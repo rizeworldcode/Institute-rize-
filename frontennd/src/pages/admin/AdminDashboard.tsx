@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { 
-  Users, Search, Plus,  Edit2, LogOut, Shield, Eye, 
+  Users, Search, Plus,  Edit2, LogOut, Shield, 
   AlertCircle, LayoutDashboard, GraduationCap, MessagesSquare, X, ArrowLeft,
   Award, Bell, UserCircle, Mail, IndianRupee, CheckCircle2, Activity
 } from "lucide-react";
@@ -24,6 +24,7 @@ export default function AdminDashboard() {
 
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<"All" | "Clear" | "Pending">("All");
+  const [detailStatusFilter, setDetailStatusFilter] = useState<"All" | "Clear" | "Pending">("All");
 
   const [students, setStudents] = useState<Student[]>([]);
   const [stats, setStats] = useState({
@@ -32,6 +33,7 @@ export default function AdminDashboard() {
     certificatesIssued: 0,
     totalEarnings: 0,
     totalClearFees: 0,
+    pendingFees: 0,
   });
   const [expandedStats, setExpandedStats] = useState({
     totalEntries: 0,
@@ -42,8 +44,8 @@ export default function AdminDashboard() {
   const [issuedCertificatesData, setIssuedCertificatesData] = useState<any[]>([]);
   const [unissuedCertificatesData, setUnissuedCertificatesData] = useState<any[]>([]);
   const [clearFeeStudentsData, setClearFeeStudentsData] = useState<any[]>([]);
+  const [pendingFeeStudentsData, setPendingFeeStudentsData] = useState<any[]>([]);
   const [earningsDetailsData, setEarningsDetailsData] = useState<any[]>([]);
-  const [, setReferredStudentsData] = useState<any[]>([]);
   const [graphData, setGraphData] = useState<any[]>([]);
   const [topCourses, setTopCourses] = useState<any[]>([]);
 
@@ -313,6 +315,36 @@ export default function AdminDashboard() {
     }
   };
 
+  const fetchPendingFeeStudents = async () => {
+    try {
+      const res = await fetch("http://localhost:3001/pandingfeeStudentsData", {
+        method: "POST"
+      });
+      const data = await res.json();
+      if (data.success) {
+        const mapped: Student[] = data.data.map((item: any) => ({
+          id: item.student_ID,
+          name: item.student_name,
+          feesStatus: item.status,
+          course: item.selected_course_name || "N/A",
+          duration: item.course_duration || "N/A",
+          totalFees: Number(item.total_fee) || 0,
+          paidFees: Number(item.total_paid_fee) || 0,
+          pendingFees: Number(item.pending_fee) || 0,
+          email: item.email,
+          phone: item.phone,
+          address: item.address,
+          startDate: item.course_start_date,
+          endDate: item.course_end_date,
+          certificateUrl: ""
+        }));
+        setPendingFeeStudentsData(mapped);
+      }
+    } catch (error) {
+      console.error("Failed to fetch pending fee students:", error);
+    }
+  };
+
   const fetchClearFeeStudents = async () => {
     try {
       const res = await fetch("http://localhost:3001/clearfeeStudentsData", {
@@ -358,19 +390,6 @@ export default function AdminDashboard() {
     }
   };
 
-  const fetchReferredStudents = async () => {
-    try {
-      const res = await fetch("http://localhost:3001/referredStudentsData", {
-        method: "POST"
-      });
-      const data = await res.json();
-      if (data.success) {
-        setReferredStudentsData(data.data);
-      }
-    } catch (error) {
-      console.error("Failed to fetch referred students:", error);
-    }
-  };
 
   const fetchReferrers = async () => {
     try {
@@ -393,6 +412,8 @@ export default function AdminDashboard() {
       fetchIssuedCertificates();
     } else if (expandedStat === "certificate-unissued") {
       fetchUnissuedCertificates();
+    } else if (expandedStat === "total-pending-fees") {
+      fetchPendingFeeStudents();
     } else if (expandedStat === "total-clear-fees") {
       fetchClearFeeStudents();
     } else if (expandedStat === "total-earnings") {
@@ -401,9 +422,7 @@ export default function AdminDashboard() {
   }, [expandedStat]);
 
   useEffect(() => {
-    if (activeTab === "referred-students") {
-      fetchReferredStudents();
-    } else if (activeTab === "referred-by") {
+    if (activeTab === "referred-by") {
       fetchReferrers();
     } else if (activeTab === "course-teachers") {
       fetchTeachers();
@@ -446,7 +465,8 @@ export default function AdminDashboard() {
           unissuedCertificates: data.stats.total_unissued_certificates,
           certificatesIssued: data.stats.total_issued_certificates,
           totalEarnings: data.stats.total_earnings,
-          totalClearFees: data.stats.clear_fee_students
+          totalClearFees: data.stats.clear_fee_students,
+          pendingFees: data.stats.unclear_fee_students
         });
         setGraphData(data.graphData || []);
         setTopCourses(data.top_courses || []);
@@ -549,7 +569,6 @@ export default function AdminDashboard() {
           <SidebarItem icon={LayoutDashboard} label="Dashboard" active={activeTab === "dashboard"} onClick={() => navigate("/admin/dashboard/dashboard")} />
           <SidebarItem icon={MessagesSquare} label="Inquiry" active={activeTab === "inquiry"} onClick={() => navigate("/admin/dashboard/inquiry")} />
           <SidebarItem icon={GraduationCap} label="Course & Teachers" active={activeTab === "course-teachers"} onClick={() => navigate("/admin/dashboard/course-teachers")} />
-          <SidebarItem icon={Users} label="Referred Students" active={activeTab === "referred-students"} onClick={() => navigate("/admin/dashboard/referred-students")} />
           <SidebarItem icon={UserCircle} label="Referred By" active={activeTab === "referred-by"} onClick={() => navigate("/admin/dashboard/referred-by")} />
         </div>
 
@@ -641,12 +660,13 @@ export default function AdminDashboard() {
             <div className="max-w-[1400px] mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
               
               {/* Stats Row */}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
                 <StatCard title="Total Students" value={stats.totalStudents} icon={Users} color="blue" onClick={() => navigate("/admin/dashboard/dashboard/total-students")} />
                 <StatCard title="Certificate Issued" value={stats.certificatesIssued} icon={Award} color="green" onClick={() => navigate("/admin/dashboard/dashboard/certificate-issued")} />
                 <StatCard title="Certificate Unissued" value={stats.unissuedCertificates} icon={AlertCircle} color="orange" onClick={() => navigate("/admin/dashboard/dashboard/certificate-unissued")} />
                 <StatCard title="Total Earnings" value={`₹${stats.totalEarnings.toLocaleString()}`} icon={IndianRupee} color="purple" onClick={() => navigate("/admin/dashboard/dashboard/total-earnings")} />
                 <StatCard title="Total Clear Fees" value={stats.totalClearFees} icon={CheckCircle2} color="cyan" onClick={() => navigate("/admin/dashboard/dashboard/total-clear-fees")} />
+                <StatCard title="Pending Fees" value={stats.pendingFees} icon={AlertCircle} color="red" onClick={() => navigate("/admin/dashboard/dashboard/total-pending-fees")} />
               </div>
 
               {/* Middle Section: Graph & Top Courses */}
@@ -886,13 +906,7 @@ export default function AdminDashboard() {
                             </td>
                             <td className="py-4 px-6">
                               <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                <button 
-                                  onClick={() => setViewingStudent(s)}
-                                  className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-all"
-                                  title="View Details"
-                                >
-                                  <Eye size={16} />
-                                </button>
+
                                 <button 
                                   onClick={() => { setEditingStudent(s); setIsStudentModalOpen(true); }}
                                   className="p-2 text-purple-600 hover:bg-purple-50 rounded-lg transition-all"
@@ -934,12 +948,25 @@ export default function AdminDashboard() {
                    <ArrowLeft size={16} /> Back to Dashboard
                 </button>
                 <div className="bg-white rounded-3xl p-8 border border-neutral-200 shadow-sm min-h-[600px] flex flex-col">
-                   <h2 className="text-2xl font-bold text-neutral-900 mb-6 capitalize flex items-center gap-3">
-                      <div className="w-10 h-10 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center">
-                         <LayoutDashboard size={20} />
-                      </div>
-                      {expandedStat.replace(/-/g, ' ')} Details
-                   </h2>
+                   <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+                       <h2 className="text-2xl font-bold text-neutral-900 capitalize flex items-center gap-3">
+                          <div className="w-10 h-10 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center">
+                             <LayoutDashboard size={20} />
+                          </div>
+                          {expandedStat.replace(/-/g, ' ')} Details
+                       </h2>
+                       {expandedStat === "total-students" && (
+                          <select 
+                            value={detailStatusFilter} 
+                            onChange={(e: any) => setDetailStatusFilter(e.target.value)}
+                            className="px-4 py-2.5 rounded-xl bg-white border border-neutral-200 text-sm text-neutral-700 focus:border-blue-500 focus:outline-none w-full md:w-48 appearance-none cursor-pointer shadow-sm"
+                          >
+                            <option value="All">All Status</option>
+                            <option value="Clear">Clear Fees</option>
+                            <option value="Pending">Pending Fees</option>
+                          </select>
+                       )}
+                   </div>
                    
                    {expandedStat === "total-students" && (
                       <div className="mt-4 flex gap-4 mb-6">
@@ -975,7 +1002,9 @@ export default function AdminDashboard() {
                                      </tr>
                                   </thead>
                                   <tbody className="divide-y divide-neutral-100">
-                                     {allStudentsData.map((row, idx) => (
+                                     {allStudentsData
+                                        .filter(row => detailStatusFilter === "All" || row.feesStatus === detailStatusFilter)
+                                        .map((row, idx) => (
                                         <tr key={idx} className="hover:bg-neutral-50/50 transition-colors">
                                            <td className="px-6 py-4 font-mono text-sm font-semibold text-blue-600">{row.id}</td>
                                            <td className="px-6 py-4">
@@ -1141,6 +1170,41 @@ export default function AdminDashboard() {
                             );
                          }
 
+                         if (expandedStat === "total-pending-fees") {
+                            return (
+                               <table className="w-full text-left border-collapse whitespace-nowrap">
+                                  <thead className="bg-neutral-50 border-b border-neutral-200">
+                                     <tr>
+                                        <th className="px-6 py-4 text-xs font-bold text-neutral-500 uppercase tracking-wider">ID</th>
+                                        <th className="px-6 py-4 text-xs font-bold text-neutral-500 uppercase tracking-wider">Student Name</th>
+                                        <th className="px-6 py-4 text-xs font-bold text-neutral-500 uppercase tracking-wider">Course</th>
+                                        <th className="px-6 py-4 text-xs font-bold text-neutral-500 uppercase tracking-wider">Total Fee</th>
+                                        <th className="px-6 py-4 text-xs font-bold text-neutral-500 uppercase tracking-wider">Paid Fee</th>
+                                        <th className="px-6 py-4 text-xs font-bold text-neutral-500 uppercase tracking-wider">Pending Fee</th>
+                                        <th className="px-6 py-4 text-xs font-bold text-neutral-500 uppercase tracking-wider">Phone Number</th>
+                                     </tr>
+                                  </thead>
+                                  <tbody className="divide-y divide-neutral-100">
+                                     {pendingFeeStudentsData.map((row: Student, idx) => (
+                                        <tr key={idx} className="hover:bg-neutral-50/50 transition-colors">
+                                           <td className="px-6 py-4 font-mono text-sm font-semibold text-red-600">{row.id}</td>
+                                           <td className="px-6 py-4 font-bold text-neutral-900 capitalize">{row.name}</td>
+                                           <td className="px-6 py-4 text-sm font-semibold text-neutral-700">{row.course}</td>
+                                           <td className="px-6 py-4 text-sm font-bold text-neutral-900">₹{Number(row.totalFees).toLocaleString()}</td>
+                                           <td className="px-6 py-4 text-sm font-bold text-emerald-600">₹{Number(row.paidFees).toLocaleString()}</td>
+                                           <td className="px-6 py-4 text-sm font-bold text-red-600">₹{Number(row.pendingFees).toLocaleString()}</td>
+                                           <td className="px-6 py-4 text-sm font-semibold text-neutral-700">{row.phone}</td>
+                                        </tr>
+                                     ))}
+                                     {pendingFeeStudentsData.length === 0 && (
+                                        <tr>
+                                           <td colSpan={7} className="py-20 text-center text-neutral-400 italic">No students with pending fees found.</td>
+                                        </tr>
+                                     )}
+                                  </tbody>
+                               </table>
+                            );
+                         }
                          if (expandedStat === "total-clear-fees") {
                             return (
                                <table className="w-full text-left border-collapse whitespace-nowrap">
@@ -1181,6 +1245,43 @@ export default function AdminDashboard() {
                                </table>
                             );
                          }
+
+                         if (expandedStat === "total-pending-fees") {
+                            return (
+                               <table className="w-full text-left border-collapse whitespace-nowrap">
+                                  <thead className="bg-neutral-50 border-b border-neutral-200">
+                                     <tr>
+                                        <th className="px-6 py-4 text-xs font-bold text-neutral-500 uppercase tracking-wider">ID</th>
+                                        <th className="px-6 py-4 text-xs font-bold text-neutral-500 uppercase tracking-wider">Student Name</th>
+                                        <th className="px-6 py-4 text-xs font-bold text-neutral-500 uppercase tracking-wider">Course</th>
+                                        <th className="px-6 py-4 text-xs font-bold text-neutral-500 uppercase tracking-wider">Total Fee</th>
+                                        <th className="px-6 py-4 text-xs font-bold text-neutral-500 uppercase tracking-wider">Paid Fee</th>
+                                        <th className="px-6 py-4 text-xs font-bold text-neutral-500 uppercase tracking-wider">Pending Fee</th>
+                                        <th className="px-6 py-4 text-xs font-bold text-neutral-500 uppercase tracking-wider">Phone Number</th>
+                                     </tr>
+                                  </thead>
+                                  <tbody className="divide-y divide-neutral-100">
+                                     {pendingFeeStudentsData.map((row: Student, idx) => (
+                                        <tr key={idx} className="hover:bg-neutral-50/50 transition-colors">
+                                           <td className="px-6 py-4 font-mono text-sm font-semibold text-red-600">{row.id}</td>
+                                           <td className="px-6 py-4 font-bold text-neutral-900 capitalize">{row.name}</td>
+                                           <td className="px-6 py-4 text-sm font-semibold text-neutral-700">{row.course}</td>
+                                           <td className="px-6 py-4 text-sm font-bold text-neutral-900">₹{Number(row.totalFees).toLocaleString()}</td>
+                                           <td className="px-6 py-4 text-sm font-bold text-emerald-600">₹{Number(row.paidFees).toLocaleString()}</td>
+                                           <td className="px-6 py-4 text-sm font-bold text-red-600">₹{Number(row.pendingFees).toLocaleString()}</td>
+                                           <td className="px-6 py-4 text-sm font-semibold text-neutral-700">{row.phone}</td>
+                                        </tr>
+                                     ))}
+                                     {pendingFeeStudentsData.length === 0 && (
+                                        <tr>
+                                           <td colSpan={7} className="py-20 text-center text-neutral-400 italic">No students with pending fees found.</td>
+                                        </tr>
+                                     )}
+                                  </tbody>
+                               </table>
+                            );
+                         }
+
 
                          return null;
                       })()}
@@ -1351,6 +1452,7 @@ function StatCard({ title, value, icon: Icon, color, onClick }: any) {
     orange: "from-orange-50 to-white text-orange-700 border-orange-100 shadow-sm icon-orange",
     purple: "from-purple-50 to-white text-purple-700 border-purple-100 shadow-sm icon-purple",
     cyan: "from-cyan-50 to-white text-cyan-700 border-cyan-100 shadow-sm icon-cyan",
+    red: "from-red-50 to-white text-red-700 border-red-100 shadow-sm icon-red",
   };
   
   const iconColors: any = {
@@ -1359,6 +1461,7 @@ function StatCard({ title, value, icon: Icon, color, onClick }: any) {
      orange: "text-orange-600 bg-orange-100",
      purple: "text-purple-600 bg-purple-100",
      cyan: "text-cyan-600 bg-cyan-100",
+     red: "text-red-600 bg-red-100",
   };
 
   return (
