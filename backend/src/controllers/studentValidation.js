@@ -7,10 +7,12 @@ exports.student_login = async (req, res) => {
         res.status(200).json(data);
       }
       else{
-          res.status(403).json(data);
+          // Return 401 Unauthorized for login failures instead of 403 Forbidden
+          res.status(401).json(data);
       }
     } catch (error) {
       console.log("Error:", error);
+      res.status(500).json({ success: false, message: "Internal server error" });
     }
   };
 
@@ -21,7 +23,7 @@ exports.student_login = async (req, res) => {
           res.status(200).json(data);
         }
         else{
-            res.status(403).json(data);
+            res.status(401).json(data);
         }
       } catch (error) {
         console.log("Error:", error);

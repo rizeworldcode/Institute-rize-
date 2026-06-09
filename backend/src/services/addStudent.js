@@ -38,7 +38,7 @@ exports.add_student = async (req,res) => {
         }
 
         const hashedPassword = await bcrypt.hash(student_password, 10);
-
+        
         // Calculate status based on fees
         const paid = parseFloat(total_paid_fee || 0);
         const total = parseFloat(total_fee || 0);

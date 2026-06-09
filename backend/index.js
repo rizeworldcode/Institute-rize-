@@ -1,101 +1,88 @@
-const cookieParser = require('cookie-parser');
+const path = require('path');
 const express = require('express');
 const dotenv = require('dotenv');
-const path = require('path');
+const cookieParser = require('cookie-parser');
 const cors = require('cors');
-const { connectDB } = require('./db/dbconnection.js');
+const helmet = require('helmet');
+const morgan = require('morgan');
+const compression = require('compression');
+const rateLimit = require('express-rate-limit');
+const hpp = require('hpp');
+const xss = require('xss-clean');
+const mongoSanitize = require('express-mongo-sanitize');
 
-// Load environment variables from .env file
+const { connectDB } = require('./db/dbconnection.js');
+const AppError = require('./src/utils/AppError');
+const globalErrorHandler = require('./src/middleware/errorMiddleware');
+const logger = require('./src/utils/logger');
+
+// Load environment variables
 dotenv.config();
 
 const app = express();
 
-// CORS configuration
-const allowedOrigins = [
-  'http://localhost:5173',
-  'http://localhost:5174',
-  'http://localhost:5175',
-  'http://127.0.0.1:5173',
-  'http://127.0.0.1:5174',
-  'http://127.0.0.1:5175',
-];
+// 1. GLOBAL MIDDLEWARES
 
-const corsOptions = {
-  origin: function (origin, callback) {
-    // Allow requests with no origin (like mobile apps or curl)
-    if (!origin) return callback(null, true);
-    
-    if (allowedOrigins.indexOf(origin) !== -1 || origin.startsWith('http://localhost:') || origin.startsWith('http://127.0.0.1:')) {
-      return callback(null, true);
-    } else {
-      console.error(`Rejected Origin: ${origin}`);
-      return callback(new Error('CORS policy: This origin is not allowed by CORS'));
-    }
-  },
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-  credentials: true,
-  allowedHeaders: ['Content-Type', 'Authorization', 'Origin', 'Accept', 'X-Requested-With']
-};
+// Security HTTP headers
+app.use(helmet({
+  contentSecurityPolicy: false,
+  crossOriginResourcePolicy: { policy: "cross-origin" }
+}));
 
-// Apply CORS middleware
-app.use(cors(corsOptions));
-app.options('*', cors(corsOptions));
+// Development logging
+if (process.env.NODE_ENV === 'development') {
+  app.use(morgan('dev'));
+} else {
+  app.use(morgan('combined', { stream: { write: message => logger.info(message.trim()) } }));
+}
 
-// Allow embedding public files (TC PDFs) in iframes from the dev frontend origins
-app.use((req, res, next) => {
-  // Use Content-Security-Policy frame-ancestors for modern browsers
-  res.setHeader(
-    'Content-Security-Policy',
-    "frame-ancestors 'self' http://localhost:5173 http://localhost:5174 http://localhost:5175"
-  );
-  // Also clear any existing X-Frame-Options header that might block embedding
-  res.removeHeader && res.removeHeader('X-Frame-Options');
-  next();
+// Limit requests from same API
+const limiter = rateLimit({
+  max: 20000, // Further increased to eliminate 429 errors during load tests
+  windowMs: 15 * 60 * 1000,
+  message: 'Too many requests from this IP, please try again later'
 });
+app.use('/health', (req, res, next) => next()); // Skip limiting for health checks
+app.use('/api', limiter);
 
-// Middleware setup
+// Body parser
 app.use(express.json());
-app.use(cookieParser());
 app.use(express.urlencoded({ extended: true }));
-app.use(express.static(path.join(__dirname, '/public')));
+app.use(cookieParser());
 
-app.get('/public-file', (req, res) => {
-  try {
-    const requested = String(req.query.path || '');
-    if (!requested) return res.status(400).json({ success: false, message: 'Missing path' });
+// Data sanitization against NoSQL query injection
+app.use(mongoSanitize());
 
-    // Only allow files inside the uploads folder to prevent traversal
-    const normalizedRequested = requested.replace(/^\//, ''); // remove leading slash
-    if (!normalizedRequested.startsWith('uploads/')) {
-      return res.status(403).json({ success: false, message: 'Forbidden' });
-    }
+// Data sanitization against XSS
+app.use(xss());
 
-    const fullPath = path.join(__dirname, 'public', normalizedRequested);
-    const normalizedFull = path.normalize(fullPath);
-    const publicRoot = path.normalize(path.join(__dirname, 'public'));
+// Prevent parameter pollution
+app.use(hpp({
+  whitelist: [] // Add parameters to whitelist if needed
+}));
 
-    // Ensure resolved path is inside the public directory
-    if (!normalizedFull.startsWith(publicRoot)) {
-      return res.status(403).json({ success: false, message: 'Forbidden' });
-    }
+// Compression
+app.use(compression());
 
-    // Set permissive embedding headers for the proxied response
-    res.setHeader('Content-Security-Policy', "frame-ancestors 'self' http://localhost:5173 http://localhost:5174 http://localhost:5175");
-    res.setHeader('X-Content-Type-Options', 'nosniff');
-    // Stream file
-    return res.sendFile(normalizedFull, (err) => {
-      if (err) {
-        console.error('Error sending file:', err);
-        if (!res.headersSent) res.status(404).end();
-      }
-    });
-  } catch (err) {
-    console.error('public-file error', err);
-    return res.status(500).json({ success: false, message: 'Server error' });
-  }
+// CORS configuration
+app.use(cors({
+  origin: true,
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'Origin', 'Accept', 'X-Requested-With']
+}));
+app.options('*', cors());
+
+// Serving static files
+app.use(express.static(path.join(__dirname, 'public')));
+
+// Health check endpoint
+app.get('/health', (req, res) => {
+  res.status(200).json({ status: 'success', message: 'Server is healthy' });
 });
 
-// Route imports and middleware
+// 2. ROUTES
+
 app.use("/", require("./src/routes/adminvalidation.js"));
 app.use("/", require("./src/routes/addStudent.js"));
 app.use("/", require("./src/routes/addtechers.js"));
@@ -107,17 +94,50 @@ app.use("/", require("./src/routes/refferel/refferelDashboard.js"));
 app.use("/", require("./src/routes/inquiry.js"));
 app.use("/", require("./src/routes/certificate.js"));
 
+// Handle unhandled routes
+app.all('*', (req, res, next) => {
+  next(new AppError(`Can't find ${req.originalUrl} on this server!`, 404));
+});
 
-
+// Global Error Handling Middleware
+app.use(globalErrorHandler);
 
 // Setup view engine
 app.set('views', path.join(__dirname, 'src/views'));
 app.set('view engine', 'ejs');
 
-// Connect to database and start server
+// 3. START SERVER
 connectDB();
 
+const PORT = process.env.PORT || 3001;
+const server = app.listen(PORT, '0.0.0.0', 2048, () => {
+  logger.info(`Server is running on port ${PORT} in ${process.env.NODE_ENV || 'development'} mode`);
+});
 
-app.listen(process.env.PORT || 3001, () => {
-  console.log(`Server is running on http://localhost:${process.env.PORT || 3001}`);
+// Increase keep-alive timeout for high-concurrency
+server.keepAliveTimeout = 65000;
+server.headersTimeout = 66000;
+
+// Handle unhandled promise rejections
+process.on('unhandledRejection', (err) => {
+  logger.error('UNHANDLED REJECTION! 💥 Shutting down...');
+  logger.error(err.name, err.message);
+  server.close(() => {
+    process.exit(1);
+  });
+});
+
+// Handle uncaught exceptions
+process.on('uncaughtException', (err) => {
+  logger.error('UNCAUGHT EXCEPTION! 💥 Shutting down...');
+  logger.error(err.name, err.message);
+  process.exit(1);
+});
+
+// Graceful shutdown
+process.on('SIGTERM', () => {
+  logger.info('👋 SIGTERM RECEIVED. Shutting down gracefully');
+  server.close(() => {
+    logger.info('💥 Process terminated!');
+  });
 });

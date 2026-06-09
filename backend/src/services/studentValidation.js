@@ -6,15 +6,17 @@ exports.student_login = async (req, res) => {
 
     try {
             const { student_ID, student_Password, password } = req.body;
+            
             // frontend may send 'password' or 'student_Password'
             const providedPassword = student_Password || password;
+            console.log(providedPassword);
             if (!student_ID || !providedPassword) {
                 return {
                     message: "Student ID and password are required",
                     success: false
                 }
             }
-        const validStudent = await Tc_model.findOne({ student_ID })
+        const validStudent = await Tc_model.findOne({ student_ID }).select("+student_password");
         if (!validStudent) {
             return {
                 message: "student data not found",
@@ -25,7 +27,6 @@ exports.student_login = async (req, res) => {
             providedPassword,
             validStudent.student_password
         );
-
         if (!isPasswordValid) {
             return {
                 message: "Invalid ID or password",
@@ -38,7 +39,7 @@ exports.student_login = async (req, res) => {
             return { success: false, message: " Token generation failed" };
         }
         // Set the token to cookies
-        res.cookie("token", token, {
+        res.cookie("jwt", token, {
             httpOnly: true,
             secure: process.env.NODE_ENV === "production",
             maxAge: 24 * 60 * 60 * 1000 // 24 hours
@@ -50,15 +51,15 @@ exports.student_login = async (req, res) => {
         );
 
         if (!authKeyInsertion) {
-            return { success: false, message: "Token updation failed" };
+            return { success: false, message: "Token synchronization failed" };
         }
 
         return {
             message: "Student logged in successfully",
             success: true,
             token: token,
-            // Provide both identifiers: external student_ID and internal Mongo _id
-            studentId: validStudent.student_ID, // frontend expects this for /TC_view/:student_ID
+            studentId: validStudent.student_ID,
+            studentName: validStudent.student_name,
             studentObjectId: validStudent._id
         };
 

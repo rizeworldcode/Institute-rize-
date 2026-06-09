@@ -83,7 +83,7 @@ export function StudentDetailsModal({ student, onClose }: any) {
                   <div className="flex-1 overflow-y-auto pr-2 max-h-[400px] scrollbar-thin scrollbar-thumb-neutral-200">
                      {paymentTab === "one-time" && (
                         <div className="space-y-4">
-                           {student.fee && student.fee.length > 0 ? (
+                           {student.fee && student.fee.length > 0 && Number(student.fee[0].amount) > 0 ? (
                               <div className="bg-neutral-50 border border-neutral-100 rounded-2xl p-5 hover:border-blue-200 transition-colors">
                                  <div className="flex items-center justify-between mb-4">
                                     <div className="flex items-center gap-3">
@@ -111,8 +111,26 @@ export function StudentDetailsModal({ student, onClose }: any) {
                                     <div>
                                        <div className="text-neutral-500 text-xs mb-1">Latest UTR / Ref</div>
                                        <div className="font-mono font-semibold text-neutral-900 truncate">
-                                          {student.fee[student.fee.length - 1]?.utr_Number || 'N/A'}
+                                          {student.fee[student.fee.length - 1]?.utr_Number || 'Cash'}
                                        </div>
+                                    </div>
+                                 </div>
+                              </div>
+                           ) : paid > 0 ? (
+                              <div className="bg-neutral-50 border border-neutral-100 rounded-2xl p-5 hover:border-blue-200 transition-colors">
+                                 <div className="flex items-center justify-between">
+                                    <div className="flex items-center gap-3">
+                                       <div className="w-10 h-10 bg-green-100 text-green-600 rounded-full flex items-center justify-center">
+                                          <Wallet size={20} />
+                                       </div>
+                                       <div>
+                                          <div className="font-bold text-neutral-900">Total Paid Amount</div>
+                                          <div className="text-xs text-neutral-500 font-medium italic">Record exists in database</div>
+                                       </div>
+                                    </div>
+                                    <div className="text-right">
+                                       <div className="font-bold text-neutral-900 text-lg">₹{paid.toLocaleString()}</div>
+                                       <div className="text-xs text-green-600 font-semibold bg-green-100 px-2 py-0.5 rounded-md inline-block">Paid</div>
                                     </div>
                                  </div>
                               </div>

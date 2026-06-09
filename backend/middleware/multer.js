@@ -1,30 +1,38 @@
-const multer = require("multer");
-const path = require("path");
-const fs = require("fs");
+const cloudinary = require('cloudinary').v2;
+const { CloudinaryStorage } = require('multer-storage-cloudinary');
+const multer = require('multer');
+const AppError = require('../src/utils/AppError');
 
-const uploadPath = path.join(__dirname, "../public/uploads");
+// Configure Cloudinary
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
 
-if (!fs.existsSync(uploadPath)) {
-  fs.mkdirSync(uploadPath, { recursive: true });
-}
-
-const storage = multer.diskStorage({
-
-  destination: function (req, file, cb) {
-    cb(null, uploadPath);
-  },
-
-  filename: function (req, file, cb) {
-
-    const uniqueName =
-      Date.now() + path.extname(file.originalname);
-
-    cb(null, uniqueName);
+const storage = new CloudinaryStorage({
+  cloudinary: cloudinary,
+  params: {
+    folder: 'rizeworld',
+    allowed_formats: ['jpg', 'jpeg', 'png', 'pdf'],
+    transformation: [{ width: 1000, height: 1000, crop: 'limit' }], // Limit size
   },
 });
 
-const multer_photo = multer({
+const fileFilter = (req, file, cb) => {
+  if (file.mimetype.startsWith('image') || file.mimetype === 'application/pdf') {
+    cb(null, true);
+  } else {
+    cb(new AppError('Invalid file type! Please upload only images or PDFs.', 400), false);
+  }
+};
+
+const upload = multer({
   storage: storage,
+  fileFilter: fileFilter,
+  limits: {
+    fileSize: 5 * 1024 * 1024, // 5MB limit
+  },
 });
 
-module.exports = multer_photo;
+module.exports = upload;

@@ -38,6 +38,7 @@ exports.admin_dashboardGet = async (req, res) => {
                 student_ID: student.student_ID,
                 selected_course_name: student.selected_course_name,
                 course_duration: student.course_duration,
+                _id: student._id,
                 total_fee: student.total_fee,
                 total_paid_fee: student.total_paid_fee,
                 pending_fee: pending.toString(),

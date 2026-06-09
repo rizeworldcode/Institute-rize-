@@ -18,7 +18,7 @@ async function user_auth(req, res, next) {
       .findOne({ _id: decode.id })
       .select("-password -notificationToken")
       .exec();
-    if (!user) return res.status(403).json({ msg: "User not found" });
+    if (!user) return res.status(401).json({ msg: "User not found" });
     req.user = user;
     next();
   } catch (error) {

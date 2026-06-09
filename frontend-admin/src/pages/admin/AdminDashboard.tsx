@@ -286,7 +286,7 @@ export default function AdminDashboard() {
           startDate: item.course_start_date ? new Date(item.course_start_date).toISOString().split('T')[0] : "",
           endDate: item.course_end_date ? new Date(item.course_end_date).toISOString().split('T')[0] : "",
           feesInstallment: item.fee_installment,
-          fee: item.fee,
+          fee: item.fee || [],
           certificates: item.certificate_photo ? [{
             id: `cert-${item.student_ID}`,
             name: "Certificate",
@@ -505,7 +505,7 @@ export default function AdminDashboard() {
           startDate: item.course_start_date ? new Date(item.course_start_date).toISOString().split('T')[0] : "",
           endDate: item.course_end_date ? new Date(item.course_end_date).toISOString().split('T')[0] : "",
           feesInstallment: item.fee_installment,
-          fee: item.fee,
+          fee: item.fee || [],
           certificates: item.certificate_photo ? [{
             id: `cert-${item.student_ID}`,
             name: "Uploaded Certificate",

@@ -7,7 +7,7 @@ exports.certificateData = async (req, res) => {
         res.status(200).json(data);
       }
       else{
-          res.status(403).json(data);
+          res.status(401).json(data);
       }
     } catch (error) {
       console.log("Error:", error);

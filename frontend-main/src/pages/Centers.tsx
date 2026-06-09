@@ -1,4 +1,4 @@
-import { MapPin, Phone, Mail, Clock, CheckCircle2, Users, Award, Calendar, Sparkles } from "lucide-react";
+import { MapPin, Phone, Mail, Clock, CheckCircle2, Users, Award, Calendar, Sparkles, ArrowRight } from "lucide-react";
 import Reveal from "../components/Reveal";
 
 const centers = [
@@ -147,6 +147,47 @@ export default function Centers() {
               Schedule a Tour →
             </a>
           </Reveal>
+        </div>
+      </section>
+
+      {/* Student Portal CTA */}
+      <section className="py-24 bg-white border-t border-neutral-100">
+        <div className="max-w-5xl mx-auto px-6">
+          <div className="bg-gradient-to-br from-neutral-900 to-neutral-800 rounded-[3rem] p-12 md:p-20 text-center relative overflow-hidden shadow-2xl">
+            <div className="absolute top-0 left-0 w-full h-full opacity-10">
+              <div className="absolute top-0 left-0 w-64 h-64 bg-blue-500 blur-[100px] rounded-full -translate-x-1/2 -translate-y-1/2" />
+              <div className="absolute bottom-0 right-0 w-64 h-64 bg-orange-500 blur-[100px] rounded-full translate-x-1/2 translate-y-1/2" />
+            </div>
+            
+            <Reveal>
+              <div className="relative z-10">
+                <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/10 text-white text-[10px] font-bold tracking-[0.2em] mb-8">
+                  STUDENT PORTAL
+                </div>
+                <h2 className="font-display text-4xl md:text-6xl font-black text-white tracking-tighter mb-6 leading-tight">
+                  Already a student? <br />
+                  <span className="text-neutral-400 italic">Access your dashboard.</span>
+                </h2>
+                <p className="max-w-xl mx-auto text-neutral-400 text-lg mb-10 font-medium">
+                  Log in to download your certificates, view course progress, and manage your student profile from anywhere.
+                </p>
+                <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+                  <a
+                    href="/certificate"
+                    className="w-full sm:w-auto px-10 py-5 rounded-full bg-white text-neutral-900 font-bold hover:bg-blue-500 hover:text-white transition-all duration-300 shadow-xl flex items-center justify-center gap-2 group"
+                  >
+                    Go to Portal <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
+                  </a>
+                  <a
+                    href="/contact"
+                    className="w-full sm:w-auto px-10 py-5 rounded-full bg-transparent border border-white/20 text-white font-bold hover:bg-white/10 transition-all flex items-center justify-center gap-2"
+                  >
+                    Need Help? <Mail size={18} />
+                  </a>
+                </div>
+              </div>
+            </Reveal>
+          </div>
         </div>
       </section>
     </main>
