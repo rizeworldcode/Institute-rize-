@@ -216,6 +216,16 @@ export function StudentModal({ student, onClose, onSave }: {
         // Existing student - update info, add new admission, and apply payments
         const formData = new FormData();
 
+        // Add basic student info to FormData
+        formData.append("student_name", studentInfo.name);
+        formData.append("phone", studentInfo.phone);
+        formData.append("email", studentInfo.email);
+        formData.append("address", studentInfo.address);
+        if (studentInfo.referredByName) formData.append("referredByName", studentInfo.referredByName);
+        if (studentInfo.referredByPhone) formData.append("referredByPhone", studentInfo.referredByPhone);
+        if (studentInfo.referredByEmail) formData.append("referredByEmail", studentInfo.referredByEmail);
+        if (studentInfo.referredAmount) formData.append("referredAmount", studentInfo.referredAmount.toString());
+        
         if (studentInfo.password) {
           formData.append("student_password", studentInfo.password);
         }

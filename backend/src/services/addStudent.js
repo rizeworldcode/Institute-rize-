@@ -220,9 +220,19 @@ exports.updateStudentdetails = async (req, res) => {
       total_fee,
       fee_installment,
       certificate_course,
+      certificate_admission_id,
       // New fields for admissions
       add_admission,
-      admission_payments
+      admission_payments,
+      // Basic student info
+      student_name,
+      phone,
+      email,
+      address,
+      referredByName,
+      referredByPhone,
+      referredByEmail,
+      referredAmount
     } = req.body;
 
     let add_courses = [];
@@ -262,6 +272,16 @@ exports.updateStudentdetails = async (req, res) => {
       };
     }
 
+    // Update basic student info
+    if (student_name) existingcertificate.student_name = student_name;
+    if (phone) existingcertificate.phone = phone;
+    if (email) existingcertificate.email = email;
+    if (address) existingcertificate.address = address;
+    if (referredByName) existingcertificate.referredByName = referredByName;
+    if (referredByPhone) existingcertificate.referredByPhone = referredByPhone;
+    if (referredByEmail) existingcertificate.referredByEmail = referredByEmail;
+    if (referredAmount) existingcertificate.referredAmount = parseFloat(referredAmount);
+    
     if (student_password && student_password.trim() !== "") {
       existingcertificate.student_password = student_password; // Plain password, model hook will hash it
     }
@@ -476,17 +496,17 @@ exports.updateStudentdetails = async (req, res) => {
     console.log("=== Certificate upload section ===");
     console.log("req.files:", req.files);
     console.log("req.body.certificate_course:", certificate_course);
-    console.log("req.body.certificate_admission_id:", req.body.certificate_admission_id);
+    console.log("req.body.certificate_admission_id:", certificate_admission_id);
     
     if (
       req.files &&
       req.files["certificate_photo"] &&
       req.files["certificate_photo"].length > 0 &&
       certificate_course &&
-      req.body.certificate_admission_id
+      certificate_admission_id
     ) {
       const certificateFilePath = req.files["certificate_photo"][0].path; // Cloudinary URL
-      const admissionId = req.body.certificate_admission_id;
+      const admissionId = certificate_admission_id;
       console.log("certificateFilePath:", certificateFilePath);
       console.log("admissionId to find:", admissionId);
       console.log("existingcertificate.admissions:", existingcertificate.admissions.map(a => ({ admissionId: a.admissionId, certificates: a.certificates })));
