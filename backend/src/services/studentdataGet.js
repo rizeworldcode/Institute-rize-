@@ -29,6 +29,27 @@ exports.allStudents = async (req,res) => {
             const paid = parseFloat(student.total_paid_fee || 0);
             const total = parseFloat(student.total_fee || 0);
             const pending = total - paid;
+
+            // Process admissions to ensure they have all required fields
+            let processedAdmissions = [];
+            if (student.admissions && student.admissions.length > 0) {
+                processedAdmissions = student.admissions.map(adm => ({
+                    admissionId: adm.admissionId || adm.admission_id || `ADM-${Date.now()}-${student.student_ID}`,
+                    courses: adm.courses || [],
+                    courseDuration: adm.courseDuration || adm.course_duration || "N/A",
+                    totalFee: adm.totalFee || adm.total_fee || 0,
+                    totalPaidFee: adm.totalPaidFee || adm.total_paid_fee || 0,
+                    pendingFee: adm.pendingFee || adm.pending_fee || (adm.totalFee - adm.totalPaidFee) || 0,
+                    feesStatus: adm.feesStatus || adm.status || "Pending",
+                    feesInstallment: adm.feesInstallment || adm.fee_installment || 0,
+                    payments: adm.payments || [],
+                    certificates: adm.certificates || [],
+                    startDate: adm.startDate || adm.course_start_date || new Date(),
+                    endDate: adm.endDate || adm.course_end_date || new Date(Date.now() + 90 * 24 * 60 * 60 * 1000),
+                    createdAt: adm.createdAt || adm.created_at || Date.now(),
+                    updatedAt: adm.updatedAt || adm.updated_at || Date.now()
+                }));
+            }
             
             return {
                 student_name: student.student_name,
@@ -46,7 +67,13 @@ exports.allStudents = async (req,res) => {
                 fee_installment: student.fee_installment,
                 fee: student.fee,
                 status: pending > 0 ? "Pending" : "Clear",
-                created_at: student.created_at
+                created_at: student.created_at,
+                admissions: processedAdmissions,
+                certificates: student.certificates || [],
+                referredByName: student.referredByName || "",
+                referredByPhone: student.referredByPhone || "",
+                referredByEmail: student.referredByEmail || "",
+                referredAmount: student.referredAmount || 0
             };
         });
 

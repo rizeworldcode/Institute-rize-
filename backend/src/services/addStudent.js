@@ -37,14 +37,36 @@ exports.add_student = async (req,res) => {
             };
         }
 
-        const hashedPassword = await bcrypt.hash(student_password, 10);
-        
-        // Calculate status based on fees
+        // Calculate status based on fees for first admission
         const paid = parseFloat(total_paid_fee || 0);
         const total = parseFloat(total_fee || 0);
-        const calculatedStatus = (total > 0 && paid >= total) ? "Clear" : "Pending";
+        const pendingFee = Math.max(0, total - paid);
+        const calculatedStatus = (total > 0 && paid >= total) ? "Clear" : (paid > 0 ? "Partial" : "Pending");
 
-        // Prepare initial fee entry
+        // Prepare first admission
+        const firstAdmission = {
+            admissionId: `ADM-${Date.now()}`,
+            courses: Array.isArray(selected_course_name) ? selected_course_name : (selected_course_name ? [selected_course_name] : []),
+            courseDuration: course_duration,
+            totalFee: total,
+            totalPaidFee: paid,
+            pendingFee,
+            feesStatus: calculatedStatus,
+            feesInstallment: parseInt(fee_installment || "1"),
+            payments: paid > 0 ? [{
+                amount: paid,
+                paymentMethod: fee_type || "cash",
+                utrNumber: (fee_type && fee_type.toLowerCase() === "online") ? (fee_utr || "") : "",
+                date: Date.now()
+            }] : [],
+            certificates: [],
+            startDate: course_start_date ? new Date(course_start_date) : new Date(),
+            endDate: course_end_date ? new Date(course_end_date) : new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // Default to 30 days later
+            createdAt: Date.now(),
+            updatedAt: Date.now()
+        };
+
+        // Prepare initial fee entry for backward compatibility
         const feeEntry = {
             amount: total_paid_fee || "0",
             payment_method: fee_type || "cash",
@@ -60,18 +82,20 @@ exports.add_student = async (req,res) => {
             student_name, 
             student_ID, 
             status: calculatedStatus, 
-            student_password: hashedPassword,
-            selected_course_name,
+            student_password, // Pass plain password, model hook will hash it
+            selected_course_name: firstAdmission.courses,
             course_duration,
-            total_fee,
-            total_paid_fee: total_paid_fee || "0",
+            total_fee: total,
+            total_paid_fee: paid,
+            pending_fee: pendingFee,
             fee: [feeEntry],
             phone,
             email,
             address,
             course_start_date: course_start_date ? new Date(course_start_date) : undefined,
             course_end_date: course_end_date ? new Date(course_end_date) : undefined,
-            fee_installment: fee_installment || "1"
+            fee_installment: fee_installment || "1",
+            admissions: [firstAdmission]
         });
 
         // Handle Referral Logic
@@ -185,20 +209,64 @@ exports.certificate_view = async (req,res)=>{
 
 exports.updateStudentdetails = async (req, res) => {
   try {
+    console.log("=== updateStudentdetails called ===");
+    console.log("req.params:", req.params);
+    console.log("req.body:", req.body);
 
     const { student_iD } = req.params || {};
 
     const {
+      student_name,
+      student_email,
+      student_phone,
+      student_address,
+      referredByName,
+      referredByPhone,
+      referredByEmail,
+      referredAmount,
       student_password,
       fee_amount,
       fee_type,
       fee_utr,
       total_fee,
-      fee_installment
+      fee_installment,
+      certificate_course,
+      // New fields for admissions
+      add_admission,
+      admission_payments
     } = req.body;
+
+    let add_courses = [];
+    if (req.body.add_courses) {
+      try {
+        add_courses = JSON.parse(req.body.add_courses);
+      } catch (e) {
+        console.error("Error parsing add_courses:", e);
+      }
+    }
+
+    let parsedAddAdmission = null;
+    if (add_admission) {
+      try {
+        parsedAddAdmission = JSON.parse(add_admission);
+      } catch (e) {
+        console.error("Error parsing add_admission:", e);
+      }
+    }
+
+    let parsedAdmissionPayments = [];
+    if (admission_payments) {
+      try {
+        parsedAdmissionPayments = JSON.parse(admission_payments);
+      } catch (e) {
+        console.error("Error parsing admission_payments:", e);
+      }
+    }
 
     // Find existing student by student_ID
     const existingcertificate = await certificate_model.findOne({ student_ID: student_iD });
+    console.log("=== existingcertificate ===");
+    console.log(existingcertificate);
 
     if (!existingcertificate) {
       return {
@@ -207,21 +275,169 @@ exports.updateStudentdetails = async (req, res) => {
       };
     }
 
+    if (student_name && student_name.trim() !== "") {
+      existingcertificate.student_name = student_name;
+    }
+    if (student_email && student_email.trim() !== "") {
+      existingcertificate.student_email = student_email;
+    }
+    if (student_phone && student_phone.trim() !== "") {
+      existingcertificate.student_phone = student_phone;
+    }
+    if (student_address && student_address.trim() !== "") {
+      existingcertificate.student_address = student_address;
+    }
+    if (referredByName) {
+      existingcertificate.referredByName = referredByName;
+    }
+    if (referredByPhone) {
+      existingcertificate.referredByPhone = referredByPhone;
+    }
+    if (referredByEmail) {
+      existingcertificate.referredByEmail = referredByEmail;
+    }
+    if (referredAmount) {
+      existingcertificate.referredAmount = parseFloat(referredAmount);
+    }
     if (student_password && student_password.trim() !== "") {
-      const hashedPassword = await bcrypt.hash(student_password, 10);
-      existingcertificate.student_password = hashedPassword;
+      existingcertificate.student_password = student_password; // Plain password, model hook will hash it
     }
 
-    if (total_fee) {
-      existingcertificate.total_fee = total_fee;
+    // Ensure admissions array exists - convert old data if needed
+    if (!existingcertificate.admissions || existingcertificate.admissions.length === 0) {
+      // Convert old student data to a single admission
+      const oldAdmission = {
+        admissionId: `ADM-${Date.now()}-legacy`,
+        courses: Array.isArray(existingcertificate.selected_course_name) 
+          ? existingcertificate.selected_course_name 
+          : (existingcertificate.selected_course_name ? [existingcertificate.selected_course_name] : []),
+        courseDuration: existingcertificate.course_duration || "1 Month",
+        totalFee: existingcertificate.total_fee || 0,
+        totalPaidFee: existingcertificate.total_paid_fee || 0,
+        pendingFee: existingcertificate.pending_fee || (existingcertificate.total_fee - existingcertificate.total_paid_fee) || 0,
+        feesStatus: existingcertificate.status || "Pending",
+        feesInstallment: existingcertificate.fee_installment || 0,
+        payments: existingcertificate.fee || [],
+        certificates: existingcertificate.certificates || [],
+        startDate: existingcertificate.course_start_date || new Date(),
+        endDate: existingcertificate.course_end_date || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+        createdAt: existingcertificate.createdAt || Date.now(),
+        updatedAt: Date.now()
+      };
+      
+      existingcertificate.admissions.push(oldAdmission);
+    } else {
+      // Ensure all existing admissions have required fields with defaults (update in place)
+      existingcertificate.admissions.forEach((adm, index) => {
+        const defaultEndDate = new Date();
+        defaultEndDate.setMonth(defaultEndDate.getMonth() + 3);
+        
+        if (!adm.admissionId) {
+          adm.admissionId = adm.admission_id || `ADM-${Date.now()}-${index}`;
+        }
+        if (!Array.isArray(adm.courses) || adm.courses.length === 0) {
+          adm.courses = Array.isArray(adm.courses) ? adm.courses : (adm.selected_course_name ? (Array.isArray(adm.selected_course_name) ? adm.selected_course_name : [adm.selected_course_name]) : []);
+        }
+        if (!adm.courseDuration) {
+          adm.courseDuration = adm.course_duration || "N/A";
+        }
+        if (adm.totalFee === undefined || adm.totalFee === null) {
+          adm.totalFee = adm.total_fee || 0;
+        }
+        if (adm.totalPaidFee === undefined || adm.totalPaidFee === null) {
+          adm.totalPaidFee = adm.total_paid_fee || 0;
+        }
+        if (adm.pendingFee === undefined || adm.pendingFee === null) {
+          adm.pendingFee = adm.pending_fee || (adm.totalFee - adm.totalPaidFee) || 0;
+        }
+        if (!adm.feesStatus) {
+          adm.feesStatus = adm.status || "Pending";
+        }
+        if (adm.feesInstallment === undefined || adm.feesInstallment === null) {
+          adm.feesInstallment = adm.fee_installment || 0;
+        }
+        if (!adm.payments) {
+          adm.payments = [];
+        }
+        if (!adm.certificates) {
+          adm.certificates = [];
+        }
+        if (!adm.startDate) {
+          adm.startDate = adm.course_start_date || new Date();
+        }
+        if (!adm.endDate) {
+          adm.endDate = adm.course_end_date || defaultEndDate;
+        }
+        adm.updatedAt = Date.now();
+      });
     }
 
-    if (fee_installment) {
-      existingcertificate.fee_installment = fee_installment;
+    // Handle adding a new admission
+    if (parsedAddAdmission) {
+      const newAdm = parsedAddAdmission;
+      const total = parseFloat(newAdm.totalFee || 0);
+      const paid = parseFloat(newAdm.paidFee || 0);
+      const pending = Math.max(0, total - paid);
+      const status = (total > 0 && paid >= total) ? "Clear" : (paid > 0 ? "Partial" : "Pending");
+
+      const newAdmission = {
+                admissionId: newAdm.admissionId || `ADM-${Date.now()}`,
+                courses: Array.isArray(newAdm.courses) ? newAdm.courses : (newAdm.courses ? [newAdm.courses] : []),
+                courseDuration: newAdm.courseDuration,
+                totalFee: total,
+                totalPaidFee: paid,
+                pendingFee: pending,
+                feesStatus: status,
+                feesInstallment: parseInt(newAdm.feesInstallment || "0"),
+                payments: paid > 0 ? [{
+                    amount: paid,
+                    paymentMethod: newAdm.feeType || "cash",
+                    utrNumber: (newAdm.feeType && newAdm.feeType.toLowerCase() === "online") ? (newAdm.utrNumber || "") : "",
+                    date: Date.now()
+                }] : [],
+                certificates: [],
+                startDate: newAdm.startDate ? new Date(newAdm.startDate) : new Date(),
+                endDate: newAdm.endDate ? new Date(newAdm.endDate) : new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // Default to 30 days later
+                createdAt: Date.now(),
+                updatedAt: Date.now()
+            };
+
+      existingcertificate.admissions.push(newAdmission);
     }
 
-    // Handle new fee entry if amount is provided
-    if (fee_amount) {
+    // Handle admission payments
+    if (Array.isArray(parsedAdmissionPayments) && parsedAdmissionPayments.length > 0) {
+      for (const payment of parsedAdmissionPayments) {
+        const admissionIndex = existingcertificate.admissions.findIndex(
+          (adm) => adm.admissionId === payment.admissionId
+        );
+
+        if (admissionIndex !== -1) {
+          const admission = existingcertificate.admissions[admissionIndex];
+          const paymentAmount = parseFloat(payment.amount || 0);
+          if (paymentAmount > 0) {
+            const newTotalPaid = admission.totalPaidFee + paymentAmount;
+            const newPending = Math.max(0, admission.totalFee - newTotalPaid);
+            const newStatus = (admission.totalFee > 0 && newTotalPaid >= admission.totalFee) ? "Clear" : (newTotalPaid > 0 ? "Partial" : "Pending");
+
+            // Update admission in place
+            admission.totalPaidFee = newTotalPaid;
+            admission.pendingFee = newPending;
+            admission.feesStatus = newStatus;
+            admission.payments.push({
+              amount: paymentAmount,
+              paymentMethod: payment.type || "cash",
+              utrNumber: (payment.type && payment.type.toLowerCase() === "online") ? (payment.utr || "") : "",
+              date: Date.now()
+            });
+            admission.updatedAt = Date.now();
+          }
+        }
+      }
+    }
+
+    // Handle old fee entry (backward compatibility)
+    if (fee_amount && !parsedAdmissionPayments.length) {
       const feeEntry = {
         amount: fee_amount,
         payment_method: fee_type || "cash",
@@ -253,47 +469,82 @@ exports.updateStudentdetails = async (req, res) => {
       }
     }
 
-    // Handle new certificate photo if uploaded
+    // Update overall student totals and status from admissions
+    if (existingcertificate.admissions.length > 0) {
+      // Calculate overall totals
+      const overallTotalFee = existingcertificate.admissions.reduce((sum, adm) => sum + (adm.totalFee || 0), 0);
+      const overallTotalPaid = existingcertificate.admissions.reduce((sum, adm) => sum + (adm.totalPaidFee || 0), 0);
+      const overallPending = existingcertificate.admissions.reduce((sum, adm) => sum + (adm.pendingFee || 0), 0);
+      
+      // Calculate overall status
+      const allClear = existingcertificate.admissions.every((adm) => adm.feesStatus === "Clear");
+      const anyPaid = existingcertificate.admissions.some((adm) => adm.totalPaidFee > 0);
+      let overallStatus = "Pending";
+      if (allClear) overallStatus = "Clear";
+      else if (anyPaid) overallStatus = "Partial";
+
+      // Update old fields for backward compatibility
+      existingcertificate.total_fee = overallTotalFee;
+      existingcertificate.total_paid_fee = overallTotalPaid;
+      existingcertificate.pending_fee = overallPending;
+      existingcertificate.status = overallStatus;
+      
+      // Collect all courses
+      const allCourses = [...new Set(existingcertificate.admissions.flatMap((adm) => adm.courses || []))];
+      existingcertificate.selected_course_name = allCourses;
+    } else if (total_fee) {
+      existingcertificate.total_fee = total_fee;
+    }
+
+    if (fee_installment) {
+      existingcertificate.fee_installment = fee_installment;
+    }
+
+    // Handle adding new courses (backward compatibility)
+    if (add_courses && Array.isArray(add_courses)) {
+      add_courses.forEach(course => {
+        if (!existingcertificate.selected_course_name.includes(course)) {
+          existingcertificate.selected_course_name.push(course);
+        }
+      });
+    }
+
+    // Handle new certificate upload for a specific course
     if (
       req.files &&
       req.files["certificate_photo"] &&
-      req.files["certificate_photo"].length > 0
+      req.files["certificate_photo"].length > 0 &&
+      certificate_course
     ) {
-      // Delete old photo if it exists
-      if (existingcertificate.certificate_photo) {
-        const oldFilePath = path.join(
-          __dirname,
-          "..",
-          "..",
-          "public",
-          existingcertificate.certificate_photo
-        );
-        try {
-          if (fs.existsSync(oldFilePath)) {
-            await fs.unlink(oldFilePath);
-            console.log("Old photo deleted successfully");
-          }
-        } catch (err) {
-          console.log("Error deleting old photo:", err);
-        }
-      }
-
-      // Store new path
-      existingcertificate.certificate_photo = `uploads/${req.files["certificate_photo"][0].filename}`;
+      const certificateFilePath = `uploads/${req.files["certificate_photo"][0].filename}`;
+      
+      // Add to certificates array
+      existingcertificate.certificates.push({
+        course_name: certificate_course,
+        certificate_path: certificateFilePath,
+        issued_at: Date.now()
+      });
     }
 
     existingcertificate.updated_at = Date.now();
+
+    console.log("=== existingcertificate.admissions before save ===");
+    console.log(existingcertificate.admissions);
+    console.log("=== existingcertificate.admissions mapped ===");
+    console.log(existingcertificate.admissions.map(adm => ({ admissionId: adm.admissionId, ...adm })));
 
     await existingcertificate.save();
 
     return {
       success: true,
-      message: 'certificate updated successfully',
+      message: 'student updated successfully',
       data: existingcertificate,
     };
 
   } catch (error) {
-
+    console.error("=== ERROR in updateStudentdetails ===");
+    console.error(error);
+    console.error(error.stack);
     return {
       success: false,
       message: error.message || 'Internal server error',
