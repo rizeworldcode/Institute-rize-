@@ -104,6 +104,7 @@ export function StudentModal({ student, onClose, onSave }: {
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
+    console.log("=== handleSubmit CALLED ===");
     e.preventDefault();
 
     // Validate student info
@@ -211,6 +212,7 @@ export function StudentModal({ student, onClose, onSave }: {
           alert(data.message || "Failed to add student");
         }
       } else {
+        console.log("=== Updating existing student ===");
         // Existing student - update info, add new admission, and apply payments
         const formData = new FormData();
 
@@ -243,15 +245,23 @@ export function StudentModal({ student, onClose, onSave }: {
           formData.append("certificate_photo", certificateFile);
           formData.append("certificate_course", certificateCourse);
           formData.append("certificate_admission_id", selectedAdmissionForCertificate);
+          console.log("Certificate upload data added to formData");
         }
 
+        // Log formData
+        console.log("FormData contents:");
+        for (let [key, value] of formData.entries()) {
+          console.log(`- ${key}:`, value);
+        }
 
 
         const res = await fetch(`http://localhost:3001/updateStudentdetails/${student.id}`, {
           method: "POST",
           body: formData
         });
+        console.log("Response from server:", res);
         const data = await res.json();
+        console.log("Response data from server:", data);
         
         if (data.success) {
           // Update local state with updated data
@@ -401,8 +411,8 @@ export function StudentModal({ student, onClose, onSave }: {
                   <input type="text" value={studentInfo.id} readOnly className="w-full px-4 py-2.5 rounded-xl bg-neutral-100 border border-neutral-200 text-neutral-500 font-semibold cursor-not-allowed shadow-sm" />
                 </div>
                 <div>
-                  <label className="text-xs font-semibold text-neutral-600 block mb-1.5">Student Name *</label>
-                  <input required type="text" value={studentInfo.name} onChange={(e) => setStudentInfo({ ...studentInfo, name: e.target.value })} className="w-full px-4 py-2.5 rounded-xl bg-white border border-neutral-200 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none transition-all text-neutral-900 shadow-sm" />
+                  <label className="text-xs font-semibold text-neutral-600 block mb-1.5">Student Name {!student ? "*" : ""}</label>
+                  <input required={!student} type="text" value={studentInfo.name} onChange={(e) => setStudentInfo({ ...studentInfo, name: e.target.value })} className="w-full px-4 py-2.5 rounded-xl bg-white border border-neutral-200 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none transition-all text-neutral-900 shadow-sm" />
                 </div>
                 <div>
                   <label className="text-xs font-semibold text-neutral-600 block mb-1.5">
@@ -418,10 +428,10 @@ export function StudentModal({ student, onClose, onSave }: {
                   />
                 </div>
                 <div>
-                  <label className="text-xs font-semibold text-neutral-600 block mb-1.5">Student Phone *</label>
+                  <label className="text-xs font-semibold text-neutral-600 block mb-1.5">Student Phone {!student ? "*" : ""}</label>
                   <div className="relative flex items-center w-full px-4 py-2.5 rounded-xl bg-white border border-neutral-200 focus-within:border-blue-500 focus-within:ring-1 focus-within:ring-blue-500 transition-all shadow-sm overflow-hidden">
                     <span className="text-neutral-500 font-bold pr-3 border-r border-neutral-200">+91</span>
-                    <input required type="tel" maxLength={10} value={studentInfo.phone} onChange={(e) => setStudentInfo({ ...studentInfo, phone: e.target.value.replace(/\D/g, '') })} className="w-full pl-3 bg-transparent outline-none text-neutral-900" />
+                    <input required={!student} type="tel" maxLength={10} value={studentInfo.phone} onChange={(e) => setStudentInfo({ ...studentInfo, phone: e.target.value.replace(/\D/g, '') })} className="w-full pl-3 bg-transparent outline-none text-neutral-900" />
                   </div>
                 </div>
                 <div>
