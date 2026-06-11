@@ -208,6 +208,11 @@ exports.certificate_view = async (req,res)=>{
 }
 
 exports.updateStudentdetails = async (req, res) => {
+  console.log("=== updateStudentdetails CALLED ===");
+  console.log("req.params:", req.params);
+  console.log("req.body:", req.body);
+  console.log("req.files:", req.files);
+  
   try {
 
     const { student_iD } = req.params || {};
@@ -544,10 +549,12 @@ exports.updateStudentdetails = async (req, res) => {
 
     console.log("=== existingcertificate.admissions before save ===");
     console.log(existingcertificate.admissions);
-    console.log("=== existingcertificate.admissions mapped ===");
-    console.log(existingcertificate.admissions.map(adm => ({ admissionId: adm.admissionId, ...adm })));
+    console.log("=== existingcertificate.admissions certificates array ===");
+    console.log(existingcertificate.admissions.map(adm => ({ admissionId: adm.admissionId, certificates: adm.certificates })));
 
+    console.log("About to save existingcertificate...");
     await existingcertificate.save();
+    console.log("existingcertificate saved successfully!");
 
     return {
       success: true,
