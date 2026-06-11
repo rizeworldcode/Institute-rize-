@@ -723,12 +723,7 @@ export function StudentModal({ student, onClose, onSave }: {
                                   ))}
                                 </select>
                                 <input type="file" accept="application/pdf, image/*" onChange={(e) => setCertificateFile(e.target.files?.[0] || null)} className="text-sm" />
-                                <button type="button" onClick={() => {
-                                  // TODO: Handle certificate upload
-                                  setSelectedAdmissionForCertificate(null);
-                                  setCertificateFile(null);
-                                  setCertificateCourse("");
-                                }} className="px-3 py-2 bg-blue-600 text-white rounded-lg text-sm font-semibold hover:bg-blue-700">
+                                <button type="submit" className="px-3 py-2 bg-blue-600 text-white rounded-lg text-sm font-semibold hover:bg-blue-700">
                                   Upload
                                 </button>
                                 <button type="button" onClick={() => {

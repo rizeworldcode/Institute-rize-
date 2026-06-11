@@ -473,6 +473,11 @@ exports.updateStudentdetails = async (req, res) => {
     }
 
     // Handle new certificate upload for a specific course and admission
+    console.log("=== Certificate upload section ===");
+    console.log("req.files:", req.files);
+    console.log("req.body.certificate_course:", certificate_course);
+    console.log("req.body.certificate_admission_id:", req.body.certificate_admission_id);
+    
     if (
       req.files &&
       req.files["certificate_photo"] &&
@@ -482,19 +487,26 @@ exports.updateStudentdetails = async (req, res) => {
     ) {
       const certificateFilePath = req.files["certificate_photo"][0].path; // Cloudinary URL
       const admissionId = req.body.certificate_admission_id;
+      console.log("certificateFilePath:", certificateFilePath);
+      console.log("admissionId to find:", admissionId);
+      console.log("existingcertificate.admissions:", existingcertificate.admissions.map(a => ({ admissionId: a.admissionId, certificates: a.certificates })));
       
       // Find the admission by admissionId
       const admissionIndex = existingcertificate.admissions.findIndex(
         adm => adm.admissionId === admissionId
       );
       
+      console.log("admissionIndex found:", admissionIndex);
+      
       if (admissionIndex !== -1) {
         // Add certificate to the admission's certificates array
-        existingcertificate.admissions[admissionIndex].certificates.push({
+        const newCert = {
           courseName: certificate_course,
           certificatePath: certificateFilePath,
           issuedAt: Date.now()
-        });
+        };
+        existingcertificate.admissions[admissionIndex].certificates.push(newCert);
+        console.log("Added new certificate to admission:", newCert);
         
         // Also add to student's top-level certificates array for backward compatibility
         existingcertificate.certificates.push({
@@ -502,7 +514,10 @@ exports.updateStudentdetails = async (req, res) => {
           certificate_path: certificateFilePath,
           issued_at: Date.now()
         });
+        console.log("Updated admissions array after adding cert:", existingcertificate.admissions[admissionIndex].certificates);
       }
+    } else {
+      console.log("Certificate upload condition not met!");
     }
 
     existingcertificate.updated_at = Date.now();
