@@ -265,14 +265,13 @@ export function StudentModal({ student, onClose, onSave }: {
         }
 
 
-        try {
-          const res = await fetch(`http://localhost:3001/updateStudentdetails/${student.id}`, {
-            method: "POST",
-            body: formData
-          });
-          console.log("Response from server:", res);
-          const data = await res.json();
-          console.log("Response data from server:", data);
+        const res = await fetch(`http://localhost:3001/updateStudentdetails/${student.id}`, {
+          method: "POST",
+          body: formData
+        });
+        console.log("Response from server:", res);
+        const data = await res.json();
+        console.log("Response data from server:", data);
         
         if (data.success) {
           // Update local state with updated data
@@ -386,13 +385,10 @@ export function StudentModal({ student, onClose, onSave }: {
         } else {
           alert(data.message || "Failed to update student");
         }
-        } catch (fetchError) {
-          console.error("Error in fetch request:", fetchError);
-          alert("Failed to communicate with server: " + (fetchError as Error).message);
-        }
-      } catch (error) {
+      }
+    } catch (error) {
       console.error("Error saving student:", error);
-      alert("Failed to save student");
+      alert("Failed to save student: " + (error as Error).message);
     }
   };
 
