@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Inquiry } from "../types";
-import { Eye, X, MessageSquare, Calendar, User, Phone, BookOpen, Mail } from "lucide-react";
+import { Eye, X, MessageSquare, Calendar, User, Phone, BookOpen } from "lucide-react";
 
 export function InquiryTab() {
   const [inquiries, setInquiries] = useState<Inquiry[]>([]);

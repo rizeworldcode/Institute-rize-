@@ -1,3 +1,26 @@
+export type Admission = {
+  admissionId: string;
+  courses: string[];
+  courseDuration: string;
+  totalFee: number;
+  totalPaidFee: number;
+  pendingFee: number;
+  feesStatus: "Clear" | "Pending" | "Partial";
+  feesInstallment: number;
+  payments: {
+    id?: string;
+    amount: number;
+    paymentMethod: string;
+    utrNumber?: string;
+    date: string;
+  }[];
+  certificates: Certificate[];
+  startDate: string;
+  endDate: string;
+  createdAt: string;
+  updatedAt: string;
+};
+
 export type Student = {
   id: string;
   name: string;
@@ -27,13 +50,15 @@ export type Student = {
     date: string;
     payment_method: string;
   }[];
+  admissions: Admission[];
 };
 
 export type Certificate = {
   id: string;
   url: string;
   date: string;
-  name: string;
+  courseName: string;
+  name?: string;
 };
 
 export type Inquiry = {

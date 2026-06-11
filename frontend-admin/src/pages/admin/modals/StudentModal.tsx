@@ -1,6 +1,6 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { X } from "lucide-react";
-import { Student, Admission, Certificate } from "../types";
+import { Student, Admission } from "../types";
 
 const ALL_COURSES = [
   { value: "Master Course Program", label: "Master Course Program" },
@@ -161,19 +161,18 @@ export function StudentModal({ student, onClose, onSave }: {
           referredByName: studentInfo.referredByName,
           referredByPhone: studentInfo.referredByPhone,
           referredByEmail: studentInfo.referredByEmail,
-          referredAmount: Number(studentInfo.referredAmount || 0)
+          referredAmount: Number(studentInfo.referredAmount || 0),
+          feesStatus: newAdmission.feesStatus,
+          certificates: newAdmission.certificates,
+          // Backward compatibility fields
+          course: newAdmission.courses.join(", "),
+          duration: newAdmission.courseDuration,
+          totalFees: newAdmission.totalFee,
+          paidFees: newAdmission.totalPaidFee,
+          pendingFees: newAdmission.pendingFee,
+          startDate: newAdmission.startDate,
+          endDate: newAdmission.endDate
         };
-
-        // Backward compatibility fields
-        newStudent.course = newAdmission.courses;
-        newStudent.duration = newAdmission.courseDuration;
-        newStudent.totalFees = newAdmission.totalFee;
-        newStudent.paidFees = newAdmission.totalPaidFee;
-        newStudent.pendingFees = newAdmission.pendingFee;
-        newStudent.feesStatus = newAdmission.feesStatus;
-        newStudent.startDate = newAdmission.startDate;
-        newStudent.endDate = newAdmission.endDate;
-        newStudent.certificates = newAdmission.certificates;
 
         // Call backend API to add student
         const payload = {
