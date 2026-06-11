@@ -209,21 +209,10 @@ exports.certificate_view = async (req,res)=>{
 
 exports.updateStudentdetails = async (req, res) => {
   try {
-    console.log("=== updateStudentdetails called ===");
-    console.log("req.params:", req.params);
-    console.log("req.body:", req.body);
 
     const { student_iD } = req.params || {};
 
     const {
-      student_name,
-      student_email,
-      student_phone,
-      student_address,
-      referredByName,
-      referredByPhone,
-      referredByEmail,
-      referredAmount,
       student_password,
       fee_amount,
       fee_type,
@@ -265,8 +254,6 @@ exports.updateStudentdetails = async (req, res) => {
 
     // Find existing student by student_ID
     const existingcertificate = await certificate_model.findOne({ student_ID: student_iD });
-    console.log("=== existingcertificate ===");
-    console.log(existingcertificate);
 
     if (!existingcertificate) {
       return {
@@ -275,30 +262,6 @@ exports.updateStudentdetails = async (req, res) => {
       };
     }
 
-    if (student_name && student_name.trim() !== "") {
-      existingcertificate.student_name = student_name;
-    }
-    if (student_email && student_email.trim() !== "") {
-      existingcertificate.student_email = student_email;
-    }
-    if (student_phone && student_phone.trim() !== "") {
-      existingcertificate.student_phone = student_phone;
-    }
-    if (student_address && student_address.trim() !== "") {
-      existingcertificate.student_address = student_address;
-    }
-    if (referredByName) {
-      existingcertificate.referredByName = referredByName;
-    }
-    if (referredByPhone) {
-      existingcertificate.referredByPhone = referredByPhone;
-    }
-    if (referredByEmail) {
-      existingcertificate.referredByEmail = referredByEmail;
-    }
-    if (referredAmount) {
-      existingcertificate.referredAmount = parseFloat(referredAmount);
-    }
     if (student_password && student_password.trim() !== "") {
       existingcertificate.student_password = student_password; // Plain password, model hook will hash it
     }
@@ -509,21 +472,37 @@ exports.updateStudentdetails = async (req, res) => {
       });
     }
 
-    // Handle new certificate upload for a specific course
+    // Handle new certificate upload for a specific course and admission
     if (
       req.files &&
       req.files["certificate_photo"] &&
       req.files["certificate_photo"].length > 0 &&
-      certificate_course
+      certificate_course &&
+      req.body.certificate_admission_id
     ) {
-      const certificateFilePath = `uploads/${req.files["certificate_photo"][0].filename}`;
+      const certificateFilePath = req.files["certificate_photo"][0].path; // Cloudinary URL
+      const admissionId = req.body.certificate_admission_id;
       
-      // Add to certificates array
-      existingcertificate.certificates.push({
-        course_name: certificate_course,
-        certificate_path: certificateFilePath,
-        issued_at: Date.now()
-      });
+      // Find the admission by admissionId
+      const admissionIndex = existingcertificate.admissions.findIndex(
+        adm => adm.admissionId === admissionId
+      );
+      
+      if (admissionIndex !== -1) {
+        // Add certificate to the admission's certificates array
+        existingcertificate.admissions[admissionIndex].certificates.push({
+          courseName: certificate_course,
+          certificatePath: certificateFilePath,
+          issuedAt: Date.now()
+        });
+        
+        // Also add to student's top-level certificates array for backward compatibility
+        existingcertificate.certificates.push({
+          course_name: certificate_course,
+          certificate_path: certificateFilePath,
+          issued_at: Date.now()
+        });
+      }
     }
 
     existingcertificate.updated_at = Date.now();
@@ -542,9 +521,7 @@ exports.updateStudentdetails = async (req, res) => {
     };
 
   } catch (error) {
-    console.error("=== ERROR in updateStudentdetails ===");
-    console.error(error);
-    console.error(error.stack);
+
     return {
       success: false,
       message: error.message || 'Internal server error',

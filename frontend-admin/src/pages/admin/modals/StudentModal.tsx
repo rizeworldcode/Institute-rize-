@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { X } from "lucide-react";
-import { Student, Admission } from "../types";
+import { Student, Admission, Certificate } from "../types";
 
 const ALL_COURSES = [
   { value: "Master Course Program", label: "Master Course Program" },
@@ -161,18 +161,19 @@ export function StudentModal({ student, onClose, onSave }: {
           referredByName: studentInfo.referredByName,
           referredByPhone: studentInfo.referredByPhone,
           referredByEmail: studentInfo.referredByEmail,
-          referredAmount: Number(studentInfo.referredAmount || 0),
-          feesStatus: newAdmission.feesStatus,
-          certificates: newAdmission.certificates,
-          // Backward compatibility fields
-          course: newAdmission.courses.join(", "),
-          duration: newAdmission.courseDuration,
-          totalFees: newAdmission.totalFee,
-          paidFees: newAdmission.totalPaidFee,
-          pendingFees: newAdmission.pendingFee,
-          startDate: newAdmission.startDate,
-          endDate: newAdmission.endDate
+          referredAmount: Number(studentInfo.referredAmount || 0)
         };
+
+        // Backward compatibility fields
+        newStudent.course = newAdmission.courses;
+        newStudent.duration = newAdmission.courseDuration;
+        newStudent.totalFees = newAdmission.totalFee;
+        newStudent.paidFees = newAdmission.totalPaidFee;
+        newStudent.pendingFees = newAdmission.pendingFee;
+        newStudent.feesStatus = newAdmission.feesStatus;
+        newStudent.startDate = newAdmission.startDate;
+        newStudent.endDate = newAdmission.endDate;
+        newStudent.certificates = newAdmission.certificates;
 
         // Call backend API to add student
         const payload = {
@@ -213,31 +214,6 @@ export function StudentModal({ student, onClose, onSave }: {
         // Existing student - update info, add new admission, and apply payments
         const formData = new FormData();
 
-        if (studentInfo.name) {
-          formData.append("student_name", studentInfo.name);
-        }
-        if (studentInfo.email) {
-          formData.append("student_email", studentInfo.email);
-        }
-        if (studentInfo.phone) {
-          formData.append("student_phone", studentInfo.phone);
-        }
-        if (studentInfo.address) {
-          formData.append("student_address", studentInfo.address);
-        }
-        if (studentInfo.referredByName) {
-          formData.append("referredByName", studentInfo.referredByName);
-        }
-        if (studentInfo.referredByPhone) {
-          formData.append("referredByPhone", studentInfo.referredByPhone);
-        }
-        if (studentInfo.referredByEmail) {
-          formData.append("referredByEmail", studentInfo.referredByEmail);
-        }
-        if (studentInfo.referredAmount) {
-          formData.append("referredAmount", studentInfo.referredAmount.toString());
-        }
-
         if (studentInfo.password) {
           formData.append("student_password", studentInfo.password);
         }
@@ -263,9 +239,10 @@ export function StudentModal({ student, onClose, onSave }: {
         }
 
         // Add certificate if needed
-        if (certificateFile && certificateCourse) {
+        if (certificateFile && certificateCourse && selectedAdmissionForCertificate) {
           formData.append("certificate_photo", certificateFile);
           formData.append("certificate_course", certificateCourse);
+          formData.append("certificate_admission_id", selectedAdmissionForCertificate);
         }
 
 
@@ -357,10 +334,10 @@ export function StudentModal({ student, onClose, onSave }: {
           });
 
           // Update certificates if needed
-          if (certificateFile && certificateCourse) {
-            // Find the last admission with clear fees (or the selected one)
+          if (certificateFile && certificateCourse && selectedAdmissionForCertificate) {
+            // Find the admission by selectedAdmissionForCertificate and add the certificate
             updatedStudent.admissions = (updatedStudent.admissions || []).map(admission => {
-              if (admission.feesStatus === "Clear" && admission.courses.includes(certificateCourse)) {
+              if (admission.admissionId === selectedAdmissionForCertificate) {
                 return {
                   ...admission,
                   certificates: [
@@ -368,7 +345,7 @@ export function StudentModal({ student, onClose, onSave }: {
                     {
                       id: `cert-${Date.now()}`,
                       courseName: certificateCourse,
-                      url: URL.createObjectURL(certificateFile),
+                      url: URL.createObjectURL(certificateFile), // Temporary URL until next data refresh
                       date: new Date().toISOString()
                     }
                   ],
@@ -377,6 +354,11 @@ export function StudentModal({ student, onClose, onSave }: {
               }
               return admission;
             });
+
+            // Clear certificate state after successful update
+            setSelectedAdmissionForCertificate(null);
+            setCertificateFile(null);
+            setCertificateCourse("");
           }
 
           onSave(updatedStudent);

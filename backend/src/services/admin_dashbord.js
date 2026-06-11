@@ -57,8 +57,19 @@ exports.admin_dashboardGet = async (req, res) => {
                 pendingFee: adm.pendingFee || adm.pending_fee || (adm.totalFee - adm.totalPaidFee) || 0,
                 feesStatus: adm.feesStatus || adm.status || "Pending",
                 feesInstallment: adm.feesInstallment || adm.fee_installment || 0,
-                payments: adm.payments || [],
-                certificates: adm.certificates || [],
+                payments: (adm.payments || []).map(pmt => ({
+                    id: `pay-${Date.now()}-${Math.random()}`,
+                    amount: pmt.amount,
+                    paymentMethod: pmt.paymentMethod,
+                    utrNumber: pmt.utrNumber,
+                    date: pmt.date ? new Date(pmt.date).toISOString() : new Date().toISOString()
+                })),
+                certificates: (adm.certificates || []).map(cert => ({
+                    id: `cert-${Date.now()}-${Math.random()}`,
+                    courseName: cert.courseName,
+                    url: `http://localhost:3001/${cert.certificatePath}`,
+                    date: cert.issuedAt ? new Date(cert.issuedAt).toISOString() : new Date().toISOString()
+                })),
                 startDate: adm.startDate || adm.course_start_date || new Date(),
                 endDate: adm.endDate || adm.course_end_date || new Date(Date.now() + 90 * 24 * 60 * 60 * 1000),
                 createdAt: adm.createdAt || adm.created_at || Date.now(),

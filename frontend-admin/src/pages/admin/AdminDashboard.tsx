@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { 
-  Users, Search, Plus,  Edit2, LogOut, Shield, 
+  Users, Search, Plus, Edit2, LogOut, Shield, Menu,
   AlertCircle, LayoutDashboard, GraduationCap, MessagesSquare, X, ArrowLeft,
   Award, Bell, UserCircle, Mail, IndianRupee, CheckCircle2, Activity
 } from "lucide-react";
@@ -22,6 +22,7 @@ export default function AdminDashboard() {
   const activeTab = useMemo(() => tab || "dashboard", [tab]);
   const expandedStat = useMemo(() => subview || null, [subview]);
 
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<"All" | "Clear" | "Pending">("All");
   const [detailStatusFilter, setDetailStatusFilter] = useState<"All" | "Clear" | "Pending">("All");
@@ -34,6 +35,7 @@ export default function AdminDashboard() {
     totalEarnings: 0,
     totalClearFees: 0,
     pendingFees: 0,
+    totalReferralPaid: 0,
   });
   const [expandedStats, setExpandedStats] = useState({
     totalEntries: 0,
@@ -232,8 +234,14 @@ export default function AdminDashboard() {
 
   const handleSaveTeacher = async (teacher: Teacher) => {
     try {
-      const res = await fetch("http://localhost:3001/add_teacher", {
-        method: "POST",
+      const isEdit = !!editingTeacher;
+      const url = isEdit 
+        ? `http://localhost:3001/updateTeacher/${teacher.id}` 
+        : "http://localhost:3001/add_teacher";
+      const method = isEdit ? "PATCH" : "POST";
+
+      const res = await fetch(url, {
+        method,
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           techer_name: teacher.name,
@@ -249,6 +257,7 @@ export default function AdminDashboard() {
         alert(data.message);
         fetchTeachers();
         setIsTeacherModalOpen(false);
+        setEditingTeacher(null);
       } else {
         alert(data.message || "Failed to save teacher");
       }
@@ -258,9 +267,23 @@ export default function AdminDashboard() {
     }
   };
 
-  const handleDeleteTeacher = (id: string) => {
+  const handleDeleteTeacher = async (id: string) => {
     if (window.confirm("Are you sure you want to delete this teacher?")) {
-      setTeachers(teachers.filter(t => t.id !== id));
+      try {
+        const res = await fetch(`http://localhost:3001/deleteTeacher/${id}`, {
+          method: "DELETE"
+        });
+        const data = await res.json();
+        if (data.success) {
+          alert(data.message);
+          fetchTeachers();
+        } else {
+          alert(data.message || "Failed to delete teacher");
+        }
+      } catch (error) {
+        console.error("Error deleting teacher:", error);
+        alert("An error occurred while deleting teacher");
+      }
     }
   };
 
@@ -271,29 +294,129 @@ export default function AdminDashboard() {
       });
       const data = await res.json();
       if (data.success) {
-        const mapped: Student[] = data.data.map((item: any) => ({
-          id: item.student_ID,
-          name: item.student_name,
-          feesStatus: item.status,
-          course: item.selected_course_name || "N/A",
-          duration: item.course_duration || "N/A",
-          totalFees: Number(item.total_fee) || 0,
-          paidFees: Number(item.total_paid_fee) || 0,
-          pendingFees: Number(item.pending_fee) || 0,
-          email: item.email,
-          phone: item.phone,
-          address: item.address,
-          startDate: item.course_start_date ? new Date(item.course_start_date).toISOString().split('T')[0] : "",
-          endDate: item.course_end_date ? new Date(item.course_end_date).toISOString().split('T')[0] : "",
-          feesInstallment: item.fee_installment,
-          fee: item.fee || [],
-          certificates: item.certificate_photo ? [{
-            id: `cert-${item.student_ID}`,
-            name: "Certificate",
-            url: `http://localhost:3001/${item.certificate_photo}`,
-            date: item.created_at ? new Date(item.created_at).toISOString().split("T")[0] : ""
-          }] : []
-        }));
+        const mapped: Student[] = data.data.map((item: any) => {
+          // Map admissions if available
+          let admissions: any[] = [];
+          if (item.admissions && item.admissions.length > 0) {
+            admissions = item.admissions.map((adm: any) => ({
+              admissionId: adm.admission_id || adm.admissionId || `adm-${Date.now()}`,
+              courses: Array.isArray(adm.courses) ? adm.courses : (adm.selected_course_name ? (Array.isArray(adm.selected_course_name) ? adm.selected_course_name : [adm.selected_course_name]) : []),
+              courseDuration: adm.course_duration || adm.courseDuration || "N/A",
+              totalFee: Number(adm.total_fee) || Number(adm.totalFee) || 0,
+              totalPaidFee: Number(adm.total_paid_fee) || Number(adm.totalPaidFee) || 0,
+              pendingFee: Number(adm.pending_fee) || Number(adm.pendingFee) || 0,
+              feesStatus: adm.status || adm.feesStatus || "Pending",
+              feesInstallment: Number(adm.fee_installment) || Number(adm.feesInstallment) || 0,
+              payments: adm.payments || [],
+              certificates: adm.certificates ? adm.certificates.map((cert: any, idx: number) => ({
+                id: `cert-${item.student_ID}-${adm.admission_id}-${idx}`,
+                courseName: cert.course_name,
+                url: `http://localhost:3001/${cert.certificate_path}`,
+                date: cert.issued_at ? new Date(cert.issued_at).toISOString() : new Date().toISOString()
+              })) : [],
+              startDate: adm.course_start_date 
+                ? new Date(adm.course_start_date).toISOString().split('T')[0] 
+                : (adm.startDate 
+                    ? (typeof adm.startDate === 'string' 
+                        ? new Date(adm.startDate).toISOString().split('T')[0] 
+                        : new Date(adm.startDate).toISOString().split('T')[0])
+                    : new Date().toISOString().split('T')[0]),
+              endDate: adm.course_end_date 
+                ? new Date(adm.course_end_date).toISOString().split('T')[0] 
+                : (adm.endDate 
+                    ? (typeof adm.endDate === 'string' 
+                        ? new Date(adm.endDate).toISOString().split('T')[0] 
+                        : new Date(adm.endDate).toISOString().split('T')[0])
+                    : (() => {
+                        const date = new Date();
+                        date.setMonth(date.getMonth() + 3);
+                        return date.toISOString().split('T')[0];
+                      })()),
+              createdAt: adm.created_at || new Date().toISOString(),
+              updatedAt: adm.updated_at || new Date().toISOString()
+            }));
+          }
+          
+          // If no admissions, create a default one from the old structure for backward compatibility
+          if (admissions.length === 0) {
+            // Start with any existing certificates from the new array
+            let certificates: any[] = item.certificates ? item.certificates.map((cert: any, idx: number) => ({
+              id: `cert-${item.student_ID}-${idx}`,
+              courseName: cert.course_name,
+              url: `http://localhost:3001/${cert.certificate_path}`,
+              date: cert.issued_at ? new Date(cert.issued_at).toISOString() : new Date().toISOString()
+            })) : [];
+            
+            // Add backward compatibility for old certificate_photo
+            if (item.certificate_photo) {
+              certificates.push({
+                id: `cert-${item.student_ID}-old`,
+                courseName: Array.isArray(item.selected_course_name) ? item.selected_course_name[0] : item.selected_course_name || "Course",
+                url: `http://localhost:3001/${item.certificate_photo}`,
+                date: item.created_at ? new Date(item.created_at).toISOString() : new Date().toISOString()
+              });
+            }
+            
+            admissions.push({
+              admissionId: `adm-${item.student_ID}-default`,
+              courses: Array.isArray(item.selected_course_name) ? item.selected_course_name : (item.selected_course_name ? [item.selected_course_name] : ["N/A"]),
+              courseDuration: item.course_duration || "N/A",
+              totalFee: Number(item.total_fee) || 0,
+              totalPaidFee: Number(item.total_paid_fee) || 0,
+              pendingFee: Number(item.pending_fee) || 0,
+              feesStatus: item.status || "Pending",
+              feesInstallment: Number(item.fee_installment) || 0,
+              payments: item.fee || [],
+              certificates,
+              startDate: item.course_start_date ? new Date(item.course_start_date).toISOString().split('T')[0] : "",
+              endDate: item.course_end_date ? new Date(item.course_end_date).toISOString().split('T')[0] : "",
+              createdAt: item.created_at || new Date().toISOString(),
+              updatedAt: item.updated_at || new Date().toISOString()
+            });
+          }
+          
+          // Calculate totals from admissions
+          const totalFees = admissions.reduce((sum, adm) => sum + adm.totalFee, 0);
+          const totalPaidFees = admissions.reduce((sum, adm) => sum + adm.totalPaidFee, 0);
+          const totalPendingFees = admissions.reduce((sum, adm) => sum + adm.pendingFee, 0);
+          
+          // Determine overall fees status
+          let overallStatus: "Clear" | "Pending" | "Partial" = "Pending";
+          const allClear = admissions.every(adm => adm.feesStatus === "Clear");
+          const anyPaid = admissions.some(adm => adm.totalPaidFee > 0);
+          if (allClear) overallStatus = "Clear";
+          else if (anyPaid) overallStatus = "Partial";
+          
+          // Collect all unique courses
+          const allCourses = [...new Set(admissions.flatMap(adm => adm.courses))];
+          
+          // Collect all certificates from all admissions
+          const allCertificates = admissions.flatMap(adm => adm.certificates);
+          
+          return {
+            id: item.student_ID,
+            name: item.student_name,
+            feesStatus: overallStatus,
+            course: allCourses,
+            duration: admissions[0]?.courseDuration || "N/A",
+            totalFees,
+            paidFees: totalPaidFees,
+            pendingFees: totalPendingFees,
+            email: item.email,
+            phone: item.phone,
+            address: item.address,
+            startDate: admissions[0]?.startDate || "",
+            endDate: admissions[admissions.length - 1]?.endDate || "",
+            feesInstallment: admissions.reduce((sum, adm) => sum + adm.feesInstallment, 0),
+            fee: admissions.flatMap(adm => adm.payments),
+            certificates: allCertificates,
+            admissions,
+            referredByName: item.referredByName,
+            referredByPhone: item.referredByPhone,
+            referredByEmail: item.referredByEmail,
+            referredAmount: Number(item.referredAmount) || 0
+          };
+        });
         setAllStudentsData(mapped);
         setExpandedStats(data.stats);
       }
@@ -313,7 +436,7 @@ export default function AdminDashboard() {
           id: item.student_ID,
           name: item.student_name,
           feesStatus: "Clear", // Issued usually means clear, or we can use item.status if backend provides it
-          course: item.selected_course_name || "N/A",
+          course: Array.isArray(item.selected_course_name) ? item.selected_course_name : (item.selected_course_name ? [item.selected_course_name] : ["N/A"]),
           duration: item.course_duration || "N/A",
           totalFees: Number(item.total_fee) || 0,
           paidFees: Number(item.total_paid_fee) || 0,
@@ -321,8 +444,16 @@ export default function AdminDashboard() {
           email: item.email,
           phone: item.phone,
           address: item.address,
-          startDate: item.course_start_date ? new Date(item.course_start_date).toISOString().split('T')[0] : "",
-          endDate: item.course_end_date ? new Date(item.course_end_date).toISOString().split('T')[0] : "",
+          startDate: item.course_start_date 
+            ? new Date(item.course_start_date).toISOString().split('T')[0] 
+            : new Date().toISOString().split('T')[0],
+          endDate: item.course_end_date 
+            ? new Date(item.course_end_date).toISOString().split('T')[0] 
+            : (() => {
+                const date = new Date();
+                date.setMonth(date.getMonth() + 3);
+                return date.toISOString().split('T')[0];
+              })(),
           feesInstallment: item.fee_installment,
           fee: item.fee,
           certificates: [{
@@ -350,7 +481,7 @@ export default function AdminDashboard() {
           id: item.student_ID,
           name: item.student_name,
           feesStatus: item.status,
-          course: item.selected_course_name || "N/A",
+          course: Array.isArray(item.selected_course_name) ? item.selected_course_name : (item.selected_course_name ? [item.selected_course_name] : ["N/A"]),
           duration: item.course_duration || "N/A",
           totalFees: Number(item.total_fee) || 0,
           paidFees: Number(item.total_paid_fee) || 0,
@@ -358,8 +489,16 @@ export default function AdminDashboard() {
           email: item.email,
           phone: item.phone,
           address: item.address,
-          startDate: item.course_start_date ? new Date(item.course_start_date).toISOString().split('T')[0] : "",
-          endDate: item.course_end_date ? new Date(item.course_end_date).toISOString().split('T')[0] : "",
+          startDate: item.course_start_date 
+            ? new Date(item.course_start_date).toISOString().split('T')[0] 
+            : new Date().toISOString().split('T')[0],
+          endDate: item.course_end_date 
+            ? new Date(item.course_end_date).toISOString().split('T')[0] 
+            : (() => {
+                const date = new Date();
+                date.setMonth(date.getMonth() + 3);
+                return date.toISOString().split('T')[0];
+              })(),
           feesInstallment: item.fee_installment,
           fee: item.fee
         }));
@@ -381,7 +520,7 @@ export default function AdminDashboard() {
           id: item.student_ID,
           name: item.student_name,
           feesStatus: item.status,
-          course: item.selected_course_name || "N/A",
+          course: Array.isArray(item.selected_course_name) ? item.selected_course_name : (item.selected_course_name ? [item.selected_course_name] : ["N/A"]),
           duration: item.course_duration || "N/A",
           totalFees: Number(item.total_fee) || 0,
           paidFees: Number(item.total_paid_fee) || 0,
@@ -411,7 +550,7 @@ export default function AdminDashboard() {
           id: item.student_ID,
           name: item.student_name,
           feesStatus: item.status,
-          course: item.selected_course_name || "N/A",
+          course: Array.isArray(item.selected_course_name) ? item.selected_course_name : (item.selected_course_name ? [item.selected_course_name] : ["N/A"]),
           duration: item.course_duration || "N/A",
           totalFees: Number(item.total_fee) || 0,
           paidFees: Number(item.total_paid_fee) || 0,
@@ -419,8 +558,16 @@ export default function AdminDashboard() {
           email: item.email,
           phone: item.phone,
           address: item.address,
-          startDate: item.course_start_date ? new Date(item.course_start_date).toISOString().split('T')[0] : "",
-          endDate: item.course_end_date ? new Date(item.course_end_date).toISOString().split('T')[0] : "",
+          startDate: item.course_start_date 
+            ? new Date(item.course_start_date).toISOString().split('T')[0] 
+            : new Date().toISOString().split('T')[0],
+          endDate: item.course_end_date 
+            ? new Date(item.course_end_date).toISOString().split('T')[0] 
+            : (() => {
+                const date = new Date();
+                date.setMonth(date.getMonth() + 3);
+                return date.toISOString().split('T')[0];
+              })(),
           feesInstallment: item.fee_installment,
           fee: item.fee
         }));
@@ -489,39 +636,139 @@ export default function AdminDashboard() {
       const res = await fetch("http://localhost:3001/admin_dashboardGet");
       const data = await res.json();
       if (data.success) {
-        // ... existing mappedStudents logic ...
-        const mappedStudents: Student[] = data.tcData.map((item: any) => ({
-          id: item.student_ID,
-          name: item.student_name,
-          feesStatus: item.status,
-          course: item.selected_course_name || "Digital Marketing",
-          duration: item.course_duration || "3 Months",
-          totalFees: Number(item.total_fee) || 0,
-          paidFees: Number(item.total_paid_fee) || 0,
-          pendingFees: Number(item.pending_fee) || 0,
-          email: item.email,
-          phone: item.phone,
-          address: item.address,
-          startDate: item.course_start_date ? new Date(item.course_start_date).toISOString().split('T')[0] : "",
-          endDate: item.course_end_date ? new Date(item.course_end_date).toISOString().split('T')[0] : "",
-          feesInstallment: item.fee_installment,
-          fee: item.fee || [],
-          certificates: item.certificate_photo ? [{
-            id: `cert-${item.student_ID}`,
-            name: "Uploaded Certificate",
-            url: `http://localhost:3001/${item.certificate_photo}`,
-            date: item.created_at ? new Date(item.created_at).toISOString().split("T")[0] : new Date().toISOString().split("T")[0]
-          }] : []
-        }));
+        const mappedStudents: Student[] = data.tcData.map((item: any) => {
+          // Map admissions if available
+          let admissions: any[] = [];
+          if (item.admissions && item.admissions.length > 0) {
+            admissions = item.admissions.map((adm: any) => ({
+              admissionId: adm.admission_id || adm.admissionId || `adm-${Date.now()}`,
+              courses: Array.isArray(adm.courses) ? adm.courses : (adm.selected_course_name ? (Array.isArray(adm.selected_course_name) ? adm.selected_course_name : [adm.selected_course_name]) : []),
+              courseDuration: adm.course_duration || adm.courseDuration || "N/A",
+              totalFee: Number(adm.total_fee) || Number(adm.totalFee) || 0,
+              totalPaidFee: Number(adm.total_paid_fee) || Number(adm.totalPaidFee) || 0,
+              pendingFee: Number(adm.pending_fee) || Number(adm.pendingFee) || 0,
+              feesStatus: adm.status || adm.feesStatus || "Pending",
+              feesInstallment: Number(adm.fee_installment) || Number(adm.feesInstallment) || 0,
+              payments: adm.payments || [],
+              certificates: adm.certificates ? adm.certificates.map((cert: any, idx: number) => ({
+                id: `cert-${item.student_ID}-${adm.admission_id}-${idx}`,
+                courseName: cert.course_name,
+                url: `http://localhost:3001/${cert.certificate_path}`,
+                date: cert.issued_at ? new Date(cert.issued_at).toISOString() : new Date().toISOString()
+              })) : [],
+              startDate: adm.course_start_date 
+                ? new Date(adm.course_start_date).toISOString().split('T')[0] 
+                : (adm.startDate 
+                    ? (typeof adm.startDate === 'string' 
+                        ? new Date(adm.startDate).toISOString().split('T')[0] 
+                        : new Date(adm.startDate).toISOString().split('T')[0])
+                    : new Date().toISOString().split('T')[0]),
+              endDate: adm.course_end_date 
+                ? new Date(adm.course_end_date).toISOString().split('T')[0] 
+                : (adm.endDate 
+                    ? (typeof adm.endDate === 'string' 
+                        ? new Date(adm.endDate).toISOString().split('T')[0] 
+                        : new Date(adm.endDate).toISOString().split('T')[0])
+                    : (() => {
+                        const date = new Date();
+                        date.setMonth(date.getMonth() + 3);
+                        return date.toISOString().split('T')[0];
+                      })()),
+              createdAt: adm.created_at || new Date().toISOString(),
+              updatedAt: adm.updated_at || new Date().toISOString()
+            }));
+          }
+          
+          // If no admissions, create a default one from the old structure for backward compatibility
+          if (admissions.length === 0) {
+            // Start with any existing certificates from the new array
+            let certificates: any[] = item.certificates ? item.certificates.map((cert: any, idx: number) => ({
+              id: `cert-${item.student_ID}-${idx}`,
+              courseName: cert.course_name,
+              url: `http://localhost:3001/${cert.certificate_path}`,
+              date: cert.issued_at ? new Date(cert.issued_at).toISOString() : new Date().toISOString()
+            })) : [];
+            
+            // Add backward compatibility for old certificate_photo
+            if (item.certificate_photo) {
+              certificates.push({
+                id: `cert-${item.student_ID}-old`,
+                courseName: Array.isArray(item.selected_course_name) ? item.selected_course_name[0] : item.selected_course_name || "Course",
+                url: `http://localhost:3001/${item.certificate_photo}`,
+                date: item.created_at ? new Date(item.created_at).toISOString() : new Date().toISOString()
+              });
+            }
+            
+            admissions.push({
+              admissionId: `adm-${item.student_ID}-default`,
+              courses: Array.isArray(item.selected_course_name) ? item.selected_course_name : (item.selected_course_name ? [item.selected_course_name] : ["N/A"]),
+              courseDuration: item.course_duration || "3 Months",
+              totalFee: Number(item.total_fee) || 0,
+              totalPaidFee: Number(item.total_paid_fee) || 0,
+              pendingFee: Number(item.pending_fee) || 0,
+              feesStatus: item.status || "Pending",
+              feesInstallment: Number(item.fee_installment) || 0,
+              payments: item.fee || [],
+              certificates,
+              startDate: item.course_start_date ? new Date(item.course_start_date).toISOString().split('T')[0] : "",
+              endDate: item.course_end_date ? new Date(item.course_end_date).toISOString().split('T')[0] : "",
+              createdAt: item.created_at || new Date().toISOString(),
+              updatedAt: item.updated_at || new Date().toISOString()
+            });
+          }
+          
+          // Calculate totals from admissions
+          const totalFees = admissions.reduce((sum, adm) => sum + adm.totalFee, 0);
+          const totalPaidFees = admissions.reduce((sum, adm) => sum + adm.totalPaidFee, 0);
+          const totalPendingFees = admissions.reduce((sum, adm) => sum + adm.pendingFee, 0);
+          
+          // Determine overall fees status
+          let overallStatus: "Clear" | "Pending" | "Partial" = "Pending";
+          const allClear = admissions.every(adm => adm.feesStatus === "Clear");
+          const anyPaid = admissions.some(adm => adm.totalPaidFee > 0);
+          if (allClear) overallStatus = "Clear";
+          else if (anyPaid) overallStatus = "Partial";
+          
+          // Collect all unique courses
+          const allCourses = [...new Set(admissions.flatMap(adm => adm.courses))];
+          
+          // Collect all certificates from all admissions
+          const allCertificates = admissions.flatMap(adm => adm.certificates);
+          
+          return {
+            id: item.student_ID,
+            name: item.student_name,
+            feesStatus: overallStatus,
+            course: allCourses,
+            duration: admissions[0]?.courseDuration || "3 Months",
+            totalFees,
+            paidFees: totalPaidFees,
+            pendingFees: totalPendingFees,
+            email: item.email,
+            phone: item.phone,
+            address: item.address,
+            startDate: admissions[0]?.startDate || "",
+            endDate: admissions[admissions.length - 1]?.endDate || "",
+            feesInstallment: admissions.reduce((sum, adm) => sum + adm.feesInstallment, 0),
+            fee: admissions.flatMap(adm => adm.payments),
+            certificates: allCertificates,
+            admissions,
+            referredByName: item.referredByName,
+            referredByPhone: item.referredByPhone,
+            referredByEmail: item.referredByEmail,
+            referredAmount: Number(item.referredAmount) || 0
+          };
+        });
         
         setStudents(mappedStudents);
         setStats({
           totalStudents: data.stats.total_students,
           unissuedCertificates: data.stats.total_unissued_certificates,
           certificatesIssued: data.stats.total_issued_certificates,
-          totalEarnings: data.stats.total_earnings,
+          totalEarnings: data.stats.net_earnings || data.stats.total_earnings,
           totalClearFees: data.stats.clear_fee_students,
-          pendingFees: data.stats.unclear_fee_students
+          pendingFees: data.stats.unclear_fee_students,
+          totalReferralPaid: data.stats.total_referral_paid || 0
         });
         setGraphData(data.graphData || []);
         setTopCourses(data.top_courses || []);
@@ -613,8 +860,29 @@ export default function AdminDashboard() {
   return (
     <div className="min-h-screen bg-[#f8fafc] text-neutral-900 flex relative overflow-hidden selection:bg-blue-100 font-sans">
       
+      {/* Mobile Overlay Backdrop */}
+      {isSidebarOpen && (
+        <div 
+          className="fixed inset-0 bg-black/40 backdrop-blur-sm z-40 md:hidden"
+          onClick={() => setIsSidebarOpen(false)}
+        />
+      )}
+
       {/* Sidebar */}
-      <aside className="w-72 bg-white border-r border-neutral-200 hidden md:flex flex-col relative z-20">
+      <aside className={`
+        w-72 bg-white border-r border-neutral-200 flex flex-col z-50
+        fixed md:static top-0 left-0 h-full
+        transform transition-transform duration-300 ease-in-out
+        ${isSidebarOpen ? 'translate-x-0 shadow-2xl' : '-translate-x-full md:translate-x-0'}
+      `}>
+        {/* Mobile Close Button */}
+        <button 
+          onClick={() => setIsSidebarOpen(false)}
+          className="absolute top-4 right-4 md:hidden p-2 rounded-lg hover:bg-neutral-100 text-neutral-500 transition-colors"
+        >
+          <X size={18} />
+        </button>
+
         <div className="p-6 border-b border-neutral-100">
           <div className="h-60 w-full relative flex items-center mb-2">
              <img src="/logo/RIZE LOGO HORI PNG.png" alt="RizeWorld" className="w-full h-full object-contain object-left" />
@@ -625,10 +893,10 @@ export default function AdminDashboard() {
         </div>
 
         <div className="flex-1 py-6 px-4 space-y-2">
-          <SidebarItem icon={LayoutDashboard} label="Dashboard" active={activeTab === "dashboard"} onClick={() => navigate("/admin/dashboard/dashboard")} />
-          <SidebarItem icon={MessagesSquare} label="Inquiry" active={activeTab === "inquiry"} onClick={() => navigate("/admin/dashboard/inquiry")} />
-          <SidebarItem icon={GraduationCap} label="Course & Teachers" active={activeTab === "course-teachers"} onClick={() => navigate("/admin/dashboard/course-teachers")} />
-          <SidebarItem icon={UserCircle} label="Referred By" active={activeTab === "referred-by"} onClick={() => navigate("/admin/dashboard/referred-by")} />
+          <SidebarItem icon={LayoutDashboard} label="Dashboard" active={activeTab === "dashboard"} onClick={() => { navigate("/admin/dashboard/dashboard"); setIsSidebarOpen(false); }} />
+          <SidebarItem icon={MessagesSquare} label="Inquiry" active={activeTab === "inquiry"} onClick={() => { navigate("/admin/dashboard/inquiry"); setIsSidebarOpen(false); }} />
+          <SidebarItem icon={GraduationCap} label="Course & Teachers" active={activeTab === "course-teachers"} onClick={() => { navigate("/admin/dashboard/course-teachers"); setIsSidebarOpen(false); }} />
+          <SidebarItem icon={UserCircle} label="Referred By" active={activeTab === "referred-by"} onClick={() => { navigate("/admin/dashboard/referred-by"); setIsSidebarOpen(false); }} />
         </div>
 
         <div className="p-6 border-t border-neutral-100">
@@ -645,10 +913,20 @@ export default function AdminDashboard() {
         <div className="absolute top-0 left-1/4 w-96 h-96 bg-blue-100/50 rounded-full blur-[120px] pointer-events-none" />
         <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-purple-100/50 rounded-full blur-[120px] pointer-events-none" />
         
-        <header className="h-20 bg-white/80 backdrop-blur-2xl border-b border-neutral-200 flex items-center justify-between px-8 sticky top-0 z-30">
-          <h2 className="font-display text-2xl font-bold text-neutral-900 capitalize tracking-tight">
-            {activeTab.replace("-", " ")} Overview
-          </h2>
+        <header className="h-20 bg-white/80 backdrop-blur-2xl border-b border-neutral-200 flex items-center justify-between px-4 md:px-8 sticky top-0 z-30">
+          <div className="flex items-center gap-3">
+            {/* Hamburger Menu - Mobile Only */}
+            <button
+              onClick={() => setIsSidebarOpen(true)}
+              className="md:hidden p-2 rounded-xl hover:bg-neutral-100 text-neutral-600 transition-colors"
+              aria-label="Open menu"
+            >
+              <Menu size={22} />
+            </button>
+            <h2 className="font-display text-lg md:text-2xl font-bold text-neutral-900 capitalize tracking-tight">
+              {activeTab.replace("-", " ")} Overview
+            </h2>
+          </div>
           
           <div className="flex items-center gap-4">
              <div className="relative">
@@ -704,7 +982,7 @@ export default function AdminDashboard() {
                   </div>
                 )}
              </div>
-             <button onClick={() => setIsLogoutModalOpen(true)} className="md:hidden text-red-600"><LogOut size={20} /></button>
+
           </div>
         </header>
 
@@ -944,7 +1222,7 @@ export default function AdminDashboard() {
                                </div>
                                {s.name}
                             </td>
-                            <td className="py-4 px-6 text-neutral-600">{s.course || "N/A"}</td>
+                            <td className="py-4 px-6 text-neutral-600">{Array.isArray(s.course) ? s.course.join(", ") : s.course || "N/A"}</td>
                             <td className="py-4 px-6 text-neutral-600">{s.duration || "N/A"}</td>
                             <td className="py-4 px-6 text-neutral-700">₹{s.totalFees || 0}</td>
                             <td className="py-4 px-6 text-neutral-700">₹{s.pendingFees || 0}</td>
@@ -959,7 +1237,7 @@ export default function AdminDashboard() {
                               </span>
                             </td>
                             <td className="py-4 px-6">
-                              <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                              <div className="flex items-center justify-end gap-2">
 
                                 <button 
                                   onClick={() => { setEditingStudent(s); setIsStudentModalOpen(true); }}
@@ -1067,7 +1345,7 @@ export default function AdminDashboard() {
                                                  <div className="font-bold text-neutral-900 capitalize">{row.name}</div>
                                               </div>
                                            </td>
-                                           <td className="px-6 py-4 text-sm font-semibold text-neutral-700">{row.course}</td>
+                                           <td className="px-6 py-4 text-sm font-semibold text-neutral-700">{Array.isArray(row.course) ? row.course.join(", ") : row.course}</td>
                                            <td className="px-6 py-4 text-sm text-neutral-600">{row.duration}</td>
                                            <td className="px-6 py-4 text-sm font-bold text-neutral-900">₹{(row.totalFees || 0).toLocaleString()}</td>
                                             <td className="px-6 py-4 text-sm font-bold text-red-600">₹{(row.pendingFees || 0).toLocaleString()}</td>
@@ -1100,7 +1378,7 @@ export default function AdminDashboard() {
                                         <tr key={idx} className="hover:bg-neutral-50/50 transition-colors">
                                            <td className="px-6 py-4 font-mono text-sm font-semibold text-emerald-600">{row.id}</td>
                                            <td className="px-6 py-4 font-bold text-neutral-900 capitalize">{row.name}</td>
-                                           <td className="px-6 py-4 text-sm font-semibold text-neutral-700">{row.course}</td>
+                                           <td className="px-6 py-4 text-sm font-semibold text-neutral-700">{Array.isArray(row.course) ? row.course.join(", ") : row.course}</td>
                                            <td className="px-6 py-4 text-sm text-neutral-600">
                                               {row.certificates && row.certificates[0]?.date ? new Date(row.certificates[0].date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : "N/A"}
                                            </td>
@@ -1151,7 +1429,7 @@ export default function AdminDashboard() {
                                         <tr key={idx} className="hover:bg-neutral-50/50 transition-colors">
                                            <td className="px-6 py-4 font-mono text-sm font-semibold text-blue-600">{row.id}</td>
                                            <td className="px-6 py-4 font-bold text-neutral-900 capitalize">{row.name}</td>
-                                           <td className="px-6 py-4 text-sm font-semibold text-neutral-700">{row.course}</td>
+                                           <td className="px-6 py-4 text-sm font-semibold text-neutral-700">{Array.isArray(row.course) ? row.course.join(", ") : row.course}</td>
                                            <td className="px-6 py-4">
                                               <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold ${
                                                  row.feesStatus === 'Clear' ? 'bg-emerald-100 text-emerald-700' : 'bg-orange-100 text-orange-700'
@@ -1243,7 +1521,7 @@ export default function AdminDashboard() {
                                         <tr key={idx} className="hover:bg-neutral-50/50 transition-colors">
                                            <td className="px-6 py-4 font-mono text-sm font-semibold text-red-600">{row.id}</td>
                                            <td className="px-6 py-4 font-bold text-neutral-900 capitalize">{row.name}</td>
-                                           <td className="px-6 py-4 text-sm font-semibold text-neutral-700">{row.course}</td>
+                                           <td className="px-6 py-4 text-sm font-semibold text-neutral-700">{Array.isArray(row.course) ? row.course.join(", ") : row.course}</td>
                                            <td className="px-6 py-4 text-sm font-bold text-neutral-900">₹{Number(row.totalFees).toLocaleString()}</td>
                                            <td className="px-6 py-4 text-sm font-bold text-emerald-600">₹{Number(row.paidFees).toLocaleString()}</td>
                                            <td className="px-6 py-4 text-sm font-bold text-red-600">₹{Number(row.pendingFees).toLocaleString()}</td>
@@ -1277,7 +1555,7 @@ export default function AdminDashboard() {
                                         <tr key={idx} className="hover:bg-neutral-50/50 transition-colors">
                                            <td className="px-6 py-4 font-mono text-sm font-semibold text-cyan-600">{row.id}</td>
                                            <td className="px-6 py-4 font-bold text-neutral-900 capitalize">{row.name}</td>
-                                           <td className="px-6 py-4 text-sm font-semibold text-neutral-700">{row.course}</td>
+                                           <td className="px-6 py-4 text-sm font-semibold text-neutral-700">{Array.isArray(row.course) ? row.course.join(", ") : row.course}</td>
                                            <td className="px-6 py-4 text-sm font-bold text-neutral-900">₹{Number(row.paidFees).toLocaleString()}</td>
                                            <td className="px-6 py-4"><span className="inline-flex items-center px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-700 text-xs font-bold">Clear</span></td>
                                            <td className="px-6 py-4">
@@ -1319,7 +1597,7 @@ export default function AdminDashboard() {
                                         <tr key={idx} className="hover:bg-neutral-50/50 transition-colors">
                                            <td className="px-6 py-4 font-mono text-sm font-semibold text-red-600">{row.id}</td>
                                            <td className="px-6 py-4 font-bold text-neutral-900 capitalize">{row.name}</td>
-                                           <td className="px-6 py-4 text-sm font-semibold text-neutral-700">{row.course}</td>
+                                           <td className="px-6 py-4 text-sm font-semibold text-neutral-700">{Array.isArray(row.course) ? row.course.join(", ") : row.course}</td>
                                            <td className="px-6 py-4 text-sm font-bold text-neutral-900">₹{Number(row.totalFees).toLocaleString()}</td>
                                            <td className="px-6 py-4 text-sm font-bold text-emerald-600">₹{Number(row.paidFees).toLocaleString()}</td>
                                            <td className="px-6 py-4 text-sm font-bold text-red-600">₹{Number(row.pendingFees).toLocaleString()}</td>
