@@ -7,7 +7,6 @@ import WhatsAppWidget from "./components/WhatsAppWidget";
 // Lazy load pages
 const Home = lazy(() => import("./pages/Home"));
 const Courses = lazy(() => import("./pages/Courses"));
-const Trainers = lazy(() => import("./pages/Trainers"));
 const MasterCourse = lazy(() => import("./pages/MasterCourse"));
 const HireFromUs = lazy(() => import("./pages/HireFromUs"));
 const About = lazy(() => import("./pages/About"));
@@ -40,7 +39,6 @@ function MainLayout() {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/courses" element={<Courses />} />
-          <Route path="/trainers" element={<Trainers />} />
           <Route path="/master-course" element={<MasterCourse />} />
           <Route path="/hire-from-us" element={<HireFromUs />} />
           <Route path="/about" element={<About />} />

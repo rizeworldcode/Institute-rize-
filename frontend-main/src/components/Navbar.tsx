@@ -26,9 +26,6 @@ export default function Navbar() {
           <Link to="/" title="Home" className="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center text-white shadow-md hover:scale-110 transition-transform">
             <Home size={20} />
           </Link>
-          <Link to="/trainers" title="Trainers" className="text-neutral-400 hover:text-neutral-900 transition-colors">
-            <Users size={22} />
-          </Link>
           <Link to="/hire-from-us" title="Hire From Us" className="text-neutral-400 hover:text-neutral-900 transition-colors">
             <Briefcase size={22} />
           </Link>

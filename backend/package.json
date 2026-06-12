@@ -50,6 +50,7 @@
     "multer": "^1.4.5-lts.1",
     "multer-storage-cloudinary": "^4.0.0",
     "newman": "^5.3.2",
+    "node-fetch": "^2.7.0",
     "node-geocoder": "^4.4.1",
     "node-schedule": "^2.1.1",
     "nodemailer": "^6.9.14",

@@ -1,6 +1,6 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { X } from "lucide-react";
-import { Student, Admission, Certificate } from "../types";
+import { Student, Admission } from "../types";
 
 const ALL_COURSES = [
   { value: "Master Course Program", label: "Master Course Program" },
@@ -162,7 +162,9 @@ export function StudentModal({ student, onClose, onSave }: {
           referredByName: studentInfo.referredByName,
           referredByPhone: studentInfo.referredByPhone,
           referredByEmail: studentInfo.referredByEmail,
-          referredAmount: Number(studentInfo.referredAmount || 0)
+          referredAmount: Number(studentInfo.referredAmount || 0),
+          feesStatus: newAdmission.feesStatus,
+          certificates: newAdmission.certificates,
         };
 
         // Backward compatibility fields
@@ -265,13 +267,60 @@ export function StudentModal({ student, onClose, onSave }: {
         }
 
 
-        const res = await fetch(`http://localhost:3001/updateStudentdetails/${student.id}`, {
-          method: "POST",
-          body: formData
-        });
-        console.log("Response from server:", res);
-        const data = await res.json();
-        console.log("Response data from server:", data);
+        console.log("=== About to make API call ===");
+        console.log("student object:", student);
+        console.log("student.id:", student.id);
+        const url = `http://localhost:3001/updateStudentdetails/${student.id}`;
+        console.log("URL:", url);
+        console.log("FormData has:", formData);
+        // Log formData contents one more time
+        console.log("FormData entries:");
+        for (let entry of formData.entries()) {
+            console.log("-", entry[0], ":", entry[1]);
+        }
+        console.log("Done logging formData, moving on to fetch!");
+        
+        let res: Response;
+        try {
+          console.log("Starting fetch with timeout...");
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
+          
+          res = await fetch(`http://localhost:3001/updateStudentdetails/${student.id}`, {
+            method: "POST",
+            body: formData,
+            signal: controller.signal
+          });
+          
+          clearTimeout(timeoutId);
+          console.log("Response from server received:", res);
+          console.log("Response status:", res.status);
+          console.log("Response status text:", res.statusText);
+        } catch (fetchErr) {
+          console.error("=== Fetch Error ===", fetchErr);
+          console.error("Error name:", (fetchErr as Error).name);
+          console.error("Error message:", (fetchErr as Error).message);
+          alert(`Network error: ${(fetchErr as Error).message}`);
+          return;
+        }
+
+        let data: any;
+        try {
+          console.log("Starting to parse response as JSON...");
+          data = await res.json();
+          console.log("Response data from server (JSON):", data);
+        } catch (jsonErr) {
+          console.error("=== JSON Parse Error ===", jsonErr);
+          try {
+            const text = await res.text();
+            console.error("Response text (not JSON):", text);
+            alert(`Error parsing server response! Response was: ${text}`);
+          } catch (textErr) {
+            console.error("Could not even get response text:", textErr);
+            alert("Error parsing server response!");
+          }
+          return;
+        }
         
         if (data.success) {
           // Update local state with updated data

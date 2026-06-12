@@ -9,29 +9,53 @@ exports.admin_dashboardGet = async (req, res) => {
         const total_students = await Tc_model.countDocuments();
 
         // 2. Total Issued/Unissued Certificates
-        // Count all certificates from all admissions, plus backward compatibility
-        let total_issued_certificates = 0;
-        const students = await Tc_model.find({});
-        
-        students.forEach(student => {
-            // Count certificates from admissions
-            if (student.admissions && student.admissions.length > 0) {
-                student.admissions.forEach(adm => {
-                    if (adm.certificates && adm.certificates.length > 0) {
-                        total_issued_certificates += adm.certificates.length;
-                    }
-                });
-            }
-            // Backward compatibility
-            if (student.certificate_photo && student.certificate_photo !== "") {
-                total_issued_certificates++;
-            }
-            if (student.certificates && student.certificates.length > 0) {
-                total_issued_certificates += student.certificates.length;
-            }
+    // Count unique students who have at least one certificate, plus backward compatibility
+    const students = await Tc_model.find({});
+    
+    // Collect all students with certificates + their issued courses
+    const studentsWithCertificates = [];
+    students.forEach(student => {
+      // Collect all unique courses with certificates for this student
+      const issuedCourses = new Set();
+      
+      // Check certificates from admissions
+      if (student.admissions && student.admissions.length > 0) {
+        student.admissions.forEach(adm => {
+          if (adm.certificates && adm.certificates.length > 0) {
+            adm.certificates.forEach(cert => {
+              if (cert.courseName) {
+                issuedCourses.add(cert.courseName);
+              }
+            });
+          }
         });
-        
-        const total_unissued_certificates = Math.max(0, total_students - total_issued_certificates);
+      }
+      // Backward compatibility
+      if (student.certificate_photo && student.certificate_photo !== "") {
+        issuedCourses.add("Default Course");
+      }
+      if (student.certificates && student.certificates.length > 0) {
+        student.certificates.forEach(cert => {
+          if (cert.course_name) {
+            issuedCourses.add(cert.course_name);
+          } else if (cert.courseName) {
+            issuedCourses.add(cert.courseName);
+          }
+        });
+      }
+      
+      // If student has any certificate
+      if (issuedCourses.size > 0) {
+        studentsWithCertificates.push({
+          studentId: student.student_ID,
+          studentName: student.student_name,
+          issuedCourses: Array.from(issuedCourses)
+        });
+      }
+    });
+    
+    const total_issued_certificates = studentsWithCertificates.length;
+    const total_unissued_certificates = Math.max(0, total_students - total_issued_certificates);
 
         // 3. Total Earnings & Fee Status Counts
         let total_earnings = 0;
@@ -66,9 +90,9 @@ exports.admin_dashboardGet = async (req, res) => {
                 })),
                 certificates: (adm.certificates || []).map(cert => ({
                     id: `cert-${Date.now()}-${Math.random()}`,
-                    courseName: cert.courseName,
-                    url: `http://localhost:3001/${cert.certificatePath}`,
-                    date: cert.issuedAt ? new Date(cert.issuedAt).toISOString() : new Date().toISOString()
+                    courseName: cert.courseName || cert.course_name,
+                    url: cert.certificatePath || cert.certificate_path,
+                    date: cert.issuedAt || cert.issued_at ? new Date(cert.issuedAt || cert.issued_at).toISOString() : new Date().toISOString()
                 })),
                 startDate: adm.startDate || adm.course_start_date || new Date(),
                 endDate: adm.endDate || adm.course_end_date || new Date(Date.now() + 90 * 24 * 60 * 60 * 1000),
@@ -144,38 +168,55 @@ exports.admin_dashboardGet = async (req, res) => {
         // 5. Deduct referral amount from total earnings
         const net_earnings = total_earnings - total_referral_paid;
 
-        // 4. Top 3 Courses (from old structure and admissions)
-        // First collect all courses from old structure
-        const topCoursesOld = await Tc_model.aggregate([
-            { $unwind: { path: "$selected_course_name", preserveNullAndEmptyArrays: true } },
-            { $group: { _id: "$selected_course_name", count: { $sum: 1 } } },
-            { $sort: { count: -1 } }
-        ]);
+        // 4. Top 3 Courses (only currently active students)
+        const today = new Date();
+        const courseStudentMap = {}; // To track unique students per course
         
-        // Collect all courses from admissions
-        const topCoursesFromAdmissions = await Tc_model.aggregate([
-            { $unwind: { path: "$admissions", preserveNullAndEmptyArrays: true } },
-            { $unwind: { path: "$admissions.courses", preserveNullAndEmptyArrays: true } },
-            { $group: { _id: "$admissions.courses", count: { $sum: 1 } } },
-            { $sort: { count: -1 } }
-        ]);
-        
-        // Combine and count
-        const courseCounts = {};
-        topCoursesOld.forEach(course => {
-            if (course._id) {
-                courseCounts[course._id] = (courseCounts[course._id] || 0) + course.count;
+        students.forEach(student => {
+            const studentId = student._id.toString();
+            
+            // Process old structure (selected_course_name)
+            if (student.selected_course_name && student.selected_course_name.length > 0) {
+                const startDate = student.course_start_date ? new Date(student.course_start_date) : null;
+                const endDate = student.course_end_date ? new Date(student.course_end_date) : null;
+                
+                // Check if course is currently active
+                const isActive = (!startDate || startDate <= today) && (!endDate || endDate >= today);
+                
+                if (isActive) {
+                    student.selected_course_name.forEach(courseName => {
+                        if (!courseStudentMap[courseName]) {
+                            courseStudentMap[courseName] = new Set();
+                        }
+                        courseStudentMap[courseName].add(studentId);
+                    });
+                }
             }
-        });
-        topCoursesFromAdmissions.forEach(course => {
-            if (course._id) {
-                courseCounts[course._id] = (courseCounts[course._id] || 0) + course.count;
+            
+            // Process admissions
+            if (student.admissions && student.admissions.length > 0) {
+                student.admissions.forEach(adm => {
+                    const startDate = adm.startDate ? new Date(adm.startDate) : null;
+                    const endDate = adm.endDate ? new Date(adm.endDate) : null;
+                    
+                    // Check if admission is currently active
+                    const isActive = (!startDate || startDate <= today) && (!endDate || endDate >= today);
+                    
+                    if (isActive && adm.courses && adm.courses.length > 0) {
+                        adm.courses.forEach(courseName => {
+                            if (!courseStudentMap[courseName]) {
+                                courseStudentMap[courseName] = new Set();
+                            }
+                            courseStudentMap[courseName].add(studentId);
+                        });
+                    }
+                });
             }
         });
         
         // Convert to sorted array
-        const top_courses = Object.keys(courseCounts)
-            .map(key => ({ _id: key, count: courseCounts[key] }))
+        const top_courses = Object.keys(courseStudentMap)
+            .map(key => ({ _id: key, count: courseStudentMap[key].size }))
             .sort((a, b) => b.count - a.count)
             .slice(0, 3);
 
@@ -223,22 +264,23 @@ exports.admin_dashboardGet = async (req, res) => {
         const adminConfig = await admin_model.findOne();
 
         return {
-            success: true,
-            stats: {
-                total_students,
-                total_issued_certificates,
-                total_unissued_certificates,
-                total_earnings,
-                net_earnings,
-                total_referral_paid,
-                clear_fee_students,
-                unclear_fee_students
-            },
-            tcData, 
-            top_courses,
-            graphData,
-            referrel_amount: adminConfig ? adminConfig.referrel_amount : 0
-        };
+        success: true,
+        stats: {
+          total_students,
+          total_issued_certificates,
+          total_unissued_certificates,
+          total_earnings,
+          net_earnings,
+          total_referral_paid,
+          clear_fee_students,
+          unclear_fee_students
+        },
+        tcData, 
+        top_courses,
+        graphData,
+        referrel_amount: adminConfig ? adminConfig.referrel_amount : 0,
+        studentsWithCertificates
+    };
     } catch (error) {
         console.log("Dashboard Error:", error);
         return { success: false, message: "Error fetching dashboard data" };

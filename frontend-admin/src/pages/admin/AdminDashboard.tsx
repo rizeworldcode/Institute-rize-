@@ -6,12 +6,10 @@ import {
   Award, Bell, UserCircle, Mail, IndianRupee, CheckCircle2, Activity
 } from "lucide-react";
 
-import { Student,  Teacher } from "./types";
+import { Student } from "./types";
 import { StudentModal } from "./modals/StudentModal";
 import { StudentDetailsModal } from "./modals/StudentDetailsModal";
-import { TeacherModal } from "./modals/TeacherModal";
 import { InquiryTab } from "./tabs/InquiryTab";
-import { CourseTeachersTab } from "./tabs/CourseTeachersTab";
 import { ReferredByTab } from "./tabs/ReferredByTab";
 import { ReferrerModal } from "./modals/ReferrerModal";
 
@@ -44,6 +42,7 @@ export default function AdminDashboard() {
   });
   const [allStudentsData, setAllStudentsData] = useState<Student[]>([]);
   const [issuedCertificatesData, setIssuedCertificatesData] = useState<any[]>([]);
+  const [studentsWithCertificates, setStudentsWithCertificates] = useState<any[]>([]);
   const [unissuedCertificatesData, setUnissuedCertificatesData] = useState<any[]>([]);
   const [clearFeeStudentsData, setClearFeeStudentsData] = useState<any[]>([]);
   const [pendingFeeStudentsData, setPendingFeeStudentsData] = useState<any[]>([]);
@@ -86,9 +85,6 @@ export default function AdminDashboard() {
   };
 
   // Mock Data for new pages
-
-
-  const [teachers, setTeachers] = useState<Teacher[]>([]);
 
 
   const [referrers, setReferrers] = useState<any[]>([]);
@@ -152,8 +148,7 @@ export default function AdminDashboard() {
   const [viewingStudent, setViewingStudent] = useState<Student | null>(null);
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
 
-  const [isTeacherModalOpen, setIsTeacherModalOpen] = useState(false);
-  const [editingTeacher, setEditingTeacher] = useState<Teacher | null>(null);
+
 
   const [notifications, setNotifications] = useState<any[]>([]);
 
@@ -212,80 +207,7 @@ export default function AdminDashboard() {
     return Math.floor(seconds) + " seconds ago";
   };
 
-  const fetchTeachers = async () => {
-    try {
-      const res = await fetch("http://localhost:3001/allTeachers");
-      const data = await res.json();
-      if (data.success) {
-        const mapped: Teacher[] = data.data.map((item: any) => ({
-          id: item.techer_ID,
-          name: item.techer_name,
-          subject: item.course_name,
-          email: item.email,
-          phone: item.phone,
-          address: item.address
-        }));
-        setTeachers(mapped);
-      }
-    } catch (error) {
-      console.error("Failed to fetch teachers:", error);
-    }
-  };
 
-  const handleSaveTeacher = async (teacher: Teacher) => {
-    try {
-      const isEdit = !!editingTeacher;
-      const url = isEdit 
-        ? `http://localhost:3001/updateTeacher/${teacher.id}` 
-        : "http://localhost:3001/add_teacher";
-      const method = isEdit ? "PATCH" : "POST";
-
-      const res = await fetch(url, {
-        method,
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          techer_name: teacher.name,
-          techer_ID: teacher.id,
-          course_name: teacher.subject,
-          phone: teacher.phone,
-          email: teacher.email,
-          address: teacher.address
-        })
-      });
-      const data = await res.json();
-      if (data.success) {
-        alert(data.message);
-        fetchTeachers();
-        setIsTeacherModalOpen(false);
-        setEditingTeacher(null);
-      } else {
-        alert(data.message || "Failed to save teacher");
-      }
-    } catch (error) {
-      console.error("Error saving teacher:", error);
-      alert("An error occurred while saving teacher");
-    }
-  };
-
-  const handleDeleteTeacher = async (id: string) => {
-    if (window.confirm("Are you sure you want to delete this teacher?")) {
-      try {
-        const res = await fetch(`http://localhost:3001/deleteTeacher/${id}`, {
-          method: "DELETE"
-        });
-        const data = await res.json();
-        if (data.success) {
-          alert(data.message);
-          fetchTeachers();
-        } else {
-          alert(data.message || "Failed to delete teacher");
-        }
-      } catch (error) {
-        console.error("Error deleting teacher:", error);
-        alert("An error occurred while deleting teacher");
-      }
-    }
-  };
 
   const fetchAllStudents = async () => {
     try {
@@ -310,9 +232,9 @@ export default function AdminDashboard() {
               payments: adm.payments || [],
               certificates: adm.certificates ? adm.certificates.map((cert: any, idx: number) => ({
                 id: `cert-${item.student_ID}-${adm.admission_id}-${idx}`,
-                courseName: cert.course_name,
-                url: `http://localhost:3001/${cert.certificate_path}`,
-                date: cert.issued_at ? new Date(cert.issued_at).toISOString() : new Date().toISOString()
+                courseName: cert.courseName || cert.course_name,
+                url: cert.certificatePath || `http://localhost:3001/${cert.certificate_path || cert.certificatePath}`,
+                date: cert.issuedAt || cert.issued_at ? new Date(cert.issuedAt || cert.issued_at).toISOString() : new Date().toISOString()
               })) : [],
               startDate: adm.course_start_date 
                 ? new Date(adm.course_start_date).toISOString().split('T')[0] 
@@ -342,9 +264,9 @@ export default function AdminDashboard() {
             // Start with any existing certificates from the new array
             let certificates: any[] = item.certificates ? item.certificates.map((cert: any, idx: number) => ({
               id: `cert-${item.student_ID}-${idx}`,
-              courseName: cert.course_name,
-              url: `http://localhost:3001/${cert.certificate_path}`,
-              date: cert.issued_at ? new Date(cert.issued_at).toISOString() : new Date().toISOString()
+              courseName: cert.courseName || cert.course_name,
+              url: cert.certificatePath || `http://localhost:3001/${cert.certificate_path || cert.certificatePath}`,
+              date: cert.issuedAt || cert.issued_at ? new Date(cert.issuedAt || cert.issued_at).toISOString() : new Date().toISOString()
             })) : [];
             
             // Add backward compatibility for old certificate_photo
@@ -626,8 +548,6 @@ export default function AdminDashboard() {
   useEffect(() => {
     if (activeTab === "referred-by") {
       fetchReferrers();
-    } else if (activeTab === "course-teachers") {
-      fetchTeachers();
     }
   }, [activeTab]);
 
@@ -652,9 +572,9 @@ export default function AdminDashboard() {
               payments: adm.payments || [],
               certificates: adm.certificates ? adm.certificates.map((cert: any, idx: number) => ({
                 id: `cert-${item.student_ID}-${adm.admission_id}-${idx}`,
-                courseName: cert.course_name,
-                url: `http://localhost:3001/${cert.certificate_path}`,
-                date: cert.issued_at ? new Date(cert.issued_at).toISOString() : new Date().toISOString()
+                courseName: cert.courseName || cert.course_name,
+                url: cert.certificatePath || `http://localhost:3001/${cert.certificate_path || cert.certificatePath}`,
+                date: cert.issuedAt || cert.issued_at ? new Date(cert.issuedAt || cert.issued_at).toISOString() : new Date().toISOString()
               })) : [],
               startDate: adm.course_start_date 
                 ? new Date(adm.course_start_date).toISOString().split('T')[0] 
@@ -684,9 +604,9 @@ export default function AdminDashboard() {
             // Start with any existing certificates from the new array
             let certificates: any[] = item.certificates ? item.certificates.map((cert: any, idx: number) => ({
               id: `cert-${item.student_ID}-${idx}`,
-              courseName: cert.course_name,
-              url: `http://localhost:3001/${cert.certificate_path}`,
-              date: cert.issued_at ? new Date(cert.issued_at).toISOString() : new Date().toISOString()
+              courseName: cert.courseName || cert.course_name,
+              url: cert.certificatePath || `http://localhost:3001/${cert.certificate_path || cert.certificatePath}`,
+              date: cert.issuedAt || cert.issued_at ? new Date(cert.issuedAt || cert.issued_at).toISOString() : new Date().toISOString()
             })) : [];
             
             // Add backward compatibility for old certificate_photo
@@ -773,6 +693,7 @@ export default function AdminDashboard() {
         setGraphData(data.graphData || []);
         setTopCourses(data.top_courses || []);
         setGlobalReferralAmount(data.referrel_amount?.toString() || "0");
+        setStudentsWithCertificates(data.studentsWithCertificates || []);
       }
     } catch (error) {
       console.error("Failed to fetch dashboard data:", error);
@@ -895,7 +816,6 @@ export default function AdminDashboard() {
         <div className="flex-1 py-6 px-4 space-y-2">
           <SidebarItem icon={LayoutDashboard} label="Dashboard" active={activeTab === "dashboard"} onClick={() => { navigate("/admin/dashboard/dashboard"); setIsSidebarOpen(false); }} />
           <SidebarItem icon={MessagesSquare} label="Inquiry" active={activeTab === "inquiry"} onClick={() => { navigate("/admin/dashboard/inquiry"); setIsSidebarOpen(false); }} />
-          <SidebarItem icon={GraduationCap} label="Course & Teachers" active={activeTab === "course-teachers"} onClick={() => { navigate("/admin/dashboard/course-teachers"); setIsSidebarOpen(false); }} />
           <SidebarItem icon={UserCircle} label="Referred By" active={activeTab === "referred-by"} onClick={() => { navigate("/admin/dashboard/referred-by"); setIsSidebarOpen(false); }} />
         </div>
 
@@ -1368,43 +1288,28 @@ export default function AdminDashboard() {
                                      <tr>
                                         <th className="px-6 py-4 text-xs font-bold text-neutral-500 uppercase tracking-wider">Student ID</th>
                                         <th className="px-6 py-4 text-xs font-bold text-neutral-500 uppercase tracking-wider">Student Name</th>
-                                        <th className="px-6 py-4 text-xs font-bold text-neutral-500 uppercase tracking-wider">Course</th>
-                                        <th className="px-6 py-4 text-xs font-bold text-neutral-500 uppercase tracking-wider">Issue Date</th>
-                                        <th className="px-6 py-4 text-xs font-bold text-neutral-500 uppercase tracking-wider">Action</th>
+                                        <th className="px-6 py-4 text-xs font-bold text-neutral-500 uppercase tracking-wider">Issued Courses</th>
                                      </tr>
                                   </thead>
                                   <tbody className="divide-y divide-neutral-100">
-                                     {issuedCertificatesData.map((row: Student, idx) => (
+                                     {studentsWithCertificates.map((row, idx) => (
                                         <tr key={idx} className="hover:bg-neutral-50/50 transition-colors">
-                                           <td className="px-6 py-4 font-mono text-sm font-semibold text-emerald-600">{row.id}</td>
-                                           <td className="px-6 py-4 font-bold text-neutral-900 capitalize">{row.name}</td>
-                                           <td className="px-6 py-4 text-sm font-semibold text-neutral-700">{Array.isArray(row.course) ? row.course.join(", ") : row.course}</td>
-                                           <td className="px-6 py-4 text-sm text-neutral-600">
-                                              {row.certificates && row.certificates[0]?.date ? new Date(row.certificates[0].date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : "N/A"}
-                                           </td>
-                                           <td className="px-6 py-4">
-                                              <div className="flex items-center gap-4">
-                                                 <a 
-                                                   href={row.certificates && row.certificates[0]?.url} 
-                                                   target="_blank" 
-                                                   rel="noopener noreferrer"
-                                                   className="text-blue-600 hover:text-blue-700 text-sm font-bold underline cursor-pointer"
-                                                 >
-                                                   View PDF
-                                                 </a>
-                                                 <button 
-                                                   onClick={() => setViewingStudent(row)} 
-                                                   className="text-neutral-600 hover:text-neutral-700 text-sm font-bold underline cursor-pointer"
-                                                 >
-                                                   Details
-                                                 </button>
+                                           <td className="px-6 py-4 font-mono text-sm font-semibold text-emerald-600">{row.studentId}</td>
+                                           <td className="px-6 py-4 font-bold text-neutral-900 capitalize">{row.studentName}</td>
+                                           <td className="px-6 py-4 text-sm font-semibold text-neutral-700">
+                                              <div className="flex flex-wrap gap-2">
+                                                 {row.issuedCourses.map((course: string, courseIdx: number) => (
+                                                    <span key={courseIdx} className="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-700">
+                                                       {course}
+                                                    </span>
+                                                 ))}
                                               </div>
                                            </td>
                                         </tr>
                                      ))}
-                                     {issuedCertificatesData.length === 0 && (
+                                     {studentsWithCertificates.length === 0 && (
                                         <tr>
-                                           <td colSpan={5} className="py-20 text-center text-neutral-400 italic">No issued certificates found.</td>
+                                           <td colSpan={3} className="py-20 text-center text-neutral-400 italic">No issued certificates found.</td>
                                         </tr>
                                      )}
                                   </tbody>
@@ -1624,15 +1529,7 @@ export default function AdminDashboard() {
 
           {/* INQUIRY PAGE */}
           {activeTab === "inquiry" && <InquiryTab />}
-          {/* COURSE & TEACHERS PAGE */}
-          {activeTab === "course-teachers" && (
-             <CourseTeachersTab
-                teachers={teachers}
-                setEditingTeacher={setEditingTeacher}
-                setIsTeacherModalOpen={setIsTeacherModalOpen}
-                handleDeleteTeacher={handleDeleteTeacher}
-             />
-          )}
+
           {/* REFERRED BY PAGE */}
           {activeTab === "referred-by" && (
              <ReferredByTab
@@ -1662,14 +1559,7 @@ export default function AdminDashboard() {
         />
       )}
 
-      {/* Add / Edit Teacher Modal */}
-      {isTeacherModalOpen && (
-        <TeacherModal 
-          teacher={editingTeacher} 
-          onClose={() => setIsTeacherModalOpen(false)} 
-          onSave={handleSaveTeacher} 
-        />
-      )}
+
 
       {/* Details Modal */}
       {viewingStudent && (

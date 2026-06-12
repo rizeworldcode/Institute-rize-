@@ -2,16 +2,21 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Download, CheckCircle2, User, Eye, FileText, Lock, Mail, ArrowRight, AlertCircle, LogOut } from "lucide-react";
 
+interface Certificate {
+  courseName: string;
+  certificatePath: string;
+  issuedAt?: string;
+}
+
 export default function Certificate() {
   const navigate = useNavigate();
-  const [downloading, setDownloading] = useState(false);
+  const [downloading, setDownloading] = useState<string | null>(null);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [loginForm, setLoginForm] = useState({ studentId: "", password: "" });
   const [studentData, setStudentData] = useState<{
     name: string;
     id: string;
-    status: string;
-    photo?: string;
+    certificates: Certificate[];
   } | null>(null);
 
   const [loginError, setLoginError] = useState("");
@@ -31,8 +36,7 @@ export default function Certificate() {
         setStudentData({
           name: data.student_name,
           id: data.student_id,
-          status: data.certificateStatus === "issued" ? "Certificate Issued" : "Pending",
-          photo: data.certificate_photo,
+          certificates: data.certificates || [],
         });
       }
     } catch (err) {
@@ -48,21 +52,24 @@ export default function Certificate() {
     }
   }, []);
 
-  const handleDownload = async () => {
-    if (!studentData?.photo) return;
-    setDownloading(true);
+  const handleDownload = async (cert: Certificate) => {
+    if (!cert?.certificatePath) return;
+    setDownloading(cert.courseName);
     try {
-      const photoPath = studentData.photo.startsWith('/') ? studentData.photo : `/${studentData.photo}`;
-      const fileUrl = `http://localhost:3001${photoPath}`;
+      const photoPath = cert.certificatePath.startsWith('http') 
+        ? cert.certificatePath 
+        : cert.certificatePath.startsWith('/') 
+          ? `http://localhost:3001${cert.certificatePath}` 
+          : `http://localhost:3001/${cert.certificatePath}`;
       
-      const response = await fetch(fileUrl);
+      const response = await fetch(photoPath);
       if (!response.ok) throw new Error("File not found");
       
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.download = `Certificate_${studentData.id}.pdf`;
+      link.download = `Certificate_${cert.courseName}_${studentData?.id}.pdf`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -71,14 +78,18 @@ export default function Certificate() {
       console.error("Download error:", err);
       alert("Failed to download certificate. Please try again later.");
     } finally {
-      setDownloading(false);
+      setDownloading(null);
     }
   };
 
-  const handleViewPdf = () => {
-    if (studentData?.photo) {
-      const photoPath = studentData.photo.startsWith('/') ? studentData.photo : `/${studentData.photo}`;
-      window.open(`http://localhost:3001${photoPath}`, '_blank');
+  const handleViewPdf = (cert: Certificate) => {
+    if (cert?.certificatePath) {
+      const photoPath = cert.certificatePath.startsWith('http') 
+        ? cert.certificatePath 
+        : cert.certificatePath.startsWith('/') 
+          ? `http://localhost:3001${cert.certificatePath}` 
+          : `http://localhost:3001/${cert.certificatePath}`;
+      window.open(photoPath, '_blank');
     }
   };
 
@@ -227,6 +238,8 @@ export default function Certificate() {
     );
   }
 
+  const hasCertificates = studentData.certificates.length > 0;
+
   return (
     <div className="min-h-screen bg-neutral-50 pt-32 pb-20 px-6 font-sans">
       <div className="max-w-4xl mx-auto space-y-8">
@@ -283,86 +296,94 @@ export default function Certificate() {
             <div>
               <div className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest mb-1">Student Status</div>
               <div className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-black border ${
-                studentData.status === "Certificate Issued" 
+                hasCertificates 
                 ? "bg-green-50 text-green-700 border-green-200" 
                 : "bg-orange-50 text-orange-700 border-orange-200"
               }`}>
-                {studentData.status}
+                {hasCertificates ? "Certificates Available" : "Pending"}
               </div>
             </div>
           </div>
         </div>
 
-        {/* Certificate Card */}
-        <div className="bg-white rounded-4xl p-6 md:p-8 shadow-[0_12px_40px_rgb(0,0,0,0.06)] border border-neutral-100 relative overflow-hidden">
-          {/* Subtle background pattern or watermark could go here */}
-          
-          {/* Verification Badge */}
-          <div className="absolute top-6 right-6 z-10">
-            <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-black border ${
-              studentData.photo 
-              ? "bg-green-50 text-green-700 border-green-200" 
-              : "bg-neutral-50 text-neutral-400 border-neutral-200"
-            }`}>
-              <CheckCircle2 size={14} className="stroke-2" />
-              {studentData.photo ? "VERIFIED" : "PENDING"}
-            </span>
-          </div>
-
-          <div className="relative z-10">
-            {/* Certificate Details & Actions */}
-            <div className="flex flex-col justify-between pt-4 lg:pt-8 pb-4">
-              <div className="space-y-6">
-                <div>
-                  <span className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest block mb-1">
-                    Student Certificate
-                  </span>
-                  <h2 className="text-3xl font-black text-neutral-900">
-                    {studentData.name}
-                  </h2>
-                </div>
-
-                <div className="border-t border-b border-neutral-100 py-5">
-                  <span className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest block mb-1">
-                    Student ID
-                  </span>
-                  <span className="text-sm font-black text-blue-600">
-                    {studentData.id}
+        {/* Certificates List */}
+        {hasCertificates ? (
+          <div className="space-y-6">
+            {studentData.certificates.map((cert, index) => (
+              <div key={index} className="bg-white rounded-4xl p-6 md:p-8 shadow-[0_12px_40px_rgb(0,0,0,0.06)] border border-neutral-100 relative overflow-hidden">
+                {/* Verification Badge */}
+                <div className="absolute top-6 right-6 z-10">
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-black border bg-green-50 text-green-700 border-green-200">
+                    <CheckCircle2 size={14} className="stroke-2" />
+                    VERIFIED
                   </span>
                 </div>
-              </div>
 
-              {studentData.photo ? (
-                <div className="flex flex-col sm:flex-row gap-4 mt-8">
-                  <button
-                    onClick={handleDownload}
-                    disabled={downloading}
-                    className="flex-1 bg-neutral-900 hover:bg-neutral-800 text-white font-bold text-xs tracking-widest uppercase py-4 px-6 rounded-2xl transition-all flex items-center justify-center gap-2 shadow-md disabled:opacity-70 disabled:cursor-not-allowed"
-                  >
-                    <Download size={18} />
-                    {downloading ? "Downloading..." : "Download Certificate"}
-                  </button>
-                  <button 
-                    onClick={handleViewPdf}
-                    className="flex-1 bg-white hover:bg-neutral-50 text-neutral-900 border-2 border-neutral-200 font-bold text-xs tracking-widest uppercase py-4 px-6 rounded-2xl transition-all flex items-center justify-center gap-2"
-                  >
-                    <Eye size={18} className="text-neutral-400" />
-                    View Full PDF
-                  </button>
-                </div>
-              ) : (
-                <div className="mt-8 p-6 bg-orange-50 border border-orange-100 rounded-3xl flex items-center gap-4">
-                  <div className="w-10 h-10 bg-white rounded-2xl flex items-center justify-center text-orange-500 shadow-sm shrink-0">
-                    <AlertCircle size={20} />
+                <div className="relative z-10">
+                  {/* Certificate Details & Actions */}
+                  <div className="flex flex-col justify-between pt-4 lg:pt-8 pb-4">
+                    <div className="space-y-6">
+                      <div>
+                        <span className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest block mb-1">
+                          Course Certificate
+                        </span>
+                        <h2 className="text-3xl font-black text-neutral-900">
+                          {cert.courseName}
+                        </h2>
+                      </div>
+
+                      <div className="border-t border-b border-neutral-100 py-5">
+                        <span className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest block mb-1">
+                          Student Name
+                        </span>
+                        <span className="text-sm font-black text-neutral-900">
+                          {studentData.name}
+                        </span>
+                        <div className="mt-4">
+                          <span className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest block mb-1">
+                            Student ID
+                          </span>
+                          <span className="text-sm font-black text-blue-600">
+                            {studentData.id}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="flex flex-col sm:flex-row gap-4 mt-8">
+                      <button
+                        onClick={() => handleDownload(cert)}
+                        disabled={downloading === cert.courseName}
+                        className="flex-1 bg-neutral-900 hover:bg-neutral-800 text-white font-bold text-xs tracking-widest uppercase py-4 px-6 rounded-2xl transition-all flex items-center justify-center gap-2 shadow-md disabled:opacity-70 disabled:cursor-not-allowed"
+                      >
+                        <Download size={18} />
+                        {downloading === cert.courseName ? "Downloading..." : "Download Certificate"}
+                      </button>
+                      <button 
+                        onClick={() => handleViewPdf(cert)}
+                        className="flex-1 bg-white hover:bg-neutral-50 text-neutral-900 border-2 border-neutral-200 font-bold text-xs tracking-widest uppercase py-4 px-6 rounded-2xl transition-all flex items-center justify-center gap-2"
+                      >
+                        <Eye size={18} className="text-neutral-400" />
+                        View Full PDF
+                      </button>
+                    </div>
                   </div>
-                  <p className="text-sm font-bold text-orange-700">
-                    Your certificate is currently being processed. It will be available for download once issued by the administration.
-                  </p>
                 </div>
-              )}
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="bg-white rounded-4xl p-6 md:p-8 shadow-[0_12px_40px_rgb(0,0,0,0.06)] border border-neutral-100">
+            <div className="p-6 bg-orange-50 border border-orange-100 rounded-3xl flex items-center gap-4">
+              <div className="w-10 h-10 bg-white rounded-2xl flex items-center justify-center text-orange-500 shadow-sm shrink-0">
+                <AlertCircle size={20} />
+              </div>
+              <p className="text-sm font-bold text-orange-700">
+                Your certificates are currently being processed. They will be available for download once issued by the administration.
+              </p>
             </div>
           </div>
-        </div>
+        )}
 
       </div>
     </div>

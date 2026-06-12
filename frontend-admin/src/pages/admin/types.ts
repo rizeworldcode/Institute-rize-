@@ -27,7 +27,7 @@ export type Student = {
   password?: string;
   email?: string;
   phone?: string;
-  course?: string;
+  course?: string | string[];
   duration?: string;
   totalFees?: string | number;
   paidFees?: string | number;

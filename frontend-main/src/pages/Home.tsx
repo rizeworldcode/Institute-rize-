@@ -441,51 +441,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ============ TRAINERS PREVIEW ============ */}
-      <section className="py-24 md:py-32 bg-premium-light relative overflow-hidden">
-        <div className="max-w-7xl mx-auto px-6">
-          <Reveal>
-            <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6 mb-16">
-              <div>
-                <div className="premium-pill inline-flex items-center gap-2 px-4 py-1.5 text-xs font-semibold text-orange-600 mb-4">
-                  <Users size={12} /> MEET THE MASTERS
-                </div>
-                <h2 className="font-display text-4xl md:text-6xl font-extrabold text-neutral-900 leading-tight tracking-tight">
-                  Learn from <span className="gradient-text">industry legends.</span>
-                </h2>
-              </div>
-              <Link to="/trainers" className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-white text-neutral-900 font-semibold shadow-sm hover:scale-105 hover:shadow-md transition-all duration-300 border border-neutral-200">
-                All Trainers <ArrowRight size={16} />
-              </Link>
-            </div>
-          </Reveal>
 
-          <div className="grid md:grid-cols-3 gap-6">
-            {[
-              { name: "Ankit Srivastava", role: "Performance Marketing Lead", exp: "12 yrs • Ex-Flipkart", img: "/images/trainer-1.jpg" },
-              { name: "Meera Kapoor", role: "Creative Director", exp: "10 yrs • Design Expert", img: "/images/trainer-2.jpg" },
-              { name: "Rohan Mehta", role: "AI & Automation Coach", exp: "8 yrs • Tech Innovator", img: "/images/trainer-3.jpg" },
-            ].map((t, i) => (
-              <Reveal key={i} delay={i * 0.1}>
-                <div className="group relative premium-card-light overflow-hidden transition-all duration-500 p-2 pb-0">
-                  <div className="aspect-3/4 overflow-hidden rounded-4xl rounded-b-none">
-                    <img src={t.img} alt={t.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
-                  </div>
-                  <div className="absolute inset-0 bg-linear-to-t from-black via-black/40 to-transparent" />
-                  <div className="absolute top-4 right-4 px-3 py-1 rounded-full glass-dark bg-white/20 backdrop-blur text-[10px] font-bold tracking-widest text-white">
-                    0{i + 1}
-                  </div>
-                  <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
-                    <div className="text-xs font-bold tracking-widest text-blue-400 mb-1">{t.exp}</div>
-                    <h3 className="font-display text-2xl font-bold">{t.name}</h3>
-                    <p className="text-white/80 text-sm mt-1">{t.role}</p>
-                  </div>
-                </div>
-              </Reveal>
-            ))}
-          </div>
-        </div>
-      </section>
 
       {/* ============ TESTIMONIALS ============ */}
       <section className="py-24 md:py-32 bg-premium-light relative overflow-hidden">

@@ -208,10 +208,13 @@ exports.certificate_view = async (req,res)=>{
 }
 
 exports.updateStudentdetails = async (req, res) => {
+  console.log("\n");
+  console.log("================================================");
   console.log("=== updateStudentdetails CALLED ===");
-  console.log("req.params:", req.params);
-  console.log("req.body:", req.body);
-  console.log("req.files:", req.files);
+  console.log("================================================");
+  console.log("req.params:", JSON.stringify(req.params, null, 2));
+  console.log("req.body:", JSON.stringify(req.body, null, 2));
+  console.log("req.files:", JSON.stringify(req.files, null, 2));
   
   try {
 
@@ -239,6 +242,8 @@ exports.updateStudentdetails = async (req, res) => {
       referredByEmail,
       referredAmount
     } = req.body;
+    const certificates = req.files;
+console.log(req.body);
 
     let add_courses = [];
     if (req.body.add_courses) {
@@ -419,6 +424,7 @@ exports.updateStudentdetails = async (req, res) => {
               date: Date.now()
             });
             admission.updatedAt = Date.now();
+            existingcertificate.markModified('admissions');
           }
         }
       }
@@ -498,10 +504,15 @@ exports.updateStudentdetails = async (req, res) => {
     }
 
     // Handle new certificate upload for a specific course and admission
-    console.log("=== Certificate upload section ===");
-    console.log("req.files:", req.files);
+    console.log("\n");
+    console.log("========================================");
+    console.log("=== Certificate upload section START ===");
+    console.log("========================================");
+    console.log("req.files:", JSON.stringify(req.files, null, 2));
     console.log("req.body.certificate_course:", certificate_course);
     console.log("req.body.certificate_admission_id:", certificate_admission_id);
+    console.log("existingcertificate.admissions.length:", existingcertificate.admissions.length);
+    console.log("existingcertificate.admissions (before):", JSON.stringify(existingcertificate.admissions, null, 2));
     
     if (
       req.files &&
@@ -510,40 +521,137 @@ exports.updateStudentdetails = async (req, res) => {
       certificate_course &&
       certificate_admission_id
     ) {
-      const certificateFilePath = req.files["certificate_photo"][0].path; // Cloudinary URL
-      const admissionId = certificate_admission_id;
-      console.log("certificateFilePath:", certificateFilePath);
-      console.log("admissionId to find:", admissionId);
-      console.log("existingcertificate.admissions:", existingcertificate.admissions.map(a => ({ admissionId: a.admissionId, certificates: a.certificates })));
+      console.log("✅ All certificate upload conditions met!");
       
-      // Find the admission by admissionId
+      // Find the admission by admissionId (check both camelCase and snake_case)
+      console.log("Looking for admissionId:", certificate_admission_id);
       const admissionIndex = existingcertificate.admissions.findIndex(
-        adm => adm.admissionId === admissionId
+        (adm, idx) => {
+          console.log(`  Checking admission ${idx} with id (camel):`, adm.admissionId, " | id (snake):", adm.admission_id);
+          const admId = adm.admissionId || adm.admission_id;
+          return admId === certificate_admission_id;
+        }
       );
       
       console.log("admissionIndex found:", admissionIndex);
       
       if (admissionIndex !== -1) {
+        const selectedAdmission = existingcertificate.admissions[admissionIndex];
+        
+        // Check if student is taking this course in the selected admission
+        const isCourseTaken = selectedAdmission.courses.includes(certificate_course);
+        if (!isCourseTaken) {
+          return {
+            success: false,
+            message: `Student is not enrolled in course "${certificate_course}" in the selected admission!`,
+          };
+        }
+        
+        // Check if certificate already exists for this course in the selected admission
+        const existingCertificateForCourse = selectedAdmission.certificates.some(cert => cert.courseName === certificate_course);
+        if (existingCertificateForCourse) {
+          return {
+            success: false,
+            message: `Certificate already exists for course "${certificate_course}"! Please delete the existing certificate first before uploading a new one!`,
+          };
+        }
+        
+        let certificateFilePath;
+        const uploadedFile = req.files["certificate_photo"][0];
+        console.log("uploadedFile details:", JSON.stringify(uploadedFile, null, 2));
+        
+        if (uploadedFile.path.startsWith('http')) {
+          // It's a Cloudinary URL
+          certificateFilePath = uploadedFile.path;
+          console.log("certificateFilePath (Cloudinary URL):", certificateFilePath);
+        } else {
+          // It's a local file, build the URL
+          certificateFilePath = `http://localhost:${process.env.PORT || 3001}/uploads/${uploadedFile.filename}`;
+          console.log("certificateFilePath (local URL):", certificateFilePath);
+        }
+        
         // Add certificate to the admission's certificates array
         const newCert = {
           courseName: certificate_course,
           certificatePath: certificateFilePath,
           issuedAt: Date.now()
         };
-        existingcertificate.admissions[admissionIndex].certificates.push(newCert);
-        console.log("Added new certificate to admission:", newCert);
+        console.log("Pushing new certificate to admission:", JSON.stringify(newCert, null, 2));
         
-        // Also add to student's top-level certificates array for backward compatibility
-        existingcertificate.certificates.push({
-          course_name: certificate_course,
-          certificate_path: certificateFilePath,
-          issued_at: Date.now()
-        });
-        console.log("Updated admissions array after adding cert:", existingcertificate.admissions[admissionIndex].certificates);
+        // 🔴 USE findOneAndUpdate WITH ATOMIC OPERATOR TO DIRECTLY ADD TO DB
+        console.log("Using findOneAndUpdate to push certificate to database...");
+        
+        // Try both camelCase and snake_case for the admission ID field
+        let updatedStudent = await certificate_model.findOneAndUpdate(
+          { 
+            student_ID: student_iD, 
+            "admissions.admissionId": certificate_admission_id 
+          },
+          {
+            $push: {
+              "admissions.$.certificates": newCert,
+              "certificates": {
+                course_name: certificate_course,
+                certificate_path: certificateFilePath,
+                issued_at: Date.now()
+              }
+            },
+            $set: { updated_at: Date.now() }
+          },
+          { new: true } // Return the updated document
+        );
+        
+        // If camelCase didn't work, try snake_case (admission_id)
+        if (!updatedStudent) {
+          console.log("Tried camelCase admissionId, now trying snake_case admission_id...");
+          updatedStudent = await certificate_model.findOneAndUpdate(
+            { 
+              student_ID: student_iD, 
+              "admissions.admission_id": certificate_admission_id 
+            },
+            {
+              $push: {
+                "admissions.$.certificates": newCert,
+                "certificates": {
+                  course_name: certificate_course,
+                  certificate_path: certificateFilePath,
+                  issued_at: Date.now()
+                }
+              },
+              $set: { updated_at: Date.now() }
+            },
+            { new: true } // Return the updated document
+          );
+        }
+        
+        if (updatedStudent) {
+          console.log("✅ findOneAndUpdate successful! Updated student:", updatedStudent.student_name);
+          // Replace existingcertificate with the updated one from the database
+          Object.assign(existingcertificate, updatedStudent);
+        } else {
+          console.log("❌ findOneAndUpdate failed!");
+        }
+        
+        console.log("📝 existingcertificate.admissions after adding cert:", JSON.stringify(existingcertificate.admissions, null, 2));
+        console.log("✅ Certificate added successfully!");
+      } else {
+        console.log("❌ admissionId not found in existingcertificate.admissions!");
+        return {
+          success: false,
+          message: "Selected admission not found!",
+        };
       }
     } else {
-      console.log("Certificate upload condition not met!");
+      console.log("❌ Certificate upload condition not met!");
+      console.log("  req.files present?", !!req.files);
+      console.log("  req.files['certificate_photo'] present?", !!(req.files && req.files["certificate_photo"]));
+      console.log("  req.files['certificate_photo'].length > 0?", !!(req.files && req.files["certificate_photo"] && req.files["certificate_photo"].length > 0));
+      console.log("  certificate_course present?", !!certificate_course);
+      console.log("  certificate_admission_id present?", !!certificate_admission_id);
     }
+    console.log("========================================");
+    console.log("=== Certificate upload section END ====");
+    console.log("========================================\n");
 
     existingcertificate.updated_at = Date.now();
 

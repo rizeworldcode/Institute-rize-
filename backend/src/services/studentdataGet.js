@@ -51,9 +51,9 @@ exports.allStudents = async (req,res) => {
                     })),
                     certificates: (adm.certificates || []).map(cert => ({
                         id: `cert-${Date.now()}-${Math.random()}`,
-                        courseName: cert.courseName,
-                        url: `http://localhost:3001/${cert.certificatePath}`,
-                        date: cert.issuedAt ? new Date(cert.issuedAt).toISOString() : new Date().toISOString()
+                        courseName: cert.courseName || cert.course_name,
+                        url: cert.certificatePath || cert.certificate_path,
+                        date: cert.issuedAt || cert.issued_at ? new Date(cert.issuedAt || cert.issued_at).toISOString() : new Date().toISOString()
                     })),
                     startDate: adm.startDate || adm.course_start_date || new Date(),
                     endDate: adm.endDate || adm.course_end_date || new Date(Date.now() + 90 * 24 * 60 * 60 * 1000),

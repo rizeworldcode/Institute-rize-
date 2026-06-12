@@ -75,6 +75,8 @@ app.options('*', cors());
 
 // Serving static files
 app.use(express.static(path.join(__dirname, 'public')));
+// Serve uploaded files
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Health check endpoint
 app.get('/health', (req, res) => {
