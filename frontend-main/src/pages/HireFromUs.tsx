@@ -163,7 +163,7 @@ _${form.message || 'No additional requirements specified.'}_
         <div className="max-w-7xl mx-auto px-6 grid lg:grid-cols-2 gap-12 items-center">
           <Reveal>
             <div className="relative">
-              <img src="/images/classroom.jpg" alt="Training" className="w-full h-[500px] object-cover rounded-3xl shadow-luxury" />
+              <img src="/images/TRAINING QUALITY.jpg" alt="Training" className="w-full h-[500px] object-contain object-center bg-[#121212]/40 rounded-3xl shadow-luxury" />
               <div className="absolute -bottom-6 -right-6 w-48 bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-5 shadow-luxury hidden md:block">
                 <Heart size={24} className="text-[#ff6b1a] mb-2" />
                 <div className="font-display font-bold text-white">96% Satisfaction</div>

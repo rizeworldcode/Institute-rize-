@@ -345,25 +345,33 @@ export default function Home() {
             </Reveal>
 
             <Reveal delay={0.2}>
-              <div className="relative w-full aspect-video lg:aspect-4/3 mt-4 lg:mt-8">
-                <div className="absolute inset-0 rounded-[3rem] overflow-hidden shadow-luxury border border-neutral-100">
-                  <img src="/images/classroom.jpg" alt="RizeWorld Classroom" className="w-full h-full object-cover hover:scale-105 transition-transform duration-1000" />
+              <div className="relative w-full mt-4 lg:mt-8">
+                <div className="rounded-[3rem] overflow-hidden shadow-luxury border border-neutral-100">
+                  <img src="/images/led mentorship.jpg" alt="Expert-led mentorship" className="w-full h-auto object-cover hover:scale-105 transition-transform duration-1000" />
                 </div>
               </div>
             </Reveal>
 
             <Reveal delay={0.3}>
-              <div className="relative w-full aspect-video lg:aspect-4/3">
-                <div className="absolute inset-0 rounded-[3rem] overflow-hidden shadow-luxury border border-neutral-100">
-                  <img src="/images/student-life.jpg" alt="Student Life" className="w-full h-full object-cover hover:scale-105 transition-transform duration-1000" />
+              <div className="relative w-full">
+                <div className="rounded-[3rem] overflow-hidden shadow-luxury border border-neutral-100">
+                  <img src="/images/live projects.jpg" alt="Live project-based learning" className="w-full h-auto object-cover hover:scale-105 transition-transform duration-1000" />
                 </div>
               </div>
             </Reveal>
 
             <Reveal delay={0.4}>
-              <div className="relative w-full aspect-video lg:aspect-4/3">
-                <div className="absolute inset-0 rounded-[3rem] overflow-hidden shadow-luxury border border-neutral-100">
-                  <img src="/images/ai-lab.jpg" alt="AI Lab" className="w-full h-full object-cover hover:scale-105 transition-transform duration-1000" />
+              <div className="relative w-full mt-6">
+                <div className="rounded-[3rem] overflow-hidden shadow-luxury border border-neutral-100">
+                  <img src="/images/small batch size.jpg" alt="Small batch sizes" className="w-full h-auto object-cover hover:scale-105 transition-transform duration-1000" />
+                </div>
+              </div>
+            </Reveal>
+
+            <Reveal delay={0.5}>
+              <div className="relative w-full mt-6">
+                <div className="rounded-[3rem] overflow-hidden shadow-luxury border border-neutral-100">
+                  <img src="/images/smart leaning.jpg" alt="Smart Learning for the Digital Era" className="w-full h-auto object-cover hover:scale-105 transition-transform duration-1000" />
                 </div>
               </div>
             </Reveal>
@@ -461,13 +469,13 @@ export default function Home() {
           <div className="grid md:grid-cols-3 gap-6">
             {testimonials.map((t, i) => (
               <Reveal key={i} delay={i * 0.1}>
-                <div className="premium-card-light border-none rounded-4xl p-8 h-full hover:shadow-[0_30px_60px_rgba(99,102,241,0.15)] transition-all hover:-translate-y-2 duration-500 relative z-10">
+                <div className="premium-card-light border-none rounded-4xl p-8 h-full hover:shadow-[0_30px_60px_rgba(99,102,241,0.15)] transition-all hover:-translate-y-2 duration-500 relative z-10 flex flex-col">
                   <div className="flex mb-4">
                     {[...Array(t.rating)].map((_, j) => <Star key={j} size={14} fill="#4168b2" className="text-blue-600" />)}
                   </div>
                   <Quote size={24} className="text-blue-600 opacity-40 mb-3" />
-                  <p className="text-neutral-600 leading-relaxed mb-6">"{t.text}"</p>
-                  <div className="flex items-center gap-3 pt-4 border-t border-white/10">
+                  <p className="text-neutral-600 leading-relaxed mb-6 flex-1">"{t.text}"</p>
+                  <div className="flex items-center gap-3 pt-4 border-t border-white/10 mt-auto">
                     <div className="w-12 h-12 rounded-full bg-blue-600 flex items-center justify-center font-bold text-white">
                       {t.name[0]}
                     </div>
@@ -522,7 +530,7 @@ export default function Home() {
                 Ready to <span className="gradient-text">Rize?</span>
               </h2>
               <p className="mt-8 text-xl text-white/70 max-w-2xl mx-auto relative z-10">
-                Join the next batch starting <span className="font-bold text-white">June 17</span>. Limited seats. Unlimited potential.
+                Join the next batch. Limited seats. Unlimited potential.
               </p>
               <div className="mt-10 flex flex-wrap justify-center gap-4 relative z-10">
                 <Link

@@ -34,11 +34,8 @@ export default function About() {
 
           <Reveal delay={0.2}>
             <div className="relative">
-              <img src="/images/about-hero.jpg" alt="RizeWorld Institute" className="w-full h-[500px] object-cover rounded-3xl shadow-luxury" />
-              <div className="absolute -bottom-6 -left-6 bg-white/90 backdrop-blur-xl border border-neutral-200 rounded-2xl p-5 shadow-luxury hidden md:block">
-                <div className="font-display font-extrabold text-4xl text-blue-600">Since 2020</div>
-                <div className="text-xs text-neutral-500">Shaping digital careers</div>
-              </div>
+              <img src="/images/about-hero.jpeg" alt="RizeWorld Institute" className="w-full h-[500px] object-cover rounded-3xl shadow-luxury" />
+
             </div>
           </Reveal>
         </div>

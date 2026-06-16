@@ -12,7 +12,8 @@ const posts = [
     readTime: "7 min read",
     date: "May 28, 2026",
     featured: true,
-    img: "/images/ai-lab.jpg",
+    img: "/images/10 AI Tools Every Marketer Must Master in 2026.jpg",
+    gridImg: "/images/aii.jpg",
   },
   {
     title: "The Ultimate Guide to Meta Ads ROAS Optimization",
@@ -21,7 +22,7 @@ const posts = [
     readTime: "10 min read",
     date: "May 22, 2026",
     featured: false,
-    img: "/images/creative-studio.jpg",
+    img: "/images/The Ultimate Guide to Meta Ads ROAS Optimization.jpg",
   },
   {
     title: "SEO in 2026: What Actually Works Now",
@@ -30,7 +31,7 @@ const posts = [
     readTime: "8 min read",
     date: "May 15, 2026",
     featured: false,
-    img: "/images/classroom.jpg",
+    img: "/images/SEO in 2026.jpg",
   },
   {
     title: "Breaking into Digital Marketing: A Beginner's Roadmap",
@@ -39,7 +40,7 @@ const posts = [
     readTime: "6 min read",
     date: "May 10, 2026",
     featured: false,
-    img: "/images/student-life.jpg",
+    img: "/images/roadmap.jpg",
   },
   {
     title: "Design Principles Every Content Creator Should Know",
@@ -48,7 +49,7 @@ const posts = [
     readTime: "5 min read",
     date: "May 05, 2026",
     featured: false,
-    img: "/images/master-course.jpg",
+    img: "/images/principle.jpg",
   },
   {
     title: "Reels vs Shorts: Which Platform Wins in 2026?",
@@ -57,7 +58,7 @@ const posts = [
     readTime: "9 min read",
     date: "Apr 28, 2026",
     featured: false,
-    img: "/images/ai-lab.jpg",
+    img: "/images/igvsyt.jpg",
   },
 ];
 
@@ -102,7 +103,7 @@ export default function Blog() {
               <div className="relative rounded-3xl overflow-hidden shadow-luxury group cursor-pointer hover:shadow-orange transition-all duration-500">
                 <div className="grid lg:grid-cols-2">
                   <div className="aspect-4/3 lg:aspect-auto overflow-hidden">
-                    <img src={featured.img} alt={featured.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
+                    <img src={featured.img} alt={featured.title} className="w-full h-full object-contain object-center bg-[#121212]/40 group-hover:scale-103 transition-transform duration-700" />
                   </div>
                   <div className="bg-white/5 backdrop-blur-xl border border-white/10 p-10 md:p-14 flex flex-col justify-center">
                     <div className="flex items-center gap-3 mb-4">
@@ -163,7 +164,7 @@ export default function Blog() {
               <Reveal key={i} delay={i * 0.05}>
                 <article className="group bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl overflow-hidden hover:shadow-luxury hover:-translate-y-2 transition-all duration-500 cursor-pointer h-full flex flex-col">
                   <div className="aspect-16/10 overflow-hidden">
-                    <img src={p.img} alt={p.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
+                    <img src={p.gridImg || p.img} alt={p.title} className="w-full h-full object-contain object-center bg-[#121212]/40 group-hover:scale-103 transition-transform duration-700" />
                   </div>
                   <div className="p-6 flex-1 flex flex-col">
                     <div className="flex items-center gap-2 mb-3">

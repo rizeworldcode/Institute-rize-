@@ -996,7 +996,7 @@ export default function AdminDashboard() {
                                    <div className="w-3.5 h-3.5 bg-blue-500 border-[2.5px] border-white rounded-full shadow-sm hover:scale-150 transition-transform cursor-pointer -translate-x-1/2 -translate-y-1/2" />
                                    
                                    {/* Tooltip */}
-                                   <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 bg-white backdrop-blur-md border border-neutral-200 shadow-xl text-neutral-900 text-[10px] font-bold px-2 py-1.5 rounded-lg opacity-0 group-hover/dot:opacity-100 transition-opacity z-50 whitespace-nowrap pointer-events-none">
+                                   <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 bg-white backdrop-blur-md border border-neutral-200 shadow-xl text-neutral-900 text-[10px] font-bold px-2 py-1.5 rounded-lg opacity-0 group-hover/dot:opacity-100 transition-opacity z-50 text-sm pointer-events-none">
                                       <div className="text-blue-600 mb-0.5">{d.month}</div>
                                       <div>Earnings: ₹{d.earnings.toLocaleString()}</div>
                                       <div className="text-neutral-500">New Students: {d.newStudents}</div>
@@ -1121,14 +1121,14 @@ export default function AdminDashboard() {
                   <table className="w-full text-left border-collapse">
                     <thead>
                       <tr className="bg-neutral-50 border-b border-neutral-200 text-neutral-500 text-xs uppercase tracking-wider font-semibold">
-                        <th className="py-5 px-6 whitespace-nowrap">ID</th>
-                        <th className="py-5 px-6 whitespace-nowrap">Student Name</th>
-                        <th className="py-5 px-6 whitespace-nowrap">Course</th>
-                        <th className="py-5 px-6 whitespace-nowrap">Duration</th>
-                        <th className="py-5 px-6 whitespace-nowrap">Total Fee</th>
-                        <th className="py-5 px-6 whitespace-nowrap">Pending Fee</th>
-                        <th className="py-5 px-6 whitespace-nowrap">Status</th>
-                        <th className="py-5 px-6 text-right whitespace-nowrap">Action</th>
+                        <th className="py-5 px-6 text-sm">ID</th>
+                        <th className="py-5 px-6 text-sm">Student Name</th>
+                        <th className="py-5 px-6 text-sm">Course</th>
+                        <th className="py-5 px-6 text-sm">Duration</th>
+                        <th className="py-5 px-6 text-sm">Total Fee</th>
+                        <th className="py-5 px-6 text-sm">Pending Fee</th>
+                        <th className="py-5 px-6 text-sm">Status</th>
+                        <th className="py-5 px-6 text-right text-sm">Action</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-neutral-100 text-sm">
@@ -1241,16 +1241,16 @@ export default function AdminDashboard() {
                       {(() => {
                          if (expandedStat === "total-students") {
                             return (
-                               <table className="w-full text-left border-collapse whitespace-nowrap">
+                               <table className="w-full text-left border-collapse text-sm">
                                   <thead className="bg-neutral-50 border-b border-neutral-200">
                                      <tr>
-                                        <th className="px-6 py-4 text-xs font-bold text-neutral-500 uppercase tracking-wider">ID</th>
-                                        <th className="px-6 py-4 text-xs font-bold text-neutral-500 uppercase tracking-wider">Student Name</th>
-                                        <th className="px-6 py-4 text-xs font-bold text-neutral-500 uppercase tracking-wider">Course</th>
-                                        <th className="px-6 py-4 text-xs font-bold text-neutral-500 uppercase tracking-wider">Duration</th>
-                                        <th className="px-6 py-4 text-xs font-bold text-neutral-500 uppercase tracking-wider">Total Fee</th>
-                                        <th className="px-6 py-4 text-xs font-bold text-neutral-500 uppercase tracking-wider">Pending Fee</th>
-                                        <th className="px-6 py-4 text-xs font-bold text-neutral-500 uppercase tracking-wider">Status</th>
+                                        <th className="px-3 py-3 text-sm text-xs font-bold text-neutral-500 uppercase tracking-wider">ID</th>
+                                        <th className="px-3 py-3 text-sm text-xs font-bold text-neutral-500 uppercase tracking-wider">Student Name</th>
+                                        <th className="px-3 py-3 text-sm text-xs font-bold text-neutral-500 uppercase tracking-wider">Course</th>
+                                        <th className="px-3 py-3 text-sm text-xs font-bold text-neutral-500 uppercase tracking-wider">Duration</th>
+                                        <th className="px-3 py-3 text-sm text-xs font-bold text-neutral-500 uppercase tracking-wider">Total Fee</th>
+                                        <th className="px-3 py-3 text-sm text-xs font-bold text-neutral-500 uppercase tracking-wider">Pending Fee</th>
+                                        <th className="px-3 py-3 text-sm text-xs font-bold text-neutral-500 uppercase tracking-wider">Status</th>
                                      </tr>
                                   </thead>
                                   <tbody className="divide-y divide-neutral-100">
@@ -1258,18 +1258,18 @@ export default function AdminDashboard() {
                                         .filter(row => detailStatusFilter === "All" || row.feesStatus === detailStatusFilter)
                                         .map((row, idx) => (
                                         <tr key={idx} className="hover:bg-neutral-50/50 transition-colors">
-                                           <td className="px-6 py-4 font-mono text-sm font-semibold text-blue-600">{row.id}</td>
-                                           <td className="px-6 py-4">
+                                           <td className="px-3 py-3 text-sm font-mono text-sm font-semibold text-blue-600">{row.id}</td>
+                                           <td className="px-3 py-3 text-sm">
                                               <div className="flex items-center gap-3">
                                                  <div className="w-8 h-8 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center font-bold text-xs uppercase">{row.name.charAt(0)}</div>
                                                  <div className="font-bold text-neutral-900 capitalize">{row.name}</div>
                                               </div>
                                            </td>
-                                           <td className="px-6 py-4 text-sm font-semibold text-neutral-700">{Array.isArray(row.course) ? row.course.join(", ") : row.course}</td>
-                                           <td className="px-6 py-4 text-sm text-neutral-600">{row.duration}</td>
-                                           <td className="px-6 py-4 text-sm font-bold text-neutral-900">₹{(row.totalFees || 0).toLocaleString()}</td>
-                                            <td className="px-6 py-4 text-sm font-bold text-red-600">₹{(row.pendingFees || 0).toLocaleString()}</td>
-                                           <td className="px-6 py-4">
+                                           <td className="px-3 py-3 text-sm text-sm font-semibold text-neutral-700">{Array.isArray(row.course) ? row.course.join(", ") : row.course}</td>
+                                           <td className="px-3 py-3 text-sm text-sm text-neutral-600">{row.duration}</td>
+                                           <td className="px-3 py-3 text-sm text-sm font-bold text-neutral-900">₹{(row.totalFees || 0).toLocaleString()}</td>
+                                            <td className="px-3 py-3 text-sm text-sm font-bold text-red-600">₹{(row.pendingFees || 0).toLocaleString()}</td>
+                                           <td className="px-3 py-3 text-sm">
                                               <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold ${row.feesStatus === 'Clear' ? 'bg-emerald-100 text-emerald-700' : 'bg-orange-100 text-orange-700'}`}>
                                                  {row.feesStatus}
                                               </span>
@@ -1283,20 +1283,20 @@ export default function AdminDashboard() {
                          
                          if (expandedStat === "certificate-issued") {
                             return (
-                               <table className="w-full text-left border-collapse whitespace-nowrap">
+                               <table className="w-full text-left border-collapse text-sm">
                                   <thead className="bg-neutral-50 border-b border-neutral-200">
                                      <tr>
-                                        <th className="px-6 py-4 text-xs font-bold text-neutral-500 uppercase tracking-wider">Student ID</th>
-                                        <th className="px-6 py-4 text-xs font-bold text-neutral-500 uppercase tracking-wider">Student Name</th>
-                                        <th className="px-6 py-4 text-xs font-bold text-neutral-500 uppercase tracking-wider">Issued Courses</th>
+                                        <th className="px-3 py-3 text-sm text-xs font-bold text-neutral-500 uppercase tracking-wider">Student ID</th>
+                                        <th className="px-3 py-3 text-sm text-xs font-bold text-neutral-500 uppercase tracking-wider">Student Name</th>
+                                        <th className="px-3 py-3 text-sm text-xs font-bold text-neutral-500 uppercase tracking-wider">Issued Courses</th>
                                      </tr>
                                   </thead>
                                   <tbody className="divide-y divide-neutral-100">
                                      {studentsWithCertificates.map((row, idx) => (
                                         <tr key={idx} className="hover:bg-neutral-50/50 transition-colors">
-                                           <td className="px-6 py-4 font-mono text-sm font-semibold text-emerald-600">{row.studentId}</td>
-                                           <td className="px-6 py-4 font-bold text-neutral-900 capitalize">{row.studentName}</td>
-                                           <td className="px-6 py-4 text-sm font-semibold text-neutral-700">
+                                           <td className="px-3 py-3 text-sm font-mono text-sm font-semibold text-emerald-600">{row.studentId}</td>
+                                           <td className="px-3 py-3 text-sm font-bold text-neutral-900 capitalize">{row.studentName}</td>
+                                           <td className="px-3 py-3 text-sm text-sm font-semibold text-neutral-700">
                                               <div className="flex flex-wrap gap-2">
                                                  {row.issuedCourses.map((course: string, courseIdx: number) => (
                                                     <span key={courseIdx} className="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-700">
@@ -1319,30 +1319,30 @@ export default function AdminDashboard() {
 
                          if (expandedStat === "certificate-unissued") {
                             return (
-                               <table className="w-full text-left border-collapse whitespace-nowrap">
+                               <table className="w-full text-left border-collapse text-sm">
                                   <thead className="bg-neutral-50 border-b border-neutral-200">
                                      <tr>
-                                        <th className="px-6 py-4 text-xs font-bold text-neutral-500 uppercase tracking-wider">ID</th>
-                                        <th className="px-6 py-4 text-xs font-bold text-neutral-500 uppercase tracking-wider">Student Name</th>
-                                        <th className="px-6 py-4 text-xs font-bold text-neutral-500 uppercase tracking-wider">Course</th>
-                                        <th className="px-6 py-4 text-xs font-bold text-neutral-500 uppercase tracking-wider">Status</th>
-                                        <th className="px-6 py-4 text-xs font-bold text-neutral-500 uppercase tracking-wider">Action</th>
+                                        <th className="px-3 py-3 text-sm text-xs font-bold text-neutral-500 uppercase tracking-wider">ID</th>
+                                        <th className="px-3 py-3 text-sm text-xs font-bold text-neutral-500 uppercase tracking-wider">Student Name</th>
+                                        <th className="px-3 py-3 text-sm text-xs font-bold text-neutral-500 uppercase tracking-wider">Course</th>
+                                        <th className="px-3 py-3 text-sm text-xs font-bold text-neutral-500 uppercase tracking-wider">Status</th>
+                                        <th className="px-3 py-3 text-sm text-xs font-bold text-neutral-500 uppercase tracking-wider">Action</th>
                                      </tr>
                                   </thead>
                                   <tbody className="divide-y divide-neutral-100">
                                      {unissuedCertificatesData.map((row: Student, idx) => (
                                         <tr key={idx} className="hover:bg-neutral-50/50 transition-colors">
-                                           <td className="px-6 py-4 font-mono text-sm font-semibold text-blue-600">{row.id}</td>
-                                           <td className="px-6 py-4 font-bold text-neutral-900 capitalize">{row.name}</td>
-                                           <td className="px-6 py-4 text-sm font-semibold text-neutral-700">{Array.isArray(row.course) ? row.course.join(", ") : row.course}</td>
-                                           <td className="px-6 py-4">
+                                           <td className="px-3 py-3 text-sm font-mono text-sm font-semibold text-blue-600">{row.id}</td>
+                                           <td className="px-3 py-3 text-sm font-bold text-neutral-900 capitalize">{row.name}</td>
+                                           <td className="px-3 py-3 text-sm text-sm font-semibold text-neutral-700">{Array.isArray(row.course) ? row.course.join(", ") : row.course}</td>
+                                           <td className="px-3 py-3 text-sm">
                                               <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold ${
                                                  row.feesStatus === 'Clear' ? 'bg-emerald-100 text-emerald-700' : 'bg-orange-100 text-orange-700'
                                               }`}>
                                                  {row.feesStatus}
                                               </span>
                                            </td>
-                                           <td className="px-6 py-4">
+                                           <td className="px-3 py-3 text-sm">
                                               <button 
                                                 onClick={() => setViewingStudent(row)} 
                                                 className="text-neutral-600 hover:text-neutral-700 text-sm font-bold underline cursor-pointer"
@@ -1364,26 +1364,26 @@ export default function AdminDashboard() {
 
                          if (expandedStat === "total-earnings") {
                             return (
-                               <table className="w-full text-left border-collapse whitespace-nowrap">
+                               <table className="w-full text-left border-collapse text-sm">
                                   <thead className="bg-neutral-50 border-b border-neutral-200">
                                      <tr>
-                                        <th className="px-6 py-4 text-xs font-bold text-neutral-500 uppercase tracking-wider">TXN ID</th>
-                                        <th className="px-6 py-4 text-xs font-bold text-neutral-500 uppercase tracking-wider">Student Name</th>
-                                        <th className="px-6 py-4 text-xs font-bold text-neutral-500 uppercase tracking-wider">Amount</th>
-                                        <th className="px-6 py-4 text-xs font-bold text-neutral-500 uppercase tracking-wider">Date</th>
-                                        <th className="px-6 py-4 text-xs font-bold text-neutral-500 uppercase tracking-wider">Method</th>
+                                        <th className="px-3 py-3 text-sm text-xs font-bold text-neutral-500 uppercase tracking-wider">TXN ID</th>
+                                        <th className="px-3 py-3 text-sm text-xs font-bold text-neutral-500 uppercase tracking-wider">Student Name</th>
+                                        <th className="px-3 py-3 text-sm text-xs font-bold text-neutral-500 uppercase tracking-wider">Amount</th>
+                                        <th className="px-3 py-3 text-sm text-xs font-bold text-neutral-500 uppercase tracking-wider">Date</th>
+                                        <th className="px-3 py-3 text-sm text-xs font-bold text-neutral-500 uppercase tracking-wider">Method</th>
                                      </tr>
                                   </thead>
                                   <tbody className="divide-y divide-neutral-100">
                                      {earningsDetailsData.map((row, idx) => (
                                         <tr key={idx} className="hover:bg-neutral-50/50 transition-colors">
-                                           <td className="px-6 py-4 font-mono text-sm font-semibold text-purple-600 truncate max-w-[150px]" title={row.txn_id}>{row.txn_id}</td>
-                                           <td className="px-6 py-4 font-bold text-neutral-900 capitalize">{row.student_name}</td>
-                                           <td className="px-6 py-4 text-sm font-bold text-emerald-600">₹{Number(row.amount).toLocaleString()}</td>
-                                           <td className="px-6 py-4 text-sm text-neutral-600">
+                                           <td className="px-3 py-3 text-sm font-mono text-sm font-semibold text-purple-600 truncate max-w-[150px]" title={row.txn_id}>{row.txn_id}</td>
+                                           <td className="px-3 py-3 text-sm font-bold text-neutral-900 capitalize">{row.student_name}</td>
+                                           <td className="px-3 py-3 text-sm text-sm font-bold text-emerald-600">₹{Number(row.amount).toLocaleString()}</td>
+                                           <td className="px-3 py-3 text-sm text-sm text-neutral-600">
                                               {new Date(row.date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
                                            </td>
-                                           <td className="px-6 py-4 text-sm font-semibold text-neutral-700 uppercase">{row.method}</td>
+                                           <td className="px-3 py-3 text-sm text-sm font-semibold text-neutral-700 uppercase">{row.method}</td>
                                         </tr>
                                      ))}
                                      {earningsDetailsData.length === 0 && (
@@ -1409,28 +1409,28 @@ export default function AdminDashboard() {
 
                          if (expandedStat === "total-pending-fees") {
                             return (
-                               <table className="w-full text-left border-collapse whitespace-nowrap">
+                               <table className="w-full text-left border-collapse text-sm">
                                   <thead className="bg-neutral-50 border-b border-neutral-200">
                                      <tr>
-                                        <th className="px-6 py-4 text-xs font-bold text-neutral-500 uppercase tracking-wider">ID</th>
-                                        <th className="px-6 py-4 text-xs font-bold text-neutral-500 uppercase tracking-wider">Student Name</th>
-                                        <th className="px-6 py-4 text-xs font-bold text-neutral-500 uppercase tracking-wider">Course</th>
-                                        <th className="px-6 py-4 text-xs font-bold text-neutral-500 uppercase tracking-wider">Total Fee</th>
-                                        <th className="px-6 py-4 text-xs font-bold text-neutral-500 uppercase tracking-wider">Paid Fee</th>
-                                        <th className="px-6 py-4 text-xs font-bold text-neutral-500 uppercase tracking-wider">Pending Fee</th>
-                                        <th className="px-6 py-4 text-xs font-bold text-neutral-500 uppercase tracking-wider">Phone Number</th>
+                                        <th className="px-3 py-3 text-sm text-xs font-bold text-neutral-500 uppercase tracking-wider">ID</th>
+                                        <th className="px-3 py-3 text-sm text-xs font-bold text-neutral-500 uppercase tracking-wider">Student Name</th>
+                                        <th className="px-3 py-3 text-sm text-xs font-bold text-neutral-500 uppercase tracking-wider">Course</th>
+                                        <th className="px-3 py-3 text-sm text-xs font-bold text-neutral-500 uppercase tracking-wider">Total Fee</th>
+                                        <th className="px-3 py-3 text-sm text-xs font-bold text-neutral-500 uppercase tracking-wider">Paid Fee</th>
+                                        <th className="px-3 py-3 text-sm text-xs font-bold text-neutral-500 uppercase tracking-wider">Pending Fee</th>
+                                        <th className="px-3 py-3 text-sm text-xs font-bold text-neutral-500 uppercase tracking-wider">Phone Number</th>
                                      </tr>
                                   </thead>
                                   <tbody className="divide-y divide-neutral-100">
                                      {pendingFeeStudentsData.map((row: Student, idx) => (
                                         <tr key={idx} className="hover:bg-neutral-50/50 transition-colors">
-                                           <td className="px-6 py-4 font-mono text-sm font-semibold text-red-600">{row.id}</td>
-                                           <td className="px-6 py-4 font-bold text-neutral-900 capitalize">{row.name}</td>
-                                           <td className="px-6 py-4 text-sm font-semibold text-neutral-700">{Array.isArray(row.course) ? row.course.join(", ") : row.course}</td>
-                                           <td className="px-6 py-4 text-sm font-bold text-neutral-900">₹{Number(row.totalFees).toLocaleString()}</td>
-                                           <td className="px-6 py-4 text-sm font-bold text-emerald-600">₹{Number(row.paidFees).toLocaleString()}</td>
-                                           <td className="px-6 py-4 text-sm font-bold text-red-600">₹{Number(row.pendingFees).toLocaleString()}</td>
-                                           <td className="px-6 py-4 text-sm font-semibold text-neutral-700">{row.phone}</td>
+                                           <td className="px-3 py-3 text-sm font-mono text-sm font-semibold text-red-600">{row.id}</td>
+                                           <td className="px-3 py-3 text-sm font-bold text-neutral-900 capitalize">{row.name}</td>
+                                           <td className="px-3 py-3 text-sm text-sm font-semibold text-neutral-700">{Array.isArray(row.course) ? row.course.join(", ") : row.course}</td>
+                                           <td className="px-3 py-3 text-sm text-sm font-bold text-neutral-900">₹{Number(row.totalFees).toLocaleString()}</td>
+                                           <td className="px-3 py-3 text-sm text-sm font-bold text-emerald-600">₹{Number(row.paidFees).toLocaleString()}</td>
+                                           <td className="px-3 py-3 text-sm text-sm font-bold text-red-600">₹{Number(row.pendingFees).toLocaleString()}</td>
+                                           <td className="px-3 py-3 text-sm text-sm font-semibold text-neutral-700">{row.phone}</td>
                                         </tr>
                                      ))}
                                      {pendingFeeStudentsData.length === 0 && (
@@ -1444,26 +1444,26 @@ export default function AdminDashboard() {
                          }
                          if (expandedStat === "total-clear-fees") {
                             return (
-                               <table className="w-full text-left border-collapse whitespace-nowrap">
+                               <table className="w-full text-left border-collapse text-sm">
                                   <thead className="bg-neutral-50 border-b border-neutral-200">
                                      <tr>
-                                        <th className="px-6 py-4 text-xs font-bold text-neutral-500 uppercase tracking-wider">ID</th>
-                                        <th className="px-6 py-4 text-xs font-bold text-neutral-500 uppercase tracking-wider">Student Name</th>
-                                        <th className="px-6 py-4 text-xs font-bold text-neutral-500 uppercase tracking-wider">Course</th>
-                                        <th className="px-6 py-4 text-xs font-bold text-neutral-500 uppercase tracking-wider">Total Paid</th>
-                                        <th className="px-6 py-4 text-xs font-bold text-neutral-500 uppercase tracking-wider">Status</th>
-                                        <th className="px-6 py-4 text-xs font-bold text-neutral-500 uppercase tracking-wider">Action</th>
+                                        <th className="px-3 py-3 text-sm text-xs font-bold text-neutral-500 uppercase tracking-wider">ID</th>
+                                        <th className="px-3 py-3 text-sm text-xs font-bold text-neutral-500 uppercase tracking-wider">Student Name</th>
+                                        <th className="px-3 py-3 text-sm text-xs font-bold text-neutral-500 uppercase tracking-wider">Course</th>
+                                        <th className="px-3 py-3 text-sm text-xs font-bold text-neutral-500 uppercase tracking-wider">Total Paid</th>
+                                        <th className="px-3 py-3 text-sm text-xs font-bold text-neutral-500 uppercase tracking-wider">Status</th>
+                                        <th className="px-3 py-3 text-sm text-xs font-bold text-neutral-500 uppercase tracking-wider">Action</th>
                                      </tr>
                                   </thead>
                                   <tbody className="divide-y divide-neutral-100">
                                      {clearFeeStudentsData.map((row: Student, idx) => (
                                         <tr key={idx} className="hover:bg-neutral-50/50 transition-colors">
-                                           <td className="px-6 py-4 font-mono text-sm font-semibold text-cyan-600">{row.id}</td>
-                                           <td className="px-6 py-4 font-bold text-neutral-900 capitalize">{row.name}</td>
-                                           <td className="px-6 py-4 text-sm font-semibold text-neutral-700">{Array.isArray(row.course) ? row.course.join(", ") : row.course}</td>
-                                           <td className="px-6 py-4 text-sm font-bold text-neutral-900">₹{Number(row.paidFees).toLocaleString()}</td>
-                                           <td className="px-6 py-4"><span className="inline-flex items-center px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-700 text-xs font-bold">Clear</span></td>
-                                           <td className="px-6 py-4">
+                                           <td className="px-3 py-3 text-sm font-mono text-sm font-semibold text-cyan-600">{row.id}</td>
+                                           <td className="px-3 py-3 text-sm font-bold text-neutral-900 capitalize">{row.name}</td>
+                                           <td className="px-3 py-3 text-sm text-sm font-semibold text-neutral-700">{Array.isArray(row.course) ? row.course.join(", ") : row.course}</td>
+                                           <td className="px-3 py-3 text-sm text-sm font-bold text-neutral-900">₹{Number(row.paidFees).toLocaleString()}</td>
+                                           <td className="px-3 py-3 text-sm"><span className="inline-flex items-center px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-700 text-xs font-bold">Clear</span></td>
+                                           <td className="px-3 py-3 text-sm">
                                               <button 
                                                 onClick={() => setViewingStudent(row)} 
                                                 className="text-neutral-600 hover:text-neutral-700 text-sm font-bold underline cursor-pointer"
@@ -1485,28 +1485,28 @@ export default function AdminDashboard() {
 
                          if (expandedStat === "total-pending-fees") {
                             return (
-                               <table className="w-full text-left border-collapse whitespace-nowrap">
+                               <table className="w-full text-left border-collapse text-sm">
                                   <thead className="bg-neutral-50 border-b border-neutral-200">
                                      <tr>
-                                        <th className="px-6 py-4 text-xs font-bold text-neutral-500 uppercase tracking-wider">ID</th>
-                                        <th className="px-6 py-4 text-xs font-bold text-neutral-500 uppercase tracking-wider">Student Name</th>
-                                        <th className="px-6 py-4 text-xs font-bold text-neutral-500 uppercase tracking-wider">Course</th>
-                                        <th className="px-6 py-4 text-xs font-bold text-neutral-500 uppercase tracking-wider">Total Fee</th>
-                                        <th className="px-6 py-4 text-xs font-bold text-neutral-500 uppercase tracking-wider">Paid Fee</th>
-                                        <th className="px-6 py-4 text-xs font-bold text-neutral-500 uppercase tracking-wider">Pending Fee</th>
-                                        <th className="px-6 py-4 text-xs font-bold text-neutral-500 uppercase tracking-wider">Phone Number</th>
+                                        <th className="px-3 py-3 text-sm text-xs font-bold text-neutral-500 uppercase tracking-wider">ID</th>
+                                        <th className="px-3 py-3 text-sm text-xs font-bold text-neutral-500 uppercase tracking-wider">Student Name</th>
+                                        <th className="px-3 py-3 text-sm text-xs font-bold text-neutral-500 uppercase tracking-wider">Course</th>
+                                        <th className="px-3 py-3 text-sm text-xs font-bold text-neutral-500 uppercase tracking-wider">Total Fee</th>
+                                        <th className="px-3 py-3 text-sm text-xs font-bold text-neutral-500 uppercase tracking-wider">Paid Fee</th>
+                                        <th className="px-3 py-3 text-sm text-xs font-bold text-neutral-500 uppercase tracking-wider">Pending Fee</th>
+                                        <th className="px-3 py-3 text-sm text-xs font-bold text-neutral-500 uppercase tracking-wider">Phone Number</th>
                                      </tr>
                                   </thead>
                                   <tbody className="divide-y divide-neutral-100">
                                      {pendingFeeStudentsData.map((row: Student, idx) => (
                                         <tr key={idx} className="hover:bg-neutral-50/50 transition-colors">
-                                           <td className="px-6 py-4 font-mono text-sm font-semibold text-red-600">{row.id}</td>
-                                           <td className="px-6 py-4 font-bold text-neutral-900 capitalize">{row.name}</td>
-                                           <td className="px-6 py-4 text-sm font-semibold text-neutral-700">{Array.isArray(row.course) ? row.course.join(", ") : row.course}</td>
-                                           <td className="px-6 py-4 text-sm font-bold text-neutral-900">₹{Number(row.totalFees).toLocaleString()}</td>
-                                           <td className="px-6 py-4 text-sm font-bold text-emerald-600">₹{Number(row.paidFees).toLocaleString()}</td>
-                                           <td className="px-6 py-4 text-sm font-bold text-red-600">₹{Number(row.pendingFees).toLocaleString()}</td>
-                                           <td className="px-6 py-4 text-sm font-semibold text-neutral-700">{row.phone}</td>
+                                           <td className="px-3 py-3 text-sm font-mono text-sm font-semibold text-red-600">{row.id}</td>
+                                           <td className="px-3 py-3 text-sm font-bold text-neutral-900 capitalize">{row.name}</td>
+                                           <td className="px-3 py-3 text-sm text-sm font-semibold text-neutral-700">{Array.isArray(row.course) ? row.course.join(", ") : row.course}</td>
+                                           <td className="px-3 py-3 text-sm text-sm font-bold text-neutral-900">₹{Number(row.totalFees).toLocaleString()}</td>
+                                           <td className="px-3 py-3 text-sm text-sm font-bold text-emerald-600">₹{Number(row.paidFees).toLocaleString()}</td>
+                                           <td className="px-3 py-3 text-sm text-sm font-bold text-red-600">₹{Number(row.pendingFees).toLocaleString()}</td>
+                                           <td className="px-3 py-3 text-sm text-sm font-semibold text-neutral-700">{row.phone}</td>
                                         </tr>
                                      ))}
                                      {pendingFeeStudentsData.length === 0 && (
@@ -1666,12 +1666,12 @@ function SidebarItem({ icon: Icon, label, active, onClick }: any) {
 
 function StatCard({ title, value, icon: Icon, color, onClick }: any) {
   const colorMap: any = {
-    blue: "from-blue-50 to-white text-blue-700 border-blue-100 shadow-sm icon-blue",
-    green: "from-emerald-50 to-white text-emerald-700 border-emerald-100 shadow-sm icon-emerald",
-    orange: "from-orange-50 to-white text-orange-700 border-orange-100 shadow-sm icon-orange",
-    purple: "from-purple-50 to-white text-purple-700 border-purple-100 shadow-sm icon-purple",
-    cyan: "from-cyan-50 to-white text-cyan-700 border-cyan-100 shadow-sm icon-cyan",
-    red: "from-red-50 to-white text-red-700 border-red-100 shadow-sm icon-red",
+    blue: "bg-white text-blue-700 border-blue-100 shadow-sm icon-blue",
+    green: "bg-white text-emerald-700 border-emerald-100 shadow-sm icon-emerald",
+    orange: "bg-white text-orange-700 border-orange-100 shadow-sm icon-orange",
+    purple: "bg-white text-purple-700 border-purple-100 shadow-sm icon-purple",
+    cyan: "bg-white text-cyan-700 border-cyan-100 shadow-sm icon-cyan",
+    red: "bg-white text-red-700 border-red-100 shadow-sm icon-red",
   };
   
   const iconColors: any = {
@@ -1684,7 +1684,7 @@ function StatCard({ title, value, icon: Icon, color, onClick }: any) {
   };
 
   return (
-    <div onClick={onClick} className={`cursor-pointer bg-linear-to-br border rounded-3xl p-6 flex flex-col justify-between relative overflow-hidden group hover:-translate-y-1 transition-transform duration-300 ${colorMap[color].split(" icon-")[0]}`}>
+    <div onClick={onClick} className={`cursor-pointer border rounded-3xl p-6 flex flex-col justify-between relative overflow-hidden group hover:-translate-y-1 transition-transform duration-300 ${colorMap[color].split(" icon-")[0]}`}>
       <div className="absolute -right-6 -top-6 w-24 h-24 bg-white/50 rounded-full blur-2xl group-hover:bg-white transition-colors"></div>
       <div className="flex justify-between items-start mb-4">
          <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shadow-sm ${iconColors[color]}`}>

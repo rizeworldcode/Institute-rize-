@@ -111,7 +111,7 @@ export default function Centers() {
                       </div>
                       <div className="text-center">
                         <Calendar size={18} className="text-[#ff6b1a] mx-auto mb-1" />
-                        <div className="text-xs text-neutral-400">Jun 17 Batch</div>
+                        <div className="text-xs text-neutral-400">Admissions Open</div>
                       </div>
                     </div>
 
@@ -153,7 +153,7 @@ export default function Centers() {
       {/* Student Portal CTA */}
       <section className="py-24 bg-white border-t border-neutral-100">
         <div className="max-w-5xl mx-auto px-6">
-          <div className="bg-gradient-to-br from-neutral-900 to-neutral-800 rounded-[3rem] p-12 md:p-20 text-center relative overflow-hidden shadow-2xl">
+          <div className="bg-linear-to-br from-neutral-900 to-neutral-800 rounded-[3rem] p-12 md:p-20 text-center relative overflow-hidden shadow-2xl">
             <div className="absolute top-0 left-0 w-full h-full opacity-10">
               <div className="absolute top-0 left-0 w-64 h-64 bg-blue-500 blur-[100px] rounded-full -translate-x-1/2 -translate-y-1/2" />
               <div className="absolute bottom-0 right-0 w-64 h-64 bg-orange-500 blur-[100px] rounded-full translate-x-1/2 translate-y-1/2" />

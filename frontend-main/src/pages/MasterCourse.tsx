@@ -64,7 +64,7 @@ export default function MasterCourse() {
                 The 3-Month <br /><span className="text-blue-600">Job-Ready</span> <br />Master Course.
               </h1>
               <div className="mt-6 text-lg text-neutral-600 max-w-lg leading-relaxed font-medium space-y-2 border-l-4 border-blue-600 pl-4">
-                <p>3-month job-ready program | Alwar, Rajasthan | Batch starting June 17</p>
+                <p>3-month job-ready program | Alwar, Rajasthan</p>
                 <p className="font-bold text-neutral-900">7 modules • 12 weeks • 3 hrs daily</p>
               </div>
 
@@ -73,7 +73,7 @@ export default function MasterCourse() {
                   to="/contact"
                   className="group inline-flex items-center gap-3 px-8 py-4 rounded-full bg-blue-600 text-white font-bold hover:bg-blue-700 hover:shadow-lg transition-all"
                 >
-                  Enroll Now — Batch June 17
+                  Enroll Now
                   <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
                 </Link>
                 <a
@@ -92,7 +92,7 @@ export default function MasterCourse() {
                 </div>
                 <div className="text-sm">
                   <div className="font-semibold text-neutral-900">847+ students enrolled</div>
-                  <div className="text-neutral-500 text-xs">Only 13 seats left in June batch</div>
+                  <div className="text-neutral-500 text-xs">Limited seats available</div>
                 </div>
               </div>
             </div>
@@ -135,12 +135,7 @@ export default function MasterCourse() {
                 </Link>
                 <p className="text-[10px] text-center text-neutral-500 mt-2">EMI options available • No credit check</p>
               </div>
-              <div className="absolute -top-6 -right-6 w-28 h-28 bg-blue-900 rounded-full items-center justify-center text-white shadow-md animate-pulse-glow hidden md:flex border border-blue-800">
-                <div className="text-center">
-                  <div className="text-[10px] font-bold tracking-widest">BATCH</div>
-                  <div className="font-display font-extrabold text-lg">JUN 17</div>
-                </div>
-              </div>
+
             </div>
           </Reveal>
         </div>
@@ -246,7 +241,7 @@ export default function MasterCourse() {
               Your future self will <span className="text-blue-600">thank you.</span>
             </h2>
             <p className="mt-6 text-lg text-neutral-600">
-              Batch starts June 17. Don't wait for the next one.
+              Enroll now. Don't wait for the next one.
             </p>
             <Link
               to="/contact"
