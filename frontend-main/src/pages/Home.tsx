@@ -193,7 +193,7 @@ export default function Home() {
 
               <h3 className="font-display text-xl lg:text-xl xl:text-2xl font-bold text-white mb-2">{heroCourseData[activeHeroCourse].title}</h3>
               <div className="flex items-center gap-2 text-white/70 text-xs lg:text-sm mb-4 font-medium line-clamp-1">
-                <MapPin size={14} className="shrink-0" /> C198, near Telco Circle, UIT colony, Shalimar Nagar, Alwar
+                <MapPin size={14} className="shrink-0" /> C197, near Telco Circle, UIT colony, Shalimar Nagar, Alwar
               </div>
               <p className="text-white/80 text-xs lg:text-sm leading-relaxed mb-6 lg:mb-8 min-h-[40px] lg:min-h-[60px] line-clamp-3">
                 {heroCourseData[activeHeroCourse].desc}

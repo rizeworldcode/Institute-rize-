@@ -1,6 +1,177 @@
 const jwt = require("jsonwebtoken");
+const bcrypt = require("bcryptjs");
 const admin_model = require("../../models/referreledModel");
 const student_model = require("../../models/studentModel");
+const refferl_model = require("../../models/referreledModel");
+const nodemailer = require("nodemailer");
+
+const transporter = nodemailer.createTransport({
+    service: "Gmail",
+    auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS,
+    },
+});
+
+const sendOTP = (email, otp) => {
+    const mailOptions = {
+        from: process.env.EMAIL_USER,
+        to: email,
+        subject: "Your OTP Code",
+        text: `Your OTP code is ${otp}`,
+    };
+
+    return transporter.sendMail(mailOptions);
+};
+
+exports.verifyOtp = async (req, res) => {
+    const { email, otp } = req.body;
+    console.log(typeof otp);
+    try {
+        const user = await refferl_model.findOne({ email });
+        if (!user) {
+            return {
+                message: "Invalid email",
+                success: false,
+            };
+        }
+        console.log(typeof user.otp);
+        if (user.otp !== otp || otp == undefined || user.otpExpiry < Date.now()) {
+            return {
+                message: "Invalid or expired OTP",
+                success: false,
+            };
+        }
+
+        const token = jwt.sign({ id: user._id }, process.env.SECRET_KEY);
+        if (!token) {
+            return {
+                message: "Token generation failed",
+                success: false,
+            };
+        }
+        res.cookie("token", token);
+        const update_admin = await refferl_model.findOneAndUpdate({ email: email },
+            {
+                $set: {
+                    auth_key: token,
+                }
+            },
+            { new: true }
+        )
+
+        if (!update_admin) {
+            return {
+                message: "password updation failed",
+                success: false,
+            };
+        }
+        return {
+            token,
+            message: "OTP verified successfully",
+            success: true,
+        };
+    } catch (error) {
+        console.log(error);
+        return {
+            message: error,
+            success: false,
+        };
+    }
+};
+
+exports.sendOtpTOadmin = async (req, res) => {
+    const { email } = req.body;
+
+    try {
+        const AdminData = await refferl_model.findOne({ email: email });
+
+        const otp = Math.floor(1000 + Math.random() * 9000).toString();
+        const otpExpiry = Date.now() + 3600000; // 1 hour
+        if (AdminData) {
+            const update_admin = await refferl_model.findOneAndUpdate({ email: email },
+                {
+                    $set: {
+                        otp: otp,
+                        otpExpiry: otpExpiry
+                    }
+                },
+                { new: true }
+            )
+            if (!update_admin) {
+                return {
+                    message: "admin not found",
+                    success: false,
+                };
+            }
+            const otp_send = await sendOTP(email, otp);
+            if (!otp_send) {
+                return {
+                    message: "otp send faild",
+                    success: false,
+                };
+            }
+            return {
+                message: "OTP send successfully",
+                success: true,
+            };
+        }
+        return {
+            message: "Referrer not found with this email",
+            success: false,
+        };
+    } catch (error) {
+        console.log(error);
+        return {
+            message: error,
+            success: false,
+        };
+    }
+};
+
+exports.admin_forgatePassword = async (req, res) => {
+    const { newPassword, email } = req.body;
+    console.log(newPassword, email);
+    
+    try {
+        if (!newPassword || !email) {
+            return {
+                message: "email or password not define",
+                success: false
+            }
+        }
+        const existingAdmin = await refferl_model.findOne({ email }).select('+auth_key');
+        if (!existingAdmin) {
+            return {
+                success: false,
+                message: "Admin not found",
+            };
+        }
+        console.log(existingAdmin.auth_key);
+        
+        if (existingAdmin.auth_key) {
+            existingAdmin.password = newPassword;
+            await existingAdmin.save();
+
+            return {
+                success: true,
+                message: "Password updated successfully",
+            };
+        }
+        return {
+            success: false,
+            message: "try again",
+        };
+
+    } catch (error) {
+        console.log(error);
+        return {
+            success: false,
+            message: "Internal server error",
+        };
+    }
+};
+
 
 exports.get_referrer_dashboard_data = async (req, res) => {
     try {
@@ -48,28 +219,19 @@ exports.get_referrer_dashboard_data = async (req, res) => {
 
 exports.referred_login = async (req, res) => {
     try {
-        
-        const password = process.env.REFFERLED_PASSWORD;
-
-
         const {frontend_password,frontend_email} = req.body;
-        const refferlData = await admin_model.findOne({ email: frontend_email });
+        const refferlData = await refferl_model.findOne({ email: frontend_email });
         if(!refferlData){
             return {
                 success: false,
                 message: "Invalid email or not registered!",
             };
         }
-        if (frontend_password !== password) {
+        const isPasswordValid = await refferlData.comparePassword(frontend_password);
+        if (!isPasswordValid) {
             return {
                 success: false,
                 message: "Invalid password",
-            };
-        }
-        if (!refferlData) {         
-            return {
-                success: false,
-                message: "Invalid email or not registered!",
             };
         }
         const token = jwt.sign({ id: refferlData._id }, process.env.SECRET_KEY);

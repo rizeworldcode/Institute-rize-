@@ -34,6 +34,7 @@ export function StudentModal({ student, onClose, onSave }: {
     referredByPhone: student?.referredByPhone || "",
     referredByEmail: student?.referredByEmail || "",
     referredAmount: student?.referredAmount || "",
+    referredByPassword: "",
   });
 
   // Process student admissions to ensure they have all required fields
@@ -198,7 +199,8 @@ export function StudentModal({ student, onClose, onSave }: {
           referredByName: studentInfo.referredByName,
           referredByPhone: studentInfo.referredByPhone,
           referredByEmail: studentInfo.referredByEmail,
-          referredAmount: studentInfo.referredAmount
+          referredAmount: studentInfo.referredAmount,
+          referredByPassword: studentInfo.referredByPassword
         };
 
         const res = await fetch("http://localhost:3001/add_student", {
@@ -523,6 +525,10 @@ export function StudentModal({ student, onClose, onSave }: {
                   <div>
                     <label className="text-xs font-semibold text-neutral-600 block mb-1.5">Referral Email</label>
                     <input type="email" value={studentInfo.referredByEmail} onChange={(e) => setStudentInfo({ ...studentInfo, referredByEmail: e.target.value })} className="w-full px-4 py-2.5 rounded-xl bg-white border border-neutral-200 focus:border-orange-500 focus:ring-1 focus:ring-orange-500 focus:outline-none transition-all text-neutral-900 shadow-sm" />
+                  </div>
+                  <div>
+                    <label className="text-xs font-semibold text-neutral-600 block mb-1.5">Referral Password</label>
+                    <input type="password" minLength={6} value={studentInfo.referredByPassword} onChange={(e) => setStudentInfo({ ...studentInfo, referredByPassword: e.target.value })} className="w-full px-4 py-2.5 rounded-xl bg-white border border-neutral-200 focus:border-orange-500 focus:ring-1 focus:ring-orange-500 focus:outline-none transition-all text-neutral-900 shadow-sm" />
                   </div>
                   <div>
                     <label className="text-xs font-semibold text-neutral-600 block mb-1.5">Referred Amount (₹)</label>

@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const bcrypt = require('bcryptjs');
 const mongoosePaginate = require('mongoose-paginate-v2');
 
 const referredSchema = new mongoose.Schema({
@@ -6,6 +7,10 @@ const referredSchema = new mongoose.Schema({
     type: String,
     required: [true, 'Name is required'],
     trim: true,
+  },
+    password: {
+    type: String,
+    required: true,
   },
   email: {
     type: String,
@@ -36,6 +41,10 @@ const referredSchema = new mongoose.Schema({
       default: 0,
     },
   },
+    otp: {
+    type: String,
+  },
+  otpExpiry: { type: Date },
   auth_key: {
     type: String,
     default: null,
@@ -46,6 +55,37 @@ const referredSchema = new mongoose.Schema({
   toJSON: { virtuals: true },
   toObject: { virtuals: true }
 });
+
+// Hash password before saving
+referredSchema.pre('save', async function (next) {
+  try {
+    if (this.isModified('password')) {
+      const salt = await bcrypt.genSalt(10);
+      this.password = await bcrypt.hash(this.password, salt);
+    }
+    next();
+  } catch (error) {
+    next(error);
+  }
+});
+
+// Hash password before updating
+referredSchema.pre('findOneAndUpdate', async function (next) {
+  try {
+    if (this.getUpdate().password) {
+      const salt = await bcrypt.genSalt(10);
+      this.getUpdate().password = await bcrypt.hash(this.getUpdate().password, salt);
+    }
+    next();
+  } catch (error) {
+    next(error);
+  }
+});
+
+// Method to compare password
+referredSchema.methods.comparePassword = async function (candidatePassword) {
+  return await bcrypt.compare(candidatePassword, this.password);
+};
 
 // Plugins
 referredSchema.plugin(mongoosePaginate);

@@ -1,4 +1,47 @@
-const { referred_login,referred_logout, get_referrer_dashboard_data } = require("../../services/refferel/reffereValidation");
+const { referred_login,referred_logout, get_referrer_dashboard_data,admin_forgatePassword,sendOtpTOadmin,verifyOtp} = require("../../services/refferel/reffereValidation");
+
+
+
+exports.sendOtpTOadmin = async (req, res) => {
+    try {
+      const data = await sendOtpTOadmin(req, res);
+      if (data.success) {
+        res.status(200).json(data);
+      }
+      else{
+          res.status(403).json(data);
+      }
+    } catch (error) {
+      console.log("Error:", error);
+    }
+  };
+exports.verifyOtp = async (req, res) => {
+    try {
+      const data = await verifyOtp(req, res);
+      if (data.success) {
+        res.status(200).json(data);
+      }
+      else{
+          res.status(403).json(data);
+      }
+    } catch (error) {
+      console.log("Error:", error);
+    }
+  };
+
+  exports.admin_forgatePassword = async (req, res) => {
+    try {
+      const data = await admin_forgatePassword(req, res);
+      if (data.success) {
+        res.status(200).json(data);
+      }
+      else{
+          res.status(403).json(data);
+      }
+    } catch (error) {
+      console.log("Error:", error);
+    }
+  };
 
 exports.get_referrer_dashboard_data = async (req, res) => {
   try {

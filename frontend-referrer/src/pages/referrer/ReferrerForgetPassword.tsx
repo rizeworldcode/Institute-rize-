@@ -35,7 +35,7 @@ export default function ReferrerForgetPassword() {
     return `${m}:${s < 10 ? '0' : ''}${s}`;
   };
 
-  const handleSendOTP = (e?: React.FormEvent) => {
+  const handleSendOTP = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     if (resendCount >= MAX_RESEND) {
       setError("Maximum OTP resend limit reached. Please try again later.");
@@ -45,20 +45,34 @@ export default function ReferrerForgetPassword() {
     setError("");
     setLoading(true);
 
-    setTimeout(() => {
-      if (email.includes("@")) {
+    try {
+      const response = await fetch("http://localhost:3001/sendOtpTOadmin", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email }),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
         setStep(2);
         setTimer(300); // Reset to 5 mins
         setResendCount(prev => prev + 1);
         setOtp("");
       } else {
-        setError("Please enter a valid email address.");
+        setError(data.message || "Failed to send OTP.");
       }
+    } catch (err) {
+      console.error("Send OTP error:", err);
+      setError("An error occurred. Please try again later.");
+    } finally {
       setLoading(false);
-    }, 1500);
+    }
   };
 
-  const handleVerifyOTP = (e: React.FormEvent) => {
+  const handleVerifyOTP = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
     
@@ -74,18 +88,31 @@ export default function ReferrerForgetPassword() {
 
     setLoading(true);
 
-    setTimeout(() => {
-      // Mock validation
-      if (otp === "4821" || otp.length === 4) { 
+    try {
+      const response = await fetch("http://localhost:3001/verifyOtp", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email, otp }),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
         setStep(3);
       } else {
-        setError("Invalid OTP. Please try again.");
+        setError(data.message || "Invalid OTP. Please try again.");
       }
+    } catch (err) {
+      console.error("Verify OTP error:", err);
+      setError("An error occurred. Please try again later.");
+    } finally {
       setLoading(false);
-    }, 1500);
+    }
   };
 
-  const handleResetPassword = (e: React.FormEvent) => {
+  const handleResetPassword = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
 
@@ -99,13 +126,32 @@ export default function ReferrerForgetPassword() {
     }
 
     setLoading(true);
-    setTimeout(() => {
-      setStep(4); // Success step
+
+    try {
+      const response = await fetch("http://localhost:3001/admin_forgatePassword", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email, newPassword: password }),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        setStep(4);
+        setTimeout(() => {
+          navigate("/referrer/login");
+        }, 3000);
+      } else {
+        setError(data.message || "Failed to reset password.");
+      }
+    } catch (err) {
+      console.error("Reset password error:", err);
+      setError("An error occurred. Please try again later.");
+    } finally {
       setLoading(false);
-      setTimeout(() => {
-        navigate("/referrer/login");
-      }, 3000);
-    }, 1500);
+    }
   };
 
   return (
