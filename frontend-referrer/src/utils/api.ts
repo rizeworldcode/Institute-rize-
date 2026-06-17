@@ -1,5 +1,5 @@
 // Base URL for the backend API
-export const API_BASE_URL = "http://localhost:3001";
+export const API_BASE_URL = "https://institute-rize.onrender.com";
 
 // Helper to construct full API URLs
 export const getApiUrl = (endpoint: string) => `${API_BASE_URL}${endpoint}`;
