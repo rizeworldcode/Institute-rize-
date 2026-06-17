@@ -100,19 +100,21 @@ export default function Blog() {
         <section className="pb-16">
           <div className="max-w-7xl mx-auto px-6">
             <Reveal>
-              <div className="relative rounded-3xl overflow-hidden shadow-luxury group cursor-pointer hover:shadow-orange transition-all duration-500">
+              <div
+                className="relative rounded-3xl overflow-hidden shadow-luxury group cursor-pointer hover:shadow-orange transition-all duration-500"
+              >
                 <div className="grid lg:grid-cols-2">
                   <div className="aspect-4/3 lg:aspect-auto overflow-hidden">
                     <img src={featured.img} alt={featured.title} className="w-full h-full object-contain object-center bg-[#121212]/40 group-hover:scale-103 transition-transform duration-700" />
                   </div>
-                  <div className="bg-white/5 backdrop-blur-xl border border-white/10 p-10 md:p-14 flex flex-col justify-center">
+                  <div className="bg-neutral-900 p-10 md:p-14 flex flex-col justify-center">
                     <div className="flex items-center gap-3 mb-4">
                       <span className="px-3 py-1 rounded-full gradient-orange text-white text-xs font-bold">FEATURED</span>
                     </div>
-                    <h2 className="font-display text-3xl md:text-4xl font-extrabold text-white leading-tight mb-4 group-hover:text-[#ff6b1a] transition-colors">
+                    <h2 className="font-display text-3xl md:text-4xl font-extrabold leading-tight mb-4 text-white group-hover:text-[#ff6b1a] transition-colors">
                       {featured.title}
                     </h2>
-                    <p className="text-neutral-400 mb-6">{featured.excerpt}</p>
+                    <p className="mb-6 text-neutral-300">{featured.excerpt}</p>
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-4 text-xs text-neutral-400">
                         <span className="flex items-center gap-1"><Tag size={12} /> {featured.category}</span>
@@ -129,14 +131,14 @@ export default function Blog() {
       {/* Search & Filter */}
       <section className="pb-10">
         <div className="max-w-7xl mx-auto px-6">
-          <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-4 md:p-6 flex flex-col md:flex-row gap-4 items-center">
+          <div className="bg-neutral-100 lg:bg-white/5 border border-neutral-200 lg:border-white/10 rounded-2xl p-4 md:p-6 flex flex-col md:flex-row gap-4 items-center">
             <div className="relative flex-1 w-full">
-              <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-neutral-400" />
+              <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-neutral-500 lg:text-neutral-400" />
               <input
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Search articles..."
-                className="w-full pl-11 pr-4 py-3 rounded-xl bg-white/60 border border-white/10 focus:border-[#ff6b1a] focus:outline-none transition-colors"
+                className="w-full pl-11 pr-4 py-3 rounded-xl bg-white lg:bg-white/60 border border-neutral-350 lg:border-white/10 text-neutral-900 lg:text-white focus:border-[#ff6b1a] focus:outline-none transition-colors"
               />
             </div>
             <div className="flex flex-wrap gap-2">
@@ -145,7 +147,7 @@ export default function Blog() {
                   key={c}
                   onClick={() => setFilter(c)}
                   className={`px-4 py-2 rounded-full text-sm font-semibold transition-all ${
-                    filter === c ? "gradient-orange text-white shadow-orange" : "bg-[#0a0a0a] text-neutral-300 hover:bg-white/5"
+                    filter === c ? "gradient-orange text-white shadow-orange" : "bg-neutral-200 lg:bg-[#0a0a0a] text-neutral-700 lg:text-neutral-300 hover:bg-neutral-300 lg:hover:bg-white/5"
                   }`}
                 >
                   {c}
@@ -162,9 +164,11 @@ export default function Blog() {
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filtered.map((p, i) => (
               <Reveal key={i} delay={i * 0.05}>
-                <article className="group bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl overflow-hidden hover:shadow-luxury hover:-translate-y-2 transition-all duration-500 cursor-pointer h-full flex flex-col">
+                <article
+                  className="group bg-white lg:bg-white/5 border border-neutral-200 lg:border-white/10 rounded-3xl overflow-hidden hover:shadow-luxury hover:-translate-y-2 transition-all duration-500 cursor-pointer h-full flex flex-col"
+                >
                   <div className="aspect-16/10 overflow-hidden">
-                    <img src={p.gridImg || p.img} alt={p.title} className="w-full h-full object-contain object-center bg-[#121212]/40 group-hover:scale-103 transition-transform duration-700" />
+                    <img src={p.gridImg || p.img} alt={p.title} className="w-full h-full object-contain object-center bg-[#121212]/5 lg:bg-[#121212]/40 group-hover:scale-103 transition-transform duration-700" />
                   </div>
                   <div className="p-6 flex-1 flex flex-col">
                     <div className="flex items-center gap-2 mb-3">
@@ -174,10 +178,10 @@ export default function Blog() {
                         {p.category.toUpperCase()}
                       </span>
                     </div>
-                    <h3 className="font-display text-xl font-bold text-white leading-tight mb-2 group-hover:text-[#ff6b1a] transition-colors">
+                    <h3 className="font-display text-xl font-bold text-neutral-900 lg:text-white leading-tight mb-2 group-hover:text-[#ff6b1a] transition-colors">
                       {p.title}
                     </h3>
-                    <p className="text-sm text-neutral-400 leading-relaxed flex-1">{p.excerpt}</p>
+                    <p className="text-sm text-neutral-600 lg:text-neutral-400 leading-relaxed flex-1">{p.excerpt}</p>
                   </div>
                 </article>
               </Reveal>

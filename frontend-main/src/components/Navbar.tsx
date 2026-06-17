@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { X, Home, Users, Briefcase, MoreHorizontal, MoreVertical } from "lucide-react";
+import { X, Home, Briefcase, MoreHorizontal, MoreVertical } from "lucide-react";
 
 
 export default function Navbar() {
@@ -138,6 +138,10 @@ export default function Navbar() {
             <MobileLink to="/courses" label="Explore Courses" onClick={() => setMobileOpen(false)} />
             <MobileLink to="/master-course" label="Program Master Course" onClick={() => setMobileOpen(false)} />
             <MobileLink to="/certificate" label="Certificate" onClick={() => setMobileOpen(false)} />
+            <MobileLink to="/courses" label="Courses" onClick={() => setMobileOpen(false)} />
+            <MobileLink to="/master-course" label="Master Course" onClick={() => setMobileOpen(false)} />
+            <MobileLink to="/trainers" label="Trainers" onClick={() => setMobileOpen(false)} />
+            <MobileLink to="/blog" label="Blogs" onClick={() => setMobileOpen(false)} />
 
             <Link
               to="/contact"

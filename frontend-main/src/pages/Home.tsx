@@ -8,13 +8,13 @@ import Reveal from "../components/Reveal";
 gsap.registerPlugin(ScrollTrigger);
 
 const courses = [
-  { icon: Brain, title: "AI Tools + DM Basics", desc: "Master ChatGPT, Midjourney, and AI-powered marketing workflows.", color: "orange" },
-  { icon: Palette, title: "Graphic Design + Photoshop", desc: "Create stunning visuals with modern design principles and tools.", color: "green" },
-  { icon: Video, title: "Video Editing", desc: "Cinematic editing for YouTube, Reels, and brand storytelling.", color: "orange" },
-  { icon: TrendingUp, title: "SMO", desc: "Build brands on Instagram, Facebook, LinkedIn, and more.", color: "green" },
   { icon: Search, title: "SEO", desc: "Rank #1 on Google with advanced on-page and off-page strategies.", color: "orange" },
-  { icon: BarChart3, title: "Performance Marketing", desc: "Run profitable Meta, Google, and YouTube ad campaigns.", color: "green" },
-  { icon: Code, title: "Website Development", desc: "Build fast, modern websites with no-code and code tools.", color: "orange" },
+  { icon: TrendingUp, title: "SMO", desc: "Build brands on Instagram, Facebook, LinkedIn, and more.", color: "green" },
+  { icon: BarChart3, title: "Performance Marketing", desc: "Run profitable Meta, Google, and YouTube ad campaigns.", color: "orange" },
+  { icon: Code, title: "Website Development", desc: "Build fast, modern websites with no-code and code tools.", color: "green" },
+  { icon: Palette, title: "Graphic Design + Photoshop", desc: "Create stunning visuals with modern design principles and tools.", color: "orange" },
+  { icon: Video, title: "Video Editing", desc: "Cinematic editing for YouTube, Reels, and brand storytelling.", color: "green" },
+  { icon: Brain, title: "AI Tools + DM Basics", desc: "Master ChatGPT, Midjourney, and AI-powered marketing workflows.", color: "orange" },
 ];
 
 const testimonials = [
@@ -37,7 +37,7 @@ const heroCourseData: any = {
     title: "Master Course Program",
     desc: "This flagship program seamlessly blends into the modern digital landscape. Master all core modules with our 12-week intensive curriculum.",
     stats: [
-      { text: "12 Weeks (3 hrs daily)", icon: <Clock size={16} /> },
+      { text: "12 Weeks", icon: <Clock size={16} /> },
       { text: "7 Modules", icon: <BookOpen size={16} /> },
       { text: "20 Seat Batch", icon: <Users size={16} /> },
       { text: "Placement Assistance", icon: <Briefcase size={16} /> }
@@ -412,10 +412,10 @@ export default function Home() {
                       The 3-Month <br /><span className="text-[#fcbf12]">Job-Ready Master Course</span>
                     </h2>
                     <p className="mt-6 text-lg text-white/80">
-                      7 modules. 12 weeks. 3 hours daily. Everything you need to launch a career in AI & digital marketing — in one transformative program.
+                      7 modules. 12 weeks. Everything you need to launch a career in AI & digital marketing — in one transformative program.
                     </p>
                     <div className="mt-8 flex flex-wrap gap-3">
-                      {["7 Modules", "12 Weeks", "3 hrs/day", "Live Projects", "Certification"].map((t, i) => (
+                      {["7 Modules", "12 Weeks", "Live Projects", "Certification"].map((t, i) => (
                         <span key={i} className="px-4 py-2 rounded-full glass-dark bg-white/10 border border-white/20 text-sm font-medium text-white">{t}</span>
                       ))}
                     </div>
@@ -532,17 +532,17 @@ export default function Home() {
               <p className="mt-8 text-xl text-white/70 max-w-2xl mx-auto relative z-10">
                 Join the next batch. Limited seats. Unlimited potential.
               </p>
-              <div className="mt-10 flex flex-wrap justify-center gap-4 relative z-10">
+              <div className="mt-10 flex flex-col sm:flex-row justify-center items-center gap-3 sm:gap-4 relative z-10">
                 <Link
                   to="/contact"
-                  className="inline-flex items-center gap-3 px-10 py-5 rounded-full bg-blue-600 text-white font-bold text-lg shadow-[0_20px_40px_-10px_rgba(65,104,178,0.4)] hover:scale-105 transition-transform"
+                  className="w-full sm:w-auto inline-flex items-center justify-center gap-3 px-6 py-3.5 md:px-10 md:py-5 rounded-full bg-blue-600 text-white font-bold text-sm md:text-lg shadow-[0_20px_40px_-10px_rgba(65,104,178,0.4)] hover:scale-105 transition-transform"
                 >
                   Book Free Counseling
                   <ArrowRight size={20} />
                 </Link>
                 <Link
                   to="/master-course"
-                  className="inline-flex items-center gap-3 px-10 py-5 rounded-full premium-pill text-neutral-900 font-semibold text-lg hover:scale-105 transition-transform"
+                  className="w-full sm:w-auto inline-flex items-center justify-center gap-3 px-6 py-3.5 md:px-10 md:py-5 rounded-full premium-pill text-neutral-900 font-semibold text-sm md:text-lg hover:scale-105 transition-transform"
                 >
                   See Curriculum
                 </Link>
@@ -564,6 +564,7 @@ function StackingCards() {
     { t: "Live project-based learning", d: "Work on real client briefs, build a portfolio that actually gets you hired.", icon: Zap, color: "bg-orange-500" },
     { t: "Small batch sizes", d: "Max 20 students per batch for personalized attention and support.", icon: Users, color: "bg-green-600" },
     { t: "Smart Learning for the Digital Era", d: "An inspiring space created for students to explore AI, digital marketing, and creative technologies.", icon: Brain, color: "bg-yellow-500" },
+    { t: "100% Job Assistance & Internship Support", d: "Get access to our partner agency network, resume building workshops, and mock interviews to land your dream job.", icon: Briefcase, color: "bg-rose-500" },
   ];
 
   useEffect(() => {
@@ -572,7 +573,10 @@ function StackingCards() {
     const cards = cardsRef.current.filter(Boolean) as HTMLDivElement[];
     if (cards.length === 0) return;
 
-    const ctx = gsap.context(() => {
+    const mm = gsap.matchMedia();
+
+    // Only apply scroll pinning on desktop (min-width: 1024px)
+    mm.add("(min-width: 1024px)", () => {
       cards.forEach((card, i) => {
         const isLast = i === cards.length - 1;
 
@@ -596,9 +600,9 @@ function StackingCards() {
           },
         });
       });
-    }, container);
+    });
 
-    return () => ctx.revert();
+    return () => mm.revert();
   }, []);
 
   return (
@@ -612,7 +616,7 @@ function StackingCards() {
             className="relative w-full mb-6"
             style={{ zIndex: items.length - i }}
           >
-            <div className="glass-card border-none rounded-4xl p-8 md:p-10 shadow-[0_20px_50px_-12px_rgba(30,27,75,0.06)] border border-neutral-100">
+            <div className="bg-white border border-neutral-200 rounded-4xl p-8 md:p-10 shadow-[0_15px_35px_rgba(0,0,0,0.05)]">
               <div className="flex flex-col md:flex-row md:items-center gap-6">
                 <div className={`w-20 h-20 md:w-24 md:h-24 rounded-4xl ${f.color} flex items-center justify-center shadow-[0_20px_50px_-12px_rgba(30,27,75,0.06)] border border-neutral-100 shrink-0`}>
                   <Icon size={36} className="text-white" />

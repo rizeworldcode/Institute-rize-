@@ -89,7 +89,7 @@ _${form.message}_
               <div className="bg-orange-50 border border-orange-200 rounded-3xl p-6 shadow-sm hover:shadow-md transition-all">
                 <MapPin size={24} className="text-orange-500 mb-3" />
                 <h3 className="font-display font-bold text-neutral-900 mb-2">Visit Our Campus</h3>
-                <p className="text-sm text-neutral-600">C198, near Telco Circle, UIT colony, Shalimar Nagar, Alwar, Rajasthan 301001</p>
+                <p className="text-sm text-neutral-600">C197, near Telco Circle, UIT colony, Shalimar Nagar, Alwar, Rajasthan 301001</p>
               </div>
             </Reveal>
 

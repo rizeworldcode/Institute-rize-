@@ -19,7 +19,7 @@ const roadmap = [
 
 const highlights = [
   { icon: Calendar, label: "Duration", value: "12 Weeks" },
-  { icon: Clock, label: "Daily Commitment", value: "3 Hours" },
+  { icon: Zap, label: "Job Assistance", value: "100%" },
   { icon: Users, label: "Batch Size", value: "Max 20" },
   { icon: MapPin, label: "Location", value: "Alwar, Rajasthan" },
 ];
@@ -65,7 +65,7 @@ export default function MasterCourse() {
               </h1>
               <div className="mt-6 text-lg text-neutral-600 max-w-lg leading-relaxed font-medium space-y-2 border-l-4 border-blue-600 pl-4">
                 <p>3-month job-ready program | Alwar, Rajasthan</p>
-                <p className="font-bold text-neutral-900">7 modules • 12 weeks • 3 hrs daily</p>
+                <p className="font-bold text-neutral-900">7 modules • 12 weeks</p>
               </div>
 
               <div className="mt-8 flex flex-wrap gap-4">
