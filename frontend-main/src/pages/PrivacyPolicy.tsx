@@ -26,7 +26,7 @@ export default function PrivacyPolicy() {
               <ul className="list-disc pl-5 space-y-2 mb-6">
                 <li>Google, as a third party vendor, uses cookies to serve ads on RizeWorld.</li>
                 <li>Google's use of the DART cookie enables it to serve ads to users based on their visit to RizeWorld and other sites on the Internet.</li>
-                <li>Users may opt out of the use of the DART cookie by visiting the Google ad and content network privacy policy at the following URL – <a href="https://www.google.com/policies/privacy/" className="text-blue-600 hover:underline" target="_blank" rel="noopener noreferrer">https://www.google.com/policies/privacy/</a>.</li>
+                <li>Users may opt out of the use of the DART cookie by visiting the Google ad and content network privacy policy at the following URL .</li>
               </ul>
 
               <p>These third-party ad servers or ad networks use technology to the advertisements and links that appear on RizeWorld send directly to your browsers. They automatically receive your IP address when this occurs.</p>
