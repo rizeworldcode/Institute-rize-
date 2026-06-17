@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Download, CheckCircle2, User, Eye, FileText, Lock, Mail, ArrowRight, AlertCircle, LogOut } from "lucide-react";
-import { getApiUrl, API_BASE_URL } from "../utils/api";
+import { Download, CheckCircle2, User, Eye, FileText, Lock, ArrowRight, AlertCircle, LogOut } from "lucide-react";
+import { getApiUrl } from "../utils/api";
 
 interface Certificate {
   courseName: string;

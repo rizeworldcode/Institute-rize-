@@ -2,7 +2,7 @@ import { useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { ArrowRight, CheckCircle2, Calendar, Clock, MapPin, Users, Zap, Brain, Palette, Video, TrendingUp, Search, BarChart3, Code, Sparkles, Target } from "lucide-react";
+import { ArrowRight, CheckCircle2, Calendar, MapPin, Users, Zap, Brain, Palette, Video, TrendingUp, Search, BarChart3, Code, Sparkles, Target } from "lucide-react";
 import Reveal from "../components/Reveal";
 
 gsap.registerPlugin(ScrollTrigger);
