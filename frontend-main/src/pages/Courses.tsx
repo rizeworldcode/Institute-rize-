@@ -3,13 +3,13 @@ import { Brain, Palette, Video, TrendingUp, Search, BarChart3, Code, ArrowRight,
 import Reveal from "../components/Reveal";
 
 const modules = [
-  { icon: Brain, title: "AI Tools + DM Basics", desc: "Master ChatGPT, Gemini, Claude, Midjourney, and modern AI workflows for digital marketing automation.", duration: "2 weeks", topics: ["ChatGPT for Marketing", "Midjourney & DALL-E", "AI Copywriting", "Workflow Automation", "Prompt Engineering"] },
-  { icon: Palette, title: "Graphic Design + Photoshop", desc: "Create stunning visuals, brand identities, and social media creatives with industry-standard tools.", duration: "2 weeks", topics: ["Photoshop Mastery", "Canva Pro", "Brand Identity", "Social Media Design", "Print & Digital"] },
-  { icon: Video, title: "Video Editing", desc: "Cinematic editing for YouTube, Reels, Shorts, and brand storytelling using Premiere Pro & CapCut.", duration: "1.5 weeks", topics: ["Premiere Pro", "CapCut Mastery", "Color Grading", "Motion Graphics", "Reels & Shorts"] },
-  { icon: TrendingUp, title: "SMO (Social Media Optimization)", desc: "Build, grow, and monetize audiences across Instagram, Facebook, LinkedIn, and emerging platforms.", duration: "1.5 weeks", topics: ["Content Strategy", "Community Building", "Influencer Marketing", "Reels Growth", "Analytics"] },
   { icon: Search, title: "SEO (Search Engine Optimization)", desc: "Rank #1 on Google with advanced on-page, off-page, and technical SEO strategies.", duration: "1.5 weeks", topics: ["Keyword Research", "On-Page SEO", "Technical SEO", "Link Building", "Local SEO"] },
+  { icon: TrendingUp, title: "SMO (Social Media Optimization)", desc: "Build, grow, and monetize audiences across Instagram, Facebook, LinkedIn, and emerging platforms.", duration: "1.5 weeks", topics: ["Content Strategy", "Community Building", "Influencer Marketing", "Reels Growth", "Analytics"] },
   { icon: BarChart3, title: "Performance Marketing", desc: "Run profitable Meta, Google, and YouTube ad campaigns with data-driven strategies.", duration: "2 weeks", topics: ["Meta Ads", "Google Ads", "YouTube Ads", "Conversion Tracking", "ROAS Optimization"] },
   { icon: Code, title: "Website Development", desc: "Build fast, modern websites with WordPress, Webflow, and basic HTML/CSS.", duration: "1.5 weeks", topics: ["WordPress", "Webflow", "HTML/CSS Basics", "Landing Pages", "E-commerce"] },
+  { icon: Palette, title: "Graphic Design + Photoshop", desc: "Create stunning visuals, brand identities, and social media creatives with industry-standard tools.", duration: "2 weeks", topics: ["Photoshop Mastery", "Canva Pro", "Brand Identity", "Social Media Design", "Print & Digital"] },
+  { icon: Video, title: "Video Editing", desc: "Cinematic editing for YouTube, Reels, Shorts, and brand storytelling using Premiere Pro & CapCut.", duration: "1.5 weeks", topics: ["Premiere Pro", "CapCut Mastery", "Color Grading", "Motion Graphics", "Reels & Shorts"] },
+  { icon: Brain, title: "AI Tools + DM Basics", desc: "Master ChatGPT, Gemini, Claude, Midjourney, and modern AI workflows for digital marketing automation.", duration: "2 weeks", topics: ["ChatGPT for Marketing", "Midjourney & DALL-E", "AI Copywriting", "Workflow Automation", "Prompt Engineering"] },
 ];
 
 const combos = [
