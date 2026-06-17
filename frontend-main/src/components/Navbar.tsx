@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { X, Home, Briefcase, MoreHorizontal, MoreVertical } from "lucide-react";
+import { X, Home, Briefcase, MoreHorizontal, Menu } from "lucide-react";
 
 
 export default function Navbar() {
@@ -48,45 +48,32 @@ export default function Navbar() {
 
 
       {/* ============================================================== */}
-      {/* 1. MOBILE NAVBAR (Phones: hidden on md and above) */}
+      {/* MOBILE & TABLET NAVBAR (Unified floating dark capsule) */}
       {/* ============================================================== */}
-      <div className="flex md:hidden fixed top-6 left-0 right-0 z-50 justify-between items-center px-6 pointer-events-none">
-        <Link 
-          to="/" 
-          onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-          className="flex items-center justify-start h-12 w-32 pointer-events-auto"
-        >
-          {/* Mobile Logo Sizing */}
-          <img src="/logo/RIZE LOGO HORI PNG.png" alt="RizeWorld Logo" className="h-[600%] w-auto max-w-none object-contain object-left ml-[-88px]" />
-        </Link>
+      <div className="lg:hidden fixed top-6 left-4 right-4 z-50 pointer-events-none">
+        <div className="w-full bg-[#0d0a15]/90 backdrop-blur-xl border border-white/10 rounded-[22px] shadow-[0_12px_40px_rgba(0,0,0,0.3)] flex items-center justify-between px-6 py-3.5 pointer-events-auto">
+          
+          {/* Logo container with white invert filter to match the reference image */}
+          <Link 
+            to="/" 
+            onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+            className="flex items-center justify-start h-10 w-32 overflow-hidden relative pointer-events-auto"
+          >
+            <img 
+              src="/logo/RIZE LOGO HORI PNG.png" 
+              alt="RizeWorld Logo" 
+              className="absolute top-1/2 -translate-y-1/2 left-0 h-[500%] w-auto max-w-none object-contain object-left ml-[-70px] invert brightness-200" 
+            />
+          </Link>
 
-        <button 
-          onClick={() => setMobileOpen(!mobileOpen)} 
-          className="pointer-events-auto h-12 w-12 mr-2 flex items-center justify-center bg-white shadow-[0_8px_32px_rgba(0,0,0,0.08)] rounded-full text-neutral-900 cursor-pointer shrink-0"
-        >
-          {mobileOpen ? <X size={24} /> : <MoreVertical size={24} />}
-        </button>
-      </div>
-
-      {/* ============================================================== */}
-      {/* 2. PAD NAVBAR (Tablets: shown on md, hidden on lg) */}
-      {/* ============================================================== */}
-      <div className="hidden md:flex lg:hidden fixed top-6 left-0 right-0 z-50 justify-between items-center px-8 pointer-events-none">
-        <Link 
-          to="/" 
-          onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-          className="flex items-center justify-start h-14 w-40 pointer-events-auto"
-        >
-          {/* Pad Logo Sizing (Edit these values to change Pad logo size) */}
-          <img src="/logo/RIZE LOGO HORI PNG.png" alt="RizeWorld Logo" className="h-[600%] w-auto max-w-none object-contain object-left ml-[-88px]" />
-        </Link>
-
-        <button 
-          onClick={() => setMobileOpen(!mobileOpen)} 
-          className="pointer-events-auto h-14 w-14 mr-2 flex items-center justify-center bg-white shadow-[0_8px_32px_rgba(0,0,0,0.08)] rounded-full text-neutral-900 cursor-pointer shrink-0"
-        >
-          {mobileOpen ? <X size={28} /> : <MoreVertical size={28} />}
-        </button>
+          {/* Thin circular hamburger button */}
+          <button 
+            onClick={() => setMobileOpen(!mobileOpen)} 
+            className="h-10 w-10 flex items-center justify-center rounded-full border border-white/20 bg-white/5 text-white hover:bg-white/10 active:scale-95 transition-all cursor-pointer shrink-0 shadow-sm"
+          >
+            {mobileOpen ? <X size={18} /> : <Menu size={18} />}
+          </button>
+        </div>
       </div>
 
       {/* Top Floating Navbar (Desktop) */}
