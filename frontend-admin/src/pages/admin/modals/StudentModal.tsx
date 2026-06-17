@@ -480,7 +480,7 @@ export function StudentModal({ student, onClose, onSave }: {
                 </div>
                 <div>
                   <label className="text-xs font-semibold text-neutral-600 block mb-1.5">Student Name {!student ? "*" : ""}</label>
-                  <input required={!student} type="text" value={studentInfo.name} onChange={(e) => setStudentInfo({ ...studentInfo, name: e.target.value })} className="w-full px-4 py-2.5 rounded-xl bg-white border border-neutral-200 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none transition-all text-neutral-900 shadow-sm" />
+                  <input required={!student} type="text" value={studentInfo.name} onChange={(e) => { if (e.target.value.length <= 120) setStudentInfo({ ...studentInfo, name: e.target.value }); }} className="w-full px-4 py-2.5 rounded-xl bg-white border border-neutral-200 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none transition-all text-neutral-900 shadow-sm" />
                 </div>
                 <div>
                   <label className="text-xs font-semibold text-neutral-600 block mb-1.5">
@@ -520,7 +520,7 @@ export function StudentModal({ student, onClose, onSave }: {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <label className="text-xs font-semibold text-neutral-600 block mb-1.5">Referral Name</label>
-                    <input type="text" value={studentInfo.referredByName} onChange={(e) => setStudentInfo({ ...studentInfo, referredByName: e.target.value })} className="w-full px-4 py-2.5 rounded-xl bg-white border border-neutral-200 focus:border-orange-500 focus:ring-1 focus:ring-orange-500 focus:outline-none transition-all text-neutral-900 shadow-sm" />
+                    <input type="text" value={studentInfo.referredByName} onChange={(e) => { if (e.target.value.length <= 120) setStudentInfo({ ...studentInfo, referredByName: e.target.value }); }} className="w-full px-4 py-2.5 rounded-xl bg-white border border-neutral-200 focus:border-orange-500 focus:ring-1 focus:ring-orange-500 focus:outline-none transition-all text-neutral-900 shadow-sm" />
                   </div>
                   <div>
                     <label className="text-xs font-semibold text-neutral-600 block mb-1.5">Referral Phone</label>
@@ -703,7 +703,7 @@ export function StudentModal({ student, onClose, onSave }: {
                                   <input
                                     type="text"
                                     value={paymentUtr}
-                                    onChange={(e) => setPaymentUtr(e.target.value)}
+                                    onChange={(e) => { if (e.target.value.length <= 120) setPaymentUtr(e.target.value); }}
                                     placeholder="Enter UTR number"
                                     className="w-full px-3 py-2 rounded-lg border border-neutral-200 text-sm"
                                   />
@@ -897,12 +897,12 @@ export function StudentModal({ student, onClose, onSave }: {
                   {currentAdmission.feeType === "Online" && (
                     <div>
                       <label className="text-xs font-semibold text-neutral-600 block mb-1.5">UTR Number</label>
-                      <input type="text" value={currentAdmission.utrNumber} onChange={(e) => setCurrentAdmission({ ...currentAdmission, utrNumber: e.target.value })} className="w-full px-4 py-2.5 rounded-xl bg-white border border-neutral-200 focus:border-purple-500 focus:outline-none transition-all text-neutral-900 shadow-sm" />
+                      <input type="text" value={currentAdmission.utrNumber} onChange={(e) => { if (e.target.value.length <= 120) setCurrentAdmission({ ...currentAdmission, utrNumber: e.target.value }); }} className="w-full px-4 py-2.5 rounded-xl bg-white border border-neutral-200 focus:border-purple-500 focus:outline-none transition-all text-neutral-900 shadow-sm" />
                     </div>
                   )}
                   <div>
                     <label className="text-xs font-semibold text-neutral-600 block mb-1.5">Installments Paid</label>
-                    <input type="number" min={0} value={currentAdmission.feesInstallment} onChange={(e) => setCurrentAdmission({ ...currentAdmission, feesInstallment: e.target.value })} className="w-full px-4 py-2.5 rounded-xl bg-white border border-neutral-200 focus:border-purple-500 focus:outline-none transition-all text-neutral-900 shadow-sm" />
+                    <input type="number" min={0} value={currentAdmission.feesInstallment} onChange={(e) => { if (e.target.value.length <= 120) setCurrentAdmission({ ...currentAdmission, feesInstallment: e.target.value }); }} className="w-full px-4 py-2.5 rounded-xl bg-white border border-neutral-200 focus:border-purple-500 focus:outline-none transition-all text-neutral-900 shadow-sm" />
                   </div>
                   <div>
                     <label className="text-xs font-semibold text-neutral-600 block mb-1.5">Start Date *</label>
