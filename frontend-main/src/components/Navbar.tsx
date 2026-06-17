@@ -125,8 +125,9 @@ export default function Navbar() {
             <MobileLink to="/courses" label="Explore Courses" onClick={() => setMobileOpen(false)} />
             <MobileLink to="/master-course" label="Program Master Course" onClick={() => setMobileOpen(false)} />
             <MobileLink to="/certificate" label="Certificate" onClick={() => setMobileOpen(false)} />
-            <MobileLink to="/courses" label="Courses" onClick={() => setMobileOpen(false)} />
-            <MobileLink to="/master-course" label="Master Course" onClick={() => setMobileOpen(false)} />
+            <MobileLink to="/about" label="About Us" onClick={() => setMobileOpen(false)} />
+            <MobileLink to="/hire-from-us" label="Hire From Us" onClick={() => setMobileOpen(false)} />
+            <MobileLink to="/contact" label="Contact" onClick={() => setMobileOpen(false)} />
             <MobileLink to="/trainers" label="Trainers" onClick={() => setMobileOpen(false)} />
             <MobileLink to="/blog" label="Blogs" onClick={() => setMobileOpen(false)} />
 
