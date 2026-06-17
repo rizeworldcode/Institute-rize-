@@ -83,18 +83,6 @@ export default function MasterCourse() {
                   View Curriculum
                 </a>
               </div>
-
-              <div className="mt-10 flex items-center gap-4">
-                <div className="flex -space-x-3">
-                  {[1, 2, 3, 4].map((i) => (
-                    <div key={i} className="w-10 h-10 rounded-full bg-neutral-200 border-2 border-white" />
-                  ))}
-                </div>
-                <div className="text-sm">
-                  <div className="font-semibold text-neutral-900">847+ students enrolled</div>
-                  <div className="text-neutral-500 text-xs">Limited seats available</div>
-                </div>
-              </div>
             </div>
           </Reveal>
 
