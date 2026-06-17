@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-
+const user_auth = require("../../middleware/user_auth");
 const multer_photo = require("../../middleware/multer");
 
 const {
@@ -19,7 +19,7 @@ router.post("/updateStudentdetails/:student_iD", (req, res, next) => {
 }, updateStudentdetails);
 
 router.post(
-    "/add_student",
+    "/add_student",user_auth,
     add_student
 );
 router.get(
