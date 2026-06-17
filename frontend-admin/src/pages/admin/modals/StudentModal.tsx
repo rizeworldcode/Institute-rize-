@@ -533,7 +533,7 @@ export function StudentModal({ student, onClose, onSave }: {
                   </div>
                   <div>
                     <label className="text-xs font-semibold text-neutral-600 block mb-1.5">Referred Amount (₹)</label>
-                    <input type="number" value={studentInfo.referredAmount} onChange={(e) => setStudentInfo({ ...studentInfo, referredAmount: e.target.value })} className="w-full px-4 py-2.5 rounded-xl bg-white border border-neutral-200 focus:border-orange-500 focus:ring-1 focus:ring-orange-500 focus:outline-none transition-all text-neutral-900 shadow-sm" />
+                    <input type="number" value={studentInfo.referredAmount} onChange={(e) => { if (e.target.value.length <= 9) setStudentInfo({ ...studentInfo, referredAmount: e.target.value }); }} className="w-full px-4 py-2.5 rounded-xl bg-white border border-neutral-200 focus:border-orange-500 focus:ring-1 focus:ring-orange-500 focus:outline-none transition-all text-neutral-900 shadow-sm" />
                   </div>
                 </div>
               </div>
@@ -874,11 +874,11 @@ export function StudentModal({ student, onClose, onSave }: {
                   </div>
                   <div>
                     <label className="text-xs font-semibold text-neutral-600 block mb-1.5">Total Fee (₹) *</label>
-                    <input type="number" required={!student || showAddAdmissionForm} min={0} value={currentAdmission.totalFee} onChange={(e) => setCurrentAdmission({ ...currentAdmission, totalFee: e.target.value })} className="w-full px-4 py-2.5 rounded-xl bg-white border border-neutral-200 focus:border-purple-500 focus:outline-none transition-all text-neutral-900 shadow-sm" />
+                    <input type="number" required={!student || showAddAdmissionForm} min={0} value={currentAdmission.totalFee} onChange={(e) => { if (e.target.value.length <= 9) setCurrentAdmission({ ...currentAdmission, totalFee: e.target.value }); }} className="w-full px-4 py-2.5 rounded-xl bg-white border border-neutral-200 focus:border-purple-500 focus:outline-none transition-all text-neutral-900 shadow-sm" />
                   </div>
                   <div>
                     <label className="text-xs font-semibold text-neutral-600 block mb-1.5">Paid Fee (₹)</label>
-                    <input type="number" min={0} value={currentAdmission.paidFee} onChange={(e) => setCurrentAdmission({ ...currentAdmission, paidFee: e.target.value })} className="w-full px-4 py-2.5 rounded-xl bg-white border border-neutral-200 focus:border-purple-500 focus:outline-none transition-all text-green-600 font-bold shadow-sm" />
+                    <input type="number" min={0} value={currentAdmission.paidFee} onChange={(e) => { if (e.target.value.length <= 9) setCurrentAdmission({ ...currentAdmission, paidFee: e.target.value }); }} className="w-full px-4 py-2.5 rounded-xl bg-white border border-neutral-200 focus:border-purple-500 focus:outline-none transition-all text-green-600 font-bold shadow-sm" />
                   </div>
                   <div>
                     <label className="text-xs font-semibold text-neutral-600 block mb-1.5">Fee Type</label>
