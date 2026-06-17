@@ -12,6 +12,7 @@ import { StudentDetailsModal } from "./modals/StudentDetailsModal";
 import { InquiryTab } from "./tabs/InquiryTab";
 import { ReferredByTab } from "./tabs/ReferredByTab";
 import { ReferrerModal } from "./modals/ReferrerModal";
+import { getApiUrl } from "../../utils/api";
 
 export default function AdminDashboard() {
   const navigate = useNavigate();
@@ -59,7 +60,7 @@ export default function AdminDashboard() {
   const handleReferrerClick = async (referrer: any) => {
     setSelectedReferrer(referrer);
     try {
-      const res = await fetch(`http://localhost:3001/getReferrerStudents/${referrer.id}`, { 
+      const res = await fetch(getApiUrl(`/getReferrerStudents/${referrer.id}`), { 
         method: "POST" 
       });
       const data = await res.json();
@@ -93,7 +94,7 @@ export default function AdminDashboard() {
      if (window.confirm(`Are you sure you want to clear all pending dues (₹${ref.pendingAmount.replace('₹', '')}) for ${ref.name}?`)) {
         try {
            const pendingValue = parseFloat(ref.pendingAmount.replace(/[₹,]/g, '')) || 0;
-           const res = await fetch("http://localhost:3001/updateReferrerPayment", {
+           const res = await fetch(getApiUrl("/updateReferrerPayment"), {
               method: "POST",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({ 
@@ -117,7 +118,7 @@ export default function AdminDashboard() {
 
   const handleSaveReferrer = async (updatedReferrer: any) => {
      try {
-        const res = await fetch("http://localhost:3001/updateReferrerPayment", {
+        const res = await fetch(getApiUrl("/updateReferrerPayment"), {
            method: "POST",
            headers: { "Content-Type": "application/json" },
            body: JSON.stringify({ 
@@ -155,7 +156,7 @@ export default function AdminDashboard() {
   const fetchNotifications = async () => {
     try {
       const token = localStorage.getItem("adminAuthToken");
-      const res = await fetch("http://localhost:3001/getAllInquiries", {
+      const res = await fetch(getApiUrl("/getAllInquiries"), {
         headers: { "Authorization": `Bearer ${token}` }
       });
       const data = await res.json();
@@ -182,7 +183,7 @@ export default function AdminDashboard() {
   const markNotificationAsRead = async (id: string) => {
     try {
       const token = localStorage.getItem("adminAuthToken");
-      await fetch(`http://localhost:3001/markInquiryRead/${id}`, {
+      await fetch(getApiUrl(`/markInquiryRead/${id}`), {
         method: "PATCH",
         headers: { "Authorization": `Bearer ${token}` }
       });
@@ -211,7 +212,7 @@ export default function AdminDashboard() {
 
   const fetchAllStudents = async () => {
     try {
-      const res = await fetch("http://localhost:3001/allStudents", {
+      const res = await fetch(getApiUrl("/allStudents"), {
         method: "POST"
       });
       const data = await res.json();
@@ -233,7 +234,7 @@ export default function AdminDashboard() {
               certificates: adm.certificates ? adm.certificates.map((cert: any, idx: number) => ({
                 id: `cert-${item.student_ID}-${adm.admission_id}-${idx}`,
                 courseName: cert.courseName || cert.course_name,
-                url: cert.certificatePath || `http://localhost:3001/${cert.certificate_path || cert.certificatePath}`,
+                url: cert.certificatePath || `/${cert.certificate_path || cert.certificatePath}`,
                 date: cert.issuedAt || cert.issued_at ? new Date(cert.issuedAt || cert.issued_at).toISOString() : new Date().toISOString()
               })) : [],
               startDate: adm.course_start_date 
@@ -265,7 +266,7 @@ export default function AdminDashboard() {
             let certificates: any[] = item.certificates ? item.certificates.map((cert: any, idx: number) => ({
               id: `cert-${item.student_ID}-${idx}`,
               courseName: cert.courseName || cert.course_name,
-              url: cert.certificatePath || `http://localhost:3001/${cert.certificate_path || cert.certificatePath}`,
+              url: cert.certificatePath || `/${cert.certificate_path || cert.certificatePath}`,
               date: cert.issuedAt || cert.issued_at ? new Date(cert.issuedAt || cert.issued_at).toISOString() : new Date().toISOString()
             })) : [];
             
@@ -274,7 +275,7 @@ export default function AdminDashboard() {
               certificates.push({
                 id: `cert-${item.student_ID}-old`,
                 courseName: Array.isArray(item.selected_course_name) ? item.selected_course_name[0] : item.selected_course_name || "Course",
-                url: `http://localhost:3001/${item.certificate_photo}`,
+                url: `/${item.certificate_photo}`,
                 date: item.created_at ? new Date(item.created_at).toISOString() : new Date().toISOString()
               });
             }
@@ -349,7 +350,7 @@ export default function AdminDashboard() {
 
   const fetchIssuedCertificates = async () => {
     try {
-      const res = await fetch("http://localhost:3001/certificateissuedStudentsData", {
+      const res = await fetch(getApiUrl("/certificateissuedStudentsData"), {
         method: "POST"
       });
       const data = await res.json();
@@ -381,7 +382,7 @@ export default function AdminDashboard() {
           certificates: [{
             id: `cert-${item.student_ID}`,
             name: "Certificate",
-            url: `http://localhost:3001/${item.certificate_photo}`,
+            url: `/${item.certificate_photo}`,
             date: item.updated_at ? new Date(item.updated_at).toISOString().split("T")[0] : ""
           }]
         }));
@@ -394,7 +395,7 @@ export default function AdminDashboard() {
 
   const fetchUnissuedCertificates = async () => {
     try {
-      const res = await fetch("http://localhost:3001/certificateunissuedStudentsData", {
+      const res = await fetch(getApiUrl("/certificateunissuedStudentsData"), {
         method: "POST"
       });
       const data = await res.json();
@@ -433,7 +434,7 @@ export default function AdminDashboard() {
 
   const fetchPendingFeeStudents = async () => {
     try {
-      const res = await fetch("http://localhost:3001/pandingfeeStudentsData", {
+      const res = await fetch(getApiUrl("/pandingfeeStudentsData"), {
         method: "POST"
       });
       const data = await res.json();
@@ -463,7 +464,7 @@ export default function AdminDashboard() {
 
   const fetchClearFeeStudents = async () => {
     try {
-      const res = await fetch("http://localhost:3001/clearfeeStudentsData", {
+      const res = await fetch(getApiUrl("/clearfeeStudentsData"), {
         method: "POST"
       });
       const data = await res.json();
@@ -502,7 +503,7 @@ export default function AdminDashboard() {
 
   const fetchEarningsDetails = async () => {
     try {
-      const res = await fetch("http://localhost:3001/totalEarningsDetails", {
+      const res = await fetch(getApiUrl("/totalEarningsDetails"), {
         method: "POST"
       });
       const data = await res.json();
@@ -517,7 +518,7 @@ export default function AdminDashboard() {
 
   const fetchReferrers = async () => {
     try {
-      const res = await fetch("http://localhost:3001/getAllReferrers", {
+      const res = await fetch(getApiUrl("/getAllReferrers"), {
         method: "POST"
       });
       const data = await res.json();
@@ -553,7 +554,7 @@ export default function AdminDashboard() {
 
   const fetchDashboardData = async () => {
     try {
-      const res = await fetch("http://localhost:3001/admin_dashboardGet");
+      const res = await fetch(getApiUrl("/admin_dashboardGet"));
       const data = await res.json();
       if (data.success) {
         const mappedStudents: Student[] = data.tcData.map((item: any) => {
@@ -573,7 +574,7 @@ export default function AdminDashboard() {
               certificates: adm.certificates ? adm.certificates.map((cert: any, idx: number) => ({
                 id: `cert-${item.student_ID}-${adm.admission_id}-${idx}`,
                 courseName: cert.courseName || cert.course_name,
-                url: cert.certificatePath || `http://localhost:3001/${cert.certificate_path || cert.certificatePath}`,
+                url: cert.certificatePath || `/${cert.certificate_path || cert.certificatePath}`,
                 date: cert.issuedAt || cert.issued_at ? new Date(cert.issuedAt || cert.issued_at).toISOString() : new Date().toISOString()
               })) : [],
               startDate: adm.course_start_date 
@@ -605,7 +606,7 @@ export default function AdminDashboard() {
             let certificates: any[] = item.certificates ? item.certificates.map((cert: any, idx: number) => ({
               id: `cert-${item.student_ID}-${idx}`,
               courseName: cert.courseName || cert.course_name,
-              url: cert.certificatePath || `http://localhost:3001/${cert.certificate_path || cert.certificatePath}`,
+              url: cert.certificatePath || `/${cert.certificate_path || cert.certificatePath}`,
               date: cert.issuedAt || cert.issued_at ? new Date(cert.issuedAt || cert.issued_at).toISOString() : new Date().toISOString()
             })) : [];
             
@@ -614,7 +615,7 @@ export default function AdminDashboard() {
               certificates.push({
                 id: `cert-${item.student_ID}-old`,
                 courseName: Array.isArray(item.selected_course_name) ? item.selected_course_name[0] : item.selected_course_name || "Course",
-                url: `http://localhost:3001/${item.certificate_photo}`,
+                url: `/${item.certificate_photo}`,
                 date: item.created_at ? new Date(item.created_at).toISOString() : new Date().toISOString()
               });
             }
@@ -702,7 +703,7 @@ export default function AdminDashboard() {
 
   const handleSetReferralAmount = async () => {
     try {
-      const res = await fetch("http://localhost:3001/updateReferralAmount", {
+      const res = await fetch(getApiUrl("/updateReferralAmount"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ amount: Number(globalReferralAmount) })
@@ -744,7 +745,7 @@ export default function AdminDashboard() {
     try {
       const token = localStorage.getItem("adminAuthToken");
       if (token) {
-        await fetch("http://localhost:3001/admin_logout", {
+        await fetch(getApiUrl("/admin_logout"), {
           method: "POST",
           headers: { "Authorization": `Bearer ${token}` }
         });

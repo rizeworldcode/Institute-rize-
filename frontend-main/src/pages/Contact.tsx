@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { MapPin, Phone, Mail, Clock, Send, Instagram, Linkedin, CheckCircle2, MessageSquare } from "lucide-react";
 import Reveal from "../components/Reveal";
+import { getApiUrl } from "../utils/api";
 
 export default function Contact() {
   const [form, setForm] = useState({ name: "", email: "", phone: "", subject: "", message: "" });
@@ -28,7 +29,7 @@ _${form.message}_
 🌐 *Source:* RizeWorld Website`;
 
     // Save to backend instead of local storage
-    fetch("http://localhost:3001/addInquiry", {
+    fetch(getApiUrl("/addInquiry"), {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { ArrowRight, CheckCircle2, Sparkles, Users, Award, Brain, Briefcase, Target, TrendingUp, Heart, Lightbulb } from "lucide-react";
 import Reveal from "../components/Reveal";
+import { getApiUrl } from "../utils/api";
 
 const reasons = [
   { icon: Brain, title: "AI-First Curriculum", desc: "Our students are trained to use AI tools in every marketing workflow — a rare edge in the industry." },
@@ -43,7 +44,7 @@ _${form.message || 'No additional requirements specified.'}_
 🌐 *Source:* RizeWorld Website (Hire From Us)`;
 
     // Save to backend instead of local storage
-    fetch("http://localhost:3001/addInquiry", {
+    fetch(getApiUrl("/addInquiry"), {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

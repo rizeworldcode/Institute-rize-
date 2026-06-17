@@ -3,6 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { 
   Users, LogOut, LayoutDashboard, IndianRupee, CheckCircle2, AlertCircle
 } from "lucide-react";
+import { getApiUrl } from "../../utils/api";
 
 export default function ReferrerDashboard() {
   const navigate = useNavigate();
@@ -33,7 +34,7 @@ export default function ReferrerDashboard() {
           return;
         }
 
-        const response = await fetch("http://localhost:3001/referrer_admin_dashboardGet", {
+        const response = await fetch(getApiUrl("/referrer_admin_dashboardGet"), {
           headers: {
             "Authorization": `Bearer ${token}`
           }
@@ -68,7 +69,7 @@ export default function ReferrerDashboard() {
   const handleLogout = async () => {
     try {
       const token = localStorage.getItem("referrerAuthToken");
-      await fetch("http://localhost:3001/referred_logout", {
+      await fetch(getApiUrl("/referred_logout"), {
         method: "POST",
         headers: {
           "Authorization": `Bearer ${token}`

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { X } from "lucide-react";
 import { Student, Admission } from "../types";
+import { getApiUrl } from "../../../utils/api";
 
 const ALL_COURSES = [
   { value: "Master Course Program", label: "Master Course Program" },
@@ -203,7 +204,7 @@ export function StudentModal({ student, onClose, onSave }: {
           referredByPassword: studentInfo.referredByPassword
         };
 
-        const res = await fetch("http://localhost:3001/add_student", {
+        const res = await fetch(getApiUrl("/add_student"), {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(payload)
@@ -272,7 +273,7 @@ export function StudentModal({ student, onClose, onSave }: {
         console.log("=== About to make API call ===");
         console.log("student object:", student);
         console.log("student.id:", student.id);
-        const url = `http://localhost:3001/updateStudentdetails/${student.id}`;
+        const url = getApiUrl(`/updateStudentdetails/${student.id}`);
         console.log("URL:", url);
         console.log("FormData has:", formData);
         // Log formData contents one more time
@@ -288,7 +289,7 @@ export function StudentModal({ student, onClose, onSave }: {
           const controller = new AbortController();
           const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
           
-          res = await fetch(`http://localhost:3001/updateStudentdetails/${student.id}`, {
+          res = await fetch(getApiUrl(`/updateStudentdetails/${student.id}`), {
             method: "POST",
             body: formData,
             signal: controller.signal

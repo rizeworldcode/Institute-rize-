@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Download, CheckCircle2, User, Eye, FileText, Lock, Mail, ArrowRight, AlertCircle, LogOut } from "lucide-react";
+import { getApiUrl, API_BASE_URL } from "../utils/api";
 
 interface Certificate {
   courseName: string;
@@ -24,7 +25,7 @@ export default function Certificate() {
 
   const fetchCertificateData = async (token: string) => {
     try {
-      const response = await fetch("http://localhost:3001/certificateData", {
+      const response = await fetch(getApiUrl("/certificateData"), {
         method: "POST",
         headers: {
           "Authorization": `Bearer ${token}`,
@@ -59,8 +60,8 @@ export default function Certificate() {
       const photoPath = cert.certificatePath.startsWith('http') 
         ? cert.certificatePath 
         : cert.certificatePath.startsWith('/') 
-          ? `http://localhost:3001${cert.certificatePath}` 
-          : `http://localhost:3001/${cert.certificatePath}`;
+          ? `API_BASE_URL${cert.certificatePath}` 
+          : `API_BASE_URL/${cert.certificatePath}`;
       
       const response = await fetch(photoPath);
       if (!response.ok) throw new Error("File not found");
@@ -87,8 +88,8 @@ export default function Certificate() {
       const photoPath = cert.certificatePath.startsWith('http') 
         ? cert.certificatePath 
         : cert.certificatePath.startsWith('/') 
-          ? `http://localhost:3001${cert.certificatePath}` 
-          : `http://localhost:3001/${cert.certificatePath}`;
+          ? `API_BASE_URL${cert.certificatePath}` 
+          : `API_BASE_URL/${cert.certificatePath}`;
       window.open(photoPath, '_blank');
     }
   };
@@ -97,7 +98,7 @@ export default function Certificate() {
     try {
       const token = localStorage.getItem("studentAuthToken");
       if (token) {
-        await fetch("http://localhost:3001/student_logout", {
+        await fetch(getApiUrl("/student_logout"), {
           method: "POST",
           headers: {
             "Authorization": `Bearer ${token}`
@@ -127,7 +128,7 @@ export default function Certificate() {
     setIsLoggingIn(true);
 
     try {
-      const response = await fetch("http://localhost:3001/student_login", {
+      const response = await fetch(getApiUrl("/student_login"), {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

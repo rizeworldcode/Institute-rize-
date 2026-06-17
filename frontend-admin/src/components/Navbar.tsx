@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { X, Home, Users, Briefcase, MoreHorizontal, MoreVertical, LogOut } from "lucide-react";
+import { getApiUrl } from "../utils/api";
 
 
 export default function Navbar() {
@@ -15,7 +16,7 @@ export default function Navbar() {
     try {
       const token = localStorage.getItem("adminAuthToken");
       if (token) {
-        await fetch("http://localhost:3001/admin_logout", {
+        await fetch(getApiUrl("/admin_logout"), {
           method: "POST",
           headers: {
             "Authorization": `Bearer ${token}`

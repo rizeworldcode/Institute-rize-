@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Inquiry } from "../types";
 import { Eye, X, MessageSquare, Calendar, User, Phone, BookOpen } from "lucide-react";
+import { getApiUrl } from "../../../utils/api";
 
 export function InquiryTab() {
   const [inquiries, setInquiries] = useState<Inquiry[]>([]);
@@ -10,7 +11,7 @@ export function InquiryTab() {
     const fetchInquiries = async () => {
       try {
         const token = localStorage.getItem("adminAuthToken");
-        const response = await fetch("http://localhost:3001/getAllInquiries", {
+        const response = await fetch(getApiUrl("/getAllInquiries"), {
           headers: {
             "Authorization": `Bearer ${token}`
           }

@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Lock, Mail, ArrowRight, Eye, EyeOff, CheckCircle2, XCircle, AlertCircle } from "lucide-react";
 import Reveal from "../../components/Reveal";
+import { getApiUrl } from "../../utils/api";
 
 export function PasswordRequirements({ password }: { password: string }) {
   const reqs = [
@@ -93,7 +94,7 @@ export default function AdminLogin() {
     setLoading(true);
 
     try {
-      const response = await fetch("http://localhost:3001/admin_login", {
+      const response = await fetch(getApiUrl("/admin_login"), {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

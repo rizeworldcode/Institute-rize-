@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { Mail, ArrowLeft, Key, Lock, CheckCircle2, AlertCircle } from "lucide-react";
 import Reveal from "../../components/Reveal";
 import { PasswordRequirements, checkPasswordValidity } from "./ReferrerLogin";
+import { getApiUrl } from "../../utils/api";
 
 export default function ReferrerForgetPassword() {
   const [step, setStep] = useState(1); // 1: Email, 2: OTP, 3: Reset, 4: Success
@@ -46,7 +47,7 @@ export default function ReferrerForgetPassword() {
     setLoading(true);
 
     try {
-      const response = await fetch("http://localhost:3001/sendOtpTOadmin", {
+      const response = await fetch(getApiUrl("/sendOtpTOadmin"), {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -89,7 +90,7 @@ export default function ReferrerForgetPassword() {
     setLoading(true);
 
     try {
-      const response = await fetch("http://localhost:3001/verifyOtp", {
+      const response = await fetch(getApiUrl("/verifyOtp"), {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -128,7 +129,7 @@ export default function ReferrerForgetPassword() {
     setLoading(true);
 
     try {
-      const response = await fetch("http://localhost:3001/admin_forgatePassword", {
+      const response = await fetch(getApiUrl("/admin_forgatePassword"), {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
