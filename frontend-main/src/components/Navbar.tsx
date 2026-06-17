@@ -123,7 +123,6 @@ export default function Navbar() {
               Location Alwar, RJ
             </a>
             <MobileLink to="/courses" label="Explore Courses" onClick={() => setMobileOpen(false)} />
-            <MobileLink to="/courses" label="Courses" onClick={() => setMobileOpen(false)} />
             <MobileLink to="/master-course" label="Program Master Course" onClick={() => setMobileOpen(false)} />
             <MobileLink to="/certificate" label="Certificate" onClick={() => setMobileOpen(false)} />
             <MobileLink to="/about" label="About Us" onClick={() => setMobileOpen(false)} />
