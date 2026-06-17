@@ -2,6 +2,7 @@ import { useState } from "react";
 import { X } from "lucide-react";
 import { Student, Admission } from "../types";
 import { getApiUrl } from "../../../utils/api";
+import { checkPasswordValidity, PasswordRequirements } from "../AdminLogin";
 
 const ALL_COURSES = [
   { value: "Master Course Program", label: "Master Course Program" },
@@ -79,9 +80,11 @@ export function StudentModal({ student, onClose, onSave }: {
     if (!studentInfo.name.trim()) return "Student name is required";
     if (!studentInfo.phone.trim()) return "Student phone is required";
     if (!/^\d+$/.test(studentInfo.phone.trim())) return "Phone number should contain only numbers";
-    if (studentInfo.password && studentInfo.password.length < 6) return "Password must contain minimum 6 characters";
     if (!student) { // Only require password for new students
       if (!studentInfo.password) return "Password is required";
+    }
+    if (studentInfo.password && !checkPasswordValidity(studentInfo.password)) {
+      return "Password does not meet the security requirements (6-20 characters, 1 uppercase, 1 lowercase, 1 number, 1 special character).";
     }
     return null;
   };
@@ -483,11 +486,11 @@ export function StudentModal({ student, onClose, onSave }: {
                   <input
                     required={!student}
                     type="password"
-                    minLength={6}
                     value={studentInfo.password}
                     onChange={(e) => setStudentInfo({ ...studentInfo, password: e.target.value })}
                     className="w-full px-4 py-2.5 rounded-xl bg-white border border-neutral-200 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none transition-all text-neutral-900 shadow-sm"
                   />
+                  <PasswordRequirements password={studentInfo.password} />
                 </div>
                 <div>
                   <label className="text-xs font-semibold text-neutral-600 block mb-1.5">Student Phone {!student ? "*" : ""}</label>
