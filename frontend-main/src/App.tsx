@@ -16,6 +16,7 @@ const Centers = lazy(() => import("./pages/Centers"));
 const PrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy"));
 const Terms = lazy(() => import("./pages/Terms"));
 const Certificate = lazy(() => import("./pages/Certificate"));
+const Trainers = lazy(() => import("./pages/Trainers"));
 
 function ScrollToTop() {
   const { pathname } = useLocation();
@@ -48,6 +49,7 @@ function MainLayout() {
           <Route path="/privacy" element={<PrivacyPolicy />} />
           <Route path="/terms" element={<Terms />} />
           <Route path="/certificate" element={<Certificate />} />
+          <Route path="/trainers" element={<Trainers />} />
         </Routes>
       </Suspense>
       <WhatsAppWidget />
