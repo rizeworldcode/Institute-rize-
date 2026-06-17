@@ -65,13 +65,21 @@ app.use(hpp({
 app.use(compression());
 
 // CORS configuration
+const allowedOrigins = [
+  'https://instituterizworld-git-main-rizeworld.vercel.app',
+  'https://instituterizworld.vercel.app'
+];
+
 app.use(cors({
-  origin: true,
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'Origin', 'Accept', 'X-Requested-With']
+  origin: function(origin, callback) {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true
 }));
-app.options('*', cors());
 
 // Serving static files
 app.use(express.static(path.join(__dirname, 'public')));
