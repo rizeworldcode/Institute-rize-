@@ -5,8 +5,6 @@ const user_auth = require("../../middleware/user_auth");
 const {
 allStudents,certificateissuedStudentsData,certificateunissuedStudentsData,pandingfeeStudentsData,clearfeeStudentsData,particularStudentData, totalEarningsDetails, referredStudentsData, getAllReferrers, updateReferrerPayment, getReferrerStudents
 } = require("../controllers/studentdataGet");
-
-const user_auth = require("../../middleware/user_auth");
 router.post("/allStudents",user_auth, allStudents);
 router.post("/certificateissuedStudentsData",user_auth, certificateissuedStudentsData);
 router.post("/certificateunissuedStudentsData",user_auth, certificateunissuedStudentsData);
