@@ -82,15 +82,15 @@ export default function Footer() {
             <ul className="space-y-3 text-sm text-neutral-500">
               <li className="flex items-start gap-2">
                 <MapPin size={14} className="text-orange-500 mt-0.5 shrink-0" />
-                <span>C198, near Telco Circle, UIT colony, Shalimar Nagar, Alwar, Rajasthan 301001</span>
+                <span>C197, near Telco Circle, UIT colony, Shalimar Nagar, Alwar, Rajasthan 301001</span>
               </li>
-              <li className="flex items-center gap-2">
-                <Phone size={14} className="text-green-600" />
+              <li className="flex items-start gap-2">
+                <Phone size={14} className="text-green-600 shrink-0 mt-0.5" />
                 <span>+91 8302277092</span>
               </li>
-              <li className="flex items-center gap-2">
-                <Mail size={14} className="text-green-600" />
-                <span>rizeworldinstitute@gmail.com</span>
+              <li className="flex items-start gap-2">
+                <Mail size={14} className="text-green-600 shrink-0 mt-0.5" />
+                <span className="break-all">rizeworldinstitute@gmail.com</span>
               </li>
             </ul>
           </div>
