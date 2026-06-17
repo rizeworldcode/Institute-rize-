@@ -66,6 +66,8 @@ app.use(compression());
 
 // CORS configuration
 const allowedOrigins = [
+  'rizeworldinstitute.vercel.app',
+  'referralinstitue.vercel.app',
   'https://instituterizworld-git-main-rizeworld.vercel.app',
   'https://instituterizworld.vercel.app',
   'https://adminrizeworldinstitute.vercel.app'
