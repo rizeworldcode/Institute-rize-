@@ -48,12 +48,12 @@ export default function Navbar() {
 
 
       {/* ============================================================== */}
-      {/* MOBILE & TABLET NAVBAR (Unified floating dark capsule) */}
+      {/* MOBILE & TABLET NAVBAR (Unified floating white glass capsule) */}
       {/* ============================================================== */}
       <div className="lg:hidden fixed top-6 left-4 right-4 z-50 pointer-events-none">
-        <div className="w-full bg-[#0d0a15]/90 backdrop-blur-xl border border-white/10 rounded-[22px] shadow-[0_12px_40px_rgba(0,0,0,0.3)] flex items-center justify-between px-6 py-3.5 pointer-events-auto">
+        <div className="w-full bg-white/80 backdrop-blur-xl border border-white/40 rounded-[22px] shadow-[0_12px_40px_rgba(0,0,0,0.06)] flex items-center justify-between px-6 py-3.5 pointer-events-auto">
           
-          {/* Logo container with white invert filter to match the reference image */}
+          {/* Logo container */}
           <Link 
             to="/" 
             onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
@@ -62,14 +62,14 @@ export default function Navbar() {
             <img 
               src="/logo/RIZE LOGO HORI PNG.png" 
               alt="RizeWorld Logo" 
-              className="absolute top-1/2 -translate-y-1/2 left-0 h-[500%] w-auto max-w-none object-contain object-left ml-[-70px] invert brightness-200" 
+              className="absolute top-1/2 -translate-y-1/2 left-0 h-[500%] w-auto max-w-none object-contain object-left ml-[-70px]" 
             />
           </Link>
 
           {/* Thin circular hamburger button */}
           <button 
             onClick={() => setMobileOpen(!mobileOpen)} 
-            className="h-10 w-10 flex items-center justify-center rounded-full border border-white/20 bg-white/5 text-white hover:bg-white/10 active:scale-95 transition-all cursor-pointer shrink-0 shadow-sm"
+            className="h-10 w-10 flex items-center justify-center rounded-full border border-neutral-200 bg-white/20 text-neutral-800 hover:bg-neutral-100 active:scale-95 transition-all cursor-pointer shrink-0 shadow-sm"
           >
             {mobileOpen ? <X size={18} /> : <Menu size={18} />}
           </button>
