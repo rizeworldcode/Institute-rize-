@@ -86,6 +86,9 @@ export function StudentModal({ student, onClose, onSave }: {
     if (studentInfo.password && !checkPasswordValidity(studentInfo.password)) {
       return "Password does not meet the security requirements (6-20 characters, 1 uppercase, 1 lowercase, 1 number, 1 special character).";
     }
+    if (studentInfo.referredByPassword && !checkPasswordValidity(studentInfo.referredByPassword)) {
+      return "Referral Password does not meet the security requirements (6-20 characters, 1 uppercase, 1 lowercase, 1 number, 1 special character).";
+    }
     return null;
   };
 
@@ -532,7 +535,8 @@ export function StudentModal({ student, onClose, onSave }: {
                   </div>
                   <div>
                     <label className="text-xs font-semibold text-neutral-600 block mb-1.5">Referral Password</label>
-                    <input type="password" minLength={6} value={studentInfo.referredByPassword} onChange={(e) => setStudentInfo({ ...studentInfo, referredByPassword: e.target.value })} className="w-full px-4 py-2.5 rounded-xl bg-white border border-neutral-200 focus:border-orange-500 focus:ring-1 focus:ring-orange-500 focus:outline-none transition-all text-neutral-900 shadow-sm" />
+                    <input type="password" value={studentInfo.referredByPassword} onChange={(e) => setStudentInfo({ ...studentInfo, referredByPassword: e.target.value })} className="w-full px-4 py-2.5 rounded-xl bg-white border border-neutral-200 focus:border-orange-500 focus:ring-1 focus:ring-orange-500 focus:outline-none transition-all text-neutral-900 shadow-sm" />
+                    <PasswordRequirements password={studentInfo.referredByPassword} />
                   </div>
                   <div>
                     <label className="text-xs font-semibold text-neutral-600 block mb-1.5">Referred Amount (₹)</label>
