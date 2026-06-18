@@ -38,8 +38,8 @@ exports.admin_login = async (req, res) => {
         
         if (!existingAdmin) {
             // If not in DB, check env vars (for backward compatibility)
-            const envEmail = existingAdmin.email;
-            const envPassword = existingAdmin.password;
+            const envEmail = process.env.ADMIN_EMAIL;
+            const envPassword = process.env.ADMIN_PASSWORD;
             
             if (frontend_email !== envEmail || frontend_password !== envPassword) {
                 return {
@@ -111,10 +111,24 @@ exports.sendOtpTOadmin = async (req, res) => {
     const {email} = req.body;
 
     try {
-        const AdminData = await admin_model.findOne({ email: email });
-        
-        // If admin not in DB, check env email
+        // Check if email matches ADMIN_EMAIL (since we only have one admin)
+        if (email !== process.env.ADMIN_EMAIL) {
+            return {
+                message: "Admin not found with this email",
+                success: false,
+            };
+        }
 
+        let AdminData = await admin_model.findOne({ email: email });
+        
+        // If admin not in DB, create it
+        if (!AdminData) {
+            const hashedPassword = await bcrypt.hash(process.env.ADMIN_PASSWORD, 10);
+            AdminData = await admin_model.create({
+                email: email,
+                password: hashedPassword
+            });
+        }
 
         const otp = Math.floor(1000 + Math.random() * 9000).toString();
         const otpExpiry = Date.now() + 3600000; // 1 hour
@@ -152,7 +166,7 @@ exports.sendOtpTOadmin = async (req, res) => {
     } catch (error) {
         console.log(error);
         return {
-            message: error.message || "An error occurred",
+            message: error,
             success: false,
         };
     }
