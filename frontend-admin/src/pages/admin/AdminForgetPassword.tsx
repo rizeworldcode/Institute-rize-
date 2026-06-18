@@ -62,7 +62,11 @@ export default function AdminForgetPassword() {
         setResendCount(prev => prev + 1);
         setOtp("");
       } else {
-        setError(data.message || "Failed to send OTP");
+        // Ensure message is a string
+        const errorMsg = typeof data.message === 'string' 
+          ? data.message 
+          : data.message?.message || "Failed to send OTP";
+        setError(errorMsg);
       }
     } catch (err) {
       setError("An error occurred. Please try again later.");
@@ -100,7 +104,10 @@ export default function AdminForgetPassword() {
       if (data.success) {
         setStep(3);
       } else {
-        setError(data.message || "Invalid OTP");
+        const errorMsg = typeof data.message === 'string' 
+          ? data.message 
+          : data.message?.message || "Invalid OTP";
+        setError(errorMsg);
       }
     } catch (err) {
       setError("An error occurred. Please try again later.");
@@ -139,7 +146,10 @@ export default function AdminForgetPassword() {
           navigate("/admin/login");
         }, 3000);
       } else {
-        setError(data.message || "Failed to reset password");
+        const errorMsg = typeof data.message === 'string' 
+          ? data.message 
+          : data.message?.message || "Failed to reset password";
+        setError(errorMsg);
       }
     } catch (err) {
       setError("An error occurred. Please try again later.");

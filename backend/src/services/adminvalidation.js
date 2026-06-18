@@ -108,7 +108,7 @@ exports.admin_login = async (req, res) => {
 };
 
 exports.sendOtpTOadmin = async (req, res) => {
-    const { email } = req.body;
+    const {email} = req.body;
 
     try {
         const AdminData = await admin_model.findOne({ email: email });
@@ -160,7 +160,7 @@ exports.sendOtpTOadmin = async (req, res) => {
     } catch (error) {
         console.log(error);
         return {
-            message: error,
+            message: error.message || "An error occurred",
             success: false,
         };
     }
@@ -216,7 +216,7 @@ exports.verifyOtp = async (req, res) => {
     } catch (error) {
         console.log(error);
         return {
-            message: error,
+            message: error.message || "An error occurred",
             success: false,
         };
     }

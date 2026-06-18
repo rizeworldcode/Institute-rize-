@@ -80,7 +80,7 @@ exports.verifyOtp = async (req, res) => {
     } catch (error) {
         console.log(error);
         return {
-            message: error,
+            message: error.message || "An error occurred",
             success: false,
         };
     }
@@ -129,7 +129,7 @@ exports.sendOtpTOadmin = async (req, res) => {
     } catch (error) {
         console.log(error);
         return {
-            message: error,
+            message: error.message || "An error occurred",
             success: false,
         };
     }
