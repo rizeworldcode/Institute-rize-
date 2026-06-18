@@ -128,7 +128,6 @@ export default function Navbar() {
             <MobileLink to="/about" label="About Us" onClick={() => setMobileOpen(false)} />
             <MobileLink to="/hire-from-us" label="Hire From Us" onClick={() => setMobileOpen(false)} />
             <MobileLink to="/contact" label="Contact" onClick={() => setMobileOpen(false)} />
-            <MobileLink to="/trainers" label="Trainers" onClick={() => setMobileOpen(false)} />
             <MobileLink to="/blog" label="Blogs" onClick={() => setMobileOpen(false)} />
 
             <Link
