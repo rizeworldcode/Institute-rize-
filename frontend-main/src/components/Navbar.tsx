@@ -110,16 +110,16 @@ export default function Navbar() {
         mobileOpen ? "visible" : "invisible"
       }`}>
         <div
-          className={`absolute inset-0 bg-black/40 backdrop-blur-sm transition-opacity duration-500 ${
+          className={`absolute inset-0 bg-black/30 backdrop-blur-xs transition-opacity duration-500 ${
             mobileOpen ? "opacity-100" : "opacity-0"
           }`}
           onClick={() => setMobileOpen(false)}
         />
-        <div className={`absolute right-0 top-0 bottom-0 w-[85%] max-w-sm bg-white/98 backdrop-blur-xl border-l border-white/40 shadow-luxury transition-transform duration-500 ${
-          mobileOpen ? "translate-x-0" : "translate-x-full"
+        <div className={`absolute right-4 top-20 bottom-4 w-[calc(100%-2rem)] max-w-sm bg-white/95 backdrop-blur-xl border border-white/40 shadow-luxury rounded-[2.5rem] transition-transform duration-500 ${
+          mobileOpen ? "translate-x-0" : "translate-x-[120%]"
         }`}>
-          <div className="h-full overflow-y-auto p-6 pt-24 space-y-2" style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 400 }}>
-            <a href="https://maps.google.com/?q=Rizeworld+Institute+of+AI+and+Digital+Marketing,+Alwar" target="_blank" rel="noopener noreferrer" className="block py-3 px-4 rounded-xl font-normal text-neutral-900 hover:bg-neutral-200 hover:text-rize-blue transition-colors uppercase">
+          <div className="h-full overflow-y-auto p-8 space-y-2" style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 400 }}>
+            <a href="https://maps.google.com/?q=Rizeworld+Institute+of+AI+and+Digital+Marketing,+Alwar" target="_blank" rel="noopener noreferrer" className="block py-3 px-4 rounded-2xl font-normal text-neutral-900 hover:bg-neutral-100 hover:text-rize-blue transition-colors uppercase">
               Location Alwar, RJ
             </a>
             <MobileLink to="/courses" label="Explore Courses" onClick={() => setMobileOpen(false)} />
@@ -133,7 +133,7 @@ export default function Navbar() {
             <Link
               to="/contact"
               onClick={() => setMobileOpen(false)}
-              className="block mt-6 text-center py-3 rounded-full border border-rose-300 text-neutral-900 font-normal hover:bg-rose-50 transition-colors uppercase"
+              className="block mt-6 text-center py-3.5 rounded-full border border-rose-300 text-neutral-900 font-normal hover:bg-rose-50 transition-colors uppercase"
               style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 400 }}
             >
               Enroll Now
@@ -150,7 +150,7 @@ function MobileLink({ to, label, onClick }: any) {
     <Link
       to={to}
       onClick={onClick}
-      className="block py-3 px-4 rounded-xl font-normal text-neutral-900 hover:bg-neutral-200 hover:text-rize-blue transition-colors uppercase"
+      className="block py-3 px-4 rounded-2xl font-normal text-neutral-900 hover:bg-neutral-100 hover:text-rize-blue transition-colors uppercase"
     >
       {label}
     </Link>
