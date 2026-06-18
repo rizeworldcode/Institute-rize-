@@ -6,6 +6,15 @@ const adminSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  password: {
+    type: String,
+  },
+  otp: {
+    type: String,
+  },
+  otpExpiry: {
+    type: Number,
+  },
   auth_key: {
     type: String,
     default: null,
