@@ -37,43 +37,19 @@ exports.admin_login = async (req, res) => {
         let existingAdmin = await admin_model.findOne({ email: frontend_email });
         
         if (!existingAdmin) {
-            // If not in DB, check env vars (for backward compatibility)
-            const envEmail = existingAdmin.email;
-            const envPassword = existingAdmin.password;
-            
-            if (frontend_email !== envEmail || frontend_password !== envPassword) {
-                return {
-                    success: false,
-                    message: "Invalid email or password",
-                };
-            }
-            
-            // Create admin in DB if not exists
-            const hashedPassword = await bcrypt.hash(envPassword, 10);
-            existingAdmin = await admin_model.create({
-                email: envEmail,
-                password: hashedPassword
-            });
-        } else {
-            // Check password against DB
-            if (existingAdmin.password) {
-                const isPasswordValid = await bcrypt.compare(frontend_password, existingAdmin.password);
-                if (!isPasswordValid) {
-                    return {
-                        success: false,
-                        message: "Invalid email or password",
-                    };
-                }
-            } else {
-                // Fallback to env password if no password in DB
-                const envPassword = existingAdmin.password;
-                if (frontend_password !== envPassword) {
-                    return {
-                        success: false,
-                        message: "Invalid email or password",
-                    };
-                }
-            }
+            return {
+                success: false,
+                message: "Invalid email or password",
+            };
+        }
+        
+        // Check password against DB
+        const isPasswordValid = await bcrypt.compare(frontend_password, existingAdmin.password);
+        if (!isPasswordValid) {
+            return {
+                success: false,
+                message: "Invalid email or password",
+            };
         }
         
         const token = jwt.sign({ id: existingAdmin._id }, process.env.SECRET_KEY);
@@ -111,12 +87,14 @@ exports.sendOtpTOadmin = async (req, res) => {
     const {email} = req.body;
 
     try {
-        // Check if email matches ADMIN_EMAIL (since we only have one admin)
-
-
-        let AdminData = await admin_model.findOne({ email: email });
+        const AdminData = await admin_model.findOne({ email: email });
         
-
+        if (!AdminData) {
+            return {
+                message: "Admin not found with this email",
+                success: false,
+            };
+        }
 
         const otp = Math.floor(1000 + Math.random() * 9000).toString();
         const otpExpiry = Date.now() + 3600000; // 1 hour
