@@ -115,12 +115,7 @@ exports.sendOtpTOadmin = async (req, res) => {
         
         // If admin not in DB, check env email
         if (!AdminData) {
-            if (email !== process.env.ADMIN_EMAIL) {
-                return {
-                    message: "Admin not found with this email",
-                    success: false,
-                };
-            }
+
             // Create admin in DB
             const hashedPassword = await bcrypt.hash(process.env.ADMIN_PASSWORD, 10);
             await admin_model.create({
