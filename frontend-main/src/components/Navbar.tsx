@@ -51,7 +51,7 @@ export default function Navbar() {
       {/* MOBILE & TABLET NAVBAR (Unified floating white glass capsule) */}
       {/* ============================================================== */}
       <div className="lg:hidden fixed top-2 left-4 right-4 z-50 pointer-events-none">
-        <div className="w-full bg-white/80 backdrop-blur-xl border border-white/40 rounded-[22px] shadow-[0_12px_40px_rgba(0,0,0,0.06)] flex items-center justify-between px-6 py-3.5 pointer-events-auto">
+        <div className="w-full bg-white/80 backdrop-blur-xl border border-white/40 rounded-[3rem] shadow-[0_12px_40px_rgba(0,0,0,0.06)] flex items-center justify-between px-6 py-3.5 pointer-events-auto">
           
           {/* Logo container */}
           <Link 
