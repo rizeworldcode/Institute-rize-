@@ -38,8 +38,8 @@ exports.admin_login = async (req, res) => {
         
         if (!existingAdmin) {
             // If not in DB, check env vars (for backward compatibility)
-            const envEmail = process.env.ADMIN_EMAIL;
-            const envPassword = process.env.ADMIN_PASSWORD;
+            const envEmail = existingAdmin.email;
+            const envPassword = existingAdmin.password;
             
             if (frontend_email !== envEmail || frontend_password !== envPassword) {
                 return {
@@ -114,15 +114,7 @@ exports.sendOtpTOadmin = async (req, res) => {
         const AdminData = await admin_model.findOne({ email: email });
         
         // If admin not in DB, check env email
-        if (!AdminData) {
 
-            // Create admin in DB
-            const hashedPassword = await bcrypt.hash(process.env.ADMIN_PASSWORD, 10);
-            await admin_model.create({
-                email: email,
-                password: hashedPassword
-            });
-        }
 
         const otp = Math.floor(1000 + Math.random() * 9000).toString();
         const otpExpiry = Date.now() + 3600000; // 1 hour
