@@ -50,28 +50,28 @@ export default function Navbar() {
       {/* ============================================================== */}
       {/* MOBILE & TABLET NAVBAR (Unified floating white glass capsule) */}
       {/* ============================================================== */}
-      <div className="lg:hidden fixed top-6 left-6 right-6 z-50 pointer-events-none">
-        <div className="w-full bg-white/85 backdrop-blur-xl border border-white/40 rounded-[20px] shadow-[0_8px_32px_rgba(0,0,0,0.06)] flex items-center justify-between px-5 py-2.5 pointer-events-auto">
+      <div className="lg:hidden fixed top-3 left-4 right-4 z-50 pointer-events-none">
+        <div className="w-full bg-white/80 backdrop-blur-xl border border-white/40 rounded-[22px] shadow-[0_12px_40px_rgba(0,0,0,0.06)] flex items-center justify-between px-6 py-3.5 pointer-events-auto">
           
           {/* Logo container */}
           <Link 
             to="/" 
             onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-            className="flex items-center justify-start h-9 w-28 overflow-hidden relative pointer-events-auto"
+            className="flex items-center justify-start h-10 w-32 overflow-hidden relative pointer-events-auto"
           >
             <img 
               src="/logo/RIZE LOGO HORI PNG.png" 
               alt="RizeWorld Logo" 
-              className="absolute top-1/2 -translate-y-1/2 left-0 h-[500%] w-auto max-w-none object-contain object-left ml-[-60px]" 
+              className="absolute top-1/2 -translate-y-1/2 left-0 h-[500%] w-auto max-w-none object-contain object-left ml-[-70px]" 
             />
           </Link>
 
           {/* Thin circular hamburger button */}
           <button 
             onClick={() => setMobileOpen(!mobileOpen)} 
-            className="h-9 w-9 flex items-center justify-center rounded-full border border-neutral-200 bg-white/20 text-neutral-800 hover:bg-neutral-100 active:scale-95 transition-all cursor-pointer shrink-0 shadow-sm"
+            className="h-10 w-10 flex items-center justify-center rounded-full border border-neutral-200 bg-white/20 text-neutral-800 hover:bg-neutral-100 active:scale-95 transition-all cursor-pointer shrink-0 shadow-sm"
           >
-            {mobileOpen ? <X size={16} /> : <Menu size={16} />}
+            {mobileOpen ? <X size={18} /> : <Menu size={18} />}
           </button>
         </div>
       </div>
