@@ -56,12 +56,13 @@ export default function AdminDashboard() {
   const [selectedReferrer, setSelectedReferrer] = useState<any>(null);
   const [referrerStudents, setReferrerStudents] = useState<any[]>([]);
   const [referrerStatusFilter, setReferrerStatusFilter] = useState("All");
-
+  const token = localStorage.getItem("token");
   const handleReferrerClick = async (referrer: any) => {
     setSelectedReferrer(referrer);
     try {
       const res = await fetch(getApiUrl(`/getReferrerStudents/${referrer.id}`), { 
-        method: "POST" 
+        method: "POST" ,
+        headers: { "Content-Type": "application/json" , "Authorization": `Bearer ${token}`}
       });
       const data = await res.json();
 
@@ -96,7 +97,7 @@ export default function AdminDashboard() {
            const pendingValue = parseFloat(ref.pendingAmount.replace(/[₹,]/g, '')) || 0;
            const res = await fetch(getApiUrl("/updateReferrerPayment"), {
               method: "POST",
-              headers: { "Content-Type": "application/json" },
+              headers: { "Content-Type": "application/json","Authorization": `Bearer ${token}`},
               body: JSON.stringify({ 
                  id: ref.id, 
                  payAmount: pendingValue
@@ -120,7 +121,7 @@ export default function AdminDashboard() {
      try {
         const res = await fetch(getApiUrl("/updateReferrerPayment"), {
            method: "POST",
-           headers: { "Content-Type": "application/json" },
+           headers: { "Content-Type": "application/json","Authorization": `Bearer ${token}`},
            body: JSON.stringify({ 
               id: updatedReferrer.id, 
               payAmount: updatedReferrer.payAmount 
@@ -213,7 +214,8 @@ export default function AdminDashboard() {
   const fetchAllStudents = async () => {
     try {
       const res = await fetch(getApiUrl("/allStudents"), {
-        method: "POST"
+        method: "POST",
+        headers: { "Content-Type": "application/json","Authorization": `Bearer ${token}`},
       });
       const data = await res.json();
       if (data.success) {
@@ -351,7 +353,8 @@ export default function AdminDashboard() {
   const fetchIssuedCertificates = async () => {
     try {
       const res = await fetch(getApiUrl("/certificateissuedStudentsData"), {
-        method: "POST"
+        method: "POST",
+        headers: { "Content-Type": "application/json","Authorization": `Bearer ${token}`},
       });
       const data = await res.json();
       if (data.success) {
@@ -396,7 +399,8 @@ export default function AdminDashboard() {
   const fetchUnissuedCertificates = async () => {
     try {
       const res = await fetch(getApiUrl("/certificateunissuedStudentsData"), {
-        method: "POST"
+        method: "POST",
+        headers: { "Content-Type": "application/json","Authorization": `Bearer ${token}`},
       });
       const data = await res.json();
       if (data.success) {
@@ -435,7 +439,8 @@ export default function AdminDashboard() {
   const fetchPendingFeeStudents = async () => {
     try {
       const res = await fetch(getApiUrl("/pandingfeeStudentsData"), {
-        method: "POST"
+        method: "POST",
+        headers: { "Content-Type": "application/json","Authorization": `Bearer ${token}`},
       });
       const data = await res.json();
       if (data.success) {
@@ -465,7 +470,8 @@ export default function AdminDashboard() {
   const fetchClearFeeStudents = async () => {
     try {
       const res = await fetch(getApiUrl("/clearfeeStudentsData"), {
-        method: "POST"
+        method: "POST",
+        headers: { "Content-Type": "application/json","Authorization": `Bearer ${token}`},
       });
       const data = await res.json();
       if (data.success) {
@@ -504,7 +510,8 @@ export default function AdminDashboard() {
   const fetchEarningsDetails = async () => {
     try {
       const res = await fetch(getApiUrl("/totalEarningsDetails"), {
-        method: "POST"
+        method: "POST",
+        headers: { "Content-Type": "application/json","Authorization": `Bearer ${token}`},
       });
       const data = await res.json();
       if (data.success) {
@@ -519,7 +526,8 @@ export default function AdminDashboard() {
   const fetchReferrers = async () => {
     try {
       const res = await fetch(getApiUrl("/getAllReferrers"), {
-        method: "POST"
+        method: "POST",
+        headers: { "Content-Type": "application/json","Authorization": `Bearer ${token}`},
       });
       const data = await res.json();
       if (data.success) {
@@ -554,7 +562,10 @@ export default function AdminDashboard() {
 
   const fetchDashboardData = async () => {
     try {
-      const res = await fetch(getApiUrl("/admin_dashboardGet"));
+      const res = await fetch(getApiUrl("/admin_dashboardGet"),{
+        method: "POST",
+        headers: { "Content-Type": "application/json","Authorization": `Bearer ${token}`},
+      });
       const data = await res.json();
       if (data.success) {
         const mappedStudents: Student[] = data.tcData.map((item: any) => {
@@ -705,7 +716,7 @@ export default function AdminDashboard() {
     try {
       const res = await fetch(getApiUrl("/updateReferralAmount"), {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json","Authorization": `Bearer ${token}` },
         body: JSON.stringify({ amount: Number(globalReferralAmount) })
       });
       const data = await res.json();
