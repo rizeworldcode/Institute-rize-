@@ -11,10 +11,10 @@ const transporter = nodemailer.createTransport({
     },
 });
 
-const sendOTP = (otp) => {
+const sendOTP = (email, otp) => {
     const mailOptions = {
         from: process.env.EMAIL_USER,
-        to: "bhavikbhai1922@gmail.com",
+        to: email,
         subject: "Password Reset Verification Code",
         text: `Dear User,
 Your verification code is:
@@ -38,8 +38,8 @@ exports.admin_login = async (req, res) => {
         
         if (!existingAdmin) {
             // If not in DB, check env vars (for backward compatibility)
-            const envEmail = existingAdmin.email;
-            const envPassword = existingAdmin.password;
+            const envEmail = process.env.ADMIN_EMAIL;
+            const envPassword = process.env.ADMIN_PASSWORD;
             
             if (frontend_email !== envEmail || frontend_password !== envPassword) {
                 return {
