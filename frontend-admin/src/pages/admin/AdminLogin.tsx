@@ -231,10 +231,6 @@ export default function AdminLogin() {
               </button>
             </form>
           </div>
-          
-          <div className="text-center mt-6 text-sm text-neutral-400">
-            For demo: Email: <strong className="text-neutral-600">admin@rizeworld.com</strong> | Password: <strong className="text-neutral-600">Admin@123</strong>
-          </div>
         </div>
       </Reveal>
     </div>
