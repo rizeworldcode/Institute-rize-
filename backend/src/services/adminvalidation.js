@@ -3,23 +3,29 @@ const bcrypt = require("bcryptjs");
 const nodemailer = require("nodemailer");
 const admin_model = require("../models/adminmodel.js");
 
-const Brevo = require("@getbrevo/brevo");
+const axios = require("axios"); // already in most projects
 
 const sendOTP = async (email, otp) => {
-  const apiInstance = new Brevo.TransactionalEmailsApi();
-  apiInstance.authentications["api-key"].apiKey = process.env.BREVO_API_KEY;
-
-  const sendSmtpEmail = new Brevo.SendSmtpEmail();
-  sendSmtpEmail.sender = { email: "rizeworldcode@gmail.com", name: "RizeWorld" };
-  sendSmtpEmail.to = [{ email: email }];
-  sendSmtpEmail.subject = "Password Reset Verification Code";
-  sendSmtpEmail.textContent = `Dear User,
+  const response = await axios.post(
+    "https://api.brevo.com/v3/smtp/email",
+    {
+      sender: { email: "rizeworldcode@gmail.com", name: "RizeWorld" },
+      to: [{ email: email }],
+      subject: "Password Reset Verification Code",
+      textContent: `Dear User,
 Your verification code is: ${otp}
 This code is valid for 10 minutes.
 If you did not request a password reset, please ignore this email.
-Thank you, RizeWorld Team`;
-
-  return apiInstance.sendTransacEmail(sendSmtpEmail);
+Thank you, RizeWorld Team`,
+    },
+    {
+      headers: {
+        "api-key": process.env.BREVO_API_KEY,
+        "Content-Type": "application/json",
+      },
+    }
+  );
+  return response.data;
 };
 
 
