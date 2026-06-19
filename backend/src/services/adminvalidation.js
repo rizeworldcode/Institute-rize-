@@ -3,36 +3,23 @@ const bcrypt = require("bcryptjs");
 const nodemailer = require("nodemailer");
 const admin_model = require("../models/adminmodel.js");
 
-const transporter = nodemailer.createTransport({
-  host: "smtp-relay.brevo.com",
-  port: 587,
-  secure: false,
-  auth: {
-    user: process.env.BREVO_EMAIL,   // your brevo account email
-    pass: process.env.BREVO_SMTP_KEY, // SMTP key from brevo dashboard
-  },
-});
+const Brevo = require("@getbrevo/brevo");
 
-transporter.verify((error, success) => {
-  if (error) console.log("Mailer error:", error);
-  else console.log("Mailer ready ✅");
-});
+const sendOTP = async (email, otp) => {
+  const apiInstance = new Brevo.TransactionalEmailsApi();
+  apiInstance.authentications["api-key"].apiKey = process.env.BREVO_API_KEY;
 
-const sendOTP = (email, otp) => {
-    const mailOptions = {
-        from: process.env.BREVO_EMAIL,
-        to: email,
-        subject: "Password Reset Verification Code",
-        text: `Dear User,
-Your verification code is:
-${otp}
+  const sendSmtpEmail = new Brevo.SendSmtpEmail();
+  sendSmtpEmail.sender = { email: "rizeworldcode@gmail.com", name: "RizeWorld" };
+  sendSmtpEmail.to = [{ email: email }];
+  sendSmtpEmail.subject = "Password Reset Verification Code";
+  sendSmtpEmail.textContent = `Dear User,
+Your verification code is: ${otp}
 This code is valid for 10 minutes.
 If you did not request a password reset, please ignore this email.
-Thank you,
-RizeWorld Team`,
-    };
+Thank you, RizeWorld Team`;
 
-    return transporter.sendMail(mailOptions);
+  return apiInstance.sendTransacEmail(sendSmtpEmail);
 };
 
 
