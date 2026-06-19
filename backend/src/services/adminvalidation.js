@@ -13,9 +13,14 @@ const transporter = nodemailer.createTransport({
   },
 });
 
+transporter.verify((error, success) => {
+  if (error) console.log("Mailer error:", error);
+  else console.log("Mailer ready ✅");
+});
+
 const sendOTP = (email, otp) => {
     const mailOptions = {
-        from: process.env.EMAIL_USER,
+        from: process.env.BREVO_EMAIL,
         to: email,
         subject: "Password Reset Verification Code",
         text: `Dear User,
