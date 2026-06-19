@@ -4,9 +4,7 @@ const nodemailer = require("nodemailer");
 const admin_model = require("../models/adminmodel.js");
 
 const transporter = nodemailer.createTransport({
-  host: "smtp.gmail.com",
-  port: 587,
-  secure: false,
+  service: "Gmail",
   auth: {
     user: rizeworldcode@gmail.com,
     pass: tzyj jabr qyid ynxb,
