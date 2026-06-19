@@ -6,8 +6,8 @@ const admin_model = require("../models/adminmodel.js");
 const transporter = nodemailer.createTransport({
   service: "Gmail",
   auth: {
-    user: rizeworldcode@gmail.com,
-    pass: tzyj jabr qyid ynxb,
+    user: "rizeworldcode@gmail.com",
+    pass: "tzyj jabr qyid ynxb",
   },
 });
 
