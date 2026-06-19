@@ -4,12 +4,12 @@ const nodemailer = require("nodemailer");
 const admin_model = require("../models/adminmodel.js");
 
 const transporter = nodemailer.createTransport({
-  host: "smtp.gmail.com",
+  host: "smtp-relay.brevo.com",
   port: 587,
-  secure: false,           // STARTTLS on port 587
+  secure: false,
   auth: {
-    user: process.env.EMAIL_USER,     // never hardcode!
-    pass: process.env.EMAIL_PASS,     // use .env variables
+    user: process.env.BREVO_EMAIL,   // your brevo account email
+    pass: process.env.BREVO_SMTP_KEY, // SMTP key from brevo dashboard
   },
 });
 
