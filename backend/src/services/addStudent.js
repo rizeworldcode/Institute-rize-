@@ -27,7 +27,6 @@ exports.add_student = async (req,res) => {
             referredByPhone,
             referredByEmail,
             referredAmount,
-            referredByPassword
         } = req.body
 
         const existingStudentTc = await certificate_model.findOne({ student_ID: student_ID })
@@ -116,7 +115,6 @@ exports.add_student = async (req,res) => {
                         name: referredByName,
                         phone: referredByPhone,
                         email: referredByEmail || "",
-                        password: referredByPassword,
                         total_student: 1,
                         amount: {
                             total: refAmount.toString(),
@@ -127,7 +125,6 @@ exports.add_student = async (req,res) => {
                 } else {
                     referrer.total_student += 1;
                     if (referredByEmail) referrer.email = referredByEmail;
-                    if (referredByPassword) referrer.password = referredByPassword;
                     
                     const currentTotal = parseFloat(referrer.amount.total || 0);
                     const currentPaid = parseFloat(referrer.amount.paid || 0);
@@ -152,7 +149,6 @@ exports.add_student = async (req,res) => {
                 success: false,
             };
         }
-
         // Persist to database
         const saved = await student_Data.save();
 

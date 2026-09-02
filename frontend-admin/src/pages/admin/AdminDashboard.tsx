@@ -55,14 +55,13 @@ export default function AdminDashboard() {
   const [selectedReferrer, setSelectedReferrer] = useState<any>(null);
   const [referrerStudents, setReferrerStudents] = useState<any[]>([]);
   const [referrerStatusFilter, setReferrerStatusFilter] = useState("All");
-
   const handleReferrerClick = async (referrer: any) => {
     setSelectedReferrer(referrer);
     try {
       const token = localStorage.getItem("adminAuthToken");
       const res = await fetch(getApiUrl(`/getReferrerStudents/${referrer.id}`), { 
         method: "POST",
-        headers: { "Authorization": `Bearer ${token}` }
+        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` }
       });
       const data = await res.json();
 
@@ -224,7 +223,7 @@ export default function AdminDashboard() {
       const token = localStorage.getItem("adminAuthToken");
       const res = await fetch(getApiUrl("/allStudents"), {
         method: "POST",
-        headers: { "Authorization": `Bearer ${token}` }
+        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` }
       });
       const data = await res.json();
       if (data.success) {
@@ -364,7 +363,7 @@ export default function AdminDashboard() {
       const token = localStorage.getItem("adminAuthToken");
       const res = await fetch(getApiUrl("/certificateissuedStudentsData"), {
         method: "POST",
-        headers: { "Authorization": `Bearer ${token}` }
+        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` }
       });
       const data = await res.json();
       if (data.success) {
@@ -387,7 +386,7 @@ export default function AdminDashboard() {
       const token = localStorage.getItem("adminAuthToken");
       const res = await fetch(getApiUrl("/certificateunissuedStudentsData"), {
         method: "POST",
-        headers: { "Authorization": `Bearer ${token}` }
+        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` }
       });
       const data = await res.json();
       if (data.success) {
@@ -428,7 +427,7 @@ export default function AdminDashboard() {
       const token = localStorage.getItem("adminAuthToken");
       const res = await fetch(getApiUrl("/pandingfeeStudentsData"), {
         method: "POST",
-        headers: { "Authorization": `Bearer ${token}` }
+        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` }
       });
       const data = await res.json();
       if (data.success) {
@@ -460,7 +459,7 @@ export default function AdminDashboard() {
       const token = localStorage.getItem("adminAuthToken");
       const res = await fetch(getApiUrl("/clearfeeStudentsData"), {
         method: "POST",
-        headers: { "Authorization": `Bearer ${token}` }
+        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` }
       });
       const data = await res.json();
       if (data.success) {
@@ -501,7 +500,7 @@ export default function AdminDashboard() {
       const token = localStorage.getItem("adminAuthToken");
       const res = await fetch(getApiUrl("/totalEarningsDetails"), {
         method: "POST",
-        headers: { "Authorization": `Bearer ${token}` }
+        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` }
       });
       const data = await res.json();
       if (data.success) {
@@ -518,7 +517,7 @@ export default function AdminDashboard() {
       const token = localStorage.getItem("adminAuthToken");
       const res = await fetch(getApiUrl("/getAllReferrers"), {
         method: "POST",
-        headers: { "Authorization": `Bearer ${token}` }
+        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` }
       });
       const data = await res.json();
       if (data.success) {

@@ -1,28 +1,57 @@
 const jwt = require("jsonwebtoken");
+const bcrypt = require("bcryptjs");
+const nodemailer = require("nodemailer");
 const admin_model = require("../models/adminmodel.js");
+
+const axios = require("axios"); // already in most projects
+
+const sendOTP = async (email, otp) => {
+  const response = await axios.post(
+    "https://api.brevo.com/v3/smtp/email",
+    {
+      sender: { email: "rizeworldcode@gmail.com", name: "RizeWorld" },
+      to: [{ email: email }],
+      subject: "Password Reset Verification Code",
+      textContent: `Dear User,
+Your verification code is: ${otp}
+This code is valid for 10 minutes.
+If you did not request a password reset, please ignore this email.
+Thank you, RizeWorld Team`,
+    },
+    {
+      headers: {
+        "api-key": process.env.BREVO_API_KEY,
+        "Content-Type": "application/json",
+      },
+    }
+  );
+  return response.data;
+};
 
 
 exports.admin_login = async (req, res) => {
     try {
-        const email = process.env.ADMIN_EMAIL;
-        const password = process.env.ADMIN_PASSWORD;
-
-
         const {frontend_password,frontend_email} = req.body;
-
-        if (frontend_password !== password || frontend_email !== email) {
+        
+        // First check if admin exists in DB
+        let existingAdmin = await admin_model.findOne({ email: frontend_email });
+        
+        if (!existingAdmin) {
             return {
                 success: false,
                 message: "Invalid email or password",
             };
         }
-        const existingAdmin = await admin_model.findOne({ email });
-        if (!existingAdmin) {
+        
+        // Check password against DB
+        const isPasswordValid = await bcrypt.compare(frontend_password, existingAdmin.password);
+        if (!isPasswordValid) {
             return {
                 success: false,
-                message: "Invalid email or not registered!",
+                message: "Invalid email or password",
             };
         }
+        
         const token = jwt.sign({ id: existingAdmin._id }, process.env.SECRET_KEY);
         if (!token) {
             return { success: false, message: " Token generation failed" };
@@ -50,6 +79,161 @@ exports.admin_login = async (req, res) => {
         return {
             message: error.message || "Internal server error",
             success: false,
+        };
+    }
+};
+
+exports.sendOtpTOadmin = async (req, res) => {
+    const {email} = req.body;
+
+    try {
+        const AdminData = await admin_model.findOne({ email: email });
+        
+        if (!AdminData) {
+            return {
+                message: "Admin not found with this email",
+                success: false,
+            };
+        }
+
+        const otp = Math.floor(1000 + Math.random() * 9000).toString();
+        const otpExpiry = Date.now() + 3600000; // 1 hour
+        
+        // Update admin with OTP
+        const update_admin = await admin_model.findOneAndUpdate({ email: email },
+            {
+                $set: {
+                    otp: otp,
+                    otpExpiry: otpExpiry
+                }
+            },
+            { new: true }
+        );
+        
+        if (!update_admin) {
+            return {
+                message: "admin not found",
+                success: false,
+            };
+        }
+        
+        const otp_send = await sendOTP(email, otp);
+        if (!otp_send) {
+            return {
+                message: "otp send faild",
+                success: false,
+            };
+        }
+        
+        return {
+            message: "OTP send successfully",
+            success: true,
+        };
+    } catch (error) {
+        console.log(error);
+        return {
+            message: error,
+            success: false,
+        };
+    }
+};
+
+exports.verifyOtp = async (req, res) => {
+    const { email, otp } = req.body;
+    console.log(typeof otp);
+    try {
+        const user = await admin_model.findOne({ email });
+        if (!user) {
+            return {
+                message: "Invalid email",
+                success: false,
+            };
+        }
+        console.log(typeof user.otp);
+        if (user.otp !== otp || otp == undefined || user.otpExpiry < Date.now()) {
+            return {
+                message: "Invalid or expired OTP",
+                success: false,
+            };
+        }
+
+        const token = jwt.sign({ id: user._id }, process.env.SECRET_KEY);
+        if (!token) {
+            return {
+                message: "Token generation failed",
+                success: false,
+            };
+        }
+        res.cookie("token", token);
+        const update_admin = await admin_model.findOneAndUpdate({ email: email },
+            {
+                $set: {
+                    auth_key: token,
+                }
+            },
+            { new: true }
+        );
+
+        if (!update_admin) {
+            return {
+                message: "password updation failed",
+                success: false,
+            };
+        }
+        return {
+            token,
+            message: "OTP verified successfully",
+            success: true,
+        };
+    } catch (error) {
+        console.log(error);
+        return {
+            message: error.message || "An error occurred",
+            success: false,
+        };
+    }
+};
+
+exports.admin_forgatePassword = async (req, res) => {
+    const { newPassword, email } = req.body;
+    console.log(newPassword, email);
+    
+    try {
+        if (!newPassword || !email) {
+            return {
+                message: "email or password not define",
+                success: false
+            }
+        }
+        const existingAdmin = await admin_model.findOne({ email }).select('+auth_key');
+        if (!existingAdmin) {
+            return {
+                success: false,
+                message: "Admin not found",
+            };
+        }
+        console.log(existingAdmin.auth_key);
+        
+        if (existingAdmin.auth_key) {
+            const hashedPassword = await bcrypt.hash(newPassword, 10);
+            existingAdmin.password = hashedPassword;
+            await existingAdmin.save();
+
+            return {
+                success: true,
+                message: "Password updated successfully",
+            };
+        }
+        return {
+            success: false,
+            message: "try again",
+        };
+
+    } catch (error) {
+        console.log(error);
+        return {
+            success: false,
+            message: "Internal server error",
         };
     }
 };
