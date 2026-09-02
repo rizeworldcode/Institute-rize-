@@ -2,8 +2,8 @@ import { useState, useEffect, useMemo } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { 
   Users, Search, Plus, Edit2, LogOut, Shield, Menu,
-  AlertCircle, LayoutDashboard, GraduationCap, MessagesSquare, X, ArrowLeft,
-  Award, Bell, UserCircle, Mail, IndianRupee, CheckCircle2, Activity
+  AlertCircle, LayoutDashboard, MessagesSquare, X, ArrowLeft,
+  Award, Bell, UserCircle, Mail, IndianRupee, CheckCircle2, Activity, Trash2
 } from "lucide-react";
 
 import { Student } from "./types";
@@ -42,7 +42,6 @@ export default function AdminDashboard() {
     recentActivity: 0
   });
   const [allStudentsData, setAllStudentsData] = useState<Student[]>([]);
-  const [issuedCertificatesData, setIssuedCertificatesData] = useState<any[]>([]);
   const [studentsWithCertificates, setStudentsWithCertificates] = useState<any[]>([]);
   const [unissuedCertificatesData, setUnissuedCertificatesData] = useState<any[]>([]);
   const [clearFeeStudentsData, setClearFeeStudentsData] = useState<any[]>([]);
@@ -60,8 +59,10 @@ export default function AdminDashboard() {
   const handleReferrerClick = async (referrer: any) => {
     setSelectedReferrer(referrer);
     try {
+      const token = localStorage.getItem("adminAuthToken");
       const res = await fetch(getApiUrl(`/getReferrerStudents/${referrer.id}`), { 
-        method: "POST" 
+        method: "POST",
+        headers: { "Authorization": `Bearer ${token}` }
       });
       const data = await res.json();
 
@@ -94,9 +95,13 @@ export default function AdminDashboard() {
      if (window.confirm(`Are you sure you want to clear all pending dues (₹${ref.pendingAmount.replace('₹', '')}) for ${ref.name}?`)) {
         try {
            const pendingValue = parseFloat(ref.pendingAmount.replace(/[₹,]/g, '')) || 0;
+           const token = localStorage.getItem("adminAuthToken");
            const res = await fetch(getApiUrl("/updateReferrerPayment"), {
               method: "POST",
-              headers: { "Content-Type": "application/json" },
+              headers: { 
+                 "Content-Type": "application/json",
+                 "Authorization": `Bearer ${token}`
+              },
               body: JSON.stringify({ 
                  id: ref.id, 
                  payAmount: pendingValue
@@ -118,9 +123,13 @@ export default function AdminDashboard() {
 
   const handleSaveReferrer = async (updatedReferrer: any) => {
      try {
+        const token = localStorage.getItem("adminAuthToken");
         const res = await fetch(getApiUrl("/updateReferrerPayment"), {
            method: "POST",
-           headers: { "Content-Type": "application/json" },
+           headers: { 
+              "Content-Type": "application/json",
+              "Authorization": `Bearer ${token}`
+           },
            body: JSON.stringify({ 
               id: updatedReferrer.id, 
               payAmount: updatedReferrer.payAmount 
@@ -212,8 +221,10 @@ export default function AdminDashboard() {
 
   const fetchAllStudents = async () => {
     try {
+      const token = localStorage.getItem("adminAuthToken");
       const res = await fetch(getApiUrl("/allStudents"), {
-        method: "POST"
+        method: "POST",
+        headers: { "Authorization": `Bearer ${token}` }
       });
       const data = await res.json();
       if (data.success) {
@@ -350,43 +361,21 @@ export default function AdminDashboard() {
 
   const fetchIssuedCertificates = async () => {
     try {
+      const token = localStorage.getItem("adminAuthToken");
       const res = await fetch(getApiUrl("/certificateissuedStudentsData"), {
-        method: "POST"
+        method: "POST",
+        headers: { "Authorization": `Bearer ${token}` }
       });
       const data = await res.json();
       if (data.success) {
-        const mapped: Student[] = data.data.map((item: any) => ({
-          id: item.student_ID,
-          name: item.student_name,
-          feesStatus: "Clear", // Issued usually means clear, or we can use item.status if backend provides it
-          course: Array.isArray(item.selected_course_name) ? item.selected_course_name : (item.selected_course_name ? [item.selected_course_name] : ["N/A"]),
-          duration: item.course_duration || "N/A",
-          totalFees: Number(item.total_fee) || 0,
-          paidFees: Number(item.total_paid_fee) || 0,
-          pendingFees: Number(item.pending_fee) || 0,
-          email: item.email,
-          phone: item.phone,
-          address: item.address,
-          startDate: item.course_start_date 
-            ? new Date(item.course_start_date).toISOString().split('T')[0] 
-            : new Date().toISOString().split('T')[0],
-          endDate: item.course_end_date 
-            ? new Date(item.course_end_date).toISOString().split('T')[0] 
-            : (() => {
-                const date = new Date();
-                date.setMonth(date.getMonth() + 3);
-                return date.toISOString().split('T')[0];
-              })(),
-          feesInstallment: item.fee_installment,
-          fee: item.fee,
-          certificates: [{
-            id: `cert-${item.student_ID}`,
-            name: "Certificate",
-            url: `/${item.certificate_photo}`,
-            date: item.updated_at ? new Date(item.updated_at).toISOString().split("T")[0] : ""
-          }]
+        const mapped = data.data.map((item: any) => ({
+          studentId: item.student_ID,
+          studentName: item.student_name,
+          issuedCourses: Array.isArray(item.selected_course_name) 
+            ? item.selected_course_name 
+            : (item.selected_course_name ? [item.selected_course_name] : ["N/A"])
         }));
-        setIssuedCertificatesData(mapped);
+        setStudentsWithCertificates(mapped);
       }
     } catch (error) {
       console.error("Failed to fetch issued certificates:", error);
@@ -395,8 +384,10 @@ export default function AdminDashboard() {
 
   const fetchUnissuedCertificates = async () => {
     try {
+      const token = localStorage.getItem("adminAuthToken");
       const res = await fetch(getApiUrl("/certificateunissuedStudentsData"), {
-        method: "POST"
+        method: "POST",
+        headers: { "Authorization": `Bearer ${token}` }
       });
       const data = await res.json();
       if (data.success) {
@@ -434,8 +425,10 @@ export default function AdminDashboard() {
 
   const fetchPendingFeeStudents = async () => {
     try {
+      const token = localStorage.getItem("adminAuthToken");
       const res = await fetch(getApiUrl("/pandingfeeStudentsData"), {
-        method: "POST"
+        method: "POST",
+        headers: { "Authorization": `Bearer ${token}` }
       });
       const data = await res.json();
       if (data.success) {
@@ -464,8 +457,10 @@ export default function AdminDashboard() {
 
   const fetchClearFeeStudents = async () => {
     try {
+      const token = localStorage.getItem("adminAuthToken");
       const res = await fetch(getApiUrl("/clearfeeStudentsData"), {
-        method: "POST"
+        method: "POST",
+        headers: { "Authorization": `Bearer ${token}` }
       });
       const data = await res.json();
       if (data.success) {
@@ -503,8 +498,10 @@ export default function AdminDashboard() {
 
   const fetchEarningsDetails = async () => {
     try {
+      const token = localStorage.getItem("adminAuthToken");
       const res = await fetch(getApiUrl("/totalEarningsDetails"), {
-        method: "POST"
+        method: "POST",
+        headers: { "Authorization": `Bearer ${token}` }
       });
       const data = await res.json();
       if (data.success) {
@@ -518,8 +515,10 @@ export default function AdminDashboard() {
 
   const fetchReferrers = async () => {
     try {
+      const token = localStorage.getItem("adminAuthToken");
       const res = await fetch(getApiUrl("/getAllReferrers"), {
-        method: "POST"
+        method: "POST",
+        headers: { "Authorization": `Bearer ${token}` }
       });
       const data = await res.json();
       if (data.success) {
@@ -554,7 +553,10 @@ export default function AdminDashboard() {
 
   const fetchDashboardData = async () => {
     try {
-      const res = await fetch(getApiUrl("/admin_dashboardGet"));
+      const token = localStorage.getItem("adminAuthToken");
+      const res = await fetch(getApiUrl("/admin_dashboardGet"), {
+        headers: { "Authorization": `Bearer ${token}` }
+      });
       const data = await res.json();
       if (data.success) {
         const mappedStudents: Student[] = data.tcData.map((item: any) => {
@@ -703,9 +705,13 @@ export default function AdminDashboard() {
 
   const handleSetReferralAmount = async () => {
     try {
+      const token = localStorage.getItem("adminAuthToken");
       const res = await fetch(getApiUrl("/updateReferralAmount"), {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { 
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
         body: JSON.stringify({ amount: Number(globalReferralAmount) })
       });
       const data = await res.json();
@@ -768,6 +774,35 @@ export default function AdminDashboard() {
       return matchesSearch && matchesStatus;
     });
   }, [students, search, statusFilter]);
+
+  const handleDeleteStudent = async (studentId: string, studentName: string) => {
+    if (window.confirm(`Are you sure you want to delete student "${studentName}" (${studentId})? This action cannot be undone.`)) {
+      try {
+        const token = localStorage.getItem("adminAuthToken");
+        const res = await fetch(getApiUrl(`/deleteStudent/${studentId}`), {
+          method: "DELETE",
+          headers: {
+            "Authorization": `Bearer ${token}`
+          }
+        });
+        const data = await res.json();
+        if (data.success) {
+          alert(data.message || "Student deleted successfully");
+          fetchDashboardData();
+          fetchAllStudents();
+          if (expandedStat === "certificate-issued") fetchIssuedCertificates();
+          if (expandedStat === "certificate-unissued") fetchUnissuedCertificates();
+          if (expandedStat === "total-pending-fees") fetchPendingFeeStudents();
+          if (expandedStat === "total-clear-fees") fetchClearFeeStudents();
+        } else {
+          alert(data.message || "Failed to delete student");
+        }
+      } catch (error) {
+        console.error("Error deleting student:", error);
+        alert("An error occurred while deleting the student.");
+      }
+    }
+  };
 
   const handleSaveStudent = (updated: Student) => {
     if (editingStudent) {
@@ -1159,7 +1194,6 @@ export default function AdminDashboard() {
                             </td>
                             <td className="py-4 px-6">
                               <div className="flex items-center justify-end gap-2">
-
                                 <button 
                                   onClick={() => { setEditingStudent(s); setIsStudentModalOpen(true); }}
                                   className="p-2 text-purple-600 hover:bg-purple-50 rounded-lg transition-all"
@@ -1168,8 +1202,15 @@ export default function AdminDashboard() {
                                   <Edit2 size={16} />
                                 </button>
                                 <button 
+                                  onClick={() => handleDeleteStudent(s.id, s.name)}
+                                  className="p-2 text-red-600 hover:bg-red-50 hover:text-red-700 rounded-lg transition-all"
+                                  title="Delete Student"
+                                >
+                                  <Trash2 size={16} />
+                                </button>
+                                <button 
                                   onClick={() => setViewingStudent(s)}
-                                  className="px-3 py-1.5 text-xs font-semibold bg-white hover:bg-neutral-50 text-neutral-700 rounded-lg border border-neutral-200 shadow-sm transition-all ml-2"
+                                  className="px-3 py-1.5 text-xs font-semibold bg-white hover:bg-neutral-50 text-neutral-700 rounded-lg border border-neutral-200 shadow-sm transition-all ml-1"
                                 >
                                   Details
                                 </button>
@@ -1245,13 +1286,13 @@ export default function AdminDashboard() {
                                <table className="w-full text-left border-collapse text-sm">
                                   <thead className="bg-neutral-50 border-b border-neutral-200">
                                      <tr>
-                                        <th className="px-3 py-3 text-sm text-xs font-bold text-neutral-500 uppercase tracking-wider">ID</th>
-                                        <th className="px-3 py-3 text-sm text-xs font-bold text-neutral-500 uppercase tracking-wider">Student Name</th>
-                                        <th className="px-3 py-3 text-sm text-xs font-bold text-neutral-500 uppercase tracking-wider">Course</th>
-                                        <th className="px-3 py-3 text-sm text-xs font-bold text-neutral-500 uppercase tracking-wider">Duration</th>
-                                        <th className="px-3 py-3 text-sm text-xs font-bold text-neutral-500 uppercase tracking-wider">Total Fee</th>
-                                        <th className="px-3 py-3 text-sm text-xs font-bold text-neutral-500 uppercase tracking-wider">Pending Fee</th>
-                                        <th className="px-3 py-3 text-sm text-xs font-bold text-neutral-500 uppercase tracking-wider">Status</th>
+                                        <th className="px-3 py-3 text-xs font-bold text-neutral-500 uppercase tracking-wider">ID</th>
+                                        <th className="px-3 py-3 text-xs font-bold text-neutral-500 uppercase tracking-wider">Student Name</th>
+                                        <th className="px-3 py-3 text-xs font-bold text-neutral-500 uppercase tracking-wider">Course</th>
+                                        <th className="px-3 py-3 text-xs font-bold text-neutral-500 uppercase tracking-wider">Duration</th>
+                                        <th className="px-3 py-3 text-xs font-bold text-neutral-500 uppercase tracking-wider">Total Fee</th>
+                                        <th className="px-3 py-3 text-xs font-bold text-neutral-500 uppercase tracking-wider">Pending Fee</th>
+                                        <th className="px-3 py-3 text-xs font-bold text-neutral-500 uppercase tracking-wider">Status</th>
                                      </tr>
                                   </thead>
                                   <tbody className="divide-y divide-neutral-100">
@@ -1259,17 +1300,17 @@ export default function AdminDashboard() {
                                         .filter(row => detailStatusFilter === "All" || row.feesStatus === detailStatusFilter)
                                         .map((row, idx) => (
                                         <tr key={idx} className="hover:bg-neutral-50/50 transition-colors">
-                                           <td className="px-3 py-3 text-sm font-mono text-sm font-semibold text-blue-600">{row.id}</td>
+                                           <td className="px-3 py-3 text-sm font-mono font-semibold text-blue-600">{row.id}</td>
                                            <td className="px-3 py-3 text-sm">
                                               <div className="flex items-center gap-3">
                                                  <div className="w-8 h-8 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center font-bold text-xs uppercase">{row.name.charAt(0)}</div>
                                                  <div className="font-bold text-neutral-900 capitalize">{row.name}</div>
                                               </div>
                                            </td>
-                                           <td className="px-3 py-3 text-sm text-sm font-semibold text-neutral-700">{Array.isArray(row.course) ? row.course.join(", ") : row.course}</td>
-                                           <td className="px-3 py-3 text-sm text-sm text-neutral-600">{row.duration}</td>
-                                           <td className="px-3 py-3 text-sm text-sm font-bold text-neutral-900">₹{(row.totalFees || 0).toLocaleString()}</td>
-                                            <td className="px-3 py-3 text-sm text-sm font-bold text-red-600">₹{(row.pendingFees || 0).toLocaleString()}</td>
+                                           <td className="px-3 py-3 text-sm font-semibold text-neutral-700">{Array.isArray(row.course) ? row.course.join(", ") : row.course}</td>
+                                           <td className="px-3 py-3 text-sm text-neutral-600">{row.duration}</td>
+                                           <td className="px-3 py-3 text-sm font-bold text-neutral-900">₹{(row.totalFees || 0).toLocaleString()}</td>
+                                            <td className="px-3 py-3 text-sm font-bold text-red-600">₹{(row.pendingFees || 0).toLocaleString()}</td>
                                            <td className="px-3 py-3 text-sm">
                                               <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold ${row.feesStatus === 'Clear' ? 'bg-emerald-100 text-emerald-700' : 'bg-orange-100 text-orange-700'}`}>
                                                  {row.feesStatus}
@@ -1287,17 +1328,17 @@ export default function AdminDashboard() {
                                <table className="w-full text-left border-collapse text-sm">
                                   <thead className="bg-neutral-50 border-b border-neutral-200">
                                      <tr>
-                                        <th className="px-3 py-3 text-sm text-xs font-bold text-neutral-500 uppercase tracking-wider">Student ID</th>
-                                        <th className="px-3 py-3 text-sm text-xs font-bold text-neutral-500 uppercase tracking-wider">Student Name</th>
-                                        <th className="px-3 py-3 text-sm text-xs font-bold text-neutral-500 uppercase tracking-wider">Issued Courses</th>
+                                        <th className="px-3 py-3 text-xs font-bold text-neutral-500 uppercase tracking-wider">Student ID</th>
+                                        <th className="px-3 py-3 text-xs font-bold text-neutral-500 uppercase tracking-wider">Student Name</th>
+                                        <th className="px-3 py-3 text-xs font-bold text-neutral-500 uppercase tracking-wider">Issued Courses</th>
                                      </tr>
                                   </thead>
                                   <tbody className="divide-y divide-neutral-100">
                                      {studentsWithCertificates.map((row, idx) => (
                                         <tr key={idx} className="hover:bg-neutral-50/50 transition-colors">
-                                           <td className="px-3 py-3 text-sm font-mono text-sm font-semibold text-emerald-600">{row.studentId}</td>
+                                           <td className="px-3 py-3 text-sm font-mono font-semibold text-emerald-600">{row.studentId}</td>
                                            <td className="px-3 py-3 text-sm font-bold text-neutral-900 capitalize">{row.studentName}</td>
-                                           <td className="px-3 py-3 text-sm text-sm font-semibold text-neutral-700">
+                                           <td className="px-3 py-3 text-sm font-semibold text-neutral-700">
                                               <div className="flex flex-wrap gap-2">
                                                  {row.issuedCourses.map((course: string, courseIdx: number) => (
                                                     <span key={courseIdx} className="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-700">
@@ -1323,19 +1364,19 @@ export default function AdminDashboard() {
                                <table className="w-full text-left border-collapse text-sm">
                                   <thead className="bg-neutral-50 border-b border-neutral-200">
                                      <tr>
-                                        <th className="px-3 py-3 text-sm text-xs font-bold text-neutral-500 uppercase tracking-wider">ID</th>
-                                        <th className="px-3 py-3 text-sm text-xs font-bold text-neutral-500 uppercase tracking-wider">Student Name</th>
-                                        <th className="px-3 py-3 text-sm text-xs font-bold text-neutral-500 uppercase tracking-wider">Course</th>
-                                        <th className="px-3 py-3 text-sm text-xs font-bold text-neutral-500 uppercase tracking-wider">Status</th>
-                                        <th className="px-3 py-3 text-sm text-xs font-bold text-neutral-500 uppercase tracking-wider">Action</th>
+                                        <th className="px-3 py-3 text-xs font-bold text-neutral-500 uppercase tracking-wider">ID</th>
+                                        <th className="px-3 py-3 text-xs font-bold text-neutral-500 uppercase tracking-wider">Student Name</th>
+                                        <th className="px-3 py-3 text-xs font-bold text-neutral-500 uppercase tracking-wider">Course</th>
+                                        <th className="px-3 py-3 text-xs font-bold text-neutral-500 uppercase tracking-wider">Status</th>
+                                        <th className="px-3 py-3 text-xs font-bold text-neutral-500 uppercase tracking-wider">Action</th>
                                      </tr>
                                   </thead>
                                   <tbody className="divide-y divide-neutral-100">
                                      {unissuedCertificatesData.map((row: Student, idx) => (
                                         <tr key={idx} className="hover:bg-neutral-50/50 transition-colors">
-                                           <td className="px-3 py-3 text-sm font-mono text-sm font-semibold text-blue-600">{row.id}</td>
+                                           <td className="px-3 py-3 text-sm font-mono font-semibold text-blue-600">{row.id}</td>
                                            <td className="px-3 py-3 text-sm font-bold text-neutral-900 capitalize">{row.name}</td>
-                                           <td className="px-3 py-3 text-sm text-sm font-semibold text-neutral-700">{Array.isArray(row.course) ? row.course.join(", ") : row.course}</td>
+                                           <td className="px-3 py-3 text-sm font-semibold text-neutral-700">{Array.isArray(row.course) ? row.course.join(", ") : row.course}</td>
                                            <td className="px-3 py-3 text-sm">
                                               <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold ${
                                                  row.feesStatus === 'Clear' ? 'bg-emerald-100 text-emerald-700' : 'bg-orange-100 text-orange-700'
@@ -1368,23 +1409,23 @@ export default function AdminDashboard() {
                                <table className="w-full text-left border-collapse text-sm">
                                   <thead className="bg-neutral-50 border-b border-neutral-200">
                                      <tr>
-                                        <th className="px-3 py-3 text-sm text-xs font-bold text-neutral-500 uppercase tracking-wider">TXN ID</th>
-                                        <th className="px-3 py-3 text-sm text-xs font-bold text-neutral-500 uppercase tracking-wider">Student Name</th>
-                                        <th className="px-3 py-3 text-sm text-xs font-bold text-neutral-500 uppercase tracking-wider">Amount</th>
-                                        <th className="px-3 py-3 text-sm text-xs font-bold text-neutral-500 uppercase tracking-wider">Date</th>
-                                        <th className="px-3 py-3 text-sm text-xs font-bold text-neutral-500 uppercase tracking-wider">Method</th>
+                                        <th className="px-3 py-3 text-xs font-bold text-neutral-500 uppercase tracking-wider">TXN ID</th>
+                                        <th className="px-3 py-3 text-xs font-bold text-neutral-500 uppercase tracking-wider">Student Name</th>
+                                        <th className="px-3 py-3 text-xs font-bold text-neutral-500 uppercase tracking-wider">Amount</th>
+                                        <th className="px-3 py-3 text-xs font-bold text-neutral-500 uppercase tracking-wider">Date</th>
+                                        <th className="px-3 py-3 text-xs font-bold text-neutral-500 uppercase tracking-wider">Method</th>
                                      </tr>
                                   </thead>
                                   <tbody className="divide-y divide-neutral-100">
                                      {earningsDetailsData.map((row, idx) => (
                                         <tr key={idx} className="hover:bg-neutral-50/50 transition-colors">
-                                           <td className="px-3 py-3 text-sm font-mono text-sm font-semibold text-purple-600 truncate max-w-[150px]" title={row.txn_id}>{row.txn_id}</td>
+                                           <td className="px-3 py-3 text-sm font-mono font-semibold text-purple-600 truncate max-w-[150px]" title={row.txn_id}>{row.txn_id}</td>
                                            <td className="px-3 py-3 text-sm font-bold text-neutral-900 capitalize">{row.student_name}</td>
-                                           <td className="px-3 py-3 text-sm text-sm font-bold text-emerald-600">₹{Number(row.amount).toLocaleString()}</td>
-                                           <td className="px-3 py-3 text-sm text-sm text-neutral-600">
+                                           <td className="px-3 py-3 text-sm font-bold text-emerald-600">₹{Number(row.amount).toLocaleString()}</td>
+                                           <td className="px-3 py-3 text-sm text-neutral-600">
                                               {new Date(row.date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
                                            </td>
-                                           <td className="px-3 py-3 text-sm text-sm font-semibold text-neutral-700 uppercase">{row.method}</td>
+                                           <td className="px-3 py-3 text-sm font-semibold text-neutral-700 uppercase">{row.method}</td>
                                         </tr>
                                      ))}
                                      {earningsDetailsData.length === 0 && (
@@ -1413,25 +1454,25 @@ export default function AdminDashboard() {
                                <table className="w-full text-left border-collapse text-sm">
                                   <thead className="bg-neutral-50 border-b border-neutral-200">
                                      <tr>
-                                        <th className="px-3 py-3 text-sm text-xs font-bold text-neutral-500 uppercase tracking-wider">ID</th>
-                                        <th className="px-3 py-3 text-sm text-xs font-bold text-neutral-500 uppercase tracking-wider">Student Name</th>
-                                        <th className="px-3 py-3 text-sm text-xs font-bold text-neutral-500 uppercase tracking-wider">Course</th>
-                                        <th className="px-3 py-3 text-sm text-xs font-bold text-neutral-500 uppercase tracking-wider">Total Fee</th>
-                                        <th className="px-3 py-3 text-sm text-xs font-bold text-neutral-500 uppercase tracking-wider">Paid Fee</th>
-                                        <th className="px-3 py-3 text-sm text-xs font-bold text-neutral-500 uppercase tracking-wider">Pending Fee</th>
-                                        <th className="px-3 py-3 text-sm text-xs font-bold text-neutral-500 uppercase tracking-wider">Phone Number</th>
+                                        <th className="px-3 py-3 text-xs font-bold text-neutral-500 uppercase tracking-wider">ID</th>
+                                        <th className="px-3 py-3 text-xs font-bold text-neutral-500 uppercase tracking-wider">Student Name</th>
+                                        <th className="px-3 py-3 text-xs font-bold text-neutral-500 uppercase tracking-wider">Course</th>
+                                        <th className="px-3 py-3 text-xs font-bold text-neutral-500 uppercase tracking-wider">Total Fee</th>
+                                        <th className="px-3 py-3 text-xs font-bold text-neutral-500 uppercase tracking-wider">Paid Fee</th>
+                                        <th className="px-3 py-3 text-xs font-bold text-neutral-500 uppercase tracking-wider">Pending Fee</th>
+                                        <th className="px-3 py-3 text-xs font-bold text-neutral-500 uppercase tracking-wider">Phone Number</th>
                                      </tr>
                                   </thead>
                                   <tbody className="divide-y divide-neutral-100">
                                      {pendingFeeStudentsData.map((row: Student, idx) => (
                                         <tr key={idx} className="hover:bg-neutral-50/50 transition-colors">
-                                           <td className="px-3 py-3 text-sm font-mono text-sm font-semibold text-red-600">{row.id}</td>
+                                           <td className="px-3 py-3 text-sm font-mono font-semibold text-red-600">{row.id}</td>
                                            <td className="px-3 py-3 text-sm font-bold text-neutral-900 capitalize">{row.name}</td>
-                                           <td className="px-3 py-3 text-sm text-sm font-semibold text-neutral-700">{Array.isArray(row.course) ? row.course.join(", ") : row.course}</td>
-                                           <td className="px-3 py-3 text-sm text-sm font-bold text-neutral-900">₹{Number(row.totalFees).toLocaleString()}</td>
-                                           <td className="px-3 py-3 text-sm text-sm font-bold text-emerald-600">₹{Number(row.paidFees).toLocaleString()}</td>
-                                           <td className="px-3 py-3 text-sm text-sm font-bold text-red-600">₹{Number(row.pendingFees).toLocaleString()}</td>
-                                           <td className="px-3 py-3 text-sm text-sm font-semibold text-neutral-700">{row.phone}</td>
+                                           <td className="px-3 py-3 text-sm font-semibold text-neutral-700">{Array.isArray(row.course) ? row.course.join(", ") : row.course}</td>
+                                           <td className="px-3 py-3 text-sm font-bold text-neutral-900">₹{Number(row.totalFees).toLocaleString()}</td>
+                                           <td className="px-3 py-3 text-sm font-bold text-emerald-600">₹{Number(row.paidFees).toLocaleString()}</td>
+                                           <td className="px-3 py-3 text-sm font-bold text-red-600">₹{Number(row.pendingFees).toLocaleString()}</td>
+                                           <td className="px-3 py-3 text-sm font-semibold text-neutral-700">{row.phone}</td>
                                         </tr>
                                      ))}
                                      {pendingFeeStudentsData.length === 0 && (
@@ -1448,21 +1489,21 @@ export default function AdminDashboard() {
                                <table className="w-full text-left border-collapse text-sm">
                                   <thead className="bg-neutral-50 border-b border-neutral-200">
                                      <tr>
-                                        <th className="px-3 py-3 text-sm text-xs font-bold text-neutral-500 uppercase tracking-wider">ID</th>
-                                        <th className="px-3 py-3 text-sm text-xs font-bold text-neutral-500 uppercase tracking-wider">Student Name</th>
-                                        <th className="px-3 py-3 text-sm text-xs font-bold text-neutral-500 uppercase tracking-wider">Course</th>
-                                        <th className="px-3 py-3 text-sm text-xs font-bold text-neutral-500 uppercase tracking-wider">Total Paid</th>
-                                        <th className="px-3 py-3 text-sm text-xs font-bold text-neutral-500 uppercase tracking-wider">Status</th>
-                                        <th className="px-3 py-3 text-sm text-xs font-bold text-neutral-500 uppercase tracking-wider">Action</th>
+                                        <th className="px-3 py-3 text-xs font-bold text-neutral-500 uppercase tracking-wider">ID</th>
+                                        <th className="px-3 py-3 text-xs font-bold text-neutral-500 uppercase tracking-wider">Student Name</th>
+                                        <th className="px-3 py-3 text-xs font-bold text-neutral-500 uppercase tracking-wider">Course</th>
+                                        <th className="px-3 py-3 text-xs font-bold text-neutral-500 uppercase tracking-wider">Total Paid</th>
+                                        <th className="px-3 py-3 text-xs font-bold text-neutral-500 uppercase tracking-wider">Status</th>
+                                        <th className="px-3 py-3 text-xs font-bold text-neutral-500 uppercase tracking-wider">Action</th>
                                      </tr>
                                   </thead>
                                   <tbody className="divide-y divide-neutral-100">
                                      {clearFeeStudentsData.map((row: Student, idx) => (
                                         <tr key={idx} className="hover:bg-neutral-50/50 transition-colors">
-                                           <td className="px-3 py-3 text-sm font-mono text-sm font-semibold text-cyan-600">{row.id}</td>
+                                           <td className="px-3 py-3 text-sm font-mono font-semibold text-cyan-600">{row.id}</td>
                                            <td className="px-3 py-3 text-sm font-bold text-neutral-900 capitalize">{row.name}</td>
-                                           <td className="px-3 py-3 text-sm text-sm font-semibold text-neutral-700">{Array.isArray(row.course) ? row.course.join(", ") : row.course}</td>
-                                           <td className="px-3 py-3 text-sm text-sm font-bold text-neutral-900">₹{Number(row.paidFees).toLocaleString()}</td>
+                                           <td className="px-3 py-3 text-sm font-semibold text-neutral-700">{Array.isArray(row.course) ? row.course.join(", ") : row.course}</td>
+                                           <td className="px-3 py-3 text-sm font-bold text-neutral-900">₹{Number(row.paidFees).toLocaleString()}</td>
                                            <td className="px-3 py-3 text-sm"><span className="inline-flex items-center px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-700 text-xs font-bold">Clear</span></td>
                                            <td className="px-3 py-3 text-sm">
                                               <button 
@@ -1489,25 +1530,25 @@ export default function AdminDashboard() {
                                <table className="w-full text-left border-collapse text-sm">
                                   <thead className="bg-neutral-50 border-b border-neutral-200">
                                      <tr>
-                                        <th className="px-3 py-3 text-sm text-xs font-bold text-neutral-500 uppercase tracking-wider">ID</th>
-                                        <th className="px-3 py-3 text-sm text-xs font-bold text-neutral-500 uppercase tracking-wider">Student Name</th>
-                                        <th className="px-3 py-3 text-sm text-xs font-bold text-neutral-500 uppercase tracking-wider">Course</th>
-                                        <th className="px-3 py-3 text-sm text-xs font-bold text-neutral-500 uppercase tracking-wider">Total Fee</th>
-                                        <th className="px-3 py-3 text-sm text-xs font-bold text-neutral-500 uppercase tracking-wider">Paid Fee</th>
-                                        <th className="px-3 py-3 text-sm text-xs font-bold text-neutral-500 uppercase tracking-wider">Pending Fee</th>
-                                        <th className="px-3 py-3 text-sm text-xs font-bold text-neutral-500 uppercase tracking-wider">Phone Number</th>
+                                        <th className="px-3 py-3 text-xs font-bold text-neutral-500 uppercase tracking-wider">ID</th>
+                                        <th className="px-3 py-3 text-xs font-bold text-neutral-500 uppercase tracking-wider">Student Name</th>
+                                        <th className="px-3 py-3 text-xs font-bold text-neutral-500 uppercase tracking-wider">Course</th>
+                                        <th className="px-3 py-3 text-xs font-bold text-neutral-500 uppercase tracking-wider">Total Fee</th>
+                                        <th className="px-3 py-3 text-xs font-bold text-neutral-500 uppercase tracking-wider">Paid Fee</th>
+                                        <th className="px-3 py-3 text-xs font-bold text-neutral-500 uppercase tracking-wider">Pending Fee</th>
+                                        <th className="px-3 py-3 text-xs font-bold text-neutral-500 uppercase tracking-wider">Phone Number</th>
                                      </tr>
                                   </thead>
                                   <tbody className="divide-y divide-neutral-100">
                                      {pendingFeeStudentsData.map((row: Student, idx) => (
                                         <tr key={idx} className="hover:bg-neutral-50/50 transition-colors">
-                                           <td className="px-3 py-3 text-sm font-mono text-sm font-semibold text-red-600">{row.id}</td>
+                                           <td className="px-3 py-3 text-sm font-mono font-semibold text-red-600">{row.id}</td>
                                            <td className="px-3 py-3 text-sm font-bold text-neutral-900 capitalize">{row.name}</td>
-                                           <td className="px-3 py-3 text-sm text-sm font-semibold text-neutral-700">{Array.isArray(row.course) ? row.course.join(", ") : row.course}</td>
-                                           <td className="px-3 py-3 text-sm text-sm font-bold text-neutral-900">₹{Number(row.totalFees).toLocaleString()}</td>
-                                           <td className="px-3 py-3 text-sm text-sm font-bold text-emerald-600">₹{Number(row.paidFees).toLocaleString()}</td>
-                                           <td className="px-3 py-3 text-sm text-sm font-bold text-red-600">₹{Number(row.pendingFees).toLocaleString()}</td>
-                                           <td className="px-3 py-3 text-sm text-sm font-semibold text-neutral-700">{row.phone}</td>
+                                           <td className="px-3 py-3 text-sm font-semibold text-neutral-700">{Array.isArray(row.course) ? row.course.join(", ") : row.course}</td>
+                                           <td className="px-3 py-3 text-sm font-bold text-neutral-900">₹{Number(row.totalFees).toLocaleString()}</td>
+                                           <td className="px-3 py-3 text-sm font-bold text-emerald-600">₹{Number(row.paidFees).toLocaleString()}</td>
+                                           <td className="px-3 py-3 text-sm font-bold text-red-600">₹{Number(row.pendingFees).toLocaleString()}</td>
+                                           <td className="px-3 py-3 text-sm font-semibold text-neutral-700">{row.phone}</td>
                                         </tr>
                                      ))}
                                      {pendingFeeStudentsData.length === 0 && (
@@ -1564,7 +1605,15 @@ export default function AdminDashboard() {
 
       {/* Details Modal */}
       {viewingStudent && (
-         <StudentDetailsModal student={viewingStudent} onClose={() => setViewingStudent(null)} />
+         <StudentDetailsModal 
+            student={viewingStudent} 
+            onClose={() => setViewingStudent(null)} 
+            onDelete={() => {
+               const st = viewingStudent;
+               setViewingStudent(null);
+               handleDeleteStudent(st.id, st.name);
+            }}
+         />
       )}
 
       {/* Add / Edit Student Modal */}

@@ -1,7 +1,7 @@
 import { useState } from "react";
-import { UserCircle, X, Banknote, IndianRupee, Wallet, CreditCard, CheckCircle2, Calendar, BookOpen, Contact, Phone, Mail, MapPin, Activity } from "lucide-react";
+import { UserCircle, X, Banknote, IndianRupee, Wallet, CreditCard, CheckCircle2, Calendar, BookOpen, Contact, Phone, Mail, MapPin, Activity, Trash2 } from "lucide-react";
 
-export function StudentDetailsModal({ student, onClose }: any) {
+export function StudentDetailsModal({ student, onClose, onDelete }: any) {
    const [paymentTab, setPaymentTab] = useState<"one-time" | "installment">("one-time");
    // Calculate percentages for chart
    const total = Number(student.totalFees) || 0;
@@ -18,9 +18,21 @@ export function StudentDetailsModal({ student, onClose }: any) {
                <h2 className="text-xl font-bold text-neutral-900 flex items-center gap-2">
                   <UserCircle className="text-blue-600" /> Student Details
                </h2>
-               <button onClick={onClose} className="p-2 text-neutral-400 hover:text-neutral-700 hover:bg-neutral-100 rounded-full transition-colors cursor-pointer">
-                  <X size={20} />
-               </button>
+               <div className="flex items-center gap-3">
+                  {onDelete && (
+                     <button 
+                        onClick={onDelete} 
+                        className="flex items-center gap-1.5 px-3 py-1.5 bg-red-50 text-red-600 hover:bg-red-100 font-semibold rounded-xl text-xs transition-colors cursor-pointer border border-red-100"
+                        title="Delete Student"
+                     >
+                        <Trash2 size={15} />
+                        Delete Student
+                     </button>
+                  )}
+                  <button onClick={onClose} className="p-2 text-neutral-400 hover:text-neutral-700 hover:bg-neutral-100 rounded-full transition-colors cursor-pointer">
+                     <X size={20} />
+                  </button>
+               </div>
             </div>
 
             {/* Scrollable Content */}

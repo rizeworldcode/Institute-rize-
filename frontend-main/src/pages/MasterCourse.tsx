@@ -4,6 +4,7 @@ import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { ArrowRight, CheckCircle2, Calendar, MapPin, Users, Zap, Brain, Palette, Video, TrendingUp, Search, BarChart3, Code, Sparkles, Target } from "lucide-react";
 import Reveal from "../components/Reveal";
+import SEO from "../components/SEO";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -43,8 +44,29 @@ export default function MasterCourse() {
     };
   }, []);
 
+  const masterCourseSchema = [
+    {
+      "@context": "https://schema.org",
+      "@type": "Course",
+      "name": "3-Month Job-Ready Master Course in AI & Marketing",
+      "description": "12-week intensive master program combining AI tools, digital marketing, portfolio building, and 100% placement support.",
+      "provider": {
+        "@type": "EducationalOrganization",
+        "name": "RizeWorld Institute",
+        "url": "https://rizeworldinstitute.in"
+      },
+      "educationalCredentialAwarded": "RizeWorld Certified AI & Digital Marketing Specialist"
+    }
+  ];
+
   return (
     <main className="pt-28 bg-neutral-50 min-h-screen">
+      <SEO
+        title="3-Month Job-Ready Master Course in AI & Marketing | RizeWorld"
+        description="12-week intensive master program combining AI tools, digital marketing, portfolio building, and 100% placement support. Enroll today."
+        canonicalPath="/master-course"
+        schemas={masterCourseSchema}
+      />
       {/* Hero */}
       <section className="relative py-20 overflow-hidden bg-white border-b border-neutral-200">
         <div className="absolute inset-0">

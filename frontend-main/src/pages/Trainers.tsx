@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import { Sparkles, Mail, Phone, GraduationCap, ExternalLink, ArrowRight } from "lucide-react";
 import Reveal from "../components/Reveal";
 import { getApiUrl } from "../utils/api";
+import SEO from "../components/SEO";
 
 interface DBTeacher {
   _id: string;
@@ -15,40 +17,24 @@ interface DBTeacher {
 
 const STATIC_MENTORS = [
   {
-    name: "Rahul Sharma",
-    role: "Director of AI & Robotics",
-    specialty: "Generative AI, LLMs & Neural Networks",
-    experience: "Ex-Senior Machine Learning Engineer at TechCorp",
-    bio: "Rahul leads the AI curriculum, bringing years of industrial machine learning experience to prepare students for the next frontier of artificial intelligence.",
-    img: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=500&q=80",
-    tags: ["AI/ML", "Python", "Deep Learning"],
+    name: "Mohit Srivastava",
+    role: "SENIOR GRAPHIC DESIGNER, RIZEWORLD",
+    specialty: "Graphic Design, Video Editing & Content Creation",
+    experience: "3+ Years Crafting Visual Identity & Motion Content",
+    bio: "Mohit is a graphic designer and video editor with a strong eye for visual storytelling — from brand design to cinematic content creation. He brings hands-on expertise across Adobe Photoshop, Premiere Pro, photography, and videography to every project at Rizeworld.",
+    img: "/images/T 1.jpeg",
+    tags: ["GRAPHIC DESIGN", "VIDEO EDITING", "BRANDING"],
+    objectPosition: "center 0%",
   },
   {
-    name: "Karan Soni",
-    role: "Head of Digital Marketing",
-    specialty: "Growth Hacking, Performance Marketing & SEO",
-    experience: "8+ Years Mentoring & Executing Global Ad Campaigns",
-    bio: "Karan is a master strategist who has managed millions in ad spend. He teaches performance marketing with a direct, data-driven, results-oriented approach.",
-    img: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=500&q=80",
-    tags: ["Marketing", "Growth", "SEO"],
-  },
-  {
-    name: "Priyanka Verma",
-    role: "UI/UX & Creative Director",
-    specialty: "Human-Centered Design, Branding & Prototyping",
-    experience: "Product Designer & Brand Consultant",
-    bio: "Priyanka guides students through design thinking, wireframing, and creating high-converting user interfaces that balance aesthetics and usability.",
-    img: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=500&q=80",
-    tags: ["UI/UX", "Figma", "Branding"],
-  },
-  {
-    name: "Ankit Choudhary",
-    role: "Lead Web Developer & Architect",
-    specialty: "Full-Stack Development, React & Cloud Infrastructure",
-    experience: "Senior Software Architect & Mentor",
-    bio: "Ankit is passionate about building scalable, high-performance web applications. He trains students in modern frontend & backend architectures.",
-    img: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=500&q=80",
-    tags: ["React", "Node.js", "Cloud"],
+    name: "Devesh Choudhary",
+    role: "DIGITAL MARKETING SPECIALIST",
+    specialty: "SEO, Meta Ads & Social Media Management",
+    experience: "3+ Years Executing Full-Stack Digital Marketing Nationally & Internationally",
+    bio: "Devesh is a tech-first digital marketer who codes his own SEO. He handles the complete digital stack — Technical & Local SEO, Meta Ads, Social Media Management, GMB optimization, and SEO-ready web development — delivering clean, data-driven growth for clients nationally and internationally.",
+    img: "/images/T 2.png",
+    tags: ["SEO", "META ADS", "SMM"],
+    objectPosition: "center 20%",
   },
 ];
 
@@ -73,8 +59,45 @@ export default function Trainers() {
     fetchTeachers();
   }, []);
 
+  const trainerSchemas = [
+    ...STATIC_MENTORS.map((mentor) => ({
+      "@context": "https://schema.org",
+      "@type": "Person",
+      "name": mentor.name,
+      "jobTitle": mentor.role,
+      "description": mentor.bio,
+      "knowsAbout": mentor.tags,
+      "worksFor": {
+        "@type": "EducationalOrganization",
+        "@id": "https://rizeworldinstitute.in/#educationalorganization",
+        "name": "RizeWorld Institute of AI & Digital Marketing",
+        "url": "https://rizeworldinstitute.in"
+      },
+      "affiliation": {
+        "@type": "EducationalOrganization",
+        "name": "RizeWorld Institute",
+        "url": "https://rizeworldinstitute.in"
+      }
+    })),
+    {
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://rizeworldinstitute.in/" },
+        { "@type": "ListItem", "position": 2, "name": "Trainers", "item": "https://rizeworldinstitute.in/trainers" }
+      ]
+    }
+  ];
+
   return (
     <main className="pt-28 bg-[#0a0a0c] text-white min-h-screen">
+      <SEO
+        title="Meet Certified Industry Trainers & Mentors | RizeWorld"
+        description="Learn from certified industry professionals with years of hands-on agency and brand experience. Get 1-on-1 mentorship at RizeWorld."
+        canonicalPath="/trainers"
+        schemas={trainerSchemas}
+      />
+
       {/* Hero Header */}
       <section className="relative py-24 overflow-hidden">
         {/* Glow circles */}
@@ -111,42 +134,45 @@ export default function Trainers() {
 
           <div className="grid md:grid-cols-2 gap-8">
             {STATIC_MENTORS.map((mentor, index) => (
-              <Reveal key={index} delay={index * 0.15}>
-                <div className="bg-[#121215]/80 backdrop-blur-xl border border-white/5 rounded-3xl p-6 md:p-8 flex flex-col sm:flex-row gap-6 hover:border-orange-500/30 transition-all duration-500 hover:shadow-[0_20px_40px_rgba(0,0,0,0.3)] hover:-translate-y-1 group">
-                  <div className="w-full sm:w-40 h-40 shrink-0 rounded-2xl overflow-hidden relative shadow-md">
+              <Reveal key={index} delay={index * 0.15} className="h-full">
+                <div className="h-full bg-[#121215]/80 backdrop-blur-xl border border-white/5 rounded-3xl p-6 md:p-8 flex flex-col sm:flex-row gap-6 hover:border-orange-500/30 transition-all duration-500 hover:shadow-[0_20px_40px_rgba(0,0,0,0.3)] hover:-translate-y-1 group">
+                  <div className="w-full sm:w-40 h-56 sm:h-40 shrink-0 rounded-2xl overflow-hidden relative shadow-md">
                     <img 
                       src={mentor.img} 
                       alt={mentor.name} 
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
+                      style={{ objectPosition: mentor.objectPosition || "center" }}
                     />
                     <div className="absolute inset-0 bg-linear-to-t from-black/60 to-transparent opacity-60" />
                   </div>
                   
-                  <div className="flex flex-col justify-between space-y-4">
-                    <div>
-                      <div className="flex flex-wrap gap-1.5 mb-2">
-                        {mentor.tags.map((t, idx) => (
-                          <span key={idx} className="px-2 py-0.5 rounded-md bg-white/5 text-[10px] font-bold text-neutral-300 border border-white/5 uppercase">
-                            {t}
-                          </span>
-                        ))}
+                  <div className="flex-1 flex flex-col justify-between space-y-4">
+                    <div className="flex flex-col flex-1">
+                      <div className="sm:min-h-[120px] flex flex-col justify-start">
+                        <div className="flex flex-wrap gap-1.5 mb-2">
+                          {mentor.tags.map((t, idx) => (
+                            <span key={idx} className="px-2 py-0.5 rounded-md bg-white/5 text-[10px] font-bold text-neutral-300 border border-white/5 uppercase">
+                              {t}
+                            </span>
+                          ))}
+                        </div>
+                        <h3 className="text-xl font-extrabold text-white group-hover:text-blue-400 transition-colors">
+                          {mentor.name}
+                        </h3>
+                        <p className="text-xs font-semibold text-orange-400 uppercase tracking-widest mt-0.5">
+                          {mentor.role}
+                        </p>
+                        <p className="text-xs text-neutral-400 font-medium mt-1">
+                          {mentor.experience}
+                        </p>
                       </div>
-                      <h3 className="text-xl font-extrabold text-white group-hover:text-blue-400 transition-colors">
-                        {mentor.name}
-                      </h3>
-                      <p className="text-xs font-semibold text-orange-400 uppercase tracking-widest mt-0.5">
-                        {mentor.role}
-                      </p>
-                      <p className="text-xs text-neutral-400 font-medium mt-1">
-                        {mentor.experience}
-                      </p>
-                      <p className="text-sm text-neutral-300 mt-3 leading-relaxed">
+                      <p className="text-sm text-neutral-300 mt-4 leading-relaxed flex-1">
                         {mentor.bio}
                       </p>
                     </div>
 
-                    <div className="pt-2 border-t border-white/5 flex items-center justify-between text-xs text-neutral-400">
-                      <span className="font-semibold text-neutral-500">Specialty:</span>
+                    <div className="pt-3 border-t border-white/5 text-xs text-neutral-400">
+                      <span className="font-semibold text-neutral-500 mr-1.5">Specialty:</span>
                       <span className="text-white/80 font-bold">{mentor.specialty}</span>
                     </div>
                   </div>
@@ -214,12 +240,12 @@ export default function Trainers() {
               Schedule a personalized 1-on-1 mentorship session or career roadmap guidance with our head mentors.
             </p>
             <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-4">
-              <a
-                href="/contact"
+              <Link
+                to="/contact"
                 className="w-full sm:w-auto px-8 py-4 rounded-full bg-white text-black font-bold hover:bg-orange-500 hover:text-white transition-all duration-300 flex items-center justify-center gap-2 shadow-lg group"
               >
                 Enroll in a Program <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
-              </a>
+              </Link>
               <a
                 href="https://wa.me/918302277092"
                 target="_blank"

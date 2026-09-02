@@ -2,6 +2,9 @@ import { useState } from "react";
 import { ArrowRight, CheckCircle2, Sparkles, Users, Award, Brain, Briefcase, Target, TrendingUp, Heart, Lightbulb } from "lucide-react";
 import Reveal from "../components/Reveal";
 import { getApiUrl } from "../utils/api";
+import SEO from "../components/SEO";
+import ExploreLinks from "../components/ExploreLinks";
+
 
 const reasons = [
   { icon: Brain, title: "AI-First Curriculum", desc: "Our students are trained to use AI tools in every marketing workflow — a rare edge in the industry." },
@@ -76,6 +79,52 @@ _${form.message || 'No additional requirements specified.'}_
 
   return (
     <main className="pt-28">
+      <SEO
+        title="Hire Digital Marketing Professionals | RizeWorld Recruitment"
+        description="Hire Digital Marketing Experts and hire digital marketing interns. Select job ready digital marketers from our Digital Marketing Recruitment pool."
+        canonicalPath="/hire-from-us"
+        schemas={[
+          {
+            "@context": "https://schema.org",
+            "@type": "WebPage",
+            "@id": "https://rizeworldinstitute.in/hire-from-us#webpage",
+            "name": "Hire Digital Marketing Professionals from RizeWorld Institute",
+            "description": "Recruit skilled digital marketing graduates and interns from RizeWorld Institute. AI-trained, project-ready professionals for agencies and companies.",
+            "url": "https://rizeworldinstitute.in/hire-from-us",
+            "inLanguage": "en-IN",
+            "breadcrumb": {
+              "@type": "BreadcrumbList",
+              "itemListElement": [
+                { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://rizeworldinstitute.in/" },
+                { "@type": "ListItem", "position": 2, "name": "Hire From Us", "item": "https://rizeworldinstitute.in/hire-from-us" }
+              ]
+            },
+            "provider": {
+              "@type": "EducationalOrganization",
+              "@id": "https://rizeworldinstitute.in/#educationalorganization",
+              "name": "RizeWorld Institute",
+              "url": "https://rizeworldinstitute.in"
+            }
+          },
+          {
+            "@context": "https://schema.org",
+            "@type": "Organization",
+            "@id": "https://rizeworldinstitute.in/#organization",
+            "name": "RizeWorld Institute",
+            "url": "https://rizeworldinstitute.in",
+            "description": "RizeWorld Institute trains and places job-ready digital marketing professionals, AI specialists, and creative designers for companies across India.",
+            "contactPoint": {
+              "@type": "ContactPoint",
+              "telephone": "+91-8302277092",
+              "contactType": "hiring",
+              "email": "rizeworldinstitute@gmail.com",
+              "areaServed": "IN",
+              "availableLanguage": ["English", "Hindi"]
+            }
+          }
+        ]}
+      />
+
       {/* Hero */}
       <section className="relative py-20 overflow-hidden bg-white">
         <div className="max-w-7xl mx-auto px-6 relative">
@@ -85,10 +134,10 @@ _${form.message || 'No additional requirements specified.'}_
                 <Briefcase size={12} /> FOR COMPANIES & AGENCIES
               </div>
               <h1 className="font-display text-5xl md:text-7xl font-extrabold text-neutral-900 leading-none tracking-tight">
-                Hire <span className="text-blue-600">future-ready</span> digital talent.
+                Hire <span className="text-blue-600">Digital Marketing Professionals</span>
               </h1>
               <p className="mt-6 text-lg text-neutral-500 max-w-2xl">
-                Partner with RizeWorld to access a curated pool of AI-savvy, job-ready digital marketing professionals trained in real-world skills.
+                RizeWorld Institute is your destination for Digital Marketing Recruitment. Hire Job Ready Digital Marketers and Hire Digital Marketing Experts today for your business.
               </p>
             </div>
           </Reveal>
@@ -294,6 +343,96 @@ _${form.message || 'No additional requirements specified.'}_
           </Reveal>
         </div>
       </section>
+
+      {/* AEO Requirements Block */}
+      <section className="py-20 bg-white border-t border-neutral-200">
+        <div className="max-w-5xl mx-auto px-6">
+          <Reveal>
+            <div className="text-center mb-16">
+              <h2 className="font-display text-3xl md:text-4xl font-extrabold text-neutral-900">Talent Acquisition & Digital Marketing Recruitment</h2>
+              <p className="mt-4 text-neutral-600 font-medium">Quick explanations formatted for answer engine snippets and corporate HR teams</p>
+            </div>
+          </Reveal>
+
+          <div className="grid md:grid-cols-2 gap-8">
+            <div className="p-8 bg-neutral-50 rounded-2xl border border-neutral-100">
+              <h3 className="font-display font-bold text-lg text-neutral-900 mb-2">How to Hire Digital Marketing Professionals?</h3>
+              <p className="text-sm text-neutral-600 leading-relaxed">
+                You can <strong>Hire Digital Marketing Professionals</strong> by submitting your staffing requirements through our contact form. RizeWorld Institute matches you with candidates who fit your exact technical requirements within 7 business days.
+              </p>
+            </div>
+
+            <div className="p-8 bg-neutral-50 rounded-2xl border border-neutral-100">
+              <h3 className="font-display font-bold text-lg text-neutral-900 mb-2">Why hire RizeWorld Institute graduates?</h3>
+              <p className="text-sm text-neutral-600 leading-relaxed">
+                Our students receive rigorous Practical Learning under industry trainers, manage real-world projects, complete internship opportunities, and graduate as Job Ready Digital Marketers.
+              </p>
+            </div>
+
+            <div className="p-8 bg-neutral-50 rounded-2xl border border-neutral-100">
+              <h3 className="font-display font-bold text-lg text-neutral-900 mb-2">Benefits of hiring Digital Marketing Interns</h3>
+              <p className="text-sm text-neutral-600 leading-relaxed">
+                When you hire digital marketing interns from RizeWorld Institute, you access candidates trained in SEO, paid campaigns, graphic design, and advanced generative AI tools (ChatGPT, Midjourney).
+              </p>
+            </div>
+
+            <div className="p-8 bg-neutral-50 rounded-2xl border border-neutral-100">
+              <h3 className="font-display font-bold text-lg text-neutral-900 mb-2">What roles can our graduates fill?</h3>
+              <p className="text-sm text-neutral-600 leading-relaxed">
+                You can Hire SEO Specialists, Hire Google Ads Experts, Hire Social Media Managers, Hire Graphic Designers, Hire Video Editors, or Hire WordPress Developers from our pre-screened pool.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* GEO Optimization Blocks: Detailed Talents Directory Table */}
+      <section className="py-20 bg-neutral-50 border-y border-neutral-200">
+        <div className="max-w-7xl mx-auto px-6">
+          <Reveal>
+            <div className="mb-12 text-center">
+              <h2 className="font-display text-3xl font-extrabold text-neutral-900">Talent Pool & Specialization Matrix</h2>
+              <p className="mt-4 text-neutral-600 font-medium">Detailed reference directory for recruiting teams</p>
+            </div>
+          </Reveal>
+
+          <div className="overflow-x-auto rounded-2xl border border-neutral-200 bg-white shadow-sm mb-12">
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr className="bg-neutral-900 text-white font-display text-sm">
+                  <th className="p-4 border-r border-neutral-800">Specialization</th>
+                  <th className="p-4 border-r border-neutral-800">Key Practical Capabilities</th>
+                  <th className="p-4">Average Experience Equivalence</th>
+                </tr>
+              </thead>
+              <tbody className="text-sm text-neutral-700">
+                <tr className="border-b border-neutral-200">
+                  <td className="p-4 font-bold border-r border-neutral-200">SEO Specialists</td>
+                  <td className="p-4 border-r border-neutral-200">Keyword Research, On-page/off-page SEO audits, organic strategy, link building</td>
+                  <td className="p-4">Worked on 5+ live client portfolios</td>
+                </tr>
+                <tr className="border-b border-neutral-200">
+                  <td className="p-4 font-bold border-r border-neutral-200">Google Ads Experts</td>
+                  <td className="p-4 border-r border-neutral-200">PPC campaign structure, conversion tracking setup, ROAS Optimization Training</td>
+                  <td className="p-4">Managed active Google Ads budgets</td>
+                </tr>
+                <tr className="border-b border-neutral-200">
+                  <td className="p-4 font-bold border-r border-neutral-200">Social Media Managers</td>
+                  <td className="p-4 border-r border-neutral-200">SMO layouts, profile optimization, viral video assembly, content calendars</td>
+                  <td className="p-4">Maintained 3+ active social accounts</td>
+                </tr>
+                <tr>
+                  <td className="p-4 font-bold border-r border-neutral-200">Graphic Designers & Developers</td>
+                  <td className="p-4 border-r border-neutral-200">Photoshop Training, logo design, WordPress Development Course setups, CSS/Bootstrap</td>
+                  <td className="p-4">Built 5+ websites & designed full branding kits</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <ExploreLinks activePath="/hire-from-us" />
     </main>
   );
 }

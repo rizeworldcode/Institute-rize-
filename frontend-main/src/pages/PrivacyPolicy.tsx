@@ -1,8 +1,14 @@
 import Reveal from "../components/Reveal";
+import SEO from "../components/SEO";
 
 export default function PrivacyPolicy() {
   return (
     <main className="pt-28 pb-20">
+      <SEO
+        title="Privacy Policy | RizeWorld Institute"
+        description="Read the privacy policy of RizeWorld Institute. Learn how we handle, collect, and protect your personal data."
+        canonicalPath="/privacy"
+      />
       <div className="max-w-4xl mx-auto px-6">
         <Reveal>
           <div className="bg-white/90 backdrop-blur-xl border border-neutral-200 rounded-3xl p-8 md:p-12 shadow-sm">

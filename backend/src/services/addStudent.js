@@ -682,3 +682,57 @@ console.log(req.body);
 
   }
 };
+
+exports.deleteStudent = async (req, res) => {
+  try {
+    const { student_ID } = req.params || req.body || {};
+    if (!student_ID) {
+      return {
+        success: false,
+        message: "Student ID is required",
+      };
+    }
+
+    // Find student by student_ID or ObjectId
+    let student = await certificate_model.findOne({ student_ID });
+    if (!student) {
+      const mongoose = require('mongoose');
+      if (mongoose.isValidObjectId(student_ID)) {
+        student = await certificate_model.findById(student_ID);
+      }
+    }
+
+    if (!student) {
+      return {
+        success: false,
+        message: "Student not found",
+      };
+    }
+
+    // Decrement referrer total_student count if linked
+    if (student.referred_by_id) {
+      try {
+        const referrer = await referred_model.findById(student.referred_by_id);
+        if (referrer && referrer.total_student > 0) {
+          referrer.total_student = Math.max(0, referrer.total_student - 1);
+          await referrer.save();
+        }
+      } catch (refErr) {
+        console.error("Error updating referrer count on delete:", refErr);
+      }
+    }
+
+    await certificate_model.deleteOne({ _id: student._id });
+
+    return {
+      success: true,
+      message: "Student deleted successfully",
+    };
+  } catch (error) {
+    console.error("Error in deleteStudent service:", error);
+    return {
+      success: false,
+      message: error.message || "Internal server error",
+    };
+  }
+};

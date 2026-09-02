@@ -210,9 +210,13 @@ export function StudentModal({ student, onClose, onSave }: {
           referredByPassword: studentInfo.referredByPassword
         };
 
+        const token = localStorage.getItem("adminAuthToken");
         const res = await fetch(getApiUrl("/add_student"), {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: { 
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
+          },
           body: JSON.stringify(payload)
         });
         const data = await res.json();
@@ -295,8 +299,12 @@ export function StudentModal({ student, onClose, onSave }: {
           const controller = new AbortController();
           const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
           
+          const token = localStorage.getItem("adminAuthToken");
           res = await fetch(getApiUrl(`/updateStudentdetails/${student.id}`), {
             method: "POST",
+            headers: {
+              "Authorization": `Bearer ${token}`
+            },
             body: formData,
             signal: controller.signal
           });

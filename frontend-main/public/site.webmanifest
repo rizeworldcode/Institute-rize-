@@ -1,0 +1,42 @@
+{
+  "name": "RizeWorld Institute of AI & Digital Marketing",
+  "short_name": "RizeWorld",
+  "description": "Premium AI & Digital Marketing training institute in Alwar, Rajasthan. Master AI tools, SEO, paid ads, video editing, and web development.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#ed5923",
+  "lang": "en-IN",
+  "scope": "/",
+  "orientation": "portrait-primary",
+  "categories": ["education", "business"],
+  "icons": [
+    {
+      "src": "/logo/RIZE_LOGO_FAVICON.png",
+      "sizes": "any",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/logo/RIZE_LOGO_FAVICON.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/logo/RIZE_LOGO_FAVICON.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/images/rize.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "RizeWorld Institute Homepage"
+    }
+  ]
+}

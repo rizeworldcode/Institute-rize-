@@ -82,7 +82,7 @@ export default function Footer() {
             <ul className="space-y-3 text-sm text-neutral-500">
               <li className="flex items-start gap-2">
                 <MapPin size={14} className="text-orange-500 mt-0.5 shrink-0" />
-                <span>C198, near Telco Circle, UIT colony, Shalimar Nagar, Alwar, Rajasthan 301001</span>
+                <span>C197, near Telco Circle, UIT colony, Shalimar Nagar, Alwar, Rajasthan 301001</span>
               </li>
               <li className="flex items-center gap-2">
                 <Phone size={14} className="text-green-600" />

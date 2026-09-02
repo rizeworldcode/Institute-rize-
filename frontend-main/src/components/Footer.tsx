@@ -40,7 +40,7 @@ export default function Footer() {
             <p className="text-neutral-500 text-sm leading-relaxed max-w-sm">
               A premium institute of AI & Digital Marketing shaping the next generation of tech-savvy professionals in Alwar, Rajasthan.
             </p>
-            <div className="flex gap-3 mt-6">
+            <div className="flex gap-3 mt-6 relative z-20">
               {[
                 { Icon: Instagram, url: "https://www.instagram.com/rizeworldinstitute?igsh=MWl4M2J3bDZuMTRpeA==" },
                 { Icon: Linkedin, url: "https://www.linkedin.com/company/rizeworld-institute/" }
@@ -61,19 +61,26 @@ export default function Footer() {
           <div className="relative z-10">
             <h4 className="font-display font-bold text-sm mb-4 text-orange-600">Learn</h4>
             <ul className="space-y-2 text-sm text-neutral-500">
-              <li><a href="/courses" className="hover:text-neutral-900 transition-colors">Courses</a></li>
-              <li><a href="/master-course" className="hover:text-neutral-900 transition-colors">Master Course</a></li>
-              <li><a href="/trainers" className="hover:text-neutral-900 transition-colors">Trainers</a></li>
-              <li><a href="/blog" className="hover:text-neutral-900 transition-colors">Blogs</a></li>
+              <li><Link to="/courses" className="hover:text-neutral-900 transition-colors">Digital Marketing Course</Link></li>
+              <li><Link to="/master-course" className="hover:text-neutral-900 transition-colors">Master Course</Link></li>
+              <li><Link to="/seo" className="hover:text-neutral-900 transition-colors">SEO Course</Link></li>
+              <li><Link to="/social-media-marketing" className="hover:text-neutral-900 transition-colors">Social Media Optimization</Link></li>
+              <li><Link to="/performance-marketing" className="hover:text-neutral-900 transition-colors">Performance Marketing</Link></li>
+              <li><Link to="/website-development" className="hover:text-neutral-900 transition-colors">Website Development</Link></li>
+              <li><Link to="/graphic-design" className="hover:text-neutral-900 transition-colors">Graphic Design</Link></li>
+              <li><Link to="/video-editing" className="hover:text-neutral-900 transition-colors">Video Editing</Link></li>
+              <li><Link to="/ai-digital-marketing" className="hover:text-neutral-900 transition-colors">AI Digital Marketing</Link></li>
+              <li><Link to="/trainers" className="hover:text-neutral-900 transition-colors">Trainers</Link></li>
+              <li><Link to="/blog" className="hover:text-neutral-900 transition-colors">Blogs</Link></li>
             </ul>
           </div>
 
           <div className="relative z-10">
             <h4 className="font-display font-bold text-sm mb-4 text-green-600">Institute</h4>
             <ul className="space-y-2 text-sm text-neutral-500">
-              <li><a href="/about" className="hover:text-neutral-900 transition-colors">About Us</a></li>
-              <li><a href="/hire-from-us" className="hover:text-neutral-900 transition-colors">Hire From Us</a></li>
-              <li><a href="/contact" className="hover:text-neutral-900 transition-colors">Contact</a></li>
+              <li><Link to="/about" className="hover:text-neutral-900 transition-colors">About Us</Link></li>
+              <li><Link to="/hire-from-us" className="hover:text-neutral-900 transition-colors">Hire From Us</Link></li>
+              <li><Link to="/contact" className="hover:text-neutral-900 transition-colors">Contact</Link></li>
             </ul>
           </div>
 
@@ -82,15 +89,26 @@ export default function Footer() {
             <ul className="space-y-3 text-sm text-neutral-500">
               <li className="flex items-start gap-2">
                 <MapPin size={14} className="text-orange-500 mt-0.5 shrink-0" />
-                <span>C197, near Telco Circle, UIT colony, Shalimar Nagar, Alwar, Rajasthan 301001</span>
+                <a
+                  href="https://maps.google.com/?q=C197,+near+Telco+Circle,+UIT+colony,+Shalimar+Nagar,+Alwar,+Rajasthan+301001"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:text-orange-500 transition-colors cursor-pointer"
+                >
+                  C197, near Telco Circle, UIT colony, Shalimar Nagar, Alwar, Rajasthan 301001
+                </a>
               </li>
               <li className="flex items-start gap-2">
                 <Phone size={14} className="text-green-600 shrink-0 mt-0.5" />
-                <span>+91 8302277092</span>
+                <a href="tel:+918302277092" className="hover:text-green-600 transition-colors">
+                  +91 8302277092
+                </a>
               </li>
               <li className="flex items-start gap-2">
                 <Mail size={14} className="text-green-600 shrink-0 mt-0.5" />
-                <span className="break-all">rizeworldinstitute@gmail.com</span>
+                <a href="mailto:rizeworldinstitute@gmail.com" className="break-all hover:text-green-600 transition-colors">
+                  rizeworldinstitute@gmail.com
+                </a>
               </li>
             </ul>
           </div>

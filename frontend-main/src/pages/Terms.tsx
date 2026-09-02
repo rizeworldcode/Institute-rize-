@@ -1,8 +1,14 @@
 import Reveal from "../components/Reveal";
+import SEO from "../components/SEO";
 
 export default function Terms() {
   return (
     <main className="pt-28 pb-20">
+      <SEO
+        title="Terms of Service | RizeWorld Institute"
+        description="Review the terms and conditions governing the use of RizeWorld website and campus enrollment."
+        canonicalPath="/terms"
+      />
       <div className="max-w-4xl mx-auto px-6">
         <Reveal>
           <div className="bg-white/90 backdrop-blur-xl border border-neutral-200 rounded-3xl p-8 md:p-12 shadow-sm">

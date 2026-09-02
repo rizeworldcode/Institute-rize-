@@ -12,7 +12,8 @@ exports.connectDB = async () => {
       family: 4 // Use IPv4, skip trying IPv6
     };
 
-    const conn = await mongoose.connect(process.env.mongo_URI, options);
+    const dbUri = process.env.mongo_URI || process.env.MONGO_URI || process.env.MONGODB_URI;
+    const conn = await mongoose.connect(dbUri, options);
     
     if (conn) {
         console.log(`Database connected successfully: ${conn.connection.host}`);

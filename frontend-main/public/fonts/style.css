@@ -4,7 +4,7 @@
 font-family: 'Helvetica';
 font-style: normal;
 font-weight: normal;
-src: local('Helvetica'), url('Helvetica.woff') format('woff');
+src: local('Helvetica');
 }
 
 
@@ -12,7 +12,7 @@ src: local('Helvetica'), url('Helvetica.woff') format('woff');
 font-family: 'Helvetica Oblique';
 font-style: normal;
 font-weight: normal;
-src: local('Helvetica Oblique'), url('Helvetica-Oblique.woff') format('woff');
+src: local('Helvetica Oblique');
 }
 
 
@@ -20,7 +20,7 @@ src: local('Helvetica Oblique'), url('Helvetica-Oblique.woff') format('woff');
 font-family: 'Helvetica Compressed';
 font-style: normal;
 font-weight: normal;
-src: local('Helvetica Compressed'), url('helvetica-compressed-5871d14b6903a.woff') format('woff');
+src: local('Helvetica Compressed');
 }
 
 
@@ -28,7 +28,7 @@ src: local('Helvetica Compressed'), url('helvetica-compressed-5871d14b6903a.woff
 font-family: 'Helvetica Rounded Bold';
 font-style: normal;
 font-weight: normal;
-src: local('Helvetica Rounded Bold'), url('helvetica-rounded-bold-5871d05ead8de.woff') format('woff');
+src: local('Helvetica Rounded Bold');
 }
 
 
@@ -36,7 +36,7 @@ src: local('Helvetica Rounded Bold'), url('helvetica-rounded-bold-5871d05ead8de.
 font-family: 'Helvetica';
 font-style: normal;
 font-weight: normal;
-src: local('Helvetica'), url('Helvetica-Bold.woff') format('woff');
+src: local('Helvetica');
 }
 
 
@@ -44,7 +44,7 @@ src: local('Helvetica'), url('Helvetica-Bold.woff') format('woff');
 font-family: 'Helvetica Bold Oblique';
 font-style: normal;
 font-weight: normal;
-src: local('Helvetica Bold Oblique'), url('Helvetica-BoldOblique.woff') format('woff');
+src: local('Helvetica Bold Oblique');
 }
 
 
@@ -52,5 +52,5 @@ src: local('Helvetica Bold Oblique'), url('Helvetica-BoldOblique.woff') format('
 font-family: 'Helvetica Light';
 font-style: normal;
 font-weight: normal;
-src: local('Helvetica Light'), url('helvetica-light-587ebe5a59211.woff') format('woff');
+src: local('Helvetica Light');
 }

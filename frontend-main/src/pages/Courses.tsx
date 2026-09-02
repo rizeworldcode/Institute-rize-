@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { Brain, Palette, Video, TrendingUp, Search, BarChart3, Code, ArrowRight, CheckCircle2, Sparkles, Zap } from "lucide-react";
 import Reveal from "../components/Reveal";
+import SEO from "../components/SEO";
 
 const modules = [
   { icon: Search, title: "SEO (Search Engine Optimization)", desc: "Rank #1 on Google with advanced on-page, off-page, and technical SEO strategies.", duration: "1.5 weeks", topics: ["Keyword Research", "On-Page SEO", "Technical SEO", "Link Building", "Local SEO"] },
@@ -42,6 +43,11 @@ const combos = [
 export default function Courses() {
   return (
     <main className="pt-28 bg-neutral-50 min-h-screen">
+      <SEO
+        title="Explore Digital Marketing & AI Courses | RizeWorld Institute"
+        description="Explore our specialized digital marketing courses at RizeWorld Institute. Master SEO, Performance Marketing, Social Media, Video Editing, and AI tools."
+        canonicalPath="/courses"
+      />
       {/* Master Course Featured */}
       <section className="py-12 md:py-16">
         <div className="max-w-7xl mx-auto px-6">

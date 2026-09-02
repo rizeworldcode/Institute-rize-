@@ -29,7 +29,7 @@ export default function Navbar() {
           <Link to="/hire-from-us" title="Hire From Us" className="text-neutral-400 hover:text-neutral-900 transition-colors">
             <Briefcase size={22} />
           </Link>
-          
+
           <div className="relative group mt-2">
             <button className="text-neutral-400 hover:text-neutral-900 transition-colors flex items-center justify-center">
               <MoreHorizontal size={24} />
@@ -37,6 +37,7 @@ export default function Navbar() {
             <div className="absolute left-full top-1/2 -translate-y-1/2 ml-4 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 w-40 bg-white/95 backdrop-blur-xl rounded-2xl shadow-luxury border border-white/40 p-2 flex flex-col gap-1 z-50">
               <Link to="/about" className="px-4 py-2 text-sm font-semibold text-neutral-400 hover:text-rize-blue hover:bg-[#0f0f0f] rounded-xl transition-colors uppercase">About Us</Link>
               <Link to="/blog" className="px-4 py-2 text-sm font-semibold text-neutral-400 hover:text-rize-blue hover:bg-[#0f0f0f] rounded-xl transition-colors uppercase">Blogs</Link>
+              <Link to="/trainers" className="px-4 py-2 text-sm font-semibold text-neutral-400 hover:text-rize-blue hover:bg-[#0f0f0f] rounded-xl transition-colors uppercase">Trainers</Link>
               <Link to="/contact" className="px-4 py-2 text-sm font-semibold text-neutral-400 hover:text-rize-blue hover:bg-[#0f0f0f] rounded-xl transition-colors uppercase">Contact Us</Link>
             </div>
           </div>
@@ -52,23 +53,23 @@ export default function Navbar() {
       {/* ============================================================== */}
       <div className="lg:hidden fixed top-2 left-4 right-4 z-50 pointer-events-none">
         <div className="w-full bg-white/80 backdrop-blur-xl border border-white/40 rounded-[3rem] shadow-[0_12px_40px_rgba(0,0,0,0.06)] flex items-center justify-between px-6 py-3.5 pointer-events-auto">
-          
+
           {/* Logo container */}
-          <Link 
-            to="/" 
+          <Link
+            to="/"
             onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
             className="flex items-center justify-start h-10 w-32 overflow-hidden relative pointer-events-auto"
           >
-            <img 
-              src="/logo/RIZE LOGO HORI PNG.png" 
-              alt="RizeWorld Logo" 
-              className="absolute top-1/2 -translate-y-1/2 left-0 h-[500%] w-auto max-w-none object-contain object-left ml-[-70px]" 
+            <img
+              src="/logo/RIZE LOGO HORI PNG.png"
+              alt="RizeWorld Logo"
+              className="absolute top-1/2 -translate-y-1/2 left-0 h-[500%] w-auto max-w-none object-contain object-left ml-[-70px]"
             />
           </Link>
 
           {/* Thin circular hamburger button */}
-          <button 
-            onClick={() => setMobileOpen(!mobileOpen)} 
+          <button
+            onClick={() => setMobileOpen(!mobileOpen)}
             className="h-10 w-10 flex items-center justify-center rounded-full border border-neutral-200 bg-white/20 text-neutral-800 hover:bg-neutral-100 active:scale-95 transition-all cursor-pointer shrink-0 shadow-sm"
           >
             {mobileOpen ? <X size={18} /> : <Menu size={18} />}
@@ -79,18 +80,30 @@ export default function Navbar() {
       {/* Top Floating Navbar (Desktop) */}
       <nav className="hidden lg:flex fixed top-10 left-28 right-8 xl:left-32 xl:right-12 z-50 pointer-events-auto transition-all duration-300">
         <div className="w-full bg-white/95 backdrop-blur-xl shadow-[0_4px_24px_rgba(0,0,0,0.06)] border border-white/60 rounded-full flex items-center justify-between px-6 xl:px-8 py-3">
-          
+
           {/* Left: Logo */}
           <Link to="/" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} className="flex items-center justify-start h-10 w-32 shrink-0 overflow-hidden relative">
-             <img src="/logo/RIZE LOGO HORI PNG.png" alt="RizeWorld Logo" className="absolute top-1/2 left-0 -translate-y-1/2 h-[500%] w-auto max-w-none object-contain object-left ml-[-70px]" />
+            <img src="/logo/RIZE LOGO HORI PNG.png" alt="RizeWorld Logo" className="absolute top-1/2 left-0 -translate-y-1/2 h-[500%] w-auto max-w-none object-contain object-left ml-[-70px]" />
           </Link>
 
           {/* Middle: Links */}
           <div className="flex items-center gap-6 xl:gap-10 text-[14px] xl:text-[16px] font-normal text-neutral-900 tracking-wide uppercase" style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 400 }}>
-            <a href="https://maps.google.com/?q=Rizeworld+Institute+of+AI+and+Digital+Marketing,+Alwar" target="_blank" rel="noopener noreferrer" className="hover:text-blue-600 transition-colors">
-              Location Alwar, RJ
-            </a>
-            <Link to="/courses" className="hover:text-blue-600 transition-colors">Explore Courses</Link>
+            <Link to="/location/alwar" className="hover:text-blue-600 transition-colors">
+              Location Alwar
+            </Link>
+            <div className="relative group py-2">
+              <Link to="/courses" className="hover:text-blue-600 transition-colors uppercase">Explore Courses</Link>
+              <div className="absolute top-full left-0 mt-1 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 w-64 bg-white/95 backdrop-blur-xl rounded-2xl shadow-lg border border-neutral-200 p-2 flex flex-col gap-1 z-50 normal-case">
+                <Link to="/courses" className="px-4 py-2 text-xs font-semibold text-neutral-600 hover:text-blue-600 hover:bg-neutral-100 rounded-xl transition-colors uppercase">Digital Marketing Course</Link>
+                <Link to="/seo" className="px-4 py-2 text-xs font-semibold text-neutral-600 hover:text-blue-600 hover:bg-neutral-100 rounded-xl transition-colors uppercase">SEO Course</Link>
+                <Link to="/social-media-marketing" className="px-4 py-2 text-xs font-semibold text-neutral-600 hover:text-blue-600 hover:bg-neutral-100 rounded-xl transition-colors uppercase">Social Media Marketing</Link>
+                <Link to="/performance-marketing" className="px-4 py-2 text-xs font-semibold text-neutral-600 hover:text-blue-600 hover:bg-neutral-100 rounded-xl transition-colors uppercase">Performance Marketing</Link>
+                <Link to="/website-development" className="px-4 py-2 text-xs font-semibold text-neutral-600 hover:text-blue-600 hover:bg-neutral-100 rounded-xl transition-colors uppercase">Website Development</Link>
+                <Link to="/graphic-design" className="px-4 py-2 text-xs font-semibold text-neutral-600 hover:text-blue-600 hover:bg-neutral-100 rounded-xl transition-colors uppercase">Graphic Design</Link>
+                <Link to="/video-editing" className="px-4 py-2 text-xs font-semibold text-neutral-600 hover:text-blue-600 hover:bg-neutral-100 rounded-xl transition-colors uppercase">Video Editing</Link>
+                <Link to="/ai-digital-marketing" className="px-4 py-2 text-xs font-semibold text-neutral-600 hover:text-blue-600 hover:bg-neutral-100 rounded-xl transition-colors uppercase">AI Digital Marketing</Link>
+              </div>
+            </div>
             <Link to="/master-course" className="hover:text-blue-600 transition-colors">Program Master Course</Link>
             <Link to="/certificate" className="hover:text-blue-600 transition-colors">Certificate</Link>
           </div>
@@ -106,29 +119,25 @@ export default function Navbar() {
       </nav>
 
       {/* Mobile Menu */}
-      <div className={`lg:hidden fixed inset-0 z-40 transition-all duration-500 ${
-        mobileOpen ? "visible" : "invisible"
-      }`}>
+      <div className={`lg:hidden fixed inset-0 z-40 transition-all duration-500 ${mobileOpen ? "visible" : "invisible"
+        }`}>
         <div
-          className={`absolute inset-0 bg-black/30 backdrop-blur-xs transition-opacity duration-500 ${
-            mobileOpen ? "opacity-100" : "opacity-0"
-          }`}
+          className={`absolute inset-0 bg-black/30 backdrop-blur-xs transition-opacity duration-500 ${mobileOpen ? "opacity-100" : "opacity-0"
+            }`}
           onClick={() => setMobileOpen(false)}
         />
-        <div className={`absolute right-4 top-20 bottom-4 w-[calc(100%-2rem)] max-w-sm bg-white/95 backdrop-blur-xl border border-white/40 shadow-luxury rounded-[2.5rem] transition-transform duration-500 ${
-          mobileOpen ? "translate-x-0" : "translate-x-[120%]"
-        }`}>
-          <div className="h-full overflow-y-auto p-8 space-y-2" style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 400 }}>
-            <a href="https://maps.google.com/?q=Rizeworld+Institute+of+AI+and+Digital+Marketing,+Alwar" target="_blank" rel="noopener noreferrer" className="block py-3 px-4 rounded-2xl font-normal text-neutral-900 hover:bg-neutral-100 hover:text-rize-blue transition-colors uppercase">
-              Location Alwar, RJ
-            </a>
-            <MobileLink to="/courses" label="Explore Courses" onClick={() => setMobileOpen(false)} />
-            <MobileLink to="/master-course" label="Program Master Course" onClick={() => setMobileOpen(false)} />
-            <MobileLink to="/certificate" label="Certificate" onClick={() => setMobileOpen(false)} />
-            <MobileLink to="/about" label="About Us" onClick={() => setMobileOpen(false)} />
-            <MobileLink to="/hire-from-us" label="Hire From Us" onClick={() => setMobileOpen(false)} />
-            <MobileLink to="/contact" label="Contact" onClick={() => setMobileOpen(false)} />
-            <MobileLink to="/blog" label="Blogs" onClick={() => setMobileOpen(false)} />
+        <div className={`absolute right-4 top-20 bottom-4 w-[calc(100%-2rem)] max-w-sm bg-white/95 backdrop-blur-xl border border-white/40 shadow-luxury rounded-[2.5rem] transition-transform duration-500 ${mobileOpen ? "translate-x-0" : "translate-x-[120%]"
+          }`}>
+          <div className="h-full overflow-y-auto p-8 space-y-1" style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 400 }}>
+            <MobileLink to="/location/alwar" label="Location Alwar" onClick={() => setMobileOpen(false)} isActive={location.pathname === "/location/alwar"} />
+            <MobileLink to="/courses" label="Explore Courses" onClick={() => setMobileOpen(false)} isActive={location.pathname === "/courses"} />
+            <MobileLink to="/master-course" label="Program Master Course" onClick={() => setMobileOpen(false)} isActive={location.pathname === "/master-course"} />
+            <MobileLink to="/certificate" label="Certificate" onClick={() => setMobileOpen(false)} isActive={location.pathname === "/certificate"} />
+            <MobileLink to="/about" label="About Us" onClick={() => setMobileOpen(false)} isActive={location.pathname === "/about"} />
+            <MobileLink to="/hire-from-us" label="Hire From Us" onClick={() => setMobileOpen(false)} isActive={location.pathname === "/hire-from-us"} />
+            <MobileLink to="/contact" label="Contact" onClick={() => setMobileOpen(false)} isActive={location.pathname === "/contact"} />
+            <MobileLink to="/blog" label="Blogs" onClick={() => setMobileOpen(false)} isActive={location.pathname === "/blog"} />
+            <MobileLink to="/trainers" label="Trainers" onClick={() => setMobileOpen(false)} isActive={location.pathname === "/trainers"} />
 
             <Link
               to="/contact"
@@ -145,14 +154,27 @@ export default function Navbar() {
   );
 }
 
-function MobileLink({ to, label, onClick }: any) {
+function MobileLink({ to, label, onClick, isActive }: any) {
+  const [hovered, setHovered] = useState(false);
+  const showHighlight = isActive || hovered;
   return (
-    <Link
-      to={to}
-      onClick={onClick}
-      className="block py-3 px-4 rounded-2xl font-normal text-neutral-900 hover:bg-neutral-100 hover:text-rize-blue transition-colors uppercase"
-    >
-      {label}
-    </Link>
+    <div className="py-1">
+      <Link
+        to={to}
+        onClick={onClick}
+        onMouseEnter={() => setHovered(true)}
+        onMouseLeave={() => setHovered(false)}
+        className="inline-block py-2 px-4 rounded-lg font-bold text-xl uppercase tracking-wide text-neutral-900 transition-all duration-300"
+        style={showHighlight ? {
+          backgroundImage: "url('/images/highlighter.webp')",
+          backgroundRepeat: 'no-repeat',
+          backgroundPosition: 'center bottom',
+          backgroundSize: '100% 85%',
+          color: '#0a0a0a',
+        } : {}}
+      >
+        {label}
+      </Link>
+    </div>
   );
 }

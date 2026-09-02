@@ -4,6 +4,7 @@ import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { Clock, ArrowRight, Sparkles, Brain, Palette, Video, TrendingUp, Search, BarChart3, Code, Users, Award, Zap, CheckCircle2, Quote, Star, MapPin, BookOpen, Briefcase } from "lucide-react";
 import Reveal from "../components/Reveal";
+import SEO from "../components/SEO";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -24,11 +25,10 @@ const testimonials = [
 ];
 
 const faqs = [
-  { q: "What makes RizeWorld different?", a: "We blend AI, design, and marketing into one premium curriculum taught by industry veterans. Our focus is job-ready skills, not theory." },
-  { q: "Do I need prior experience?", a: "Not at all. Our modules are designed for absolute beginners and progress to advanced mastery with hands-on projects." },
-  { q: "What is the batch size?", a: "We keep batches small (max 20 students) to ensure personalized mentorship and premium learning experience." },
-  { q: "Is the course online or offline?", a: "Both. Our flagship campus is in Alwar, Rajasthan, with hybrid options available for working professionals." },
-  { q: "Will I get a certificate?", a: "Yes, you receive an industry-recognized RizeWorld certificate upon completion, plus portfolio reviews." },
+  { q: "What is the Best Digital Marketing Course in India?", a: "The Best Digital Marketing Course in India is a comprehensive 3-month program combining search engine optimization, paid advertising, and prompt engineering, offered by RizeWorld Institute. It provides practical learning and verified certifications." },
+  { q: "Why choose RizeWorld Institute for Digital Marketing Coaching India?", a: "RizeWorld Institute is the Best Digital Marketing Institute in India. We offer professional Digital Marketing Training India with small batch mentorship, industry trainers, live project training, and placement support." },
+  { q: "What are the benefits of enrolling in a Digital Marketing Training Institute?", a: "Enrolling in a premier Digital Marketing Academy like RizeWorld Institute gives you access to a modern curriculum, live campaigns, internship opportunities, and a recognized Digital Marketing Certification Course India credential." },
+  { q: "What career opportunities exist after Professional Digital Marketing Training?", a: "Graduates can enter pathways as Digital Marketers, Paid Ads Managers, SEO Executives, and Brand Promoters, backed by complete placement support and recruitment events." }
 ];
 
 
@@ -159,8 +159,166 @@ export default function Home() {
     };
   }, []);
 
+  const homeSchemas = [
+    {
+      "@context": "https://schema.org",
+      "@type": "EducationalOrganization",
+      "@id": "https://rizeworldinstitute.in/#educationalorganization",
+      "name": "RizeWorld Institute of AI & Digital Marketing",
+      "alternateName": "RizeWorld Institute",
+      "description": "Premium AI and Digital Marketing training institute in Alwar, Rajasthan offering comprehensive courses in SEO, SMO, Performance Marketing, Graphic Design, Video Editing, Website Development, and AI Tools.",
+      "url": "https://rizeworldinstitute.in/",
+      "logo": {
+        "@type": "ImageObject",
+        "url": "https://rizeworldinstitute.in/logo/RIZE%20LOGO%20HORI%20PNG.png",
+        "width": 200,
+        "height": 60
+      },
+      "image": "https://rizeworldinstitute.in/images/rize.png",
+      "telephone": "+91-8302277092",
+      "email": "rizeworldinstitute@gmail.com",
+      "foundingDate": "2023",
+      "numberOfEmployees": { "@type": "QuantitativeValue", "value": 10 },
+      "sameAs": [
+        "https://www.instagram.com/rizeworldinstitute",
+        "https://www.linkedin.com/company/rizeworld-institute/"
+      ],
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "C197, near Telco Circle, UIT colony, Shalimar Nagar",
+        "addressLocality": "Alwar",
+        "addressRegion": "Rajasthan",
+        "postalCode": "301001",
+        "addressCountry": "IN"
+      },
+      "hasOfferCatalog": {
+        "@type": "OfferCatalog",
+        "name": "Digital Marketing & AI Courses",
+        "itemListElement": [
+          { "@type": "Offer", "itemOffered": { "@type": "Course", "name": "Master Course in AI & Digital Marketing", "url": "https://rizeworldinstitute.in/master-course" } },
+          { "@type": "Offer", "itemOffered": { "@type": "Course", "name": "SEO Course", "url": "https://rizeworldinstitute.in/seo" } },
+          { "@type": "Offer", "itemOffered": { "@type": "Course", "name": "Social Media Marketing Course", "url": "https://rizeworldinstitute.in/social-media-marketing" } },
+          { "@type": "Offer", "itemOffered": { "@type": "Course", "name": "Performance Marketing Course", "url": "https://rizeworldinstitute.in/performance-marketing" } },
+          { "@type": "Offer", "itemOffered": { "@type": "Course", "name": "Graphic Design Course", "url": "https://rizeworldinstitute.in/graphic-design" } },
+          { "@type": "Offer", "itemOffered": { "@type": "Course", "name": "Video Editing Course", "url": "https://rizeworldinstitute.in/video-editing" } },
+          { "@type": "Offer", "itemOffered": { "@type": "Course", "name": "AI Digital Marketing Course", "url": "https://rizeworldinstitute.in/ai-digital-marketing" } }
+        ]
+      }
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      "@id": "https://rizeworldinstitute.in/#organization",
+      "name": "RizeWorld Institute",
+      "alternateName": "RizeWorld Institute",
+      "url": "https://rizeworldinstitute.in/",
+      "logo": "https://rizeworldinstitute.in/logo/RIZE%20LOGO%20HORI%20PNG.png",
+      "contactPoint": {
+        "@type": "ContactPoint",
+        "telephone": "+91-8302277092",
+        "contactType": "customer service",
+        "areaServed": "IN",
+        "availableLanguage": ["English", "Hindi"]
+      },
+      "sameAs": [
+        "https://www.instagram.com/rizeworldinstitute",
+        "https://www.linkedin.com/company/rizeworld-institute/"
+      ]
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "LocalBusiness",
+      "@id": "https://rizeworldinstitute.in/#localbusiness",
+      "name": "RizeWorld Institute of AI & Digital Marketing",
+      "description": "Premium AI and Digital Marketing training institute offering courses in SEO, Performance Marketing, Graphic Design, Video Editing, and AI Tools in Alwar, Rajasthan.",
+      "url": "https://rizeworldinstitute.in/",
+      "telephone": "+91-8302277092",
+      "email": "rizeworldinstitute@gmail.com",
+      "image": "https://rizeworldinstitute.in/images/rize.png",
+      "logo": "https://rizeworldinstitute.in/logo/RIZE%20LOGO%20HORI%20PNG.png",
+      "priceRange": "₹₹",
+      "currenciesAccepted": "INR",
+      "paymentAccepted": "Cash, Credit Card, UPI, Bank Transfer",
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "C197, near Telco Circle, UIT colony, Shalimar Nagar",
+        "addressLocality": "Alwar",
+        "addressRegion": "Rajasthan",
+        "postalCode": "301001",
+        "addressCountry": "IN"
+      },
+      "geo": {
+        "@type": "GeoCoordinates",
+        "latitude": 27.5539,
+        "longitude": 76.6266
+      },
+      "openingHoursSpecification": {
+        "@type": "OpeningHoursSpecification",
+        "dayOfWeek": ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"],
+        "opens": "09:00",
+        "closes": "19:00"
+      },
+      "sameAs": [
+        "https://www.instagram.com/rizeworldinstitute",
+        "https://www.linkedin.com/company/rizeworld-institute/"
+      ]
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "@id": "https://rizeworldinstitute.in/#website",
+      "name": "RizeWorld Institute",
+      "description": "Premium AI and Digital Marketing training institute in India.",
+      "url": "https://rizeworldinstitute.in/",
+      "inLanguage": "en-IN",
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": {
+          "@type": "EntryPoint",
+          "urlTemplate": "https://rizeworldinstitute.in/courses?search={search_term_string}"
+        },
+        "query-input": "required name=search_term_string"
+      }
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": faqs.map((faq) => ({
+        "@type": "Question",
+        "name": faq.q,
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": faq.a
+        }
+      }))
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "SiteNavigationElement",
+      "name": ["Home", "Courses", "Master Course", "About", "Blog", "Contact", "Our Locations", "Hire From Us", "Trainers"],
+      "url": [
+        "https://rizeworldinstitute.in/",
+        "https://rizeworldinstitute.in/courses",
+        "https://rizeworldinstitute.in/master-course",
+        "https://rizeworldinstitute.in/about",
+        "https://rizeworldinstitute.in/blog",
+        "https://rizeworldinstitute.in/contact",
+        "https://rizeworldinstitute.in/location",
+        "https://rizeworldinstitute.in/hire-from-us",
+        "https://rizeworldinstitute.in/trainers"
+      ]
+    }
+  ];
+
+
   return (
     <main className="relative">
+      <SEO
+        title="Best Digital Marketing Course in India | Digital Marketing Institute India"
+        description="Enroll in the Best Digital Marketing Course in India at RizeWorld Institute. Master AI tools, paid ads, SEO, and join the top Digital Marketing Training India."
+        canonicalPath=""
+        schemas={homeSchemas}
+      />
       {/* ============ HERO ============ */}
       {/* ============ BENTO-BOX HERO ============ */}
       <section ref={heroRef} className="relative w-full min-h-dvh md:h-screen p-4 md:p-6 bg-white overflow-hidden flex flex-col">
@@ -180,11 +338,11 @@ export default function Home() {
             {/* Main Left-Aligned Typography */}
             <div className="flex-1 flex flex-col justify-center w-full pointer-events-none lg:max-w-2xl xl:max-w-3xl">
               <h1 className="hero-title font-display text-4xl md:text-5xl lg:text-[3.5rem] xl:text-[4.5rem] font-semibold text-white leading-[1.1] tracking-tight drop-shadow-[0_10px_30px_rgba(0,0,0,0.8)] mb-4 md:mb-6">
-                <span>RizeWorld <span className="text-[#ed5923]">Institute</span></span><br />
-                <span className="text-white/90">of AI & Digital Marketing</span>
+                <span>Best <span className="text-[#ed5923]">Digital Marketing Course</span> in India</span><br />
+                <span className="text-white/90">RizeWorld Institute</span>
               </h1>
               <p className="hero-sub text-white/90 text-sm md:text-base lg:text-base xl:text-lg leading-relaxed font-medium max-w-xl drop-shadow-md">
-                Discover extraordinary AI and digital marketing programs available for ambitious learners. Whether you're seeking a career shift or a unique skill investment, our curated modules offer the most exceptional education worldwide.
+                Welcome to the Best Digital Marketing Institute in India. We offer professional Digital Marketing Training India with Advanced Digital Marketing modules, Digital Marketing Classes India, and structured Digital Marketing Certification Course India tracks. Get ready to launch your career.
               </p>
             </div>
 

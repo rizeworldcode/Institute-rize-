@@ -3,6 +3,7 @@ import { useEffect, lazy, Suspense } from "react";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 import WhatsAppWidget from "./components/WhatsAppWidget";
+import CallWidget from "./components/CallWidget";
 
 // Lazy load pages
 const Home = lazy(() => import("./pages/Home"));
@@ -11,12 +12,23 @@ const MasterCourse = lazy(() => import("./pages/MasterCourse"));
 const HireFromUs = lazy(() => import("./pages/HireFromUs"));
 const About = lazy(() => import("./pages/About"));
 const Blog = lazy(() => import("./pages/Blog"));
+const BlogPost = lazy(() => import("./pages/BlogPost"));
 const Contact = lazy(() => import("./pages/Contact"));
-const Centers = lazy(() => import("./pages/Centers"));
 const PrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy"));
 const Terms = lazy(() => import("./pages/Terms"));
 const Certificate = lazy(() => import("./pages/Certificate"));
 const Trainers = lazy(() => import("./pages/Trainers"));
+const LocationHub = lazy(() => import("./pages/LocationHub"));
+const AlwarLocation = lazy(() => import("./pages/AlwarLocation"));
+const SEOPage = lazy(() => import("./pages/SEO"));
+const SocialMediaPage = lazy(() => import("./pages/SocialMedia"));
+const PerformanceMarketingPage = lazy(() => import("./pages/PerformanceMarketing"));
+const WebsiteDevelopmentPage = lazy(() => import("./pages/WebsiteDevelopment"));
+const GraphicDesignPage = lazy(() => import("./pages/GraphicDesign"));
+const VideoEditingPage = lazy(() => import("./pages/VideoEditing"));
+const AIDigitalMarketingPage = lazy(() => import("./pages/AIDigitalMarketing"));
+const NotFound = lazy(() => import("./pages/NotFound"));
+
 
 function ScrollToTop() {
   const { pathname } = useLocation();
@@ -44,14 +56,26 @@ function MainLayout() {
           <Route path="/hire-from-us" element={<HireFromUs />} />
           <Route path="/about" element={<About />} />
           <Route path="/blog" element={<Blog />} />
+          <Route path="/blog/:slug" element={<BlogPost />} />
           <Route path="/contact" element={<Contact />} />
-          <Route path="/centers" element={<Centers />} />
+          <Route path="/location" element={<LocationHub />} />
+          <Route path="/location/alwar" element={<AlwarLocation />} />
+          <Route path="/seo" element={<SEOPage />} />
+          <Route path="/social-media-marketing" element={<SocialMediaPage />} />
+          <Route path="/performance-marketing" element={<PerformanceMarketingPage />} />
+          <Route path="/website-development" element={<WebsiteDevelopmentPage />} />
+          <Route path="/graphic-design" element={<GraphicDesignPage />} />
+          <Route path="/video-editing" element={<VideoEditingPage />} />
+          <Route path="/ai-digital-marketing" element={<AIDigitalMarketingPage />} />
           <Route path="/privacy" element={<PrivacyPolicy />} />
           <Route path="/terms" element={<Terms />} />
           <Route path="/certificate" element={<Certificate />} />
+          <Route path="/student_login" element={<Certificate />} />
           <Route path="/trainers" element={<Trainers />} />
+          <Route path="*" element={<NotFound />} />
         </Routes>
       </Suspense>
+      <CallWidget />
       <WhatsAppWidget />
       <Footer />
     </div>

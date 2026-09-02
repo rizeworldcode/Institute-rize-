@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { Download, CheckCircle2, User, Eye, FileText, Lock, ArrowRight, AlertCircle, LogOut } from "lucide-react";
 import { getApiUrl } from "../utils/api";
+import SEO from "../components/SEO";
 
 interface Certificate {
   courseName: string;
@@ -11,6 +12,8 @@ interface Certificate {
 
 export default function Certificate() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const isStudentLoginRoute = location.pathname === "/student_login";
   const [downloading, setDownloading] = useState<string | null>(null);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [loginForm, setLoginForm] = useState({ studentId: "", password: "" });
@@ -160,6 +163,12 @@ export default function Certificate() {
   if (!isLoggedIn || !studentData) {
     return (
       <div className="min-h-screen bg-neutral-50 pt-32 pb-20 px-6 font-sans flex items-center justify-center">
+        <SEO
+          title="Verify Student Certificates | RizeWorld Student Portal"
+          description="Verify and validate certifications earned by RizeWorld students. Secure digital records of graduation and professional skills."
+          canonicalPath={isStudentLoginRoute ? "/student_login" : "/certificate"}
+          noIndex={isStudentLoginRoute}
+        />
         {!isLoggedIn ? (
           <div className="max-w-md w-full bg-white rounded-4xl p-8 shadow-[0_12px_40px_rgb(0,0,0,0.06)] border border-neutral-100">
             <div className="w-16 h-16 bg-blue-50 text-blue-600 rounded-3xl flex items-center justify-center mb-8 mx-auto shadow-sm">
@@ -243,6 +252,12 @@ export default function Certificate() {
 
   return (
     <div className="min-h-screen bg-neutral-50 pt-32 pb-20 px-6 font-sans">
+      <SEO
+        title="Verify Student Certificates | RizeWorld Student Portal"
+        description="Verify and validate certifications earned by RizeWorld students. Secure digital records of graduation and professional skills."
+        canonicalPath={isStudentLoginRoute ? "/student_login" : "/certificate"}
+        noIndex={isStudentLoginRoute}
+      />
       <div className="max-w-4xl mx-auto space-y-8">
         
         {/* Header Section */}
