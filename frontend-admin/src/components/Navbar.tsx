@@ -175,10 +175,26 @@ export default function Navbar() {
           }`}
           onClick={() => setMobileOpen(false)}
         />
-        <div className={`absolute right-0 top-0 bottom-0 w-[85%] max-w-sm bg-white/98 backdrop-blur-xl border-l border-white/40 shadow-luxury transition-transform duration-500 ${
+        <div className={`absolute right-0 top-0 bottom-0 w-[85%] max-w-sm bg-white/98 backdrop-blur-xl border-l border-white/40 shadow-luxury transition-transform duration-500 flex flex-col ${
           mobileOpen ? "translate-x-0" : "translate-x-full"
         }`}>
-          <div className="h-full overflow-y-auto p-6 pt-24 space-y-2">
+          {/* Drawer Header with Close Button */}
+          <div className="flex items-center justify-between px-6 pt-6 pb-2 border-b border-neutral-100">
+            <span className="text-xs font-bold tracking-widest text-neutral-400 uppercase">Menu</span>
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                setMobileOpen(false);
+              }}
+              className="p-2 rounded-full bg-neutral-100 hover:bg-neutral-200 text-neutral-700 transition-all cursor-pointer shadow-xs"
+              aria-label="Close menu"
+            >
+              <X size={18} />
+            </button>
+          </div>
+
+          <div className="flex-1 overflow-y-auto p-6 space-y-2">
             <a href="https://maps.google.com/?q=Rizeworld+Institute+of+AI+and+Digital+Marketing,+Alwar" target="_blank" rel="noopener noreferrer" className="block py-3 px-4 rounded-xl font-semibold text-neutral-900 hover:bg-neutral-200 hover:text-rize-blue transition-colors uppercase">
               Location Alwar, RJ
             </a>

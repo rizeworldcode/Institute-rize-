@@ -1,4 +1,5 @@
 const Inquiry = require("../models/inquiryModel");
+const memoryCache = require("../utils/cache");
 
 exports.addInquiry = async (req, res) => {
     try {
@@ -13,6 +14,7 @@ exports.addInquiry = async (req, res) => {
         });
 
         await newInquiry.save();
+        memoryCache.clear();
 
         return {
             success: true,
@@ -27,11 +29,16 @@ exports.addInquiry = async (req, res) => {
 
 exports.getAllInquiries = async (req, res) => {
     try {
-        const inquiries = await Inquiry.find().sort({ created_at: -1 });
-        return {
+        const cached = memoryCache.get("all_inquiries");
+        if (cached) return cached;
+
+        const inquiries = await Inquiry.find().sort({ created_at: -1 }).lean();
+        const result = {
             success: true,
             data: inquiries
         };
+        memoryCache.set("all_inquiries", result, 30);
+        return result;
     } catch (error) {
         console.log("Get Inquiries Error:", error);
         return { success: false, message: "Error fetching inquiries" };
@@ -42,6 +49,7 @@ exports.markInquiryRead = async (req, res) => {
     try {
         const { id } = req.params;
         await Inquiry.findByIdAndUpdate(id, { is_read: true });
+        memoryCache.clear();
         return {
             success: true,
             message: "Inquiry marked as read"

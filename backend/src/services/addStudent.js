@@ -1,6 +1,7 @@
 const certificate_model = require("../models/studentModel");
 const referred_model = require("../models/referreledModel");
 const admin_model = require("../models/adminmodel");
+const memoryCache = require("../utils/cache");
 const bcrypt = require("bcryptjs");
 const path = require('path');
 const fs = require('fs');
@@ -151,6 +152,7 @@ exports.add_student = async (req,res) => {
         }
         // Persist to database
         const saved = await student_Data.save();
+        memoryCache.clear();
 
         return {
             student_Data: saved,
@@ -422,6 +424,12 @@ console.log(req.body);
               utrNumber: (payment.type && payment.type.toLowerCase() === "online") ? (payment.utr || "") : "",
               date: Date.now()
             });
+            existingcertificate.fee.push({
+              amount: paymentAmount,
+              payment_method: payment.type || "cash",
+              utr_Number: (payment.type && payment.type.toLowerCase() === "online") ? (payment.utr || "") : "",
+              date: Date.now()
+            });
             admission.updatedAt = Date.now();
             existingcertificate.markModified('admissions');
           }
@@ -661,6 +669,7 @@ console.log(req.body);
 
     console.log("About to save existingcertificate...");
     await existingcertificate.save();
+    memoryCache.clear();
     console.log("existingcertificate saved successfully!");
 
     return {
@@ -718,7 +727,10 @@ exports.deleteStudent = async (req, res) => {
       }
     }
 
-    await certificate_model.deleteOne({ _id: student._id });
+    student.is_deleted = true;
+    student.deleted_at = new Date();
+    await student.save();
+    memoryCache.clear();
 
     return {
       success: true,

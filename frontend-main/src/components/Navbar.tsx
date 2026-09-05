@@ -126,9 +126,25 @@ export default function Navbar() {
             }`}
           onClick={() => setMobileOpen(false)}
         />
-        <div className={`absolute right-4 top-20 bottom-4 w-[calc(100%-2rem)] max-w-sm bg-white/95 backdrop-blur-xl border border-white/40 shadow-luxury rounded-[2.5rem] transition-transform duration-500 ${mobileOpen ? "translate-x-0" : "translate-x-[120%]"
+        <div className={`absolute right-4 top-20 bottom-4 w-[calc(100%-2rem)] max-w-sm bg-white/95 backdrop-blur-xl border border-white/40 shadow-luxury rounded-[2.5rem] transition-transform duration-500 flex flex-col ${mobileOpen ? "translate-x-0" : "translate-x-[120%]"
           }`}>
-          <div className="h-full overflow-y-auto p-8 space-y-1" style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 400 }}>
+          {/* Drawer Header with Close Button */}
+          <div className="flex items-center justify-between px-6 pt-6 pb-2 border-b border-neutral-100">
+            <span className="text-xs font-bold tracking-widest text-neutral-400 uppercase">Navigation</span>
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                setMobileOpen(false);
+              }}
+              className="p-2 rounded-full bg-neutral-100 hover:bg-neutral-200 text-neutral-700 transition-all cursor-pointer shadow-xs"
+              aria-label="Close menu"
+            >
+              <X size={18} />
+            </button>
+          </div>
+
+          <div className="flex-1 overflow-y-auto p-6 space-y-1" style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 400 }}>
             <MobileLink to="/location/alwar" label="Location Alwar" onClick={() => setMobileOpen(false)} isActive={location.pathname === "/location/alwar"} />
             <MobileLink to="/courses" label="Explore Courses" onClick={() => setMobileOpen(false)} isActive={location.pathname === "/courses"} />
             <MobileLink to="/master-course" label="Program Master Course" onClick={() => setMobileOpen(false)} isActive={location.pathname === "/master-course"} />

@@ -1,4 +1,4 @@
-import { ArrowLeft, UserCircle, Edit2, Eye } from "lucide-react";
+import { ArrowLeft, UserCircle, Edit2, Eye, Trash2 } from "lucide-react";
 
 interface ReferredByTabProps {
   selectedReferrer: any;
@@ -11,6 +11,7 @@ interface ReferredByTabProps {
   setEditingReferrer: (referrer: any) => void;
   setIsReferrerModalOpen: (isOpen: boolean) => void;
   handleClearReferrerAmount: (referrer: any) => void;
+  handleDeleteReferrer: (referrer: any) => void;
 }
 
 export function ReferredByTab({
@@ -23,7 +24,8 @@ export function ReferredByTab({
   handleReferrerClick,
   setEditingReferrer,
   setIsReferrerModalOpen,
-  handleClearReferrerAmount
+  handleClearReferrerAmount,
+  handleDeleteReferrer
 }: ReferredByTabProps) {
   return (
              <div className="max-w-[1400px] mx-auto space-y-8 animate-in fade-in duration-500">
@@ -150,7 +152,7 @@ export function ReferredByTab({
                                       </span>
                                    </td>
                                    <td className="px-3 py-3 text-sm text-right">
-                                      <div className="flex justify-end gap-2">
+                                      <div className="flex justify-end gap-2 items-center">
                                          <button onClick={() => handleReferrerClick(ref)} className="p-1.5 text-blue-600 hover:bg-blue-50 hover:text-blue-700 rounded-lg transition-colors cursor-pointer" title="View Details">
                                             <Eye size={16} />
                                          </button>
@@ -160,6 +162,9 @@ export function ReferredByTab({
                                          {ref.status === 'Pending' && (
                                             <button onClick={() => handleClearReferrerAmount(ref)} className="px-3 py-1 bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs rounded-lg transition-colors shadow-sm cursor-pointer">Clear</button>
                                          )}
+                                         <button onClick={() => handleDeleteReferrer(ref)} className="p-1.5 text-red-600 hover:bg-red-50 hover:text-red-700 rounded-lg transition-colors cursor-pointer" title="Delete Referrer">
+                                            <Trash2 size={16} />
+                                         </button>
                                       </div>
                                    </td>
                                 </tr>

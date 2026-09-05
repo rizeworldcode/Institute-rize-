@@ -1,9 +1,13 @@
 const student_model = require("../models/studentModel");
 const referred_model = require("../models/referreledModel");
+const memoryCache = require("../utils/cache");
 
 exports.allStudents = async (req,res) => {
     try {
-        const Studentdata = await student_model.find().sort({ created_at: -1 });
+        const cached = memoryCache.get("all_students");
+        if (cached) return cached;
+
+        const Studentdata = await student_model.find({ is_deleted: { $ne: true } }).sort({ created_at: -1 }).lean();
         
         // Calculate stats
         const totalEntries = Studentdata.length;
@@ -88,7 +92,7 @@ exports.allStudents = async (req,res) => {
             };
         });
 
-        return {
+        const result = {
             success: true,
             message: "Students fetched successfully",
             data: mappedData,
@@ -98,6 +102,9 @@ exports.allStudents = async (req,res) => {
                 recentActivity
             }
         };
+
+        memoryCache.set("all_students", result, 30);
+        return result;
     } catch (error) {
         console.log("Error:", error);
         return {
@@ -110,7 +117,7 @@ exports.allStudents = async (req,res) => {
 
 exports.pandingfeeStudentsData = async (req,res) => {
     try {
-        const students = await student_model.find();
+        const students = await student_model.find({ is_deleted: { $ne: true } });
         
         const pendingStudents = students.filter(student => {
             const paid = parseFloat(student.total_paid_fee || 0);
@@ -159,7 +166,7 @@ exports.pandingfeeStudentsData = async (req,res) => {
 
 exports.clearfeeStudentsData = async (req,res) => {
     try {
-        const students = await student_model.find();
+        const students = await student_model.find({ is_deleted: { $ne: true } });
         
         const clearStudents = students.filter(student => {
             const paid = parseFloat(student.total_paid_fee || 0);
@@ -204,21 +211,54 @@ exports.clearfeeStudentsData = async (req,res) => {
 
 exports.totalEarningsDetails = async (req, res) => {
     try {
-        const students = await student_model.find();
+        const students = await student_model.find({ is_deleted: { $ne: true } });
         let transactions = [];
 
         students.forEach(student => {
-            if (student.fee && student.fee.length > 0) {
+            let studentTxns = [];
+
+            // Primary source: Check admissions for payments
+            if (student.admissions && student.admissions.length > 0) {
+                student.admissions.forEach((adm, admIndex) => {
+                    if (adm.payments && adm.payments.length > 0) {
+                        adm.payments.forEach((p, pIndex) => {
+                            studentTxns.push({
+                                txn_id: p.utrNumber || p.utr_Number || `TXN-${student.student_ID}-${admIndex}-${pIndex}`,
+                                student_name: student.student_name,
+                                amount: parseFloat(p.amount || 0),
+                                date: p.date || student.created_at || new Date(),
+                                method: p.paymentMethod || p.payment_method || "cash"
+                            });
+                        });
+                    }
+                });
+            }
+
+            // Fallback: Check student.fee if no admission payments found
+            if (studentTxns.length === 0 && student.fee && student.fee.length > 0) {
                 student.fee.forEach((f, index) => {
-                    transactions.push({
+                    studentTxns.push({
                         txn_id: f.utr_Number || `TXN-${student.student_ID}-${index}`,
                         student_name: student.student_name,
-                        amount: f.amount,
-                        date: f.date,
-                        method: f.payment_method || "cash"
+                        amount: parseFloat(f.amount || 0),
+                        date: f.date || student.created_at || new Date(),
+                        method: f.payment_method || f.paymentMethod || "cash"
                     });
                 });
             }
+
+            // Secondary Fallback: If still no transactions but student has total_paid_fee
+            if (studentTxns.length === 0 && parseFloat(student.total_paid_fee || 0) > 0) {
+                studentTxns.push({
+                    txn_id: `TXN-${student.student_ID}-init`,
+                    student_name: student.student_name,
+                    amount: parseFloat(student.total_paid_fee || 0),
+                    date: student.created_at || student.createdAt || new Date(),
+                    method: "cash"
+                });
+            }
+
+            transactions.push(...studentTxns);
         });
 
         // Sort by date descending
@@ -241,7 +281,7 @@ exports.totalEarningsDetails = async (req, res) => {
 
 exports.certificateissuedStudentsData = async (req,res) => {
     try {
-        const Studentdata = await student_model.find({certificate_photo: {$ne: ""}}).sort({ updated_at: -1 });
+        const Studentdata = await student_model.find({ is_deleted: { $ne: true }, certificate_photo: {$ne: ""} }).sort({ updated_at: -1 });
         
         const mappedData = Studentdata.map(student => {
             const paid = parseFloat(student.total_paid_fee || 0);
@@ -285,7 +325,7 @@ exports.certificateissuedStudentsData = async (req,res) => {
 
 exports.certificateunissuedStudentsData = async (req,res) => {
     try {
-        const Studentdata = await student_model.find({certificate_photo: {$eq: ""}}).sort({ created_at: -1 });
+        const Studentdata = await student_model.find({ is_deleted: { $ne: true }, certificate_photo: {$eq: ""} }).sort({ created_at: -1 });
         
         const mappedData = Studentdata.map(student => {
             const paid = parseFloat(student.total_paid_fee || 0);
@@ -328,7 +368,7 @@ exports.certificateunissuedStudentsData = async (req,res) => {
 
 exports.referredStudentsData = async (req, res) => {
     try {
-        const Studentdata = await student_model.find({ referred_by_id: { $ne: null } })
+        const Studentdata = await student_model.find({ is_deleted: { $ne: true }, referred_by_id: { $ne: null } })
             .populate('referred_by_id')
             .sort({ created_at: -1 });
 
@@ -361,8 +401,8 @@ exports.referredStudentsData = async (req, res) => {
 
 exports.getAllReferrers = async (req, res) => {
     try {
-        const referrers = await referred_model.find().sort({ updated_at: -1 });
-        const students = await student_model.find({ referred_by_id: { $ne: null } });
+        const referrers = await referred_model.find({ is_deleted: { $ne: true } }).sort({ updated_at: -1 }).lean();
+        const students = await student_model.find({ referred_by_id: { $ne: null } }).lean();
         
         const mappedData = referrers.map(ref => {
             // Calculate real-time stats from student model
@@ -370,8 +410,8 @@ exports.getAllReferrers = async (req, res) => {
             const totalStudentCount = referredStudents.length;
             
             // Total amount is stored in referrer model, but we can verify it or use it as base
-            const total = parseFloat(ref.amount.total || 0);
-            const paid = parseFloat(ref.amount.paid || 0);
+            const total = parseFloat(ref.amount?.total || 0);
+            const paid = parseFloat(ref.amount?.paid || 0);
             const pending = total - paid;
 
             return {
@@ -402,6 +442,106 @@ exports.getAllReferrers = async (req, res) => {
     }
 };
 
+exports.deleteReferrer = async (req, res) => {
+    try {
+        const { id } = req.body;
+        const referrer = await referred_model.findById(id);
+        if (!referrer) {
+            return {
+                success: false,
+                message: "Referrer not found"
+            };
+        }
+
+        referrer.is_deleted = true;
+        referrer.deleted_at = new Date();
+        await referrer.save();
+        memoryCache.clear();
+
+        return {
+            success: true,
+            message: "Referrer deleted successfully"
+        };
+    } catch (error) {
+        console.log("Error deleting referrer:", error);
+        return {
+            success: false,
+            message: "Error in deleting referrer"
+        };
+    }
+};
+
+exports.getDeletedReferrers = async (req, res) => {
+    try {
+        const referrers = await referred_model.find({ is_deleted: true }).sort({ deleted_at: -1 }).lean();
+        const students = await student_model.find({ referred_by_id: { $ne: null } }).lean();
+        
+        const mappedData = referrers.map(ref => {
+            const referredStudents = students.filter(s => s.referred_by_id && s.referred_by_id.toString() === ref._id.toString());
+            const totalStudentCount = referredStudents.length;
+            
+            const total = parseFloat(ref.amount?.total || 0);
+            const paid = parseFloat(ref.amount?.paid || 0);
+            const pending = total - paid;
+
+            return {
+                id: ref._id,
+                name: ref.name,
+                phone: ref.phone,
+                email: ref.email || "N/A",
+                studentsReferred: totalStudentCount,
+                totalAmount: `₹${total.toLocaleString()}`,
+                pendingAmount: `₹${pending.toLocaleString()}`,
+                paidAmount: `₹${paid.toLocaleString()}`,
+                status: pending > 0 ? "Pending" : "Clear",
+                deleted_at: ref.deleted_at
+            };
+        });
+
+        return {
+            success: true,
+            message: "Deleted referrers fetched successfully",
+            data: mappedData
+        };
+    } catch (error) {
+        console.log("Error fetching deleted referrers:", error);
+        return {
+            success: false,
+            message: "Error in fetching deleted referrers",
+            data: null
+        };
+    }
+};
+
+exports.restoreReferrer = async (req, res) => {
+    try {
+        const { id } = req.body;
+        const referrer = await referred_model.findById(id);
+        if (!referrer) {
+            return {
+                success: false,
+                message: "Referrer not found"
+            };
+        }
+
+        referrer.is_deleted = false;
+        referrer.deleted_at = null;
+        await referrer.save();
+        memoryCache.clear();
+
+        return {
+            success: true,
+            message: "Referrer restored successfully"
+        };
+    } catch (error) {
+        console.log("Error restoring referrer:", error);
+        return {
+            success: false,
+            message: "Error in restoring referrer"
+        };
+    }
+};
+
 exports.updateReferrerPayment = async (req, res) => {
     try {
         const { id, payAmount } = req.body;
@@ -425,6 +565,7 @@ exports.updateReferrerPayment = async (req, res) => {
         referrer.updated_at = Date.now();
 
         await referrer.save();
+        memoryCache.clear();
 
         return {
             success: true,
@@ -504,4 +645,82 @@ exports.particularStudentData = async (req,res) => {
             data: null
         }
     }
-}
+};
+
+exports.getDeletedStudents = async (req, res) => {
+    try {
+        const Studentdata = await student_model.find({ is_deleted: true }).sort({ deleted_at: -1 }).lean();
+        
+        const mappedData = Studentdata.map(student => {
+            const paid = parseFloat(student.total_paid_fee || 0);
+            const total = parseFloat(student.total_fee || 0);
+            const pending = total - paid;
+
+            return {
+                student_name: student.student_name,
+                student_ID: student.student_ID,
+                selected_course_name: Array.isArray(student.selected_course_name) 
+                    ? student.selected_course_name 
+                    : (student.selected_course_name ? [student.selected_course_name] : ["N/A"]),
+                course_duration: student.course_duration || "N/A",
+                total_fee: student.total_fee || 0,
+                total_paid_fee: student.total_paid_fee || 0,
+                pending_fee: pending > 0 ? pending.toString() : "0",
+                email: student.email || "N/A",
+                phone: student.phone || "N/A",
+                status: pending > 0 ? "Pending" : "Clear",
+                deleted_at: student.deleted_at
+            };
+        });
+
+        return {
+            success: true,
+            message: "Deleted students fetched successfully",
+            data: mappedData
+        };
+    } catch (error) {
+        console.log("Error in getDeletedStudents:", error);
+        return {
+            success: false,
+            message: "Error in fetching deleted students",
+            data: null
+        };
+    }
+};
+
+exports.restoreStudent = async (req, res) => {
+    try {
+        const { student_ID } = req.body;
+        if (!student_ID) {
+            return { success: false, message: "Student ID is required" };
+        }
+
+        let student = await student_model.findOne({ student_ID });
+        if (!student) {
+            const mongoose = require('mongoose');
+            if (mongoose.isValidObjectId(student_ID)) {
+                student = await student_model.findById(student_ID);
+            }
+        }
+
+        if (!student) {
+            return { success: false, message: "Student not found" };
+        }
+
+        student.is_deleted = false;
+        student.deleted_at = null;
+        await student.save();
+        memoryCache.clear();
+
+        return {
+            success: true,
+            message: "Student restored successfully"
+        };
+    } catch (error) {
+        console.log("Error in restoreStudent:", error);
+        return {
+            success: false,
+            message: "Error in restoring student"
+        };
+    }
+};

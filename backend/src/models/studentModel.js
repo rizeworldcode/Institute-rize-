@@ -191,8 +191,21 @@ const StudentSchema = new mongoose.Schema({
     updatedAt: {
         type: Date,
         default: Date.now
+    },
+    is_deleted: {
+        type: Boolean,
+        default: false
+    },
+    deleted_at: {
+        type: Date,
+        default: null
     }
 });
+
+// Indexes for ultra-fast query performance
+StudentSchema.index({ is_deleted: 1, created_at: -1 });
+StudentSchema.index({ is_deleted: 1, student_ID: 1 });
+StudentSchema.index({ referred_by_id: 1, is_deleted: 1 });
 
 // Hash password before saving
 StudentSchema.pre('save', async function (next) {

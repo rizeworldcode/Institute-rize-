@@ -49,11 +49,22 @@ const referredSchema = new mongoose.Schema({
     default: null,
     select: false,
   },
+  is_deleted: {
+    type: Boolean,
+    default: false,
+  },
+  deleted_at: {
+    type: Date,
+    default: null,
+  },
 }, {
   timestamps: { createdAt: 'created_at', updatedAt: 'updated_at' },
   toJSON: { virtuals: true },
   toObject: { virtuals: true }
 });
+
+// Indexes for ultra-fast query performance
+referredSchema.index({ is_deleted: 1, updated_at: -1 });
 
 // Hash password before saving
 referredSchema.pre('save', async function (next) {

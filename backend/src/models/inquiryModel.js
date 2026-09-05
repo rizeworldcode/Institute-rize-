@@ -36,5 +36,9 @@ const InquirySchema = new mongoose.Schema({
     }
 });
 
+// Indexes for ultra-fast query performance
+InquirySchema.index({ is_read: 1, created_at: -1 });
+InquirySchema.index({ created_at: -1 });
+
 const Inquiry = mongoose.model("Inquiry", InquirySchema);
 module.exports = Inquiry;

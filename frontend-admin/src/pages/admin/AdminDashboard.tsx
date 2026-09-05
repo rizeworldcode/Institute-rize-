@@ -3,7 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { 
   Users, Search, Plus, Edit2, LogOut, Shield, Menu,
   AlertCircle, LayoutDashboard, MessagesSquare, X, ArrowLeft,
-  Award, Bell, UserCircle, Mail, IndianRupee, CheckCircle2, Activity, Trash2
+  Award, Bell, UserCircle, Mail, IndianRupee, CheckCircle2, Activity, Trash2, UserX, UserMinus
 } from "lucide-react";
 
 import { Student } from "./types";
@@ -11,6 +11,8 @@ import { StudentModal } from "./modals/StudentModal";
 import { StudentDetailsModal } from "./modals/StudentDetailsModal";
 import { InquiryTab } from "./tabs/InquiryTab";
 import { ReferredByTab } from "./tabs/ReferredByTab";
+import { DeletedReferrersTab } from "./tabs/DeletedReferrersTab";
+import { DeletedStudentsTab } from "./tabs/DeletedStudentsTab";
 import { ReferrerModal } from "./modals/ReferrerModal";
 import { getApiUrl } from "../../utils/api";
 
@@ -48,6 +50,7 @@ export default function AdminDashboard() {
   const [pendingFeeStudentsData, setPendingFeeStudentsData] = useState<any[]>([]);
   const [earningsDetailsData, setEarningsDetailsData] = useState<any[]>([]);
   const [graphData, setGraphData] = useState<any[]>([]);
+  const [graphMetric, setGraphMetric] = useState<"earnings" | "students">("earnings");
   const [topCourses, setTopCourses] = useState<any[]>([]);
 
   const [isSetAmountModalOpen, setIsSetAmountModalOpen] = useState(false);
@@ -89,6 +92,106 @@ export default function AdminDashboard() {
 
 
   const [referrers, setReferrers] = useState<any[]>([]);
+  const [deletedReferrers, setDeletedReferrers] = useState<any[]>([]);
+  const [deletedStudents, setDeletedStudents] = useState<any[]>([]);
+
+  const fetchDeletedStudents = async () => {
+    try {
+      const token = localStorage.getItem("adminAuthToken");
+      const res = await fetch(getApiUrl("/getDeletedStudents"), {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` }
+      });
+      const data = await res.json();
+      if (data.success) {
+        setDeletedStudents(data.data);
+      }
+    } catch (error) {
+      console.error("Failed to fetch deleted students:", error);
+    }
+  };
+
+  const handleRestoreStudent = async (student: any) => {
+    if (window.confirm(`Are you sure you want to restore student "${student.student_name}" (${student.student_ID}) back to Active Students?`)) {
+      try {
+        const token = localStorage.getItem("adminAuthToken");
+        const res = await fetch(getApiUrl("/restoreStudent"), {
+          method: "POST",
+          headers: { 
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
+          },
+          body: JSON.stringify({ student_ID: student.student_ID })
+        });
+        const data = await res.json();
+        if (data.success) {
+          alert("Student restored successfully");
+          fetchDeletedStudents();
+          fetchAllStudents();
+          fetchDashboardData();
+        } else {
+          alert(data.message || "Failed to restore student");
+        }
+      } catch (error) {
+        console.error("Error restoring student:", error);
+        alert("An error occurred while restoring student");
+      }
+    }
+  };
+
+  const handleDeleteReferrer = async (ref: any) => {
+    if (window.confirm(`Are you sure you want to delete referrer "${ref.name}"? This referrer will be moved to Deleted Referrers.`)) {
+      try {
+        const token = localStorage.getItem("adminAuthToken");
+        const res = await fetch(getApiUrl("/deleteReferrer"), {
+          method: "POST",
+          headers: { 
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
+          },
+          body: JSON.stringify({ id: ref.id })
+        });
+        const data = await res.json();
+        if (data.success) {
+          alert("Referrer deleted successfully");
+          fetchReferrers();
+          if (activeTab === "deleted-referrers") fetchDeletedReferrers();
+        } else {
+          alert(data.message || "Failed to delete referrer");
+        }
+      } catch (error) {
+        console.error("Error deleting referrer:", error);
+        alert("An error occurred while deleting referrer");
+      }
+    }
+  };
+
+  const handleRestoreReferrer = async (ref: any) => {
+    if (window.confirm(`Are you sure you want to restore referrer "${ref.name}" back to Active Referrers?`)) {
+      try {
+        const token = localStorage.getItem("adminAuthToken");
+        const res = await fetch(getApiUrl("/restoreReferrer"), {
+          method: "POST",
+          headers: { 
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
+          },
+          body: JSON.stringify({ id: ref.id })
+        });
+        const data = await res.json();
+        if (data.success) {
+          alert("Referrer restored successfully");
+          fetchDeletedReferrers();
+          fetchReferrers();
+        } else {
+          alert(data.message || "Failed to restore referrer");
+        }
+      } catch (error) {
+        console.error("Error restoring referrer:", error);
+        alert("An error occurred while restoring referrer");
+      }
+    }
+  };
 
   const handleClearReferrerAmount = async (ref: any) => {
      if (window.confirm(`Are you sure you want to clear all pending dues (₹${ref.pendingAmount.replace('₹', '')}) for ${ref.name}?`)) {
@@ -528,6 +631,22 @@ export default function AdminDashboard() {
     }
   };
 
+  const fetchDeletedReferrers = async () => {
+    try {
+      const token = localStorage.getItem("adminAuthToken");
+      const res = await fetch(getApiUrl("/getDeletedReferrers"), {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` }
+      });
+      const data = await res.json();
+      if (data.success) {
+        setDeletedReferrers(data.data);
+      }
+    } catch (error) {
+      console.error("Failed to fetch deleted referrers:", error);
+    }
+  };
+
   useEffect(() => {
     if (expandedStat === "total-students") {
       fetchAllStudents();
@@ -547,6 +666,10 @@ export default function AdminDashboard() {
   useEffect(() => {
     if (activeTab === "referred-by") {
       fetchReferrers();
+    } else if (activeTab === "deleted-referrers") {
+      fetchDeletedReferrers();
+    } else if (activeTab === "deleted-students") {
+      fetchDeletedStudents();
     }
   }, [activeTab]);
 
@@ -692,7 +815,32 @@ export default function AdminDashboard() {
           pendingFees: data.stats.unclear_fee_students,
           totalReferralPaid: data.stats.total_referral_paid || 0
         });
-        setGraphData(data.graphData || []);
+        // Ensure graphData is always a continuous 6-month timeline on frontend
+        let rawGraphData: any[] = data.graphData || [];
+        const monthsShort = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+        const now = new Date();
+        const formattedGraphData: any[] = [];
+
+        for (let i = 5; i >= 0; i--) {
+          const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+          const m = d.getMonth();
+          const y = d.getFullYear();
+          const monthLabel = `${monthsShort[m]} ${y}`;
+
+          const match = rawGraphData.find((item: any) => {
+            if (!item || !item.month) return false;
+            const str = String(item.month).toLowerCase();
+            return str.includes(monthsShort[m].toLowerCase());
+          });
+
+          formattedGraphData.push({
+            month: monthLabel,
+            newStudents: match ? Number(match.newStudents || 0) : 0,
+            earnings: match ? Number(match.earnings || 0) : 0
+          });
+        }
+
+        setGraphData(formattedGraphData);
         setTopCourses(data.top_courses || []);
         setGlobalReferralAmount(data.referrel_amount?.toString() || "0");
         setStudentsWithCertificates(data.studentsWithCertificates || []);
@@ -726,6 +874,8 @@ export default function AdminDashboard() {
     }
   };
 
+  const [isInitialLoading, setIsInitialLoading] = useState(true);
+
   useEffect(() => {
     const token = localStorage.getItem("adminAuthToken");
     const authTime = localStorage.getItem("adminAuthTime");
@@ -740,8 +890,11 @@ export default function AdminDashboard() {
       navigate("/admin/login");
       return;
     }
-    fetchDashboardData();
-    fetchNotifications();
+    
+    Promise.all([fetchDashboardData(), fetchNotifications()]).finally(() => {
+      setIsInitialLoading(false);
+    });
+    
     const interval = setInterval(fetchNotifications, 60000); // Poll every minute
     return () => clearInterval(interval);
   }, [navigate]);
@@ -833,10 +986,15 @@ export default function AdminDashboard() {
       `}>
         {/* Mobile Close Button */}
         <button 
-          onClick={() => setIsSidebarOpen(false)}
-          className="absolute top-4 right-4 md:hidden p-2 rounded-lg hover:bg-neutral-100 text-neutral-500 transition-colors"
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            setIsSidebarOpen(false);
+          }}
+          className="absolute top-4 right-4 md:hidden z-50 p-2 rounded-xl bg-neutral-100 hover:bg-neutral-200 text-neutral-700 transition-all cursor-pointer shadow-sm border border-neutral-200/60"
+          aria-label="Close navigation menu"
         >
-          <X size={18} />
+          <X size={20} />
         </button>
 
         <div className="p-6 border-b border-neutral-100">
@@ -852,6 +1010,8 @@ export default function AdminDashboard() {
           <SidebarItem icon={LayoutDashboard} label="Dashboard" active={activeTab === "dashboard"} onClick={() => { navigate("/admin/dashboard/dashboard"); setIsSidebarOpen(false); }} />
           <SidebarItem icon={MessagesSquare} label="Inquiry" active={activeTab === "inquiry"} onClick={() => { navigate("/admin/dashboard/inquiry"); setIsSidebarOpen(false); }} />
           <SidebarItem icon={UserCircle} label="Referred By" active={activeTab === "referred-by"} onClick={() => { navigate("/admin/dashboard/referred-by"); setIsSidebarOpen(false); }} />
+          <SidebarItem icon={UserX} label="Deleted Referrers" active={activeTab === "deleted-referrers"} onClick={() => { navigate("/admin/dashboard/deleted-referrers"); setIsSidebarOpen(false); }} />
+          <SidebarItem icon={UserMinus} label="Deleted Students" active={activeTab === "deleted-students"} onClick={() => { navigate("/admin/dashboard/deleted-students"); setIsSidebarOpen(false); }} />
         </div>
 
         <div className="p-6 border-t border-neutral-100">
@@ -943,6 +1103,17 @@ export default function AdminDashboard() {
 
         <div className="flex-1 overflow-y-auto p-4 md:p-8 scrollbar-thin scrollbar-thumb-neutral-200 scrollbar-track-transparent">
           
+          {isInitialLoading ? (
+            <div className="max-w-[1400px] mx-auto space-y-8 animate-pulse">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
+                {[...Array(6)].map((_, i) => (
+                  <div key={i} className="h-28 bg-neutral-200/60 rounded-3xl" />
+                ))}
+              </div>
+              <div className="h-64 bg-neutral-200/60 rounded-3xl" />
+            </div>
+          ) : (
+            <>
           {activeTab === "dashboard" && !expandedStat && (
             <div className="max-w-[1400px] mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
               
@@ -960,82 +1131,134 @@ export default function AdminDashboard() {
               <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
                 
                 {/* Graph Area */}
-                <div className="lg:col-span-3 bg-white border border-neutral-200 rounded-3xl p-6 relative overflow-hidden group hover:border-neutral-300 transition-colors shadow-sm">
-                   <div className="flex justify-between items-center mb-6">
+                <div className="lg:col-span-3 bg-white border border-neutral-200 rounded-3xl p-6 relative group hover:border-neutral-300 transition-colors shadow-sm">
+                   <div className="flex flex-wrap justify-between items-center gap-4 mb-6">
                      <div>
-                       <h3 className="text-lg font-bold text-neutral-900">Revenue & Enrollment Analytics</h3>
-                       <p className="text-xs text-neutral-500">Monthly overview of student growth</p>
+                       <h3 className="text-lg font-bold text-neutral-900 flex items-center gap-2">
+                         <Activity className="text-blue-600" size={20} /> Revenue & Enrollment Analytics
+                       </h3>
+                       <p className="text-xs text-neutral-500">Monthly overview of student growth & earnings</p>
                      </div>
-                     <Activity className="text-blue-500/50" />
+                     <div className="flex items-center gap-1.5 bg-neutral-100 p-1 rounded-xl text-xs font-semibold">
+                       <button
+                         onClick={() => setGraphMetric("earnings")}
+                         className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer ${
+                           graphMetric === "earnings" ? "bg-white text-blue-600 shadow-sm font-bold" : "text-neutral-600 hover:text-neutral-900"
+                         }`}
+                       >
+                         Earnings (₹)
+                       </button>
+                       <button
+                         onClick={() => setGraphMetric("students")}
+                         className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer ${
+                           graphMetric === "students" ? "bg-white text-blue-600 shadow-sm font-bold" : "text-neutral-600 hover:text-neutral-900"
+                         }`}
+                       >
+                         Enrollments
+                       </button>
+                     </div>
                    </div>
                    
                    {/* Custom SVG Line Graph */}
                    <div className="h-[250px] w-full relative mt-4">
                       {graphData.length > 0 ? (
                         <>
-                          {/* Background SVG for Grid Lines */}
+                          {/* Background Grid Lines */}
                           <svg className="absolute inset-0 w-full h-full overflow-visible" preserveAspectRatio="none" viewBox="0 0 100 100">
+                             {[0, 25, 50, 75, 100].map((yVal) => (
+                               <line key={`h-${yVal}`} x1="0" y1={yVal} x2="100" y2={yVal} stroke="rgba(0,0,0,0.04)" strokeWidth="1" vectorEffect="non-scaling-stroke" />
+                             ))}
                              {graphData.map((_, i) => {
-                               const x = (i / (graphData.length - 1 || 1)) * 100;
+                               const x = 3 + (i / (graphData.length - 1 || 1)) * 94;
                                return (
-                                 <line key={`v-${i}`} x1={x} y1="0" x2={x} y2="100" stroke="rgba(0,0,0,0.06)" strokeWidth="1" vectorEffect="non-scaling-stroke" />
+                                 <line key={`v-${i}`} x1={x} y1="0" x2={x} y2="100" stroke="rgba(0,0,0,0.04)" strokeWidth="1" vectorEffect="non-scaling-stroke" />
                                );
                              })}
                           </svg>
 
-                          {/* Foreground SVG for Line Path */}
+                          {/* SVG Area & Line Path */}
                           <svg 
                              className="absolute inset-0 w-full h-full overflow-visible" 
                              preserveAspectRatio="none" 
                              viewBox="0 0 100 100"
-                             style={{ filter: 'drop-shadow(0px 12px 10px rgba(59,130,246,0.3))' }}
                           >
+                             <defs>
+                               <linearGradient id="chartGradient" x1="0" y1="0" x2="0" y2="1">
+                                 <stop offset="0%" stopColor="#3b82f6" stopOpacity="0.35" />
+                                 <stop offset="100%" stopColor="#3b82f6" stopOpacity="0.0" />
+                               </linearGradient>
+                             </defs>
                              {(() => {
-                               const maxEarnings = Math.max(...graphData.map(d => d.earnings), 1000);
-                               const pts = graphData.map((d, i) => ({
-                                 x: (i / (graphData.length - 1 || 1)) * 100,
-                                 y: 100 - (d.earnings / maxEarnings) * 80 - 10 // scale to 10-90% range
-                               }));
+                               const values = graphData.map(d => graphMetric === "earnings" ? Number(d.earnings) : Number(d.newStudents));
+                               const maxVal = Math.max(...values, graphMetric === "earnings" ? 1000 : 5);
                                
-                               if (pts.length < 2) return null;
+                               const pts = graphData.map((d, i) => {
+                                 const val = graphMetric === "earnings" ? Number(d.earnings) : Number(d.newStudents);
+                                 return {
+                                   x: 3 + (i / (graphData.length - 1 || 1)) * 94,
+                                   y: 90 - (val / (maxVal || 1)) * 75
+                                 };
+                               });
+                               
+                               if (pts.length === 0) return null;
 
-                               let d = `M ${pts[0].x},${pts[0].y}`;
+                               let linePath = `M ${pts[0].x},${pts[0].y}`;
                                for (let i = 1; i < pts.length; i++) {
                                  const p = pts[i-1];
                                  const c = pts[i];
-                                 // Simple bezier curve
-                                 d += ` C ${p.x + (c.x - p.x) / 2},${p.y} ${c.x - (c.x - p.x) / 2},${c.y} ${c.x},${c.y}`;
+                                 linePath += ` C ${p.x + (c.x - p.x) / 2},${p.y} ${c.x - (c.x - p.x) / 2},${c.y} ${c.x},${c.y}`;
                                }
+
+                               const areaPath = `${linePath} L ${pts[pts.length - 1].x},95 L ${pts[0].x},95 Z`;
+
                                return (
-                                 <path 
-                                   d={d} 
-                                   fill="none" 
-                                   stroke="#3b82f6" 
-                                   strokeWidth="3.5" 
-                                   vectorEffect="non-scaling-stroke" 
-                                   strokeLinecap="round" 
-                                   strokeLinejoin="round" 
-                                 />
+                                 <g>
+                                   <path d={areaPath} fill="url(#chartGradient)" />
+                                   <path 
+                                     d={linePath} 
+                                     fill="none" 
+                                     stroke="#3b82f6" 
+                                     strokeWidth="3.5" 
+                                     vectorEffect="non-scaling-stroke" 
+                                     strokeLinecap="round" 
+                                     strokeLinejoin="round" 
+                                   />
+                                 </g>
                                );
                              })()}
                           </svg>
 
-                          {/* Data Point Dots */}
+                          {/* Data Point Dots & Boundary-Safe Tooltips */}
                           {(() => {
-                             const maxEarnings = Math.max(...graphData.map(d => d.earnings), 1000);
+                             const values = graphData.map(d => graphMetric === "earnings" ? Number(d.earnings) : Number(d.newStudents));
+                             const maxVal = Math.max(...values, graphMetric === "earnings" ? 1000 : 5);
                              return graphData.map((d, i) => {
-                               const x = (i / (graphData.length - 1 || 1)) * 100;
-                               const y = 100 - (d.earnings / maxEarnings) * 80 - 10;
+                               const val = graphMetric === "earnings" ? Number(d.earnings) : Number(d.newStudents);
+                               const x = 3 + (i / (graphData.length - 1 || 1)) * 94;
+                               const y = 90 - (val / (maxVal || 1)) * 75;
+                               const displayMonth = (d.month && !d.month.includes("undefined")) ? d.month : "Month";
+
+                               // Determine tooltip positioning to avoid screen edge clipping
+                               let tooltipPosClass = "left-1/2 -translate-x-1/2";
+                               let arrowPosClass = "left-1/2 -translate-x-1/2";
+                               if (i === 0) {
+                                 tooltipPosClass = "left-0 translate-x-0";
+                                 arrowPosClass = "left-3 translate-x-0";
+                               } else if (i === graphData.length - 1) {
+                                 tooltipPosClass = "right-0 left-auto translate-x-0";
+                                 arrowPosClass = "right-3 left-auto translate-x-0";
+                               }
+
                                return (
                                  <div key={`dot-wrapper-${i}`} className="absolute group/dot" style={{ left: `${x}%`, top: `${y}%` }}>
-                                   <div className="w-3.5 h-3.5 bg-blue-500 border-[2.5px] border-white rounded-full shadow-sm hover:scale-150 transition-transform cursor-pointer -translate-x-1/2 -translate-y-1/2" />
+                                   <div className="w-4 h-4 bg-blue-600 border-2 border-white rounded-full shadow-md hover:scale-150 transition-all cursor-pointer -translate-x-1/2 -translate-y-1/2" />
                                    
                                    {/* Tooltip */}
-                                   <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 bg-white backdrop-blur-md border border-neutral-200 shadow-xl text-neutral-900 text-[10px] font-bold px-2 py-1.5 rounded-lg opacity-0 group-hover/dot:opacity-100 transition-opacity z-50 text-sm pointer-events-none">
-                                      <div className="text-blue-600 mb-0.5">{d.month}</div>
-                                      <div>Earnings: ₹{d.earnings.toLocaleString()}</div>
-                                      <div className="text-neutral-500">New Students: {d.newStudents}</div>
-                                      <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-white rotate-45 border-r border-b border-neutral-200"></div>
+                                   <div className={`absolute bottom-full mb-3 ${tooltipPosClass} bg-neutral-900 text-white text-[11px] font-semibold px-3 py-2 rounded-xl opacity-0 group-hover/dot:opacity-100 transition-all duration-200 z-50 pointer-events-none whitespace-nowrap shadow-2xl`}>
+                                      <div className="text-blue-400 font-bold mb-0.5">{displayMonth}</div>
+                                      <div>Earnings: ₹{Number(d.earnings).toLocaleString()}</div>
+                                      <div className="text-neutral-300">New Students: {d.newStudents}</div>
+                                      <div className={`absolute -bottom-1 ${arrowPosClass} w-2 h-2 bg-neutral-900 rotate-45`}></div>
                                    </div>
                                  </div>
                                );
@@ -1048,13 +1271,28 @@ export default function AdminDashboard() {
                         </div>
                       )}
                    </div>
-                   <div className="flex justify-between text-[10px] text-neutral-400 mt-4 px-2">
+                   <div className="relative h-6 w-full mt-4 text-[11px] font-bold text-neutral-500">
                      {graphData.length > 0 ? (
-                       graphData.map((d, i) => (
-                         <span key={i}>{d.month.split(' ')[0]}</span>
-                       ))
+                       graphData.map((d, i) => {
+                         const x = 3 + (i / (graphData.length - 1 || 1)) * 94;
+                         const displayMonth = (d.month && !d.month.includes("undefined")) ? d.month : "";
+                         
+                         let labelAlignClass = "-translate-x-1/2";
+                         if (i === 0) labelAlignClass = "translate-x-0";
+                         if (i === graphData.length - 1) labelAlignClass = "-translate-x-full";
+
+                         return (
+                           <span 
+                             key={i} 
+                             className={`absolute ${labelAlignClass} whitespace-nowrap text-neutral-600 font-bold text-[11px]`} 
+                             style={{ left: `${x}%` }}
+                           >
+                             {displayMonth}
+                           </span>
+                         );
+                       })
                      ) : (
-                       <span>No Data</span>
+                       <span className="text-neutral-400">No Data</span>
                      )}
                    </div>
                 </div>
@@ -1584,7 +1822,26 @@ export default function AdminDashboard() {
                 setEditingReferrer={setEditingReferrer}
                 setIsReferrerModalOpen={setIsReferrerModalOpen}
                 handleClearReferrerAmount={handleClearReferrerAmount}
+                handleDeleteReferrer={handleDeleteReferrer}
              />
+          )}
+
+          {/* DELETED REFERRERS PAGE */}
+          {activeTab === "deleted-referrers" && (
+             <DeletedReferrersTab 
+                deletedReferrers={deletedReferrers}
+                handleRestoreReferrer={handleRestoreReferrer}
+             />
+          )}
+
+          {/* DELETED STUDENTS PAGE */}
+          {activeTab === "deleted-students" && (
+             <DeletedStudentsTab 
+                deletedStudents={deletedStudents}
+                handleRestoreStudent={handleRestoreStudent}
+             />
+          )}
+            </>
           )}
         </div>
       </main>

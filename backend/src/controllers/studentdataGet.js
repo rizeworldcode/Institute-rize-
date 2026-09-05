@@ -42,6 +42,76 @@ exports.getAllReferrers = async (req, res) => {
     }
   };
 
+exports.deleteReferrer = async (req, res) => {
+    try {
+      const data = await studentDataService.deleteReferrer(req, res);
+      if (data.success) {
+        res.status(200).json(data);
+      }
+      else{
+          res.status(403).json(data);
+      }
+    } catch (error) {
+      console.log("Error:", error);
+    }
+  };
+
+exports.getDeletedReferrers = async (req, res) => {
+    try {
+      const data = await studentDataService.getDeletedReferrers(req, res);
+      if (data.success) {
+        res.status(200).json(data);
+      }
+      else{
+          res.status(403).json(data);
+      }
+    } catch (error) {
+      console.log("Error:", error);
+    }
+  };
+
+exports.restoreReferrer = async (req, res) => {
+    try {
+      const data = await studentDataService.restoreReferrer(req, res);
+      if (data.success) {
+        res.status(200).json(data);
+      }
+      else{
+          res.status(403).json(data);
+      }
+    } catch (error) {
+      console.log("Error:", error);
+    }
+  };
+
+exports.getDeletedStudents = async (req, res) => {
+    try {
+      const data = await studentDataService.getDeletedStudents(req, res);
+      if (data.success) {
+        res.status(200).json(data);
+      }
+      else{
+          res.status(403).json(data);
+      }
+    } catch (error) {
+      console.log("Error:", error);
+    }
+  };
+
+exports.restoreStudent = async (req, res) => {
+    try {
+      const data = await studentDataService.restoreStudent(req, res);
+      if (data.success) {
+        res.status(200).json(data);
+      }
+      else{
+          res.status(403).json(data);
+      }
+    } catch (error) {
+      console.log("Error:", error);
+    }
+  };
+
 exports.referredStudentsData = async (req, res) => {
     try {
       const data = await studentDataService.referredStudentsData(req, res);

@@ -2,15 +2,20 @@
 const Tc_model = require("../models/studentModel");
 const admin_model = require("../models/adminmodel.js");
 const referred_model = require("../models/referreledModel.js");
+const memoryCache = require("../utils/cache");
 
 exports.admin_dashboardGet = async (req, res) => {
     try {
+        const cached = memoryCache.get("admin_dashboard");
+        if (cached) {
+            return cached;
+        }
         // 1. Total Students
-        const total_students = await Tc_model.countDocuments();
+        const total_students = await Tc_model.countDocuments({ is_deleted: { $ne: true } });
 
         // 2. Total Issued/Unissued Certificates
     // Count unique students who have at least one certificate, plus backward compatibility
-    const students = await Tc_model.find({});
+    const students = await Tc_model.find({ is_deleted: { $ne: true } }).lean();
     
     // Collect all students with certificates + their issued courses
     const studentsWithCertificates = [];
@@ -159,7 +164,7 @@ exports.admin_dashboardGet = async (req, res) => {
         });
 
         // 4. Calculate total referral amount paid to referrers
-        const referrers = await referred_model.find({});
+        const referrers = await referred_model.find({ is_deleted: { $ne: true } });
         let total_referral_paid = 0;
         referrers.forEach(referrer => {
             total_referral_paid += referrer.amount?.paid || 0;
@@ -220,67 +225,102 @@ exports.admin_dashboardGet = async (req, res) => {
             .sort((a, b) => b.count - a.count)
             .slice(0, 3);
 
-        // 5. Monthly Growth (Students and Earnings)
-        // New students per month
-        const monthly_students = await Tc_model.aggregate([
-            {
-                $group: {
-                    _id: { 
-                        month: { $month: "$created_at" }, 
-                        year: { $year: "$created_at" } 
-                    },
-                    count: { $sum: 1 }
-                }
-            },
-            { $sort: { "_id.year": 1, "_id.month": 1 } }
-        ]);
+        // 5. Monthly Growth (Students and Earnings) - Calculate 6-month timeline safely in JS
+        const monthsShort = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+        const now = new Date();
+        const graphData = [];
 
-        // Earnings per month (based on individual fee entries)
-        const monthly_earnings = await Tc_model.aggregate([
-            { $unwind: "$fee" },
-            {
-                $group: {
-                    _id: { 
-                        month: { $month: "$fee.date" }, 
-                        year: { $year: "$fee.date" } 
-                    },
-                    earnings: { $sum: { $toDouble: { $ifNull: ["$fee.amount", "0"] } } }
-                }
-            },
-            { $sort: { "_id.year": 1, "_id.month": 1 } }
-        ]);
+        // Collect all transactions per student to prevent double-counting between s.fee and adm.payments
+        let allTransactions = [];
+        students.forEach(student => {
+            let studentTxns = [];
+            if (student.admissions && student.admissions.length > 0) {
+                student.admissions.forEach(adm => {
+                    if (adm.payments && adm.payments.length > 0) {
+                        adm.payments.forEach(p => {
+                            if (p && p.amount) {
+                                studentTxns.push({
+                                    amount: parseFloat(p.amount || 0),
+                                    date: p.date ? new Date(p.date) : (student.created_at ? new Date(student.created_at) : new Date())
+                                });
+                            }
+                        });
+                    }
+                });
+            }
 
-        // Combine monthly data for a unified graph format
-        const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-        const graphData = monthly_students.map(item => {
-            const earningsItem = monthly_earnings.find(e => e._id.month === item._id.month && e._id.year === item._id.year);
-            return {
-                month: `${months[item._id.month - 1]} ${item._id.year}`,
-                newStudents: item.count,
-                earnings: earningsItem ? earningsItem.earnings : 0
-            };
+            if (studentTxns.length === 0 && student.fee && student.fee.length > 0) {
+                student.fee.forEach(f => {
+                    if (f && f.amount) {
+                        studentTxns.push({
+                            amount: parseFloat(f.amount || 0),
+                            date: f.date ? new Date(f.date) : (student.created_at ? new Date(student.created_at) : new Date())
+                        });
+                    }
+                });
+            }
+
+            if (studentTxns.length === 0 && parseFloat(student.total_paid_fee || 0) > 0) {
+                studentTxns.push({
+                    amount: parseFloat(student.total_paid_fee || 0),
+                    date: student.created_at ? new Date(student.created_at) : (student.createdAt ? new Date(student.createdAt) : new Date())
+                });
+            }
+
+            allTransactions.push(...studentTxns);
         });
 
-        const adminConfig = await admin_model.findOne();
+        for (let i = 5; i >= 0; i--) {
+            const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+            const m = d.getMonth();
+            const y = d.getFullYear();
 
-        return {
-        success: true,
-        stats: {
-          total_students,
-          total_issued_certificates,
-          total_unissued_certificates,
-          total_earnings,
-          net_earnings,
-          total_referral_paid,
-          clear_fee_students,
-          unclear_fee_students
-        },
-        tcData, 
-        top_courses,
-        graphData,
-        referrel_amount: adminConfig ? adminConfig.referrel_amount : 0,
-        studentsWithCertificates
-    };
+            // Count new students in this month & year
+            const count = students.filter(s => {
+                const dateVal = s.createdAt || s.created_at || s.course_start_date;
+                if (!dateVal) return false;
+                const dt = new Date(dateVal);
+                return !isNaN(dt.getTime()) && dt.getMonth() === m && dt.getFullYear() === y;
+            }).length;
+
+            // Calculate total earnings in this month & year
+            let earnings = 0;
+            allTransactions.forEach(t => {
+                if (t.date && !isNaN(t.date.getTime()) && t.date.getMonth() === m && t.date.getFullYear() === y) {
+                    earnings += t.amount;
+                }
+            });
+
+            graphData.push({
+                month: `${monthsShort[m]} ${y}`,
+                newStudents: count,
+                earnings: earnings
+            });
+        }
+
+        const adminConfig = await admin_model.findOne().lean();
+
+        const result = {
+            success: true,
+            stats: {
+              total_students,
+              total_issued_certificates,
+              total_unissued_certificates,
+              total_earnings,
+              net_earnings,
+              total_referral_paid,
+              clear_fee_students,
+              unclear_fee_students
+            },
+            tcData, 
+            top_courses,
+            graphData,
+            referrel_amount: adminConfig ? adminConfig.referrel_amount : 0,
+            studentsWithCertificates
+        };
+
+        memoryCache.set("admin_dashboard", result, 30);
+        return result;
     } catch (error) {
         console.log("Dashboard Error:", error);
         return { success: false, message: "Error fetching dashboard data" };
@@ -299,6 +339,7 @@ exports.updateReferralAmount = async (req, res) => {
         }
         
         await admin.save();
+        memoryCache.clear();
         
         return {
             success: true,
