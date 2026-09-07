@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useLocation, useNavigate } from "react-router-dom";
 import { useEffect, lazy, Suspense } from "react";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
@@ -31,10 +31,17 @@ const NotFound = lazy(() => import("./pages/NotFound"));
 
 
 function ScrollToTop() {
-  const { pathname } = useLocation();
+  const { pathname, search, hash } = useLocation();
+  const navigate = useNavigate();
+
   useEffect(() => {
+    if (pathname.length > 1 && pathname.endsWith("/")) {
+      const cleanPath = pathname.replace(/\/+$/, "") + search + hash;
+      navigate(cleanPath, { replace: true });
+    }
     window.scrollTo({ top: 0, behavior: "instant" as ScrollBehavior });
-  }, [pathname]);
+  }, [pathname, search, hash, navigate]);
+
   return null;
 }
 

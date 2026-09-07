@@ -47,7 +47,7 @@ export default function AlwarLocation() {
       "name": "RizeWorld Institute of AI & Digital Marketing - Alwar Flagship Campus",
       "image": "https://rizeworldinstitute.in/images/about-hero.jpg",
       "@id": "https://rizeworldinstitute.in/location/alwar/#organization",
-      "url": "https://rizeworldinstitute.in/location/alwar/",
+      "url": "https://rizeworldinstitute.in/location/alwar",
       "telephone": "+91 8302277092",
       "address": {
         "@type": "PostalAddress",
@@ -90,13 +90,13 @@ export default function AlwarLocation() {
           "@type": "ListItem",
           "position": 2,
           "name": "Location",
-          "item": "https://rizeworldinstitute.in/location/"
+          "item": "https://rizeworldinstitute.in/location"
         },
         {
           "@type": "ListItem",
           "position": 3,
           "name": "Alwar",
-          "item": "https://rizeworldinstitute.in/location/alwar/"
+          "item": "https://rizeworldinstitute.in/location/alwar"
         }
       ]
     },
@@ -118,7 +118,7 @@ export default function AlwarLocation() {
       "@id": "https://rizeworldinstitute.in/location/alwar/#localbusiness",
       "name": "RizeWorld Institute of AI & Digital Marketing - Alwar Flagship Campus",
       "description": "Premium AI and Digital Marketing training institute in Alwar, Rajasthan offering comprehensive courses with 100% placement support.",
-      "url": "https://rizeworldinstitute.in/location/alwar/",
+      "url": "https://rizeworldinstitute.in/location/alwar",
       "telephone": "+91-8302277092",
       "email": "rizeworldinstitute@gmail.com",
       "image": "https://rizeworldinstitute.in/images/rize.png",
