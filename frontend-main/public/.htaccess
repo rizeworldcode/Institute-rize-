@@ -1,4 +1,6 @@
 DirectoryIndex index.html
+DirectorySlash Off
+Options -Indexes
 
 <IfModule mod_rewrite.c>
   RewriteEngine On
@@ -8,22 +10,19 @@ DirectoryIndex index.html
   RewriteCond %{HTTP_HOST} ^www\.rizeworldinstitute\.in [NC]
   RewriteRule ^(.*)$ https://rizeworldinstitute.in/$1 [R=301,L]
 
-  # 301 Redirect trailing slash to non-trailing slash (except existing directories)
-  RewriteCond %{REQUEST_FILENAME} !-d
+  # 301 Redirect trailing slash to non-trailing slash (except root '/')
   RewriteCond %{REQUEST_URI} ^(.+)/$
   RewriteRule ^ %1 [R=301,L]
 
   # Skip real files and index.html
   RewriteRule ^index\.html$ - [L]
   RewriteCond %{REQUEST_FILENAME} !-f
-  RewriteCond %{REQUEST_FILENAME} !-d
 
   # Known app routes → serve index.html with HTTP 200
   RewriteRule ^(|courses|master-course|hire-from-us|about|blog(/.*)?|contact|location(/.*)?|seo|social-media-marketing|performance-marketing|website-development|graphic-design|video-editing|ai-digital-marketing|privacy|terms|certificate|student_login|trainers|alwar-rj|centers)$ /index.html [L]
 
   # All other unmatched routes → serve index.html with HTTP 404
   RewriteCond %{REQUEST_FILENAME} !-f
-  RewriteCond %{REQUEST_FILENAME} !-d
   RewriteRule . - [R=404,L]
 </IfModule>
 
