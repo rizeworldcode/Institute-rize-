@@ -123,6 +123,15 @@ server.listen(PORT, async () => {
         fs.mkdirSync(path.dirname(targetFile), { recursive: true });
         fs.writeFileSync(targetFile, html, 'utf8');
         console.log(`[Prerender] Saved ${targetFile}`);
+
+        // Also write flat .html file so servers (Vite preview, Vercel cleanUrls) match URLs without trailing slash
+        if (route !== '/') {
+          const cleanRoute = route.startsWith('/') ? route.slice(1) : route;
+          const flatTargetFile = path.join(distDir, `${cleanRoute}.html`);
+          fs.mkdirSync(path.dirname(flatTargetFile), { recursive: true });
+          fs.writeFileSync(flatTargetFile, html, 'utf8');
+          console.log(`[Prerender] Saved ${flatTargetFile}`);
+        }
       } catch (err) {
         console.error(`[Prerender] Error rendering ${route}:`, err.message);
       }

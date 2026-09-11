@@ -3,12 +3,13 @@ import { useNavigate, useParams } from "react-router-dom";
 import { 
   Users, Search, Plus, Edit2, LogOut, Shield, Menu,
   AlertCircle, LayoutDashboard, MessagesSquare, X, ArrowLeft,
-  Award, Bell, UserCircle, Mail, IndianRupee, CheckCircle2, Activity, Trash2, UserX, UserMinus
+  Award, Bell, UserCircle, Mail, IndianRupee, CheckCircle2, Activity, Trash2, UserX, UserMinus, Receipt
 } from "lucide-react";
 
 import { Student } from "./types";
 import { StudentModal } from "./modals/StudentModal";
 import { StudentDetailsModal } from "./modals/StudentDetailsModal";
+import { StudentInvoiceModal } from "./modals/StudentInvoiceModal";
 import { InquiryTab } from "./tabs/InquiryTab";
 import { ReferredByTab } from "./tabs/ReferredByTab";
 import { DeletedReferrersTab } from "./tabs/DeletedReferrersTab";
@@ -258,6 +259,7 @@ export default function AdminDashboard() {
   const [selectedNotification, setSelectedNotification] = useState<any>(null);
   const [editingStudent, setEditingStudent] = useState<Student | null>(null);
   const [viewingStudent, setViewingStudent] = useState<Student | null>(null);
+  const [invoicingStudent, setInvoicingStudent] = useState<{ student: Student; paymentIndex?: number } | null>(null);
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
 
 
@@ -956,7 +958,7 @@ export default function AdminDashboard() {
     }
   };
 
-  const handleSaveStudent = (updated: Student) => {
+  const handleSaveStudent = (updated: Student, openInvoice = false) => {
     if (editingStudent) {
       setStudents(students.map(s => s.id === editingStudent.id ? updated : s));
     } else {
@@ -964,6 +966,9 @@ export default function AdminDashboard() {
     }
     setIsStudentModalOpen(false);
     setEditingStudent(null);
+    if (openInvoice) {
+      setInvoicingStudent({ student: updated });
+    }
   };
 
   return (
@@ -1432,6 +1437,13 @@ export default function AdminDashboard() {
                             <td className="py-4 px-6">
                               <div className="flex items-center justify-end gap-2">
                                 <button 
+                                  onClick={() => setInvoicingStudent({ student: s })}
+                                  className="p-2 text-[#FF5A36] hover:bg-orange-50 rounded-lg transition-all"
+                                  title="Fee Bill / Invoice"
+                                >
+                                  <Receipt size={16} />
+                                </button>
+                                <button 
                                   onClick={() => { setEditingStudent(s); setIsStudentModalOpen(true); }}
                                   className="p-2 text-purple-600 hover:bg-purple-50 rounded-lg transition-all"
                                   title="Edit Student"
@@ -1870,6 +1882,15 @@ export default function AdminDashboard() {
                handleDeleteStudent(st.id, st.name);
             }}
          />
+      )}
+
+      {/* Student Fee Bill / Invoice Modal */}
+      {invoicingStudent && (
+        <StudentInvoiceModal 
+          student={invoicingStudent.student} 
+          initialPaymentIndex={invoicingStudent.paymentIndex}
+          onClose={() => setInvoicingStudent(null)} 
+        />
       )}
 
       {/* Add / Edit Student Modal */}

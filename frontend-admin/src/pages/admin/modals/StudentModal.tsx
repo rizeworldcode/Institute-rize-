@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { X } from "lucide-react";
+import { X, Receipt } from "lucide-react";
 import { Student, Admission } from "../types";
 import { getApiUrl } from "../../../utils/api";
 import { checkPasswordValidity, PasswordRequirements } from "../AdminLogin";
@@ -22,8 +22,9 @@ const ALL_COURSES = [
 export function StudentModal({ student, onClose, onSave }: {
   student: Student | null;
   onClose: () => void;
-  onSave: (updatedStudent: Student) => void;
+  onSave: (updatedStudent: Student, openInvoice?: boolean) => void;
 }) {
+  const [shouldOpenInvoice, setShouldOpenInvoice] = useState(false);
   // Student personal info
   const [studentInfo, setStudentInfo] = useState({
     id: student ? student.id : `RW-${Math.floor(1000 + Math.random() * 9000)}`,
@@ -90,6 +91,29 @@ export function StudentModal({ student, onClose, onSave }: {
       return "Referral Password does not meet the security requirements (6-20 characters, 1 uppercase, 1 lowercase, 1 number, 1 special character).";
     }
     return null;
+  };
+
+  // Helper to automatically compute End Date based on Start Date and Course Duration
+  const calculateEndDate = (startDateStr: string, durationStr: string): string => {
+    if (!startDateStr || !durationStr) return "";
+    const match = durationStr.match(/(\d+)/);
+    if (!match) return "";
+    const months = parseInt(match[1], 10);
+    if (isNaN(months) || months <= 0) return "";
+
+    const parts = startDateStr.split("-");
+    if (parts.length !== 3) return "";
+    const year = parseInt(parts[0], 10);
+    const month = parseInt(parts[1], 10) - 1;
+    const day = parseInt(parts[2], 10);
+
+    const date = new Date(year, month, day);
+    date.setMonth(date.getMonth() + months);
+
+    const y = date.getFullYear();
+    const m = String(date.getMonth() + 1).padStart(2, "0");
+    const d = String(date.getDate()).padStart(2, "0");
+    return `${y}-${m}-${d}`;
   };
 
   // Validate admission info
@@ -222,7 +246,7 @@ export function StudentModal({ student, onClose, onSave }: {
         const data = await res.json();
         
         if (data.success) {
-          onSave(newStudent);
+          onSave(newStudent, shouldOpenInvoice);
         } else {
           alert(data.message || "Failed to add student");
         }
@@ -447,7 +471,7 @@ export function StudentModal({ student, onClose, onSave }: {
             setCertificateCourse("");
           }
 
-          onSave(updatedStudent);
+          onSave(updatedStudent, shouldOpenInvoice);
         } else {
           alert(data.message || "Failed to update student");
         }
@@ -880,11 +904,27 @@ export function StudentModal({ student, onClose, onSave }: {
                   </div>
                   <div>
                     <label className="text-xs font-semibold text-neutral-600 block mb-1.5">Course Duration *</label>
-                    <select required={!student || showAddAdmissionForm} value={currentAdmission.courseDuration} onChange={(e) => setCurrentAdmission({ ...currentAdmission, courseDuration: e.target.value })} className="w-full px-4 py-2.5 rounded-xl bg-white border border-neutral-200 focus:border-purple-500 focus:outline-none transition-all text-neutral-900 shadow-sm">
+                    <select
+                      required={!student || showAddAdmissionForm}
+                      value={currentAdmission.courseDuration}
+                      onChange={(e) => {
+                        const newDuration = e.target.value;
+                        const computedEnd = calculateEndDate(currentAdmission.startDate, newDuration);
+                        setCurrentAdmission(prev => ({
+                          ...prev,
+                          courseDuration: newDuration,
+                          endDate: computedEnd ? computedEnd : prev.endDate
+                        }));
+                      }}
+                      className="w-full px-4 py-2.5 rounded-xl bg-white border border-neutral-200 focus:border-purple-500 focus:outline-none transition-all text-neutral-900 shadow-sm"
+                    >
                       <option value="">Select duration</option>
                       <option value="1 Month">1 Month</option>
                       <option value="2 Months">2 Months</option>
                       <option value="3 Months">3 Months</option>
+                      <option value="4 Months">4 Months</option>
+                      <option value="5 Months">5 Months</option>
+                      <option value="6 Months">6 Months</option>
                     </select>
                   </div>
                   <div>
@@ -914,11 +954,31 @@ export function StudentModal({ student, onClose, onSave }: {
                   </div>
                   <div>
                     <label className="text-xs font-semibold text-neutral-600 block mb-1.5">Start Date *</label>
-                    <input type="date" required={!student || showAddAdmissionForm} value={currentAdmission.startDate} onChange={(e) => setCurrentAdmission({ ...currentAdmission, startDate: e.target.value })} className="w-full px-4 py-2.5 rounded-xl bg-white border border-neutral-200 focus:border-purple-500 focus:outline-none transition-all text-neutral-900 shadow-sm" />
+                    <input
+                      type="date"
+                      required={!student || showAddAdmissionForm}
+                      value={currentAdmission.startDate}
+                      onChange={(e) => {
+                        const newStartDate = e.target.value;
+                        const computedEnd = calculateEndDate(newStartDate, currentAdmission.courseDuration);
+                        setCurrentAdmission(prev => ({
+                          ...prev,
+                          startDate: newStartDate,
+                          endDate: computedEnd ? computedEnd : prev.endDate
+                        }));
+                      }}
+                      className="w-full px-4 py-2.5 rounded-xl bg-white border border-neutral-200 focus:border-purple-500 focus:outline-none transition-all text-neutral-900 shadow-sm"
+                    />
                   </div>
                   <div>
                     <label className="text-xs font-semibold text-neutral-600 block mb-1.5">End Date *</label>
-                    <input type="date" required={!student || showAddAdmissionForm} value={currentAdmission.endDate} onChange={(e) => setCurrentAdmission({ ...currentAdmission, endDate: e.target.value })} className="w-full px-4 py-2.5 rounded-xl bg-white border border-neutral-200 focus:border-purple-500 focus:outline-none transition-all text-neutral-900 shadow-sm" />
+                    <input
+                      type="date"
+                      required={!student || showAddAdmissionForm}
+                      value={currentAdmission.endDate}
+                      onChange={(e) => setCurrentAdmission(prev => ({ ...prev, endDate: e.target.value }))}
+                      className="w-full px-4 py-2.5 rounded-xl bg-white border border-neutral-200 focus:border-purple-500 focus:outline-none transition-all text-neutral-900 shadow-sm"
+                    />
                   </div>
                 </div>
               </div>
@@ -940,11 +1000,26 @@ export function StudentModal({ student, onClose, onSave }: {
               {Object.keys(admissionPaymentUpdates).length} payment{Object.keys(admissionPaymentUpdates).length > 1 ? 's' : ''} pending - click Save to apply
             </div>
           )}
-          <div className="flex gap-3 ml-auto">
-            <button type="button" onClick={onClose} className="px-6 py-2.5 rounded-xl font-semibold text-neutral-600 hover:text-neutral-900 hover:bg-neutral-50 transition-all cursor-pointer">
+          <div className="flex items-center gap-3 ml-auto">
+            <button type="button" onClick={onClose} className="px-5 py-2.5 rounded-xl font-semibold text-neutral-600 hover:text-neutral-900 hover:bg-neutral-50 transition-all cursor-pointer">
               Cancel
             </button>
-            <button type="submit" form="student-form" className="px-8 py-2.5 rounded-xl font-semibold text-white bg-linear-to-r from-blue-600 to-indigo-600 hover:shadow-[0_0_20px_rgba(79,70,229,0.3)] hover:-translate-y-0.5 transition-all cursor-pointer">
+            <button 
+              type="submit" 
+              form="student-form"
+              onClick={() => setShouldOpenInvoice(true)}
+              className="px-5 py-2.5 rounded-xl font-semibold text-[#FF5A36] bg-orange-50 hover:bg-orange-100 border border-orange-200 transition-all cursor-pointer flex items-center gap-1.5 shadow-2xs"
+              title="Save details and immediately generate printable fee bill"
+            >
+              <Receipt size={16} />
+              Save & Print Bill
+            </button>
+            <button 
+              type="submit" 
+              form="student-form" 
+              onClick={() => setShouldOpenInvoice(false)}
+              className="px-7 py-2.5 rounded-xl font-semibold text-white bg-linear-to-r from-blue-600 to-indigo-600 hover:shadow-[0_0_20px_rgba(79,70,229,0.3)] hover:-translate-y-0.5 transition-all cursor-pointer"
+            >
               {student ? (
                 Object.keys(admissionPaymentUpdates).length > 0 
                   ? "Save Payments & Update" 
