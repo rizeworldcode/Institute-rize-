@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
-import { Download, CheckCircle2, User, Eye, FileText, Lock, ArrowRight, AlertCircle, LogOut } from "lucide-react";
+import { useNavigate, useLocation, useSearchParams } from "react-router-dom";
+import { Download, CheckCircle2, User, Eye, FileText, Lock, ArrowRight, AlertCircle, LogOut, Award, ExternalLink } from "lucide-react";
 import { getApiUrl } from "../utils/api";
 import SEO from "../components/SEO";
 
@@ -13,6 +13,13 @@ interface Certificate {
 export default function Certificate() {
   const navigate = useNavigate();
   const location = useLocation();
+  const [searchParams] = useSearchParams();
+  const verifyParam = searchParams.get("verify");
+  const downloadParam = searchParams.get("download");
+  const isDirectScan = Boolean(verifyParam || downloadParam);
+
+  const [directDownloading, setDirectDownloading] = useState(false);
+  const [downloadSuccess, setDownloadSuccess] = useState(false);
   const isStudentLoginRoute = location.pathname === "/student_login";
   const [downloading, setDownloading] = useState<string | null>(null);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -159,6 +166,167 @@ export default function Certificate() {
       setIsLoggingIn(false);
     }
   };
+
+  // Handle direct download for QR scanner users
+  const handleDirectDownload = async () => {
+    setDirectDownloading(true);
+    try {
+      const photoUrl = "/hero/White%20and%20Gold%20Simple%20Elegant%20Appreciation%20Certificate.jpg.jpeg";
+      const response = await fetch(photoUrl);
+      if (!response.ok) throw new Error("File fetch failed");
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = "RizeWorld_Certificate_Punit_Sharma.jpg";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+      setDownloadSuccess(true);
+    } catch (err) {
+      console.error("Direct download error:", err);
+      // Fallback
+      const link = document.createElement("a");
+      link.href = "/hero/White and Gold Simple Elegant Appreciation Certificate.jpg.jpeg";
+      link.setAttribute("download", "RizeWorld_Certificate_Punit_Sharma.jpg");
+      link.target = "_blank";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      setDownloadSuccess(true);
+    } finally {
+      setDirectDownloading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (isDirectScan) {
+      const timer = setTimeout(() => {
+        handleDirectDownload();
+      }, 700);
+      return () => clearTimeout(timer);
+    }
+  }, [isDirectScan]);
+
+  if (isDirectScan) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-neutral-50 via-slate-50 to-neutral-100 pt-28 pb-20 px-4 sm:px-6 font-sans">
+        <SEO
+          title="Verify & Download Certificate | RizeWorld Institute"
+          description="Official verified certificate issued by RizeWorld Institute of AI & Digital Marketing. Scan verified."
+          canonicalPath="/certificate"
+        />
+        <div className="max-w-4xl mx-auto space-y-6">
+          {/* Top verified banner */}
+          <div className="bg-white rounded-3xl p-6 sm:p-8 shadow-[0_12px_40px_rgb(0,0,0,0.06)] border border-neutral-100 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+            <div className="flex items-start gap-4">
+              <div className="w-14 h-14 bg-emerald-50 text-emerald-600 rounded-2xl flex items-center justify-center shrink-0 border border-emerald-100">
+                <CheckCircle2 size={30} className="stroke-[2]" />
+              </div>
+              <div>
+                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black bg-emerald-100/70 text-emerald-800 border border-emerald-200 mb-2">
+                  <Award size={14} /> OFFICIAL CREDENTIAL VERIFIED
+                </div>
+                <h1 className="text-2xl sm:text-3xl font-black text-neutral-900 tracking-tight">
+                  Certificate of Completion
+                </h1>
+                <p className="text-sm font-semibold text-neutral-500 mt-1">
+                  Issued by <span className="text-neutral-800 font-bold">RizeWorld Institute of AI & Digital Marketing</span>
+                </p>
+              </div>
+            </div>
+
+            <div className="flex flex-col sm:flex-row w-full md:w-auto gap-3">
+              <button
+                onClick={handleDirectDownload}
+                disabled={directDownloading}
+                className="bg-neutral-900 hover:bg-neutral-800 text-white font-bold text-xs tracking-wider uppercase py-4 px-6 rounded-2xl transition-all flex items-center justify-center gap-2.5 shadow-lg active:scale-95 disabled:opacity-75 cursor-pointer"
+              >
+                <Download size={18} />
+                {directDownloading ? "Downloading..." : downloadSuccess ? "Downloaded ✓ (Re-download)" : "Download Certificate"}
+              </button>
+              <button
+                onClick={() => window.open("/hero/White and Gold Simple Elegant Appreciation Certificate.jpg.jpeg", "_blank")}
+                className="bg-white hover:bg-neutral-50 text-neutral-800 border-2 border-neutral-200 font-bold text-xs tracking-wider uppercase py-3.5 px-5 rounded-2xl transition-all flex items-center justify-center gap-2 active:scale-95 cursor-pointer"
+              >
+                <Eye size={17} /> View Full
+              </button>
+            </div>
+          </div>
+
+          {/* Student metadata info cards */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div className="bg-white rounded-2xl p-5 shadow-sm border border-neutral-100">
+              <div className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest mb-1">Student Name</div>
+              <div className="text-base font-black text-neutral-900">Punit Sharma</div>
+            </div>
+            <div className="bg-white rounded-2xl p-5 shadow-sm border border-neutral-100">
+              <div className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest mb-1">Program</div>
+              <div className="text-base font-black text-blue-600">Creative Pro (Graphic + Video)</div>
+            </div>
+            <div className="bg-white rounded-2xl p-5 shadow-sm border border-neutral-100">
+              <div className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest mb-1">Credential Status</div>
+              <div className="text-base font-black text-emerald-600 flex items-center gap-1.5">
+                <CheckCircle2 size={16} /> Authentic & Verified
+              </div>
+            </div>
+          </div>
+
+          {/* Download status toast / alert */}
+          <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-4 flex items-center justify-between gap-3 text-emerald-900">
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 bg-emerald-100 text-emerald-700 rounded-xl flex items-center justify-center shrink-0">
+                <Download size={16} />
+              </div>
+              <p className="text-xs sm:text-sm font-semibold">
+                Certificate download has been automatically initiated. Check your browser downloads.
+              </p>
+            </div>
+            <button
+              onClick={handleDirectDownload}
+              className="shrink-0 text-xs font-black underline hover:text-emerald-950 uppercase tracking-wider cursor-pointer"
+            >
+              Download Again
+            </button>
+          </div>
+
+          {/* High-res Certificate Preview */}
+          <div className="bg-white rounded-4xl p-4 sm:p-6 shadow-[0_16px_50px_rgb(0,0,0,0.08)] border border-neutral-100 overflow-hidden">
+            <div className="flex items-center justify-between pb-4 border-b border-neutral-100 mb-4 px-2">
+              <div className="text-xs font-bold text-neutral-500 uppercase tracking-widest">
+                Certificate Preview
+              </div>
+              <div className="flex items-center gap-2">
+                <a
+                  href="/hero/White and Gold Simple Elegant Appreciation Certificate.jpg.jpeg"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-xs font-bold text-blue-600 hover:text-blue-800 flex items-center gap-1"
+                >
+                  Open in New Tab <ExternalLink size={13} />
+                </a>
+              </div>
+            </div>
+            <div className="rounded-2xl overflow-hidden border border-neutral-200 bg-neutral-900/5 shadow-inner">
+              <img
+                src="/hero/White and Gold Simple Elegant Appreciation Certificate.jpg.jpeg"
+                alt="Punit Sharma Certificate of Completion"
+                className="w-full h-auto object-contain block mx-auto hover:scale-[1.01] transition-transform duration-300"
+              />
+            </div>
+          </div>
+
+          {/* Footer note */}
+          <div className="text-center pt-2 pb-6">
+            <p className="text-xs font-semibold text-neutral-400">
+              © {new Date().getFullYear()} RizeWorld Institute of AI & Digital Marketing. All rights reserved.
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   if (!isLoggedIn || !studentData) {
     return (

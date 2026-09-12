@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { UserCircle, X, Banknote, IndianRupee, Wallet, CreditCard, CheckCircle2, Calendar, BookOpen, Contact, Phone, Mail, MapPin, Activity, Trash2, Receipt } from "lucide-react";
+import { UserCircle, X, Banknote, IndianRupee, Wallet, CreditCard, CheckCircle2, Calendar, BookOpen, Contact, Phone, Mail, MapPin, Activity, Trash2, FileText } from "lucide-react";
 import { StudentInvoiceModal } from "./StudentInvoiceModal";
 
 export function StudentDetailsModal({ student, onClose, onDelete }: any) {
@@ -26,7 +26,7 @@ export function StudentDetailsModal({ student, onClose, onDelete }: any) {
                      className="flex items-center gap-1.5 px-3 py-1.5 bg-[#FF5A36]/10 text-[#FF5A36] hover:bg-[#FF5A36]/20 font-semibold rounded-xl text-xs transition-colors cursor-pointer border border-[#FF5A36]/20 shadow-2xs"
                      title="Generate / Print Fee Invoice Bill"
                   >
-                     <Receipt size={15} />
+                     <FileText size={15} />
                      Fee Bill / Invoice
                   </button>
                   {onDelete && (
@@ -141,7 +141,7 @@ export function StudentDetailsModal({ student, onClose, onDelete }: any) {
                                     onClick={() => setInvoiceModalState({ isOpen: true, paymentIndex: student.fee.length - 1 })}
                                     className="mt-3 w-full flex items-center justify-center gap-1.5 py-2 px-3 bg-white hover:bg-neutral-50 text-[#FF5A36] border border-[#FF5A36]/30 hover:border-[#FF5A36] rounded-xl text-xs font-bold transition-all cursor-pointer shadow-2xs"
                                  >
-                                    <Receipt size={14} /> View / Print Fee Bill
+                                    <FileText size={14} /> View / Print Fee Bill
                                  </button>
                               </div>
                            ) : paid > 0 ? (
@@ -219,7 +219,7 @@ export function StudentDetailsModal({ student, onClose, onDelete }: any) {
                                                 onClick={() => setInvoiceModalState({ isOpen: true, paymentIndex: i })}
                                                 className="mt-2.5 w-full flex items-center justify-center gap-1 py-1.5 px-2 bg-orange-50 hover:bg-orange-100 text-[#FF5A36] border border-orange-200 rounded-lg text-xs font-semibold transition-all cursor-pointer"
                                              >
-                                                <Receipt size={13} /> Print Installment Bill
+                                                <FileText size={13} /> Print Installment Bill
                                              </button>
                                           )}
                                        </div>

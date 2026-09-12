@@ -30,6 +30,7 @@ const staticRoutes = [
   '/privacy',
   '/terms',
   '/certificate',
+  '/download-certificate',
   '/trainers'
 ];
 

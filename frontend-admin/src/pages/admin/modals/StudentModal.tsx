@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { X, Receipt } from "lucide-react";
+import { X, FileText, CalendarPlus, Check } from "lucide-react";
 import { Student, Admission } from "../types";
 import { getApiUrl } from "../../../utils/api";
 import { checkPasswordValidity, PasswordRequirements } from "../AdminLogin";
@@ -75,6 +75,116 @@ export function StudentModal({ student, onClose, onSave }: {
   const [paymentType, setPaymentType] = useState<"Online" | "Cash">("Online");
   const [paymentUtr, setPaymentUtr] = useState("");
   const [admissionPaymentUpdates, setAdmissionPaymentUpdates] = useState<Record<string, { amount: number; type: "Online" | "Cash"; utr: string; clearFull?: boolean }>>({});
+
+  // State for course duration extension for selected admission
+  const [selectedAdmissionForExtension, setSelectedAdmissionForExtension] = useState<string | null>(null);
+  const [extensionMonths, setExtensionMonths] = useState<number>(1);
+  const [customExtensionMonths, setCustomExtensionMonths] = useState<string>("");
+  const [newDurationText, setNewDurationText] = useState<string>("");
+  const [newEndDateText, setNewEndDateText] = useState<string>("");
+  const [extensionFee, setExtensionFee] = useState<string>("0");
+  const [admissionExtensionUpdates, setAdmissionExtensionUpdates] = useState<Record<string, {
+    extensionMonths: number;
+    newDuration: string;
+    newEndDate: string;
+    additionalFee: number;
+  }>>({});
+
+  const initExtensionForm = (admission: Admission) => {
+    const existingExt = admissionExtensionUpdates[admission.admissionId];
+    if (existingExt) {
+      setExtensionMonths(existingExt.extensionMonths);
+      setCustomExtensionMonths(existingExt.extensionMonths > 3 && existingExt.extensionMonths !== 6 ? String(existingExt.extensionMonths) : "");
+      setNewDurationText(existingExt.newDuration);
+      setNewEndDateText(existingExt.newEndDate);
+      setExtensionFee(String(existingExt.additionalFee || 0));
+      return;
+    }
+
+    const match = (admission.courseDuration || "").match(/(\d+)/);
+    const existingMonths = match ? parseInt(match[1], 10) : 3;
+    const addM = 1;
+    setExtensionMonths(addM);
+    setCustomExtensionMonths("");
+    setNewDurationText(`${existingMonths + addM} Months`);
+
+    const baseEndDate = admission.endDate ? new Date(admission.endDate) : new Date();
+    const newEnd = new Date(baseEndDate);
+    newEnd.setMonth(newEnd.getMonth() + addM);
+
+    const y = newEnd.getFullYear();
+    const m = String(newEnd.getMonth() + 1).padStart(2, "0");
+    const d = String(newEnd.getDate()).padStart(2, "0");
+    setNewEndDateText(`${y}-${m}-${d}`);
+    setExtensionFee("0");
+  };
+
+  const handleSelectExtensionMonths = (admission: Admission, addM: number) => {
+    setExtensionMonths(addM);
+    setCustomExtensionMonths("");
+
+    const match = (admission.courseDuration || "").match(/(\d+)/);
+    const existingMonths = match ? parseInt(match[1], 10) : 3;
+    setNewDurationText(`${existingMonths + addM} Months`);
+
+    const baseEndDate = admission.endDate ? new Date(admission.endDate) : new Date();
+    const newEnd = new Date(baseEndDate);
+    newEnd.setMonth(newEnd.getMonth() + addM);
+
+    const y = newEnd.getFullYear();
+    const m = String(newEnd.getMonth() + 1).padStart(2, "0");
+    const d = String(newEnd.getDate()).padStart(2, "0");
+    setNewEndDateText(`${y}-${m}-${d}`);
+  };
+
+  const handleCustomExtensionChange = (admission: Admission, val: number) => {
+    setCustomExtensionMonths(val ? String(val) : "");
+    if (val && val > 0) {
+      setExtensionMonths(val);
+      const match = (admission.courseDuration || "").match(/(\d+)/);
+      const existingMonths = match ? parseInt(match[1], 10) : 3;
+      setNewDurationText(`${existingMonths + val} Months`);
+
+      const baseEndDate = admission.endDate ? new Date(admission.endDate) : new Date();
+      const newEnd = new Date(baseEndDate);
+      newEnd.setMonth(newEnd.getMonth() + val);
+
+      const y = newEnd.getFullYear();
+      const m = String(newEnd.getMonth() + 1).padStart(2, "0");
+      const d = String(newEnd.getDate()).padStart(2, "0");
+      setNewEndDateText(`${y}-${m}-${d}`);
+    }
+  };
+
+  const saveExtension = (admissionId: string) => {
+    if (!newDurationText.trim()) {
+      alert("Please enter a valid course duration");
+      return;
+    }
+    if (!newEndDateText.trim()) {
+      alert("Please select a valid new end date");
+      return;
+    }
+    setAdmissionExtensionUpdates(prev => ({
+      ...prev,
+      [admissionId]: {
+        extensionMonths: extensionMonths || 1,
+        newDuration: newDurationText.trim(),
+        newEndDate: newEndDateText,
+        additionalFee: Math.max(0, Number(extensionFee) || 0)
+      }
+    }));
+    setSelectedAdmissionForExtension(null);
+  };
+
+  const removeExtension = (admissionId: string) => {
+    setAdmissionExtensionUpdates(prev => {
+      const copy = { ...prev };
+      delete copy[admissionId];
+      return copy;
+    });
+    setSelectedAdmissionForExtension(null);
+  };
 
   // Validate student info
   const validateStudentInfo = () => {
@@ -278,6 +388,15 @@ export function StudentModal({ student, onClose, onSave }: {
           formData.append("admission_payments", JSON.stringify(admissionPayments));
         }
 
+        // Prepare admission duration extensions
+        const admissionExtensions = Object.keys(admissionExtensionUpdates).map(admissionId => ({
+          admissionId,
+          ...admissionExtensionUpdates[admissionId]
+        }));
+        if (admissionExtensions.length > 0) {
+          formData.append("admission_extensions", JSON.stringify(admissionExtensions));
+        }
+
         // Add new admission if needed
         if (showAddAdmissionForm) {
           const admissionError = validateAdmission();
@@ -443,6 +562,34 @@ export function StudentModal({ student, onClose, onSave }: {
             return admission;
           });
 
+          // Apply extension updates to admissions in local state
+          if (admissionExtensions.length > 0) {
+            updatedStudent.admissions = updatedStudent.admissions.map(admission => {
+              const ext = admissionExtensionUpdates[admission.admissionId];
+              if (ext) {
+                const addFee = Number(ext.additionalFee || 0);
+                const newTotal = admission.totalFee + addFee;
+                const newPending = Math.max(0, newTotal - admission.totalPaidFee);
+                const newStatus = calculateFeesStatus(newTotal, admission.totalPaidFee);
+                return {
+                  ...admission,
+                  courseDuration: ext.newDuration,
+                  endDate: ext.newEndDate,
+                  totalFee: newTotal,
+                  pendingFee: newPending,
+                  feesStatus: newStatus,
+                  updatedAt: new Date().toISOString()
+                };
+              }
+              return admission;
+            });
+            const firstExt = admissionExtensionUpdates[updatedStudent.admissions[0]?.admissionId];
+            if (firstExt) {
+              updatedStudent.duration = firstExt.newDuration;
+              updatedStudent.endDate = firstExt.newEndDate;
+            }
+          }
+
           // Update certificates if needed
           if (certificateFile && certificateCourse && selectedAdmissionForCertificate) {
             // Find the admission by selectedAdmissionForCertificate and add the certificate
@@ -483,9 +630,15 @@ export function StudentModal({ student, onClose, onSave }: {
   };
 
   // Calculate total fees across all admissions
-  const totalFeesAcrossAdmissions = processedStudentAdmissions.reduce((sum, adm) => sum + adm.totalFee, 0);
+  const totalFeesAcrossAdmissions = processedStudentAdmissions.reduce((sum, adm) => {
+    const extFee = admissionExtensionUpdates[adm.admissionId]?.additionalFee || 0;
+    return sum + adm.totalFee + extFee;
+  }, 0);
   const totalPaidFeesAcrossAdmissions = processedStudentAdmissions.reduce((sum, adm) => sum + adm.totalPaidFee, 0);
-  const totalPendingFeesAcrossAdmissions = processedStudentAdmissions.reduce((sum, adm) => sum + adm.pendingFee, 0);
+  const totalPendingFeesAcrossAdmissions = processedStudentAdmissions.reduce((sum, adm) => {
+    const extFee = admissionExtensionUpdates[adm.admissionId]?.additionalFee || 0;
+    return sum + adm.pendingFee + extFee;
+  }, 0);
 
   return (
     <div className="fixed inset-0 bg-neutral-900/40 backdrop-blur-md z-50 flex items-center justify-center p-4">
@@ -603,7 +756,10 @@ export function StudentModal({ student, onClose, onSave }: {
                             )}
                           </h5>
                           <div className="text-xs text-neutral-500">
-                            From {new Date(admission.startDate).toLocaleDateString()} to {new Date(admission.endDate).toLocaleDateString()}
+                            From {new Date(admission.startDate).toLocaleDateString()} to{" "}
+                            <span className={admissionExtensionUpdates[admission.admissionId] ? "text-emerald-700 font-bold bg-emerald-50 px-1.5 py-0.5 rounded" : ""}>
+                              {new Date(admissionExtensionUpdates[admission.admissionId]?.newEndDate || admission.endDate).toLocaleDateString()}
+                            </span>
                           </div>
                         </div>
                         <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
@@ -626,16 +782,25 @@ export function StudentModal({ student, onClose, onSave }: {
                           </div>
                         </div>
                         <div>
-                          <span className="font-medium text-neutral-600">Duration:</span> {admission.courseDuration}
+                          <span className="font-medium text-neutral-600">Duration:</span>{" "}
+                          <span className="font-semibold text-neutral-900">
+                            {admissionExtensionUpdates[admission.admissionId]?.newDuration || admission.courseDuration}
+                          </span>
+                          {admissionExtensionUpdates[admission.admissionId] && (
+                            <span className="ml-2 px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-xs font-bold inline-flex items-center gap-1">
+                              <Check size={11} />
+                              +{admissionExtensionUpdates[admission.admissionId].extensionMonths} Month Extended
+                            </span>
+                          )}
                         </div>
                         <div>
-                          <span className="font-medium text-neutral-600">Total Fee:</span> ₹{admission.totalFee}
+                          <span className="font-medium text-neutral-600">Total Fee:</span> ₹{admission.totalFee + (admissionExtensionUpdates[admission.admissionId]?.additionalFee || 0)}
                         </div>
                         <div>
                           <span className="font-medium text-neutral-600">Paid:</span> ₹{admission.totalPaidFee}
                         </div>
                         <div>
-                          <span className="font-medium text-neutral-600">Pending:</span> ₹{admission.pendingFee}
+                          <span className="font-medium text-neutral-600">Pending:</span> ₹{admission.pendingFee + (admissionExtensionUpdates[admission.admissionId]?.additionalFee || 0)}
                         </div>
                         <div>
                           <span className="font-medium text-neutral-600">Installments:</span> {admission.feesInstallment}
@@ -809,7 +974,7 @@ export function StudentModal({ student, onClose, onSave }: {
                             </div>
                           </div>
                         ) : (
-                          <div className="flex gap-2">
+                          <div className="flex gap-2 flex-wrap items-center">
                             <button
                               type="button"
                               onClick={() => {
@@ -817,13 +982,146 @@ export function StudentModal({ student, onClose, onSave }: {
                                 setPaymentAmount("");
                                 setPaymentUtr("");
                               }}
-                              className="px-4 py-2 bg-purple-100 text-purple-700 rounded-lg text-sm font-semibold hover:bg-purple-200"
+                              className="px-4 py-2 bg-purple-100 text-purple-700 rounded-lg text-sm font-semibold hover:bg-purple-200 transition-colors"
                             >
                               + Record Payment
+                            </button>
+
+                            <button
+                              type="button"
+                              onClick={() => {
+                                if (selectedAdmissionForExtension === admission.admissionId) {
+                                  setSelectedAdmissionForExtension(null);
+                                } else {
+                                  setSelectedAdmissionForExtension(admission.admissionId);
+                                  initExtensionForm(admission);
+                                }
+                              }}
+                              className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all flex items-center gap-1.5 cursor-pointer ${
+                                admissionExtensionUpdates[admission.admissionId]
+                                  ? "bg-emerald-100 text-emerald-800 hover:bg-emerald-200 border border-emerald-300"
+                                  : "bg-blue-50 text-blue-700 hover:bg-blue-100 border border-blue-200"
+                              }`}
+                            >
+                              <CalendarPlus size={15} />
+                              {admissionExtensionUpdates[admission.admissionId]
+                                ? `Extended (+${admissionExtensionUpdates[admission.admissionId].extensionMonths} Month) - Edit`
+                                : "+ Extend Duration / Month"}
                             </button>
                           </div>
                         )}
                       </div>
+
+                      {/* Course Duration Extension Panel */}
+                      {selectedAdmissionForExtension === admission.admissionId && (
+                        <div className="mt-3 p-4 bg-gradient-to-r from-blue-50/80 to-indigo-50/80 border border-blue-200 rounded-xl space-y-4">
+                          <div className="flex items-center justify-between">
+                            <h6 className="text-sm font-bold text-blue-900 flex items-center gap-2">
+                              <CalendarPlus size={16} className="text-blue-600" />
+                              Extend Course Duration (Month Extension)
+                            </h6>
+                            {admissionExtensionUpdates[admission.admissionId] && (
+                              <button
+                                type="button"
+                                onClick={() => removeExtension(admission.admissionId)}
+                                className="text-xs text-red-600 hover:text-red-800 font-semibold underline cursor-pointer"
+                              >
+                                Remove Extension
+                              </button>
+                            )}
+                          </div>
+
+                          <div>
+                            <label className="text-xs font-semibold text-neutral-700 block mb-1.5">
+                              Quick Extend By:
+                            </label>
+                            <div className="flex items-center gap-2 flex-wrap">
+                              {[1, 2, 3, 6].map((m) => (
+                                <button
+                                  key={m}
+                                  type="button"
+                                  onClick={() => handleSelectExtensionMonths(admission, m)}
+                                  className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                                    extensionMonths === m && !customExtensionMonths
+                                      ? "bg-blue-600 text-white shadow-sm"
+                                      : "bg-white text-neutral-700 border border-neutral-200 hover:bg-neutral-100"
+                                  }`}
+                                >
+                                  +{m} Month{m > 1 ? "s" : ""}
+                                </button>
+                              ))}
+                              <div className="flex items-center gap-1.5 ml-1">
+                                <span className="text-xs text-neutral-500 font-medium">or custom:</span>
+                                <input
+                                  type="number"
+                                  min="1"
+                                  max="24"
+                                  value={customExtensionMonths}
+                                  onChange={(e) => handleCustomExtensionChange(admission, Number(e.target.value))}
+                                  placeholder="Months"
+                                  className="w-16 px-2 py-1 text-xs border border-neutral-300 rounded-md bg-white text-neutral-900 outline-none focus:border-blue-500"
+                                />
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                            <div>
+                              <label className="text-xs font-semibold text-neutral-600 block mb-1">
+                                New Duration
+                              </label>
+                              <input
+                                type="text"
+                                value={newDurationText}
+                                onChange={(e) => setNewDurationText(e.target.value)}
+                                className="w-full px-3 py-1.5 text-xs rounded-lg border border-neutral-300 bg-white font-semibold text-neutral-900 outline-none focus:border-blue-500"
+                                placeholder="e.g. 4 Months"
+                              />
+                            </div>
+                            <div>
+                              <label className="text-xs font-semibold text-neutral-600 block mb-1">
+                                New End Date
+                              </label>
+                              <input
+                                type="date"
+                                value={newEndDateText}
+                                onChange={(e) => setNewEndDateText(e.target.value)}
+                                className="w-full px-3 py-1.5 text-xs rounded-lg border border-neutral-300 bg-white font-semibold text-neutral-900 outline-none focus:border-blue-500"
+                              />
+                            </div>
+                            <div>
+                              <label className="text-xs font-semibold text-neutral-600 block mb-1">
+                                Additional Fee (Optional ₹)
+                              </label>
+                              <input
+                                type="number"
+                                min="0"
+                                value={extensionFee}
+                                onChange={(e) => setExtensionFee(e.target.value)}
+                                placeholder="0"
+                                className="w-full px-3 py-1.5 text-xs rounded-lg border border-neutral-300 bg-white text-neutral-900 outline-none focus:border-blue-500"
+                              />
+                            </div>
+                          </div>
+
+                          <div className="flex items-center gap-2 pt-1">
+                            <button
+                              type="button"
+                              onClick={() => saveExtension(admission.admissionId)}
+                              className="px-4 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-bold transition-all shadow-xs cursor-pointer"
+                            >
+                              Confirm Extension
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => setSelectedAdmissionForExtension(null)}
+                              className="px-3 py-1.5 bg-neutral-200 hover:bg-neutral-300 text-neutral-700 rounded-lg text-xs font-semibold transition-all cursor-pointer"
+                            >
+                              Cancel
+                            </button>
+                          </div>
+                        </div>
+                      )}
 
                       {/* Certificate upload button - only if fees clear */}
                       {admission.feesStatus === "Clear" && (
@@ -1011,7 +1309,7 @@ export function StudentModal({ student, onClose, onSave }: {
               className="px-5 py-2.5 rounded-xl font-semibold text-[#FF5A36] bg-orange-50 hover:bg-orange-100 border border-orange-200 transition-all cursor-pointer flex items-center gap-1.5 shadow-2xs"
               title="Save details and immediately generate printable fee bill"
             >
-              <Receipt size={16} />
+              <FileText size={16} />
               Save & Print Bill
             </button>
             <button 

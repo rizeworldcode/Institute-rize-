@@ -3,7 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { 
   Users, Search, Plus, Edit2, LogOut, Shield, Menu,
   AlertCircle, LayoutDashboard, MessagesSquare, X, ArrowLeft,
-  Award, Bell, UserCircle, Mail, IndianRupee, CheckCircle2, Activity, Trash2, UserX, UserMinus, Receipt
+  Award, Bell, UserCircle, Mail, IndianRupee, CheckCircle2, Activity, Trash2, UserX, UserMinus, FileText
 } from "lucide-react";
 
 import { Student } from "./types";
@@ -1438,10 +1438,10 @@ export default function AdminDashboard() {
                               <div className="flex items-center justify-end gap-2">
                                 <button 
                                   onClick={() => setInvoicingStudent({ student: s })}
-                                  className="p-2 text-[#FF5A36] hover:bg-orange-50 rounded-lg transition-all"
+                                  className="p-2 text-[#FF5A36] hover:bg-orange-50 rounded-lg transition-all cursor-pointer"
                                   title="Fee Bill / Invoice"
                                 >
-                                  <Receipt size={16} />
+                                  <FileText size={16} />
                                 </button>
                                 <button 
                                   onClick={() => { setEditingStudent(s); setIsStudentModalOpen(true); }}

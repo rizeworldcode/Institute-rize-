@@ -1,5 +1,5 @@
-@import "tailwindcss";
 @import url('/fonts/style.css');
+@import "tailwindcss";
 
 @font-face {
   font-family: 'Season Serif';

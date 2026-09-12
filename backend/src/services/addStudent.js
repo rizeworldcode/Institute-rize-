@@ -273,6 +273,15 @@ console.log(req.body);
       }
     }
 
+    let parsedAdmissionExtensions = [];
+    if (req.body.admission_extensions) {
+      try {
+        parsedAdmissionExtensions = JSON.parse(req.body.admission_extensions);
+      } catch (e) {
+        console.error("Error parsing admission_extensions:", e);
+      }
+    }
+
     // Find existing student by student_ID
     const existingcertificate = await certificate_model.findOne({ student_ID: student_iD });
 
@@ -433,6 +442,37 @@ console.log(req.body);
             admission.updatedAt = Date.now();
             existingcertificate.markModified('admissions');
           }
+        }
+      }
+    }
+
+    // Handle admission duration extension (extend months / end date)
+    if (Array.isArray(parsedAdmissionExtensions) && parsedAdmissionExtensions.length > 0) {
+      for (const ext of parsedAdmissionExtensions) {
+        const admissionIndex = existingcertificate.admissions.findIndex(
+          (adm) => adm.admissionId === ext.admissionId
+        );
+
+        if (admissionIndex !== -1) {
+          const admission = existingcertificate.admissions[admissionIndex];
+          if (ext.newDuration) {
+            admission.courseDuration = ext.newDuration;
+            existingcertificate.course_duration = ext.newDuration;
+          }
+          if (ext.newEndDate) {
+            admission.endDate = new Date(ext.newEndDate);
+            existingcertificate.course_end_date = new Date(ext.newEndDate);
+          }
+          if (ext.additionalFee && parseFloat(ext.additionalFee) > 0) {
+            const addFee = parseFloat(ext.additionalFee);
+            admission.totalFee = (admission.totalFee || 0) + addFee;
+            admission.pendingFee = Math.max(0, admission.totalFee - (admission.totalPaidFee || 0));
+            admission.feesStatus = (admission.totalFee > 0 && admission.totalPaidFee >= admission.totalFee)
+              ? "Clear"
+              : (admission.totalPaidFee > 0 ? "Partial" : "Pending");
+          }
+          admission.updatedAt = Date.now();
+          existingcertificate.markModified('admissions');
         }
       }
     }

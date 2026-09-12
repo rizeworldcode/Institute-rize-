@@ -28,9 +28,18 @@
     }
   ],
   "routes": [
+    {
+      "src": "^/download-certificate/?$",
+      "dest": "/hero/White and Gold Simple Elegant Appreciation Certificate.jpg.jpeg",
+      "headers": {
+        "Content-Disposition": "attachment; filename=\"RizeWorld_Certificate_Punit_Sharma.jpg\"",
+        "Content-Type": "image/jpeg"
+      },
+      "status": 200
+    },
     { "handle": "filesystem" },
     {
-      "src": "^/(|courses|master-course|hire-from-us|about|blog|blog/.+|contact|location|location/alwar|seo|social-media-marketing|performance-marketing|website-development|graphic-design|video-editing|ai-digital-marketing|privacy|terms|certificate|student_login|trainers|alwar-rj|centers)/?$",
+      "src": "^/(|courses|master-course|hire-from-us|about|blog|blog/.+|contact|location|location/alwar|seo|social-media-marketing|performance-marketing|website-development|graphic-design|video-editing|ai-digital-marketing|privacy|terms|certificate|student_login|download-certificate|trainers|alwar-rj|centers)/?$",
       "dest": "/index.html",
       "status": 200
     },

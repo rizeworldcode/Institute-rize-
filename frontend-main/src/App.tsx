@@ -27,6 +27,7 @@ const WebsiteDevelopmentPage = lazy(() => import("./pages/WebsiteDevelopment"));
 const GraphicDesignPage = lazy(() => import("./pages/GraphicDesign"));
 const VideoEditingPage = lazy(() => import("./pages/VideoEditing"));
 const AIDigitalMarketingPage = lazy(() => import("./pages/AIDigitalMarketing"));
+const DirectDownload = lazy(() => import("./pages/DirectDownload"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 
@@ -78,6 +79,7 @@ function MainLayout() {
           <Route path="/terms" element={<Terms />} />
           <Route path="/certificate" element={<Certificate />} />
           <Route path="/student_login" element={<Certificate />} />
+          <Route path="/download-certificate" element={<DirectDownload />} />
           <Route path="/trainers" element={<Trainers />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
