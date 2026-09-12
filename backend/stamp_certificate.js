@@ -12,8 +12,8 @@ async function stampCertificate() {
   // Read the original certificate
   const certImage = await Jimp.read(originalCertPath);
 
-  // Target URL: Pointing directly to download-certificate endpoint
-  const targetUrl = 'https://rizeworldinstitute.in/download-certificate';
+  // Target URL: Live Render direct download endpoint (verified 200 OK & instant attachment download)
+  const targetUrl = 'https://institute-rize.onrender.com/download-certificate';
 
   // Generate QR Code with high resolution
   const qrSize = 205;
