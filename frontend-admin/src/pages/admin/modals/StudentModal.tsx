@@ -679,7 +679,8 @@ export function StudentModal({ student, onClose, onSave }: {
                       type={showStudentPassword ? "text" : "password"}
                       value={studentInfo.password}
                       onChange={(e) => setStudentInfo({ ...studentInfo, password: e.target.value })}
-                      className="w-full pl-4 pr-11 py-2.5 rounded-xl bg-white border border-neutral-200 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none transition-all text-neutral-900 shadow-sm"
+                      placeholder={student ? `Unchanged (${(student.name || '').trim().split(' ')[0]}@123)` : "Enter password"}
+                      className="w-full pl-4 pr-11 py-2.5 rounded-xl bg-white border border-neutral-200 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none transition-all text-neutral-900 shadow-sm placeholder:text-neutral-400"
                     />
                     <button
                       type="button"
@@ -690,6 +691,11 @@ export function StudentModal({ student, onClose, onSave }: {
                       {showStudentPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                     </button>
                   </div>
+                  {student && !studentInfo.password && (
+                    <p className="text-[11px] text-neutral-400 mt-1">
+                      🔒 Password encrypted hai (Default: <strong>{(student.name || '').trim().split(' ')[0]}@123</strong>). Naya password set karne ke liye yahan type karein, warna khali chhod dein.
+                    </p>
+                  )}
                   <PasswordRequirements password={studentInfo.password} />
                 </div>
                 <div>
