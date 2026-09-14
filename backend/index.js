@@ -88,8 +88,31 @@ app.use(cors({
 
 // Serving static files
 app.use(express.static(path.join(__dirname, 'public')));
-// Serve uploaded files
+app.use('/certificates', express.static(path.join(__dirname, 'public/certificates')));
+app.use('/certificates', express.static(path.join(__dirname, 'public/uploads/certificates')));
+app.use('/certificates', express.static(path.join(__dirname, '../frontend-admin/public/certificates')));
+app.use('/certificates', express.static(path.join(__dirname, '../frontend-main/public/certificates')));
+app.use('/uploads', express.static(path.join(__dirname, 'public/uploads')));
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
+// Dedicated certificate file handler
+app.get('/certificates/:fileName', (req, res) => {
+  const fileName = path.basename(req.params.fileName);
+  const searchDirs = [
+    path.join(__dirname, 'public/certificates'),
+    path.join(__dirname, 'public/uploads/certificates'),
+    path.join(__dirname, '../frontend-admin/public/certificates'),
+    path.join(__dirname, '../frontend-main/public/certificates'),
+    path.join(__dirname, 'uploads')
+  ];
+  for (const d of searchDirs) {
+    const fullPath = path.join(d, fileName);
+    if (fs.existsSync(fullPath)) {
+      return res.sendFile(fullPath);
+    }
+  }
+  return res.status(404).json({ success: false, message: 'Certificate file not found' });
+});
 
 // Health check endpoint
 app.get('/health', (req, res) => {

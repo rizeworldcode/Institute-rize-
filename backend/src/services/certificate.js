@@ -47,60 +47,64 @@ exports.certificateData = async (req,res)=>{
             return calcEnd;
         };
 
-        // Collect all certificates (only completed courses)
+        // Collect all certificates
         const certificates = [];
-        
-        // Add old certificate if exists and completed
-        if (student.certificate_photo) {
-            const cName = Array.isArray(student.selected_course_name) ? student.selected_course_name[0] : (student.selected_course_name || "Course");
-            const cDate = getCompDate(cName);
-            if (now >= cDate) {
-                certificates.push({
-                    courseName: cName,
-                    certificatePath: student.certificate_photo,
-                    issuedAt: student.created_at || new Date(),
-                    isEligible: true
-                });
-            }
-        }
-        
-        // Add certificates from student.certificates array
+        const seenCourseKeys = new Set();
+
+        const getCourseKey = (name) => {
+            const lower = (name || '').toLowerCase().trim();
+            if (lower.includes('creative pro')) return 'creative_pro';
+            if (lower.includes('seo') && !lower.includes('marketing') && !lower.includes('smo')) return 'seo';
+            if (lower.includes('marketing pro')) return 'marketing_pro';
+            if (lower.includes('master course')) return 'master_course';
+            if (lower.includes('web development')) return 'web_development';
+            return lower.replace(/[^a-z0-9]/g, '');
+        };
+
+        const addCert = (cName, cPath, issuedAt) => {
+            if (!cName || !cPath) return;
+            const key = getCourseKey(cName);
+            if (seenCourseKeys.has(key)) return;
+            seenCourseKeys.add(key);
+            certificates.push({
+                courseName: cName.trim(),
+                certificatePath: cPath,
+                issuedAt: issuedAt || new Date(),
+                isEligible: true
+            });
+        };
+
+        // 1. Add certificates explicitly issued/uploaded in student.certificates
         if (student.certificates && student.certificates.length > 0) {
             student.certificates.forEach((cert) => {
-                const cName = cert.course_name || cert.courseName || "Course";
-                const cDate = getCompDate(cName);
-                if (now >= cDate) {
-                    certificates.push({
-                        courseName: cName,
-                        certificatePath: cert.certificate_path || cert.certificatePath,
-                        issuedAt: cert.issued_at || cert.issuedAt || new Date(),
-                        isEligible: true
-                    });
-                }
+                const cName = cert.course_name || cert.courseName;
+                const cPath = cert.certificate_path || cert.certificatePath;
+                addCert(cName, cPath, cert.issued_at || cert.issuedAt);
             });
         }
-        
-        // Add certificates from admissions
+
+        // 2. Add certificates uploaded/issued in admissions
         if (student.admissions && student.admissions.length > 0) {
             student.admissions.forEach((admission) => {
                 if (admission.certificates && admission.certificates.length > 0) {
                     admission.certificates.forEach((cert) => {
-                        const cName = cert.courseName || cert.course_name || "Course";
-                        const cDate = getCompDate(cName);
-                        if (now >= cDate) {
-                            certificates.push({
-                                courseName: cName,
-                                certificatePath: cert.certificatePath || cert.certificate_path,
-                                issuedAt: cert.issuedAt || cert.issued_at || new Date(),
-                                isEligible: true
-                            });
-                        }
+                        const cName = cert.courseName || cert.course_name;
+                        const cPath = cert.certificatePath || cert.certificate_path;
+                        addCert(cName, cPath, cert.issuedAt || cert.issued_at);
                     });
                 }
             });
         }
 
-        // Also compile pending/ongoing courses list
+        // 3. Add backward compatibility student.certificate_photo
+        if (student.certificate_photo) {
+            const cName = Array.isArray(student.selected_course_name) 
+                ? student.selected_course_name[0] 
+                : (student.selected_course_name || "Course");
+            addCert(cName, student.certificate_photo, student.created_at);
+        }
+
+        // 4. Also compile pending/ongoing courses list or auto-generate eligible completed ones
         const rawCourses = [];
         if (Array.isArray(student.selected_course_name)) rawCourses.push(...student.selected_course_name);
         else if (student.selected_course_name) rawCourses.push(student.selected_course_name);
@@ -111,7 +115,11 @@ exports.certificateData = async (req,res)=>{
         }
         const uniqueCourses = [...new Set(rawCourses.filter(Boolean).map(c => c.trim()))];
         const ongoingCourses = [];
+
         for (const c of uniqueCourses) {
+            const key = getCourseKey(c);
+            if (seenCourseKeys.has(key)) continue; // Already has an issued/uploaded certificate!
+
             const cDate = getCompDate(c);
             const isCompleted = now >= cDate;
             if (!isCompleted) {
@@ -121,22 +129,15 @@ exports.certificateData = async (req,res)=>{
                     status: "In Progress"
                 });
             } else {
-                const hasInList = certificates.some(cert => (cert.courseName || '').toLowerCase().includes(c.toLowerCase()));
-                if (!hasInList) {
-                    try {
-                        const { generateSingleStudentCertificate } = require('../utils/certificateGenerator');
-                        const genRes = await generateSingleStudentCertificate(student_id, c);
-                        if (genRes && genRes.eligible && genRes.cert) {
-                            certificates.push({
-                                courseName: c,
-                                certificatePath: genRes.cert.publicPath,
-                                issuedAt: new Date(),
-                                isEligible: true
-                            });
-                        }
-                    } catch (genErr) {
-                        console.error('Error generating on-demand cert in certificateData:', genErr);
+                // Completed course without certificate: auto-generate on demand
+                try {
+                    const { generateSingleStudentCertificate } = require('../utils/certificateGenerator');
+                    const genRes = await generateSingleStudentCertificate(student_id, c);
+                    if (genRes && genRes.eligible && genRes.cert) {
+                        addCert(c, genRes.cert.publicPath, new Date());
                     }
+                } catch (genErr) {
+                    console.error('Error generating on-demand cert in certificateData:', genErr);
                 }
             }
         }

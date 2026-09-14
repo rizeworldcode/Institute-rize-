@@ -77,20 +77,38 @@ export default function Certificate() {
     if (!cert?.certificatePath) return;
     setDownloading(cert.courseName);
     try {
-      const photoPath = cert.certificatePath.startsWith('http') 
+      const isExternal = cert.certificatePath.startsWith('http');
+      const photoPath = isExternal 
         ? cert.certificatePath 
         : cert.certificatePath.startsWith('/') 
           ? `${API_BASE_URL}${cert.certificatePath}` 
           : `${API_BASE_URL}/${cert.certificatePath}`;
       
-      const response = await fetch(photoPath);
-      if (!response.ok) throw new Error("File not found");
+      let response: Response | null = null;
+      try {
+        response = await fetch(photoPath);
+      } catch (networkErr) {
+        console.warn("API_BASE_URL fetch failed, trying local static fallback:", networkErr);
+      }
+
+      if (!response || !response.ok) {
+        if (!isExternal) {
+          const fallbackPath = cert.certificatePath.startsWith('/') ? cert.certificatePath : `/${cert.certificatePath}`;
+          response = await fetch(fallbackPath);
+        }
+      }
+
+      if (!response || !response.ok) throw new Error("Certificate file not found");
       
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.download = `Certificate_${cert.courseName}_${studentData?.id}.pdf`;
+      const isPng = cert.certificatePath.toLowerCase().endsWith('.png');
+      const isJpg = cert.certificatePath.toLowerCase().endsWith('.jpg') || cert.certificatePath.toLowerCase().endsWith('.jpeg');
+      const ext = isPng ? 'png' : isJpg ? 'jpg' : 'pdf';
+      const cleanCourse = cert.courseName.replace(/[^a-zA-Z0-9]/g, '_');
+      link.download = `Certificate_${cleanCourse}_${studentData?.id || 'Student'}.${ext}`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -105,7 +123,8 @@ export default function Certificate() {
 
   const handleViewPdf = (cert: Certificate) => {
     if (cert?.certificatePath) {
-      const photoPath = cert.certificatePath.startsWith('http') 
+      const isExternal = cert.certificatePath.startsWith('http');
+      const photoPath = isExternal 
         ? cert.certificatePath 
         : cert.certificatePath.startsWith('/') 
           ? `${API_BASE_URL}${cert.certificatePath}` 
