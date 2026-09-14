@@ -48,7 +48,7 @@ router.get("/api/certificate/file", (req, res) => {
     return res.status(404).send("Certificate image not found");
 });
 
-// 3. QR Code Scanner Landing & Verification Page (Branded to match RizeWorld website & Admin Panel)
+// 3. QR Code Scanner Landing & Verification Page
 router.get("/download-certificate", (req, res) => {
     if (req.query.raw === "1" || req.query.download === "1") {
         const certPath = getCertificateFilePath();
@@ -62,7 +62,7 @@ router.get("/download-certificate", (req, res) => {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Verified Certificate | RizeWorld Institute</title>
+  <title>Certificate | RizeWorld Institute</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -107,24 +107,6 @@ router.get("/download-certificate", (req, res) => {
       box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.06), 0 1px 3px rgba(0, 0, 0, 0.03);
       text-align: center;
     }
-    .badge-container {
-      margin-bottom: 14px;
-    }
-    .badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      background: #ecfdf5;
-      color: #047857;
-      border: 1px solid #a7f3d0;
-      padding: 6px 14px;
-      border-radius: 9999px;
-      font-size: 11px;
-      font-weight: 800;
-      letter-spacing: 0.06em;
-      text-transform: uppercase;
-    }
-    .badge svg { width: 14px; height: 14px; fill: currentColor; }
     .institute-title {
       font-size: 12px;
       color: #2563eb;
@@ -132,6 +114,7 @@ router.get("/download-certificate", (req, res) => {
       letter-spacing: 0.05em;
       text-transform: uppercase;
       margin-bottom: 6px;
+      margin-top: 4px;
     }
     .cert-heading {
       font-size: 26px;
@@ -211,21 +194,16 @@ router.get("/download-certificate", (req, res) => {
       border-radius: 16px;
       text-decoration: none;
       border: 1.5px solid #e2e8f0;
-      margin-bottom: 16px;
+      margin-bottom: 12px;
       transition: background 0.15s, border-color 0.15s;
     }
     .btn-view:hover { background: #f8fafc; border-color: #cbd5e1; }
-    .toast {
-      font-size: 12px;
-      color: #64748b;
-      margin-top: 4px;
-    }
     .footer-link {
       font-size: 12px;
       color: #64748b;
       font-weight: 600;
       text-decoration: none;
-      margin-top: 18px;
+      margin-top: 14px;
       display: inline-block;
       transition: color 0.15s;
     }
@@ -239,13 +217,6 @@ router.get("/download-certificate", (req, res) => {
     </div>
     
     <div class="card">
-      <div class="badge-container">
-        <div class="badge">
-          <svg viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
-          Official Credential Verified
-        </div>
-      </div>
-
       <div class="institute-title">RizeWorld Institute of AI & Digital Marketing</div>
       <h1 class="cert-heading">Certificate of Completion</h1>
 
@@ -257,13 +228,6 @@ router.get("/download-certificate", (req, res) => {
         <div class="info-row">
           <span class="info-label">Program</span>
           <span class="info-val" style="color: #2563eb;">Creative Pro (Graphic + Video)</span>
-        </div>
-        <div class="info-row">
-          <span class="info-label">Credential Status</span>
-          <span class="info-val" style="color: #059669; display: flex; align-items: center; gap: 4px;">
-            <svg width="14" height="14" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
-            Authentic & Verified
-          </span>
         </div>
       </div>
 
@@ -280,8 +244,6 @@ router.get("/download-certificate", (req, res) => {
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
         View Full Certificate
       </a>
-
-      <p class="toast">Tap button above to save official certificate to your device.</p>
       
       <a href="https://rizeworldinstitute.in" target="_blank" class="footer-link">
         © RizeWorld Institute • rizeworldinstitute.in
