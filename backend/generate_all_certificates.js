@@ -154,10 +154,10 @@ async function run() {
     }
     .mask-sign {
       position: absolute;
-      top: 960px;
-      left: 1340px;
-      width: 440px;
-      height: 100px;
+      top: 920px;
+      left: 1280px;
+      width: 540px;
+      height: 143px;
       background: #ffffff;
       z-index: 2;
     }
@@ -234,9 +234,9 @@ async function run() {
     /* New Signature (bottom-right) */
     .sign-img {
       position: absolute;
-      top: 960px;
-      left: 1400px;
-      width: 320px;
+      top: 952px;
+      left: 1330px;
+      width: 315px;
       height: auto;
       object-fit: contain;
     }
