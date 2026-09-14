@@ -48,7 +48,24 @@ router.get("/api/certificate/file", (req, res) => {
     return res.status(404).send("Certificate image not found");
 });
 
-// 3. QR Code Scanner Landing & Verification Page
+// 3. Official Logo Endpoint (High-res cropped horizontal brand logo)
+router.get("/api/certificate/logo", (req, res) => {
+    const logoCandidates = [
+        path.join(__dirname, "../../public/uploads/RIZE_LOGO_CROPPED.png"),
+        path.join(__dirname, "../../../frontend-admin/public/logo/RIZE_LOGO_CROPPED.png"),
+        path.join(__dirname, "../../../frontend-main/public/logo/RIZE_LOGO_CROPPED.png")
+    ];
+    for (const p of logoCandidates) {
+        if (fs.existsSync(p)) {
+            res.setHeader("Content-Type", "image/png");
+            res.setHeader("Cache-Control", "public, max-age=86400");
+            return res.sendFile(p);
+        }
+    }
+    return res.status(404).send("Logo not found");
+});
+
+// 4. QR Code Scanner Landing & Verification Page
 router.get("/download-certificate", (req, res) => {
     if (req.query.raw === "1" || req.query.download === "1") {
         const certPath = getCertificateFilePath();
@@ -91,13 +108,14 @@ router.get("/download-certificate", (req, res) => {
       display: flex;
       flex-direction: column;
       align-items: center;
-      margin-bottom: 20px;
+      margin-bottom: 22px;
     }
     .brand-logo {
-      height: 48px;
-      max-width: 220px;
+      height: 64px;
+      width: auto;
+      max-width: 240px;
       object-fit: contain;
-      margin-bottom: 4px;
+      filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.06));
     }
     .card {
       background: #ffffff;
@@ -213,7 +231,7 @@ router.get("/download-certificate", (req, res) => {
 <body>
   <div class="wrapper">
     <div class="brand-header">
-      <img src="https://rizeworldinstitute.in/logo/RIZE%20LOGO%20HORI%20PNG.png" alt="RizeWorld Institute" class="brand-logo" onerror="this.style.display='none'" />
+      <img src="/api/certificate/logo" alt="RizeWorld Institute" class="brand-logo" onerror="this.style.display='none'" />
     </div>
     
     <div class="card">
