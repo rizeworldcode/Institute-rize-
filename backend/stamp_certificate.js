@@ -51,16 +51,16 @@ async function stampCertificate(options = {}) {
   const qrImage = await Jimp.read(qrBuffer);
 
   // Load fonts
-  const font16Path = path.join(__dirname, 'node_modules/@jimp/plugin-print/fonts/open-sans/open-sans-16-black/open-sans-16-black.fnt');
+  const font14Path = path.join(__dirname, 'node_modules/@jimp/plugin-print/fonts/open-sans/open-sans-14-black/open-sans-14-black.fnt');
   const font12Path = path.join(__dirname, 'node_modules/@jimp/plugin-print/fonts/open-sans/open-sans-12-black/open-sans-12-black.fnt');
-  const font16 = await loadFont(font16Path);
+  const font14 = await loadFont(font14Path);
   const font12 = await loadFont(font12Path);
 
   // Card dimensions
   const cardPaddingX = 20;
   const cardPaddingTop = 18;
   const cardWidth = qrSize + (cardPaddingX * 2); // 264
-  const cardHeight = 296;
+  const cardHeight = 280;
 
   const card = new Jimp({ width: cardWidth, height: cardHeight, color: 0xffffffff });
 
@@ -84,23 +84,28 @@ async function stampCertificate(options = {}) {
   // Composite QR code onto card with clear white quiet zone
   card.composite(qrImage, cardPaddingX, cardPaddingTop);
 
-  // Print text below QR code
-  card.print({
-    font: font16,
-    x: 0,
-    y: cardPaddingTop + qrSize + 8,
-    text: 'SCAN TO VERIFY',
-    alignmentX: HorizontalAlign.CENTER,
-    maxWidth: cardWidth
-  });
+  // Print Student ID below QR code (replacing SCAN TO VERIFY & DOWNLOAD CERTIFICATE)
+  const rawId = (options.studentId || 'RW-6678').trim();
+  let idText = rawId;
+  if (!rawId.toUpperCase().startsWith('STUDENT ID') && !rawId.toUpperCase().startsWith('ID:')) {
+    idText = `STUDENT ID: ${rawId}`;
+  }
+
+  const { measureText } = require('jimp');
+  let selectedFont = font14;
+  let textWidth = measureText(selectedFont, idText);
+  if (textWidth > cardWidth - 16) {
+    selectedFont = font12;
+    textWidth = measureText(selectedFont, idText);
+  }
+  const textX = Math.round((cardWidth - textWidth) / 2);
+  const textY = cardPaddingTop + qrSize + 12;
 
   card.print({
-    font: font12,
-    x: 0,
-    y: cardPaddingTop + qrSize + 28,
-    text: 'DOWNLOAD CERTIFICATE',
-    alignmentX: HorizontalAlign.CENTER,
-    maxWidth: cardWidth
+    font: selectedFont,
+    x: textX,
+    y: textY,
+    text: idText
   });
 
   // Card placement on certificate (bottom-left area matching layout)

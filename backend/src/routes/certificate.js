@@ -19,8 +19,10 @@ router.post(
 
 function getCertificateFilePath() {
     const candidates = [
-        path.join(__dirname, "../../../frontend-admin/public/hero/White and Gold Simple Elegant Appreciation Certificate.jpg.jpeg"),
+        path.join(__dirname, "../../../frontend-admin/public/hero/COURSE CERTIFICATE.png"),
+        path.join(__dirname, "../../../frontend-main/public/hero/COURSE CERTIFICATE.png"),
         path.join(__dirname, "../../public/uploads/RizeWorld_Certificate_Punit_Sharma.jpg"),
+        path.join(__dirname, "../../../frontend-admin/public/hero/White and Gold Simple Elegant Appreciation Certificate.jpg.jpeg"),
         path.join(__dirname, "../../../frontend-main/public/hero/White and Gold Simple Elegant Appreciation Certificate.jpg.jpeg"),
         path.join(__dirname, "../../../frontend-main/public/certificate/RizeWorld_Certificate_Punit_Sharma.jpg")
     ];
@@ -34,7 +36,7 @@ function getCertificateFilePath() {
 router.get("/api/certificate/download", (req, res) => {
     const certPath = getCertificateFilePath();
     if (certPath) {
-        return res.download(certPath, "RizeWorld_Certificate.jpg");
+        return res.download(certPath, "RizeWorld_Certificate.png");
     }
     return res.status(404).json({ success: false, message: "Certificate file not found" });
 });
@@ -43,7 +45,7 @@ router.get("/api/certificate/download", (req, res) => {
 router.get("/api/certificate/file", (req, res) => {
     const certPath = getCertificateFilePath();
     if (certPath) {
-        res.setHeader("Content-Type", "image/jpeg");
+        res.setHeader("Content-Type", certPath.endsWith(".png") ? "image/png" : "image/jpeg");
         res.setHeader("Cache-Control", "public, max-age=86400");
         return res.sendFile(certPath);
     }
@@ -72,10 +74,11 @@ router.get("/download-certificate", async (req, res) => {
     if (req.query.raw === "1" || req.query.download === "1") {
         const certPath = getCertificateFilePath();
         if (certPath) {
-            return res.download(certPath, "RizeWorld_Certificate.jpg");
+            return res.download(certPath, "RizeWorld_Certificate.png");
         }
     }
 
+    let studentId = "RW-6678";
     let studentName = "Punit Sharma";
     let courseName = "Creative Pro (Graphic + Video)";
     let certImageUrl = "/api/certificate/file";
@@ -85,6 +88,7 @@ router.get("/download-certificate", async (req, res) => {
     if (req.query.id) {
         try {
             const queryId = req.query.id.trim();
+            studentId = queryId;
             const student = await student_model.findOne({
                 $or: [
                     { student_ID: queryId },
@@ -93,6 +97,7 @@ router.get("/download-certificate", async (req, res) => {
             }).lean();
 
             if (student) {
+                studentId = student.student_ID || studentId;
                 studentName = student.student_name || studentName;
                 if (Array.isArray(student.selected_course_name) && student.selected_course_name.length > 0) {
                     courseName = student.selected_course_name.join(", ");
@@ -283,12 +288,16 @@ router.get("/download-certificate", async (req, res) => {
 
       <div class="info-box">
         <div class="info-row">
+          <span class="info-label">Student ID</span>
+          <span class="info-val" style="color: #2563eb;">${studentId}</span>
+        </div>
+        <div class="info-row">
           <span class="info-label">Student Name</span>
           <span class="info-val">${studentName}</span>
         </div>
         <div class="info-row">
           <span class="info-label">Program</span>
-          <span class="info-val" style="color: #2563eb;">${courseName}</span>
+          <span class="info-val">${courseName}</span>
         </div>
       </div>
 
