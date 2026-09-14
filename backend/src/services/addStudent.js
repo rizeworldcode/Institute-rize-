@@ -594,20 +594,32 @@ console.log(req.body);
           };
         }
         
-        // Check if certificate already exists for this course in the selected admission
-        const existingCertificateForCourse = selectedAdmission.certificates.some(cert => cert.courseName === certificate_course);
-        if (existingCertificateForCourse) {
-          return {
-            success: false,
-            message: `Certificate already exists for course "${certificate_course}"! Please delete the existing certificate first before uploading a new one!`,
-          };
-        }
+        // If a certificate already exists for this course, remove it first so the new upload cleanly replaces it
+        await certificate_model.updateOne(
+          { student_ID: student_iD },
+          {
+            $pull: {
+              "admissions.$[].certificates": {
+                $or: [
+                  { courseName: certificate_course },
+                  { course_name: certificate_course }
+                ]
+              },
+              "certificates": {
+                $or: [
+                  { courseName: certificate_course },
+                  { course_name: certificate_course }
+                ]
+              }
+            }
+          }
+        ).catch(err => console.error("Error pulling old certificate before upload:", err));
         
         let certificateFilePath;
         const uploadedFile = req.files["certificate_photo"][0];
         console.log("uploadedFile details:", JSON.stringify(uploadedFile, null, 2));
         
-        if (uploadedFile.path.startsWith('http')) {
+        if (uploadedFile.path && uploadedFile.path.startsWith('http')) {
           // It's a Cloudinary URL
           certificateFilePath = uploadedFile.path;
           console.log("certificateFilePath (Cloudinary URL):", certificateFilePath);
@@ -643,7 +655,10 @@ console.log(req.body);
                 issued_at: Date.now()
               }
             },
-            $set: { updated_at: Date.now() }
+            $set: { 
+              updated_at: Date.now(),
+              certificate_photo: certificateFilePath
+            }
           },
           { new: true } // Return the updated document
         );
@@ -665,7 +680,10 @@ console.log(req.body);
                   issued_at: Date.now()
                 }
               },
-              $set: { updated_at: Date.now() }
+              $set: { 
+                updated_at: Date.now(),
+                certificate_photo: certificateFilePath
+              }
             },
             { new: true } // Return the updated document
           );

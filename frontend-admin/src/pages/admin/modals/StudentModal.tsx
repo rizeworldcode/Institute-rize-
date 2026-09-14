@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { X, FileText, CalendarPlus, Check, Eye, EyeOff } from "lucide-react";
+import { X, FileText, CalendarPlus, Check, Eye, EyeOff, Upload, Award } from "lucide-react";
 import { Student, Admission } from "../types";
 import { getApiUrl } from "../../../utils/api";
 import { checkPasswordValidity, PasswordRequirements } from "../AdminLogin";
@@ -614,10 +614,12 @@ export function StudentModal({ student, onClose, onSave }: {
               return admission;
             });
 
+            const uploadedCourseName = certificateCourse;
             // Clear certificate state after successful update
             setSelectedAdmissionForCertificate(null);
             setCertificateFile(null);
             setCertificateCourse("");
+            alert(`✅ Certificate for "${uploadedCourseName}" uploaded successfully! It is now available on the student's portal.`);
           }
 
           onSave(updatedStudent, shouldOpenInvoice);
@@ -1156,33 +1158,116 @@ export function StudentModal({ student, onClose, onSave }: {
                         </div>
                       )}
 
-                      {/* Certificate upload button - only if fees clear */}
+                      {/* Certificate upload button & list - only if fees clear */}
                       {admission.feesStatus === "Clear" && (
-                        <div className="mt-3 pt-3 border-t border-neutral-100">
+                        <div className="mt-3 pt-3 border-t border-neutral-100 space-y-3">
+                          {/* Uploaded Certificates List */}
+                          {admission.certificates && admission.certificates.length > 0 && (
+                            <div className="space-y-1.5">
+                              <span className="text-[11px] font-bold text-neutral-500 uppercase tracking-wider block">
+                                Uploaded Certificates ({admission.certificates.length}):
+                              </span>
+                              <div className="flex flex-wrap gap-2">
+                                {admission.certificates.map((cert: any, cIdx: number) => {
+                                  const cPath = cert.certificatePath || cert.certificate_path || cert.url;
+                                  const fullHref = cPath
+                                    ? (cPath.startsWith("http") ? cPath : `http://localhost:3001${cPath.startsWith("/") ? "" : "/"}${cPath}`)
+                                    : null;
+                                  return (
+                                    <div key={cIdx} className="flex items-center gap-2 px-3 py-1.5 bg-emerald-50 border border-emerald-200 rounded-lg text-xs font-semibold text-emerald-800">
+                                      <Award size={14} className="text-emerald-600" />
+                                      <span>{cert.courseName || cert.course_name}</span>
+                                      {fullHref && (
+                                        <a
+                                          href={fullHref}
+                                          target="_blank"
+                                          rel="noreferrer"
+                                          className="text-blue-600 hover:text-blue-800 underline font-semibold ml-1 cursor-pointer"
+                                        >
+                                          View
+                                        </a>
+                                      )}
+                                    </div>
+                                  );
+                                })}
+                              </div>
+                            </div>
+                          )}
+
                           {selectedAdmissionForCertificate === admission.admissionId ? (
-                            <div className="space-y-3">
-                              <div className="flex gap-2 flex-wrap">
-                                <select value={certificateCourse} onChange={(e) => setCertificateCourse(e.target.value)} className="px-3 py-2 rounded-lg border border-neutral-200 text-sm">
-                                  <option value="">Select course for certificate</option>
+                            <div className="p-3.5 bg-blue-50/70 border border-blue-200 rounded-xl space-y-3">
+                              <div className="text-xs font-bold text-blue-900 flex items-center gap-1.5">
+                                <Upload size={14} className="text-blue-600" />
+                                Upload Certificate for this Admission
+                              </div>
+                              <div className="flex gap-2 flex-wrap items-center">
+                                <select 
+                                  value={certificateCourse} 
+                                  onChange={(e) => setCertificateCourse(e.target.value)} 
+                                  className="px-3 py-2 rounded-lg border border-neutral-300 bg-white text-xs font-semibold text-neutral-800 outline-none focus:border-blue-500"
+                                >
+                                  <option value="">Select course for certificate *</option>
                                   {admission.courses.map((course) => (
                                     <option key={course} value={course}>{course}</option>
                                   ))}
                                 </select>
-                                <input type="file" accept="application/pdf, image/*" onChange={(e) => setCertificateFile(e.target.files?.[0] || null)} className="text-sm" />
-                                <button type="submit" className="px-3 py-2 bg-blue-600 text-white rounded-lg text-sm font-semibold hover:bg-blue-700">
-                                  Upload
+                                <input 
+                                  type="file" 
+                                  accept="application/pdf, image/*" 
+                                  onChange={(e) => setCertificateFile(e.target.files?.[0] || null)} 
+                                  className="text-xs text-neutral-700 file:mr-2 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-blue-100 file:text-blue-700 hover:file:bg-blue-200 cursor-pointer" 
+                                />
+                                <button 
+                                  type="button" 
+                                  onClick={(e) => {
+                                    if (!certificateCourse) {
+                                      alert("Please select a course for the certificate!");
+                                      return;
+                                    }
+                                    if (!certificateFile) {
+                                      alert("Please choose a certificate file (PNG, JPG, or PDF)!");
+                                      return;
+                                    }
+                                    const form = (e.currentTarget as HTMLElement).closest("form");
+                                    if (form) {
+                                      form.requestSubmit();
+                                    }
+                                  }} 
+                                  className="px-3.5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-bold transition-all shadow-xs flex items-center gap-1.5 cursor-pointer"
+                                >
+                                  <Upload size={13} />
+                                  Upload & Save
                                 </button>
-                                <button type="button" onClick={() => {
-                                  setSelectedAdmissionForCertificate(null);
-                                  setCertificateFile(null);
-                                  setCertificateCourse("");
-                                }} className="px-3 py-2 bg-neutral-200 text-neutral-700 rounded-lg text-sm font-semibold hover:bg-neutral-300">
+                                <button 
+                                  type="button" 
+                                  onClick={() => {
+                                    setSelectedAdmissionForCertificate(null);
+                                    setCertificateFile(null);
+                                    setCertificateCourse("");
+                                  }} 
+                                  className="px-3 py-2 bg-neutral-200 text-neutral-700 rounded-lg text-xs font-semibold hover:bg-neutral-300 transition-all cursor-pointer"
+                                >
                                   Cancel
                                 </button>
                               </div>
+                              {certificateFile && (
+                                <div className="text-[11px] text-blue-700 font-medium">
+                                  Selected file: <span className="font-bold">{certificateFile.name}</span>
+                                </div>
+                              )}
                             </div>
                           ) : (
-                            <button type="button" onClick={() => setSelectedAdmissionForCertificate(admission.admissionId)} className="px-4 py-2 bg-green-100 text-green-700 rounded-lg text-sm font-semibold hover:bg-green-200">
+                            <button 
+                              type="button" 
+                              onClick={() => {
+                                setSelectedAdmissionForCertificate(admission.admissionId);
+                                if (admission.courses.length === 1) {
+                                  setCertificateCourse(admission.courses[0]);
+                                }
+                              }} 
+                              className="px-4 py-2 bg-green-100 hover:bg-green-200 text-green-700 rounded-lg text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer border border-green-200"
+                            >
+                              <Upload size={13} />
                               + Upload Certificate
                             </button>
                           )}
