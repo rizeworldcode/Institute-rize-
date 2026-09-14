@@ -17,7 +17,24 @@ router.post(
     certificateData
 );
 
-function getCertificateFilePath() {
+function getCertificateFilePath(studentId) {
+    if (studentId) {
+        const cleanId = studentId.replace(/[^a-zA-Z0-9-_]/g, '_');
+        const certDirs = [
+            path.join(__dirname, "../../../frontend-admin/public/certificates"),
+            path.join(__dirname, "../../../frontend-main/public/certificates"),
+            path.join(__dirname, "../../public/uploads/certificates")
+        ];
+
+        for (const dir of certDirs) {
+            if (fs.existsSync(dir)) {
+                const files = fs.readdirSync(dir);
+                const matched = files.find(f => f.startsWith(`Certificate_${cleanId}`));
+                if (matched) return path.join(dir, matched);
+            }
+        }
+    }
+
     const candidates = [
         path.join(__dirname, "../../../frontend-admin/public/hero/COURSE CERTIFICATE.png"),
         path.join(__dirname, "../../../frontend-main/public/hero/COURSE CERTIFICATE.png"),
@@ -34,16 +51,18 @@ function getCertificateFilePath() {
 
 // 1. Direct raw binary download endpoint
 router.get("/api/certificate/download", (req, res) => {
-    const certPath = getCertificateFilePath();
+    const studentId = req.query.id;
+    const certPath = getCertificateFilePath(studentId);
     if (certPath) {
-        return res.download(certPath, "RizeWorld_Certificate.png");
+        return res.download(certPath, `RizeWorld_Certificate_${studentId || 'Official'}.png`);
     }
     return res.status(404).json({ success: false, message: "Certificate file not found" });
 });
 
 // 2. Direct inline image view endpoint
 router.get("/api/certificate/file", (req, res) => {
-    const certPath = getCertificateFilePath();
+    const studentId = req.query.id;
+    const certPath = getCertificateFilePath(studentId);
     if (certPath) {
         res.setHeader("Content-Type", certPath.endsWith(".png") ? "image/png" : "image/jpeg");
         res.setHeader("Cache-Control", "public, max-age=86400");
@@ -107,16 +126,20 @@ router.get("/download-certificate", async (req, res) => {
                     courseName = student.admissions[0].courses.join(", ");
                 }
 
-                if (student.certificate_photo) {
-                    certImageUrl = student.certificate_photo.startsWith("http")
-                        ? student.certificate_photo
-                        : (student.certificate_photo.startsWith("/") ? student.certificate_photo : "/" + student.certificate_photo);
+                if (student.certificate_photo && student.certificate_photo.startsWith("http")) {
+                    certImageUrl = student.certificate_photo;
                     downloadUrl = certImageUrl;
+                } else {
+                    certImageUrl = `/api/certificate/file?id=${encodeURIComponent(studentId)}`;
+                    downloadUrl = `/api/certificate/download?id=${encodeURIComponent(studentId)}`;
                 }
             }
         } catch (err) {
             console.error("Error fetching dynamic student certificate:", err);
         }
+    } else {
+        certImageUrl = `/api/certificate/file?id=${encodeURIComponent(studentId)}`;
+        downloadUrl = `/api/certificate/download?id=${encodeURIComponent(studentId)}`;
     }
 
     if (req.query.name) studentName = req.query.name;
