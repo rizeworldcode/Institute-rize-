@@ -8,22 +8,23 @@ async function stampCertificate() {
   const outputAdminCertPath = 'd:/desktop/Aman/rizeworld institute/rizeworld institute/rizeworld institute/frontend-admin/public/hero/White and Gold Simple Elegant Appreciation Certificate.jpg.jpeg';
   const outputMainHeroCertPath = 'd:/desktop/Aman/rizeworld institute/rizeworld institute/rizeworld institute/frontend-main/public/hero/White and Gold Simple Elegant Appreciation Certificate.jpg.jpeg';
   const outputMainPublicCertPath = 'd:/desktop/Aman/rizeworld institute/rizeworld institute/rizeworld institute/frontend-main/public/certificate/RizeWorld_Certificate_Punit_Sharma.jpg';
+  const outputBackendUploadPath = 'd:/desktop/Aman/rizeworld institute/rizeworld institute/rizeworld institute/backend/public/uploads/RizeWorld_Certificate_Punit_Sharma.jpg';
 
   // Read the original certificate
   const certImage = await Jimp.read(originalCertPath);
 
-  // Target URL: Live Render direct download endpoint (verified 200 OK & instant attachment download)
+  // Target URL: Live Render verification & download endpoint
   const targetUrl = 'https://institute-rize.onrender.com/download-certificate';
 
-  // Generate QR Code with high resolution
-  const qrSize = 205;
+  // Generate QR Code with standard 'M' error correction, clean margin and true black
+  const qrSize = 224;
   const qrBuffer = await QRCode.toBuffer(targetUrl, {
-    errorCorrectionLevel: 'H',
+    errorCorrectionLevel: 'M',
     type: 'png',
     width: qrSize,
-    margin: 1,
+    margin: 2,
     color: {
-      dark: '#1e293b', // Deep charcoal slate
+      dark: '#000000', // Pure black for 100% optical readability on all phones
       light: '#ffffff'
     }
   });
@@ -37,16 +38,15 @@ async function stampCertificate() {
   const font12 = await loadFont(font12Path);
 
   // Card dimensions
-  const cardPaddingX = 18;
-  const cardPaddingTop = 16;
-  const cardWidth = qrSize + (cardPaddingX * 2); // 241
-  const cardHeight = 282; // Room for QR + 2 lines of clear text + bottom padding
+  const cardPaddingX = 20;
+  const cardPaddingTop = 18;
+  const cardWidth = qrSize + (cardPaddingX * 2); // 264
+  const cardHeight = 296;
 
   const card = new Jimp({ width: cardWidth, height: cardHeight, color: 0xffffffff });
 
-  // Border: elegant double line in gold & soft border
+  // Border: elegant gold
   const goldColor = 0xc5a059ff; // Refined Certificate Gold
-  const innerGold = 0xddc48aff;
 
   // Outer border (2px gold)
   for (let x = 0; x < cardWidth; x++) {
@@ -62,15 +62,15 @@ async function stampCertificate() {
     card.setPixelColor(goldColor, cardWidth - 2, y);
   }
 
-  // Composite QR code onto card
+  // Composite QR code onto card with clear white quiet zone
   card.composite(qrImage, cardPaddingX, cardPaddingTop);
 
   // Print text below QR code
   card.print({
     font: font16,
     x: 0,
-    y: cardPaddingTop + qrSize + 10,
-    text: 'SCAN TO DOWNLOAD',
+    y: cardPaddingTop + qrSize + 8,
+    text: 'SCAN TO VERIFY',
     alignmentX: HorizontalAlign.CENTER,
     maxWidth: cardWidth
   });
@@ -78,17 +78,15 @@ async function stampCertificate() {
   card.print({
     font: font12,
     x: 0,
-    y: cardPaddingTop + qrSize + 32,
-    text: 'VERIFIED CERTIFICATE',
+    y: cardPaddingTop + qrSize + 28,
+    text: 'DOWNLOAD CERTIFICATE',
     alignmentX: HorizontalAlign.CENTER,
     maxWidth: cardWidth
   });
 
   // Card placement on certificate:
-  // x = 275 (aligned nicely with the body copy)
-  // y = 920 (harmonious with the signature on the right)
   const cardX = 275;
-  const cardY = 920;
+  const cardY = 915;
 
   certImage.composite(card, cardX, cardY);
 
@@ -107,6 +105,12 @@ async function stampCertificate() {
   if (!fs.existsSync(dirMainCert)) fs.mkdirSync(dirMainCert, { recursive: true });
   await certImage.write(outputMainPublicCertPath);
   console.log('Saved to frontend-main certificate folder:', outputMainPublicCertPath);
+
+  // Save copy to backend uploads
+  const dirBackendUpload = path.dirname(outputBackendUploadPath);
+  if (!fs.existsSync(dirBackendUpload)) fs.mkdirSync(dirBackendUpload, { recursive: true });
+  await certImage.write(outputBackendUploadPath);
+  console.log('Saved to backend uploads folder:', outputBackendUploadPath);
 }
 
 stampCertificate().catch(err => {
