@@ -120,8 +120,27 @@ exports.certificateData = async (req,res)=>{
                     completionDate: cDate,
                     status: "In Progress"
                 });
+            } else {
+                const hasInList = certificates.some(cert => (cert.courseName || '').toLowerCase().includes(c.toLowerCase()));
+                if (!hasInList) {
+                    try {
+                        const { generateSingleStudentCertificate } = require('../utils/certificateGenerator');
+                        const genRes = await generateSingleStudentCertificate(student_id, c);
+                        if (genRes && genRes.eligible && genRes.cert) {
+                            certificates.push({
+                                courseName: c,
+                                certificatePath: genRes.cert.publicPath,
+                                issuedAt: new Date(),
+                                isEligible: true
+                            });
+                        }
+                    } catch (genErr) {
+                        console.error('Error generating on-demand cert in certificateData:', genErr);
+                    }
+                }
             }
         }
+
 
         return {
             message: "Student data fetched",

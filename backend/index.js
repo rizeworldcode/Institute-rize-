@@ -124,10 +124,33 @@ app.set('view engine', 'ejs');
 // 3. START SERVER
 connectDB();
 
+const schedule = require('node-schedule');
+const { checkAndGenerateEligibleCertificates } = require('./src/utils/certificateGenerator');
+
 const PORT = process.env.PORT || 3001;
 const server = app.listen(PORT, '0.0.0.0', 2048, () => {
   logger.info(`Server is running on port ${PORT} in ${process.env.NODE_ENV || 'development'} mode`);
+
+  // Automated midnight certificate check (Runs every night at 00:01)
+  schedule.scheduleJob('1 0 * * *', async () => {
+    logger.info('Running automated midnight certificate generation check...');
+    try {
+      await checkAndGenerateEligibleCertificates();
+    } catch (err) {
+      logger.error('Error in automated certificate scheduler:', err);
+    }
+  });
+
+  // Run an initial check 10 seconds after server start
+  setTimeout(async () => {
+    try {
+      await checkAndGenerateEligibleCertificates();
+    } catch (err) {
+      logger.error('Error during initial certificate check on server boot:', err);
+    }
+  }, 10000);
 });
+
 
 // Increase keep-alive timeout for high-concurrency
 server.keepAliveTimeout = 65000;

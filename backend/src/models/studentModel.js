@@ -163,13 +163,15 @@ const StudentSchema = new mongoose.Schema({
         date: Date,
         utr_Number: String
     }],
-    //   certificate_photo: {
-    //     type: String,
-    //     default: ''
-    //   },
+    certificate_photo: {
+        type: String,
+        default: ''
+    },
+    certificates: [CertificateSchema],
     course_start_date: {
         type: Date
     },
+
     course_end_date: {
         type: Date
     },

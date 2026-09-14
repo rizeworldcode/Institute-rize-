@@ -80,6 +80,8 @@ function getCourseCompletionDate(student, specificCourse) {
     return calcEnd;
 }
 
+const { generateSingleStudentCertificate } = require('../utils/certificateGenerator');
+
 // 1. Direct raw binary download endpoint
 router.get("/api/certificate/download", async (req, res) => {
     const studentId = req.query.id;
@@ -99,7 +101,17 @@ router.get("/api/certificate/download", async (req, res) => {
             console.error("Error checking completion date:", e);
         }
     }
-    const certPath = getCertificateFilePath(studentId);
+    let certPath = getCertificateFilePath(studentId);
+    if (!certPath && studentId) {
+        try {
+            const genRes = await generateSingleStudentCertificate(studentId, req.query.course);
+            if (genRes && genRes.eligible) {
+                certPath = getCertificateFilePath(studentId);
+            }
+        } catch (err) {
+            console.error("On-demand certificate generation error:", err);
+        }
+    }
     if (certPath) {
         return res.download(certPath, `RizeWorld_Certificate_${studentId || 'Official'}.png`);
     }
@@ -107,9 +119,19 @@ router.get("/api/certificate/download", async (req, res) => {
 });
 
 // 2. Direct inline image view endpoint
-router.get("/api/certificate/file", (req, res) => {
+router.get("/api/certificate/file", async (req, res) => {
     const studentId = req.query.id;
-    const certPath = getCertificateFilePath(studentId);
+    let certPath = getCertificateFilePath(studentId);
+    if (!certPath && studentId) {
+        try {
+            const genRes = await generateSingleStudentCertificate(studentId, req.query.course);
+            if (genRes && genRes.eligible) {
+                certPath = getCertificateFilePath(studentId);
+            }
+        } catch (err) {
+            console.error("On-demand certificate generation error:", err);
+        }
+    }
     if (certPath) {
         res.setHeader("Content-Type", certPath.endsWith(".png") ? "image/png" : "image/jpeg");
         res.setHeader("Cache-Control", "public, max-age=86400");
@@ -117,6 +139,7 @@ router.get("/api/certificate/file", (req, res) => {
     }
     return res.status(404).send("Certificate image not found");
 });
+
 
 // 3. Official Logo Endpoint
 router.get("/api/certificate/logo", (req, res) => {
@@ -175,6 +198,15 @@ router.get("/download-certificate", async (req, res) => {
                 if (now < compDate) {
                     isCourseOngoing = true;
                     completionDateFormatted = compDate.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
+                } else {
+                    let certPath = getCertificateFilePath(studentId);
+                    if (!certPath) {
+                        try {
+                            await generateSingleStudentCertificate(studentId, targetCourse);
+                        } catch (err) {
+                            console.error("On-demand generation error in download-certificate:", err);
+                        }
+                    }
                 }
 
                 if (student.certificate_photo && student.certificate_photo.startsWith("http")) {
@@ -188,6 +220,7 @@ router.get("/download-certificate", async (req, res) => {
         } catch (err) {
             console.error("Error fetching dynamic student certificate:", err);
         }
+
     } else {
         certImageUrl = `/api/certificate/file?id=${encodeURIComponent(studentId)}`;
         downloadUrl = `/api/certificate/download?id=${encodeURIComponent(studentId)}`;
