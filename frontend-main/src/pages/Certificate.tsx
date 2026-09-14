@@ -10,6 +10,12 @@ interface Certificate {
   issuedAt?: string;
 }
 
+interface OngoingCourse {
+  courseName: string;
+  completionDate: string;
+  status: string;
+}
+
 export default function Certificate() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -28,6 +34,7 @@ export default function Certificate() {
     name: string;
     id: string;
     certificates: Certificate[];
+    ongoingCourses?: OngoingCourse[];
   } | null>(null);
 
   const [loginError, setLoginError] = useState("");
@@ -48,12 +55,14 @@ export default function Certificate() {
           name: data.student_name,
           id: data.student_id,
           certificates: data.certificates || [],
+          ongoingCourses: data.ongoingCourses || [],
         });
       }
     } catch (err) {
       console.error("Error fetching certificate data:", err);
     }
   };
+
 
   useEffect(() => {
     const token = localStorage.getItem("studentAuthToken");
@@ -491,7 +500,7 @@ export default function Certificate() {
         </div>
 
         {/* Certificates List */}
-        {hasCertificates ? (
+        {hasCertificates && (
           <div className="space-y-6">
             {studentData.certificates.map((cert, index) => (
               <div key={index} className="bg-white rounded-4xl p-6 md:p-8 shadow-[0_12px_40px_rgb(0,0,0,0.06)] border border-neutral-100 relative overflow-hidden">
@@ -556,18 +565,50 @@ export default function Certificate() {
               </div>
             ))}
           </div>
-        ) : (
+        )}
+
+        {/* Ongoing / In-Progress Courses Section */}
+        {studentData.ongoingCourses && studentData.ongoingCourses.length > 0 && (
+          <div className="space-y-4 pt-2">
+            <div className="flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
+              <h3 className="text-xs font-bold text-neutral-400 uppercase tracking-widest">
+                Active Training Programs (In Progress)
+              </h3>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {studentData.ongoingCourses.map((oc, idx) => (
+                <div key={idx} className="bg-amber-50/70 border border-amber-200 rounded-3xl p-6 relative overflow-hidden">
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="space-y-1.5">
+                      <span className="inline-flex items-center gap-1 text-[10px] font-black uppercase tracking-wider text-amber-800 bg-amber-100 px-2.5 py-0.5 rounded-full">
+                        <Lock size={11} /> Training In Progress
+                      </span>
+                      <h4 className="text-lg font-black text-neutral-900">{oc.courseName}</h4>
+                      <p className="text-xs font-semibold text-neutral-600">
+                        Certificate unlocks after: <strong className="text-amber-900">{new Date(oc.completionDate).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}</strong>
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {!hasCertificates && (!studentData.ongoingCourses || studentData.ongoingCourses.length === 0) && (
           <div className="bg-white rounded-4xl p-6 md:p-8 shadow-[0_12px_40px_rgb(0,0,0,0.06)] border border-neutral-100">
             <div className="p-6 bg-orange-50 border border-orange-100 rounded-3xl flex items-center gap-4">
               <div className="w-10 h-10 bg-white rounded-2xl flex items-center justify-center text-orange-500 shadow-sm shrink-0">
                 <AlertCircle size={20} />
               </div>
               <p className="text-sm font-bold text-orange-700">
-                Your certificates are currently being processed. They will be available for download once issued by the administration.
+                Your certificates are currently being processed. They will be available for download once your course completion date arrives and certificates are issued.
               </p>
             </div>
           </div>
         )}
+
 
       </div>
     </div>

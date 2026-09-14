@@ -104,6 +104,39 @@ function getStartDate(student) {
   return '17 June 2026';
 }
 
+function getCourseCompletionDate(student, courseObj) {
+  let start = null;
+  let end = null;
+  if (student.admissions && student.admissions.length > 0) {
+    for (const adm of student.admissions) {
+      if (Array.isArray(adm.courses) && adm.courses.some(c => c.toLowerCase().includes(courseObj.slug.toLowerCase().replace(/_/g, '')) || courseObj.title.toLowerCase().includes(c.toLowerCase()))) {
+        if (adm.startDate) start = new Date(adm.startDate);
+        if (adm.endDate) end = new Date(adm.endDate);
+      }
+    }
+    if (!start && student.admissions[0].startDate) start = new Date(student.admissions[0].startDate);
+    if (!end && student.admissions[0].endDate) end = new Date(student.admissions[0].endDate);
+  }
+  if (!start && student.course_start_date) start = new Date(student.course_start_date);
+  if (!end && student.course_end_date) end = new Date(student.course_end_date);
+  if (!start && student.createdAt) start = new Date(student.createdAt);
+  if (!start) start = new Date();
+
+  // Duration in months
+  let durMonths = 2;
+  if (courseObj.duration && courseObj.duration.startsWith('1')) durMonths = 1;
+  else if (courseObj.duration && courseObj.duration.startsWith('3')) durMonths = 3;
+
+  // Course completion date
+  const calcEnd = new Date(start);
+  calcEnd.setMonth(calcEnd.getMonth() + durMonths);
+
+  if (end && !isNaN(end.getTime())) {
+    return calcEnd < end ? calcEnd : end;
+  }
+  return calcEnd;
+}
+
 async function run() {
   console.log('Connecting to MongoDB...');
   await mongoose.connect(process.env.mongo_URI);
@@ -136,7 +169,7 @@ async function run() {
   console.log('Cleaned old and duplicate certificates.');
 
   const students = await student_model.find({ is_deleted: { $ne: true } });
-  console.log(`Found ${students.length} active students to generate certificates for.`);
+  console.log(`Found ${students.length} active students to check certificates for.`);
 
   const tempHtmlPath = path.join(__dirname, 'temp_batch_cert.html');
   const tempPngPath = path.join(__dirname, 'temp_batch_cert.png');
@@ -157,7 +190,16 @@ async function run() {
 
     for (let cIdx = 0; cIdx < courseList.length; cIdx++) {
       const courseObj = courseList[cIdx];
-      console.log(`   -> Generating certificate for course: ${courseObj.title} (${courseObj.duration})...`);
+      const completionDate = getCourseCompletionDate(s, courseObj);
+      const now = new Date();
+      const isCompleted = now >= completionDate;
+
+      if (!isCompleted) {
+        console.log(`   ⏳ Skipping: ${courseObj.title} - Course is currently IN PROGRESS until ${formatDate(completionDate)}.`);
+        continue;
+      }
+
+      console.log(`   -> Generating certificate for COMPLETED course: ${courseObj.title} (${courseObj.duration})...`);
 
       // Dynamic QR code with id and course query
       const targetUrl = `https://institute-rize.onrender.com/download-certificate?id=${encodeURIComponent(studentId)}&course=${encodeURIComponent(courseObj.title)}`;
@@ -371,9 +413,9 @@ async function run() {
 
     // Update student in MongoDB
     s.certificates = studentGeneratedCerts;
-    s.certificate_photo = studentGeneratedCerts[0].certificate_path;
+    s.certificate_photo = studentGeneratedCerts.length > 0 ? studentGeneratedCerts[0].certificate_path : "";
     await s.save();
-    console.log(`   ✓ DB updated with ${studentGeneratedCerts.length} certificates for ${studentName}`);
+    console.log(`   ✓ DB updated with ${studentGeneratedCerts.length} issued certificate(s) for ${studentName}`);
   }
 
   // Cleanup temp files

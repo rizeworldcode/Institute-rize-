@@ -49,14 +49,61 @@ function getCertificateFilePath(studentId) {
     return null;
 }
 
+function getCourseCompletionDate(student, specificCourse) {
+    let start = null;
+    let end = null;
+    if (student.admissions && student.admissions.length > 0) {
+        for (const adm of student.admissions) {
+            if (specificCourse && Array.isArray(adm.courses) && adm.courses.some(c => c.toLowerCase().includes(specificCourse.toLowerCase()) || specificCourse.toLowerCase().includes(c.toLowerCase()))) {
+                if (adm.startDate) start = new Date(adm.startDate);
+                if (adm.endDate) end = new Date(adm.endDate);
+            }
+        }
+        if (!start && student.admissions[0].startDate) start = new Date(student.admissions[0].startDate);
+        if (!end && student.admissions[0].endDate) end = new Date(student.admissions[0].endDate);
+    }
+    if (!start && student.course_start_date) start = new Date(student.course_start_date);
+    if (!end && student.course_end_date) end = new Date(student.course_end_date);
+    if (!start && student.createdAt) start = new Date(student.createdAt);
+    if (!start) start = new Date();
+
+    let durMonths = 2;
+    const clc = (specificCourse || (Array.isArray(student.selected_course_name) ? student.selected_course_name.join(' ') : student.selected_course_name) || '').toLowerCase();
+    if (clc.includes('seo') && !clc.includes('marketing') && !clc.includes('smo')) durMonths = 1;
+    else if (clc.includes('master') || clc.includes('web development')) durMonths = 3;
+
+    const calcEnd = new Date(start);
+    calcEnd.setMonth(calcEnd.getMonth() + durMonths);
+    if (end && !isNaN(end.getTime())) {
+        return calcEnd < end ? calcEnd : end;
+    }
+    return calcEnd;
+}
+
 // 1. Direct raw binary download endpoint
-router.get("/api/certificate/download", (req, res) => {
+router.get("/api/certificate/download", async (req, res) => {
     const studentId = req.query.id;
+    if (studentId) {
+        try {
+            const student = await student_model.findOne({ student_ID: studentId.trim() }).lean();
+            if (student) {
+                const compDate = getCourseCompletionDate(student, req.query.course);
+                if (new Date() < compDate) {
+                    return res.status(403).json({
+                        success: false,
+                        message: `Course is currently in progress. Certificate will be available after ${compDate.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}.`
+                    });
+                }
+            }
+        } catch (e) {
+            console.error("Error checking completion date:", e);
+        }
+    }
     const certPath = getCertificateFilePath(studentId);
     if (certPath) {
         return res.download(certPath, `RizeWorld_Certificate_${studentId || 'Official'}.png`);
     }
-    return res.status(404).json({ success: false, message: "Certificate file not found" });
+    return res.status(404).json({ success: false, message: "Certificate file not found or course not completed yet" });
 });
 
 // 2. Direct inline image view endpoint
@@ -90,18 +137,13 @@ router.get("/api/certificate/logo", (req, res) => {
 
 // 4. Dynamic QR Code Scanner Landing & Verification Page (Supports every individual student)
 router.get("/download-certificate", async (req, res) => {
-    if (req.query.raw === "1" || req.query.download === "1") {
-        const certPath = getCertificateFilePath();
-        if (certPath) {
-            return res.download(certPath, "RizeWorld_Certificate.png");
-        }
-    }
-
     let studentId = "RW-6678";
     let studentName = "Punit Sharma";
     let courseName = "Creative Pro (Graphic + Video)";
     let certImageUrl = "/api/certificate/file";
     let downloadUrl = "/api/certificate/download";
+    let isCourseOngoing = false;
+    let completionDateFormatted = "";
 
     // Dynamic lookup by Student ID or query parameters
     if (req.query.id) {
@@ -126,6 +168,15 @@ router.get("/download-certificate", async (req, res) => {
                     courseName = student.admissions[0].courses.join(", ");
                 }
 
+                // Check completion date
+                const targetCourse = req.query.course || courseName;
+                const compDate = getCourseCompletionDate(student, targetCourse);
+                const now = new Date();
+                if (now < compDate) {
+                    isCourseOngoing = true;
+                    completionDateFormatted = compDate.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
+                }
+
                 if (student.certificate_photo && student.certificate_photo.startsWith("http")) {
                     certImageUrl = student.certificate_photo;
                     downloadUrl = certImageUrl;
@@ -144,6 +195,17 @@ router.get("/download-certificate", async (req, res) => {
 
     if (req.query.name) studentName = req.query.name;
     if (req.query.course) courseName = req.query.course;
+
+    if (req.query.raw === "1" || req.query.download === "1") {
+        if (isCourseOngoing) {
+            return res.status(403).send(`Course is currently in progress. Certificate will be available after ${completionDateFormatted}.`);
+        }
+        const certPath = getCertificateFilePath(studentId);
+        if (certPath) {
+            return res.download(certPath, `RizeWorld_Certificate_${studentId}.png`);
+        }
+    }
+
 
     const html = `<!DOCTYPE html>
 <html lang="en">
@@ -307,7 +369,7 @@ router.get("/download-certificate", async (req, res) => {
     
     <div class="card">
       <div class="institute-title">RizeWorld Institute of AI & Digital Marketing</div>
-      <h1 class="cert-heading">Certificate of Completion</h1>
+      <h1 class="cert-heading">${isCourseOngoing ? 'Credential In Progress' : 'Certificate of Completion'}</h1>
 
       <div class="info-box">
         <div class="info-row">
@@ -322,8 +384,25 @@ router.get("/download-certificate", async (req, res) => {
           <span class="info-label">Program</span>
           <span class="info-val">${courseName}</span>
         </div>
+        <div class="info-row">
+          <span class="info-label">Status</span>
+          <span class="info-val" style="color: ${isCourseOngoing ? '#d97706' : '#16a34a'};">
+            ${isCourseOngoing ? `In Progress (Ends ${completionDateFormatted})` : 'Verified & Completed'}
+          </span>
+        </div>
       </div>
 
+      ${isCourseOngoing ? `
+      <div style="padding: 28px 20px; background: #fffbeb; border: 1.5px solid #fde68a; border-radius: 18px; margin-bottom: 22px; text-align: center;">
+        <div style="font-size: 34px; margin-bottom: 10px;">⏳</div>
+        <div style="font-weight: 800; font-size: 16px; color: #92400e; margin-bottom: 6px;">Course Currently In Progress</div>
+        <div style="font-size: 13.5px; color: #b45309; line-height: 1.55;">This student is currently enrolled in the <strong>${courseName}</strong> training program. The official verifiable certificate will be issued after <strong>${completionDateFormatted}</strong>.</div>
+      </div>
+
+      <div style="width: 100%; background: #f1f5f9; color: #94a3b8; font-size: 13.5px; font-weight: 700; padding: 14px; border-radius: 16px; margin-bottom: 12px; text-align: center; border: 1px dashed #cbd5e1;">
+        🔒 Certificate Download Unlocks On ${completionDateFormatted}
+      </div>
+      ` : `
       <div class="preview-wrap">
         <img src="${certImageUrl}" alt="${studentName} Certificate Preview" class="preview-img" />
       </div>
@@ -337,12 +416,14 @@ router.get("/download-certificate", async (req, res) => {
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
         View Full Certificate
       </a>
+      `}
       
       <a href="https://rizeworldinstitute.in" target="_blank" class="footer-link">
         © RizeWorld Institute • rizeworldinstitute.in
       </a>
     </div>
   </div>
+
 </body>
 </html>`;
 
