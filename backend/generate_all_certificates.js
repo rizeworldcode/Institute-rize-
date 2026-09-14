@@ -30,26 +30,69 @@ function getPronoun(name) {
   return 'His';
 }
 
-// Clean course display name
-function getCourseName(student) {
-  if (Array.isArray(student.selected_course_name) && student.selected_course_name.length > 0) {
-    return student.selected_course_name.join(' + ');
+// Extract distinct course list for student
+function getStudentCourseList(student) {
+  const rawList = [];
+  if (Array.isArray(student.selected_course_name)) {
+    rawList.push(...student.selected_course_name);
+  } else if (student.selected_course_name) {
+    rawList.push(student.selected_course_name);
   }
-  if (student.selected_course_name && typeof student.selected_course_name === 'string') {
-    return student.selected_course_name;
-  }
-  if (student.admissions && student.admissions.length > 0 && student.admissions[0].courses && student.admissions[0].courses.length > 0) {
-    return student.admissions[0].courses.join(' + ');
-  }
-  return 'Creative Pro (Graphic + Video)';
-}
 
-function getDuration(student) {
-  if (student.course_duration) return student.course_duration;
-  if (student.admissions && student.admissions[0] && student.admissions[0].courseDuration) {
-    return student.admissions[0].courseDuration;
+  if (student.admissions && student.admissions.length > 0) {
+    for (const adm of student.admissions) {
+      if (Array.isArray(adm.courses)) {
+        rawList.push(...adm.courses);
+      }
+    }
   }
-  return '3-month';
+
+  // Deduplicate and normalize
+  const courses = [];
+  for (const item of rawList) {
+    if (!item) continue;
+    const trimmed = item.trim();
+    if (!courses.includes(trimmed)) courses.push(trimmed);
+  }
+
+  if (courses.length === 0) {
+    courses.push('Creative Pro (Graphic + Video)');
+  }
+
+  return courses.map(c => {
+    const lc = c.toLowerCase();
+    let title = c;
+    let slug = 'Course';
+    let duration = '2-month';
+
+    if (lc.includes('seo') && !lc.includes('marketing') && !lc.includes('smo')) {
+      title = 'SEO (Search Engine Optimization)';
+      slug = 'SEO';
+      duration = '1-month';
+    } else if (lc.includes('creative pro')) {
+      title = 'Creative Pro (Graphic + Video)';
+      slug = 'Creative_Pro';
+      duration = '2-month';
+    } else if (lc.includes('marketing pro')) {
+      title = 'Marketing Pro (SEO + SMO + Performance)';
+      slug = 'Marketing_Pro';
+      duration = '2-month';
+    } else if (lc.includes('master course')) {
+      title = 'Master Course Program in AI & Digital Marketing';
+      slug = 'Master_Course';
+      duration = '3-month';
+    } else if (lc.includes('web development')) {
+      title = 'Web Development';
+      slug = 'Web_Development';
+      duration = '3-month';
+    } else {
+      title = c;
+      slug = c.replace(/[^a-zA-Z0-9]/g, '_');
+      duration = '2-month';
+    }
+
+    return { title, slug, duration };
+  });
 }
 
 function getStartDate(student) {
@@ -77,9 +120,20 @@ async function run() {
   const dirMain = 'd:/desktop/Aman/rizeworld institute/rizeworld institute/rizeworld institute/frontend-main/public/certificates';
   const dirBackend = 'd:/desktop/Aman/rizeworld institute/rizeworld institute/rizeworld institute/backend/public/uploads/certificates';
 
+  // Clean old/duplicate certificate files
   [dirAdmin, dirMain, dirBackend].forEach(d => {
-    if (!fs.existsSync(d)) fs.mkdirSync(d, { recursive: true });
+    if (fs.existsSync(d)) {
+      const existing = fs.readdirSync(d);
+      for (const f of existing) {
+        if (f.startsWith('Certificate_') && f.endsWith('.png')) {
+          fs.unlinkSync(path.join(d, f));
+        }
+      }
+    } else {
+      fs.mkdirSync(d, { recursive: true });
+    }
   });
+  console.log('Cleaned old and duplicate certificates.');
 
   const students = await student_model.find({});
   console.log(`Found ${students.length} students to generate certificates for.`);
@@ -87,25 +141,33 @@ async function run() {
   const tempHtmlPath = path.join(__dirname, 'temp_batch_cert.html');
   const tempPngPath = path.join(__dirname, 'temp_batch_cert.png');
 
+  let totalGeneratedCount = 0;
+
   for (let i = 0; i < students.length; i++) {
     const s = students[i];
-    const studentId = s.student_ID || `RW-${Date.now()}`;
+    const studentId = (s.student_ID || `RW-${Date.now()}`).trim();
     const studentName = (s.student_name || 'Student').trim();
-    const course = getCourseName(s);
-    const duration = getDuration(s);
+    const courseList = getStudentCourseList(s);
     const date = getStartDate(s);
     const pronoun = getPronoun(studentName);
 
-    console.log(`\n[${i + 1}/${students.length}] Generating certificate for: ${studentName} (${studentId})...`);
+    console.log(`\n[${i + 1}/${students.length}] ${studentName} (${studentId}) has ${courseList.length} course(s):`);
 
-    // Generate dynamic QR code
-    const qrDataUrl = await QRCode.toDataURL(`https://institute-rize.onrender.com/download-certificate?id=${encodeURIComponent(studentId)}`, {
-      errorCorrectionLevel: 'M',
-      margin: 2,
-      color: { dark: '#000000', light: '#ffffff' }
-    });
+    const studentGeneratedCerts = [];
 
-    const htmlContent = `<!DOCTYPE html>
+    for (let cIdx = 0; cIdx < courseList.length; cIdx++) {
+      const courseObj = courseList[cIdx];
+      console.log(`   -> Generating certificate for course: ${courseObj.title} (${courseObj.duration})...`);
+
+      // Dynamic QR code with id and course query
+      const targetUrl = `https://institute-rize.onrender.com/download-certificate?id=${encodeURIComponent(studentId)}&course=${encodeURIComponent(courseObj.title)}`;
+      const qrDataUrl = await QRCode.toDataURL(targetUrl, {
+        errorCorrectionLevel: 'M',
+        margin: 2,
+        color: { dark: '#000000', light: '#ffffff' }
+      });
+
+      const htmlContent = `<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -231,7 +293,7 @@ async function run() {
       letter-spacing: 0.04em;
     }
 
-    /* New Signature (bottom-right) */
+    /* New Signature (bottom-right shifted left) */
     .sign-img {
       position: absolute;
       top: 952px;
@@ -251,7 +313,7 @@ async function run() {
   <div class="content-layer">
     <div class="student-name">${studentName}</div>
     <p class="description-text">
-      has successfully completed the <strong>${course}</strong> program at <strong>RizeWorld Institute of AI & Digital Marketing</strong>, a <strong>${duration}</strong> course, joined on <strong>${date}</strong>. ${pronoun} dedication and commitment to the learning process are truly commendable.
+      has successfully completed the <strong>${courseObj.title}</strong> program at <strong>RizeWorld Institute of AI & Digital Marketing</strong>, a <strong>${courseObj.duration}</strong> course, joined on <strong>${date}</strong>. ${pronoun} dedication and commitment to the learning process are truly commendable.
     </p>
 
     <div class="qr-card">
@@ -264,66 +326,61 @@ async function run() {
 </body>
 </html>`;
 
-    fs.writeFileSync(tempHtmlPath, htmlContent);
+      fs.writeFileSync(tempHtmlPath, htmlContent);
 
-    const cmd = `"${chromePath}" --headless --disable-gpu --screenshot="${tempPngPath}" --window-size=2000,1414 --hide-scrollbars "file:///${tempHtmlPath.replace(/\\\\/g, '/')}"`;
-    execSync(cmd);
+      const cmd = `"${chromePath}" --headless --disable-gpu --screenshot="${tempPngPath}" --window-size=2000,1414 --hide-scrollbars "file:///${tempHtmlPath.replace(/\\/g, '/')}"`;
+      execSync(cmd);
 
-    // Save to all target locations
-    const cleanId = studentId.replace(/[^a-zA-Z0-9-_]/g, '_');
-    const safeName = studentName.replace(/[^a-zA-Z0-9-_]/g, '_');
-    const fileName = `Certificate_${cleanId}_${safeName}.png`;
-    const simpleIdFileName = `Certificate_${cleanId}.png`;
+      // Unique file name per course
+      const cleanId = studentId.replace(/[^a-zA-Z0-9-_]/g, '_');
+      const safeName = studentName.replace(/[^a-zA-Z0-9-_]/g, '_');
+      const fileName = `Certificate_${cleanId}_${safeName}_${courseObj.slug}.png`;
 
-    const outPathAdmin = path.join(dirAdmin, fileName);
-    const outPathAdminSimple = path.join(dirAdmin, simpleIdFileName);
-    const outPathMain = path.join(dirMain, fileName);
-    const outPathMainSimple = path.join(dirMain, simpleIdFileName);
-    const outPathBackend = path.join(dirBackend, fileName);
-    const outPathBackendSimple = path.join(dirBackend, simpleIdFileName);
+      const outPathAdmin = path.join(dirAdmin, fileName);
+      const outPathMain = path.join(dirMain, fileName);
+      const outPathBackend = path.join(dirBackend, fileName);
 
-    const renderedBuffer = fs.readFileSync(tempPngPath);
+      const renderedBuffer = fs.readFileSync(tempPngPath);
 
-    fs.writeFileSync(outPathAdmin, renderedBuffer);
-    fs.writeFileSync(outPathAdminSimple, renderedBuffer);
-    fs.writeFileSync(outPathMain, renderedBuffer);
-    fs.writeFileSync(outPathMainSimple, renderedBuffer);
-    fs.writeFileSync(outPathBackend, renderedBuffer);
-    fs.writeFileSync(outPathBackendSimple, renderedBuffer);
+      fs.writeFileSync(outPathAdmin, renderedBuffer);
+      fs.writeFileSync(outPathMain, renderedBuffer);
+      fs.writeFileSync(outPathBackend, renderedBuffer);
 
-    // Update student in database
-    const certPublicUrl = `/certificates/${fileName}`;
-    s.certificate_photo = certPublicUrl;
-    if (!s.certificates) s.certificates = [];
-    s.certificates = [{
-      course_name: course,
-      courseName: course,
-      certificate_path: certPublicUrl,
-      certificatePath: certPublicUrl,
-      issued_at: new Date(),
-      issuedAt: new Date()
-    }];
-    await s.save();
+      const certPublicUrl = `/certificates/${fileName}`;
+      studentGeneratedCerts.push({
+        course_name: courseObj.title,
+        courseName: courseObj.title,
+        certificate_path: certPublicUrl,
+        certificatePath: certPublicUrl,
+        issued_at: new Date(),
+        issuedAt: new Date()
+      });
 
-    console.log(`✓ Saved certificate to:`);
-    console.log(`  - frontend-admin/public/certificates/${fileName}`);
-    console.log(`  - DB record updated with certificate_photo: ${certPublicUrl}`);
+      console.log(`      ✓ Saved: frontend-admin/public/certificates/${fileName}`);
+      totalGeneratedCount++;
 
-    // If Punit Sharma, also update COURSE CERTIFICATE.png in hero
-    if (studentId === 'RW-6678') {
-      const heroAdmin = 'd:/desktop/Aman/rizeworld institute/rizeworld institute/rizeworld institute/frontend-admin/public/hero/COURSE CERTIFICATE.png';
-      const heroMain = 'd:/desktop/Aman/rizeworld institute/rizeworld institute/rizeworld institute/frontend-main/public/hero/COURSE CERTIFICATE.png';
-      fs.writeFileSync(heroAdmin, renderedBuffer);
-      fs.writeFileSync(heroMain, renderedBuffer);
-      console.log(`  - Also updated default hero/COURSE CERTIFICATE.png for Punit Sharma`);
+      // If Punit Sharma and Creative Pro, also update hero/COURSE CERTIFICATE.png
+      if (studentId === 'RW-6678' && courseObj.slug === 'Creative_Pro') {
+        const heroAdmin = 'd:/desktop/Aman/rizeworld institute/rizeworld institute/rizeworld institute/frontend-admin/public/hero/COURSE CERTIFICATE.png';
+        const heroMain = 'd:/desktop/Aman/rizeworld institute/rizeworld institute/rizeworld institute/frontend-main/public/hero/COURSE CERTIFICATE.png';
+        fs.writeFileSync(heroAdmin, renderedBuffer);
+        fs.writeFileSync(heroMain, renderedBuffer);
+        console.log(`      ✓ Updated hero/COURSE CERTIFICATE.png for Punit Sharma`);
+      }
     }
+
+    // Update student in MongoDB
+    s.certificates = studentGeneratedCerts;
+    s.certificate_photo = studentGeneratedCerts[0].certificate_path;
+    await s.save();
+    console.log(`   ✓ DB updated with ${studentGeneratedCerts.length} certificates for ${studentName}`);
   }
 
   // Cleanup temp files
   if (fs.existsSync(tempHtmlPath)) fs.unlinkSync(tempHtmlPath);
   if (fs.existsSync(tempPngPath)) fs.unlinkSync(tempPngPath);
 
-  console.log('\nAll certificates successfully generated and saved into public folders!');
+  console.log(`\nComplete! Total ${totalGeneratedCount} individual course certificates generated and saved without duplicates!`);
   process.exit(0);
 }
 
