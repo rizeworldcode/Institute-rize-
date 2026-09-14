@@ -135,8 +135,8 @@ async function run() {
   });
   console.log('Cleaned old and duplicate certificates.');
 
-  const students = await student_model.find({});
-  console.log(`Found ${students.length} students to generate certificates for.`);
+  const students = await student_model.find({ is_deleted: { $ne: true } });
+  console.log(`Found ${students.length} active students to generate certificates for.`);
 
   const tempHtmlPath = path.join(__dirname, 'temp_batch_cert.html');
   const tempPngPath = path.join(__dirname, 'temp_batch_cert.png');
