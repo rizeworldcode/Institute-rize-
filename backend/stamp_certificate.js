@@ -4,10 +4,23 @@ const QRCode = require('qrcode');
 const { Jimp, loadFont, HorizontalAlign } = require('jimp');
 
 async function stampCertificate(options = {}) {
-  // Use the newly provided template COURSE CERTIFICATE.png
+  const originalBackupPath = 'd:/desktop/Aman/rizeworld institute/rizeworld institute/rizeworld institute/frontend-admin/public/hero/COURSE CERTIFICATE.original.png';
   const defaultInputPath = 'd:/desktop/Aman/rizeworld institute/rizeworld institute/rizeworld institute/frontend-admin/public/hero/COURSE CERTIFICATE.png';
-  const inputCertPath = options.inputPath || (fs.existsSync(defaultInputPath) ? defaultInputPath : 'd:/desktop/Aman/rizeworld institute/rizeworld institute/rizeworld institute/frontend-admin/public/hero/White and Gold Simple Elegant Appreciation Certificate.original.jpeg');
+  
+  // Choose input: prefer clean original backup, then defaultInput, then old template
+  let inputCertPath = options.inputPath;
+  if (!inputCertPath) {
+    if (fs.existsSync(originalBackupPath)) {
+      inputCertPath = originalBackupPath;
+    } else if (fs.existsSync(defaultInputPath)) {
+      inputCertPath = defaultInputPath;
+    } else {
+      inputCertPath = 'd:/desktop/Aman/rizeworld institute/rizeworld institute/rizeworld institute/frontend-admin/public/hero/White and Gold Simple Elegant Appreciation Certificate.original.jpeg';
+    }
+  }
 
+  const outputCourseCertAdminPath = 'd:/desktop/Aman/rizeworld institute/rizeworld institute/rizeworld institute/frontend-admin/public/hero/COURSE CERTIFICATE.png';
+  const outputCourseCertMainPath = 'd:/desktop/Aman/rizeworld institute/rizeworld institute/rizeworld institute/frontend-main/public/hero/COURSE CERTIFICATE.png';
   const outputAdminCertPath = 'd:/desktop/Aman/rizeworld institute/rizeworld institute/rizeworld institute/frontend-admin/public/hero/White and Gold Simple Elegant Appreciation Certificate.jpg.jpeg';
   const outputMainHeroCertPath = 'd:/desktop/Aman/rizeworld institute/rizeworld institute/rizeworld institute/frontend-main/public/hero/White and Gold Simple Elegant Appreciation Certificate.jpg.jpeg';
   const outputMainPublicCertPath = 'd:/desktop/Aman/rizeworld institute/rizeworld institute/rizeworld institute/frontend-main/public/certificate/RizeWorld_Certificate_Punit_Sharma.jpg';
@@ -102,30 +115,29 @@ async function stampCertificate(options = {}) {
     return options.outputPath;
   }
 
-  // Save to all default active certificate paths
-  await certImage.write(outputAdminCertPath);
-  console.log('Saved to frontend-admin:', outputAdminCertPath);
+  // 1. Save directly to COURSE CERTIFICATE.png in frontend-admin
+  await certImage.write(outputCourseCertAdminPath);
+  console.log('Saved directly to COURSE CERTIFICATE.png in frontend-admin:', outputCourseCertAdminPath);
 
-  const dirMainHero = path.dirname(outputMainHeroCertPath);
+  // 2. Save directly to COURSE CERTIFICATE.png in frontend-main
+  const dirMainHero = path.dirname(outputCourseCertMainPath);
   if (!fs.existsSync(dirMainHero)) fs.mkdirSync(dirMainHero, { recursive: true });
+  await certImage.write(outputCourseCertMainPath);
+  console.log('Saved directly to COURSE CERTIFICATE.png in frontend-main:', outputCourseCertMainPath);
+
+  // 3. Save to all existing paths for backward compatibility
+  await certImage.write(outputAdminCertPath);
   await certImage.write(outputMainHeroCertPath);
-  console.log('Saved to frontend-main hero:', outputMainHeroCertPath);
 
   const dirMainCert = path.dirname(outputMainPublicCertPath);
   if (!fs.existsSync(dirMainCert)) fs.mkdirSync(dirMainCert, { recursive: true });
   await certImage.write(outputMainPublicCertPath);
-  console.log('Saved to frontend-main certificate folder:', outputMainPublicCertPath);
 
   const dirBackendUpload = path.dirname(outputBackendUploadPath);
   if (!fs.existsSync(dirBackendUpload)) fs.mkdirSync(dirBackendUpload, { recursive: true });
   await certImage.write(outputBackendUploadPath);
-  console.log('Saved to backend uploads folder:', outputBackendUploadPath);
 
-  // Also keep backup of raw template in backend/public/templates
-  const dirTemplates = path.join(__dirname, 'public/templates');
-  if (!fs.existsSync(dirTemplates)) fs.mkdirSync(dirTemplates, { recursive: true });
-  fs.copyFileSync(inputCertPath, path.join(dirTemplates, 'COURSE_CERTIFICATE.png'));
-  console.log('Saved raw template to backend templates folder');
+  console.log('All certificate files updated successfully with QR scanner!');
 }
 
 module.exports = { stampCertificate };
