@@ -144,7 +144,7 @@ async function run() {
 
   const chromePath = 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe';
   const baseCertPath = 'd:/desktop/Aman/rizeworld institute/rizeworld institute/rizeworld institute/frontend-admin/public/hero/COURSE CERTIFICATE.original.png';
-  const signCroppedPath = 'd:/desktop/Aman/rizeworld institute/rizeworld institute/rizeworld institute/frontend-admin/public/hero/sign_cropped.png';
+  const signCroppedPath = 'd:/desktop/Aman/rizeworld institute/rizeworld institute/rizeworld institute/frontend-admin/public/hero/sign_with_line.png';
 
   const baseCertBase64 = `data:image/png;base64,${fs.readFileSync(baseCertPath).toString('base64')}`;
   const signBase64 = `data:image/png;base64,${fs.readFileSync(signCroppedPath).toString('base64')}`;
@@ -258,10 +258,10 @@ async function run() {
     }
     .mask-sign {
       position: absolute;
-      top: 920px;
-      left: 1280px;
-      width: 540px;
-      height: 143px;
+      top: 960px;
+      left: 1300px;
+      width: 440px;
+      height: 160px;
       background: #ffffff;
       z-index: 2;
     }
@@ -335,12 +335,12 @@ async function run() {
       letter-spacing: 0.04em;
     }
 
-    /* New Signature (bottom-right shifted left) */
+    /* Signature with Golden Line & Founder (bottom-right shifted left) */
     .sign-img {
       position: absolute;
-      top: 952px;
-      left: 1330px;
-      width: 315px;
+      top: 970px;
+      left: 1315px;
+      width: 350px;
       height: auto;
       object-fit: contain;
     }

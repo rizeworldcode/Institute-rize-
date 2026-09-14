@@ -151,7 +151,7 @@ function getCourseCompletionDate(student, courseObj) {
 async function renderCertificate(student, courseObj) {
   const chromePath = getChromePath();
   const baseCertPath = path.join(__dirname, '../../../frontend-admin/public/hero/COURSE CERTIFICATE.original.png');
-  const signCroppedPath = path.join(__dirname, '../../../frontend-admin/public/hero/sign_cropped.png');
+  const signCroppedPath = path.join(__dirname, '../../../frontend-admin/public/hero/sign_with_line.png');
 
   if (!fs.existsSync(baseCertPath) || !fs.existsSync(signCroppedPath)) {
     throw new Error('Base certificate or signature asset not found');
@@ -229,10 +229,10 @@ async function renderCertificate(student, courseObj) {
     }
     .mask-sign {
       position: absolute;
-      top: 920px;
-      left: 1280px;
+      top: 960px;
+      left: 1300px;
       width: 440px;
-      height: 170px;
+      height: 160px;
       background: #ffffff;
       z-index: 2;
     }
@@ -303,11 +303,12 @@ async function renderCertificate(student, courseObj) {
       letter-spacing: 0.04em;
     }
 
+    /* Signature with Golden Line & Founder (bottom-right shifted left) */
     .sign-img {
       position: absolute;
-      top: 952px;
-      left: 1330px;
-      width: 315px;
+      top: 970px;
+      left: 1315px;
+      width: 350px;
       height: auto;
       object-fit: contain;
     }
