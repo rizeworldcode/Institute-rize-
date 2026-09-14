@@ -48,7 +48,7 @@ router.get("/api/certificate/file", (req, res) => {
     return res.status(404).send("Certificate image not found");
 });
 
-// 3. QR Code Scanner Landing & Verification Page (Pure clean HTML - NO auto-redirects/iframes that blank mobile WebViews)
+// 3. QR Code Scanner Landing & Verification Page (Branded to match RizeWorld website & Admin Panel)
 router.get("/download-certificate", (req, res) => {
     if (req.query.raw === "1" || req.query.download === "1") {
         const certPath = getCertificateFilePath();
@@ -70,91 +70,111 @@ router.get("/download-certificate", (req, res) => {
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
       font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background: #090d16;
-      color: #f8fafc;
+      background-color: #f8fafc;
+      background-image: 
+        radial-gradient(at 0% 0%, rgba(59, 130, 246, 0.08) 0px, transparent 50%),
+        radial-gradient(at 100% 100%, rgba(99, 102, 241, 0.06) 0px, transparent 50%);
+      color: #0f172a;
       min-height: 100vh;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      padding: 24px 14px;
+      padding: 32px 16px;
       -webkit-font-smoothing: antialiased;
     }
     .wrapper {
-      max-width: 520px;
+      max-width: 540px;
       width: 100%;
     }
+    .brand-header {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+    .brand-logo {
+      height: 48px;
+      max-width: 220px;
+      object-fit: contain;
+      margin-bottom: 4px;
+    }
     .card {
-      background: #131b2e;
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      border-radius: 26px;
-      padding: 28px 20px;
-      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6);
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 28px;
+      padding: 32px 22px;
+      box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.06), 0 1px 3px rgba(0, 0, 0, 0.03);
       text-align: center;
+    }
+    .badge-container {
+      margin-bottom: 14px;
     }
     .badge {
       display: inline-flex;
       align-items: center;
       gap: 6px;
-      background: rgba(16, 185, 129, 0.15);
-      color: #10b981;
-      border: 1px solid rgba(16, 185, 129, 0.3);
+      background: #ecfdf5;
+      color: #047857;
+      border: 1px solid #a7f3d0;
       padding: 6px 14px;
       border-radius: 9999px;
       font-size: 11px;
       font-weight: 800;
       letter-spacing: 0.06em;
       text-transform: uppercase;
-      margin-bottom: 16px;
     }
     .badge svg { width: 14px; height: 14px; fill: currentColor; }
     .institute-title {
       font-size: 12px;
-      color: #94a3b8;
-      font-weight: 700;
-      letter-spacing: 0.04em;
+      color: #2563eb;
+      font-weight: 800;
+      letter-spacing: 0.05em;
       text-transform: uppercase;
-      margin-bottom: 4px;
+      margin-bottom: 6px;
     }
     .cert-heading {
-      font-size: 24px;
+      font-size: 26px;
       font-weight: 800;
-      color: #ffffff;
-      margin-bottom: 18px;
+      color: #0f172a;
+      margin-bottom: 20px;
       letter-spacing: -0.02em;
     }
     .info-box {
-      background: rgba(9, 13, 22, 0.7);
-      border: 1px solid rgba(255, 255, 255, 0.06);
-      border-radius: 18px;
-      padding: 16px;
-      margin-bottom: 20px;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 20px;
+      padding: 16px 20px;
+      margin-bottom: 22px;
       text-align: left;
     }
     .info-row {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 7px 0;
+      padding: 9px 0;
       font-size: 13px;
     }
     .info-row:not(:last-child) {
-      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+      border-bottom: 1px solid #edf2f7;
     }
-    .info-label { color: #94a3b8; font-weight: 500; }
-    .info-val { color: #ffffff; font-weight: 700; }
+    .info-label { color: #64748b; font-weight: 600; }
+    .info-val { color: #0f172a; font-weight: 800; }
     .preview-wrap {
-      border-radius: 16px;
+      border-radius: 18px;
       overflow: hidden;
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      margin-bottom: 22px;
-      background: #000;
-      box-shadow: 0 10px 25px -5px rgba(0,0,0,0.5);
+      border: 1px solid #e2e8f0;
+      margin-bottom: 24px;
+      background: #ffffff;
+      box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.05);
+      padding: 6px;
     }
     .preview-img {
       width: 100%;
       height: auto;
       display: block;
+      border-radius: 14px;
+      border: 1px solid #f1f5f9;
     }
     .btn-download {
       display: flex;
@@ -162,59 +182,68 @@ router.get("/download-certificate", (req, res) => {
       justify-content: center;
       gap: 10px;
       width: 100%;
-      background: linear-gradient(135deg, #2563eb, #4f46e5);
+      background: linear-gradient(135deg, #2563eb 0%, #4f46e5 100%);
       color: #ffffff;
       font-size: 15px;
       font-weight: 800;
-      padding: 16px 20px;
+      padding: 16px 24px;
       border-radius: 16px;
       text-decoration: none;
-      box-shadow: 0 10px 25px -5px rgba(79, 70, 229, 0.4);
+      box-shadow: 0 10px 25px -5px rgba(37, 99, 235, 0.35);
       margin-bottom: 12px;
       cursor: pointer;
       border: none;
-      transition: transform 0.15s, opacity 0.15s;
+      transition: transform 0.15s, box-shadow 0.15s;
     }
     .btn-download:active { transform: scale(0.98); }
+    .btn-download:hover { box-shadow: 0 12px 28px -5px rgba(37, 99, 235, 0.45); }
     .btn-view {
       display: flex;
       align-items: center;
       justify-content: center;
       gap: 8px;
       width: 100%;
-      background: rgba(255, 255, 255, 0.05);
-      color: #cbd5e1;
-      font-size: 13px;
+      background: #ffffff;
+      color: #334155;
+      font-size: 14px;
       font-weight: 700;
-      padding: 12px 18px;
-      border-radius: 14px;
+      padding: 14px 20px;
+      border-radius: 16px;
       text-decoration: none;
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      margin-bottom: 14px;
-      transition: background 0.15s;
+      border: 1.5px solid #e2e8f0;
+      margin-bottom: 16px;
+      transition: background 0.15s, border-color 0.15s;
     }
-    .btn-view:hover { background: rgba(255, 255, 255, 0.09); }
+    .btn-view:hover { background: #f8fafc; border-color: #cbd5e1; }
     .toast {
       font-size: 12px;
-      color: #94a3b8;
-      margin-top: 8px;
+      color: #64748b;
+      margin-top: 4px;
     }
     .footer-link {
       font-size: 12px;
       color: #64748b;
+      font-weight: 600;
       text-decoration: none;
-      margin-top: 14px;
+      margin-top: 18px;
       display: inline-block;
+      transition: color 0.15s;
     }
-    .footer-link:hover { color: #94a3b8; }
+    .footer-link:hover { color: #2563eb; }
   </style>
 </head>
 <body>
   <div class="wrapper">
+    <div class="brand-header">
+      <img src="https://rizeworldinstitute.in/logo/RIZE%20LOGO%20HORI%20PNG.png" alt="RizeWorld Institute" class="brand-logo" onerror="this.style.display='none'" />
+    </div>
+    
     <div class="card">
-      <div class="badge">
-        <svg viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
-        Official Credential Verified
+      <div class="badge-container">
+        <div class="badge">
+          <svg viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
+          Official Credential Verified
+        </div>
       </div>
 
       <div class="institute-title">RizeWorld Institute of AI & Digital Marketing</div>
@@ -222,16 +251,19 @@ router.get("/download-certificate", (req, res) => {
 
       <div class="info-box">
         <div class="info-row">
-          <span class="info-label">Student Name:</span>
+          <span class="info-label">Student Name</span>
           <span class="info-val">Punit Sharma</span>
         </div>
         <div class="info-row">
-          <span class="info-label">Program:</span>
-          <span class="info-val" style="color: #60a5fa;">Creative Pro (Graphic + Video)</span>
+          <span class="info-label">Program</span>
+          <span class="info-val" style="color: #2563eb;">Creative Pro (Graphic + Video)</span>
         </div>
         <div class="info-row">
-          <span class="info-label">Verification:</span>
-          <span class="info-val" style="color: #34d399;">100% Authentic & Verified</span>
+          <span class="info-label">Credential Status</span>
+          <span class="info-val" style="color: #059669; display: flex; align-items: center; gap: 4px;">
+            <svg width="14" height="14" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
+            Authentic & Verified
+          </span>
         </div>
       </div>
 
@@ -249,7 +281,7 @@ router.get("/download-certificate", (req, res) => {
         View Full Certificate
       </a>
 
-      <p class="toast">Tap button above to save certificate to your gallery/downloads.</p>
+      <p class="toast">Tap button above to save official certificate to your device.</p>
       
       <a href="https://rizeworldinstitute.in" target="_blank" class="footer-link">
         © RizeWorld Institute • rizeworldinstitute.in
