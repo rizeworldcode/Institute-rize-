@@ -37,7 +37,7 @@ router.get("/api/certificate/download", (req, res) => {
     return res.status(404).json({ success: false, message: "Certificate file not found" });
 });
 
-// 2. Direct inline image view endpoint (for <img> tags or full screen viewing)
+// 2. Direct inline image view endpoint
 router.get("/api/certificate/file", (req, res) => {
     const certPath = getCertificateFilePath();
     if (certPath) {
@@ -48,7 +48,7 @@ router.get("/api/certificate/file", (req, res) => {
     return res.status(404).send("Certificate image not found");
 });
 
-// 3. QR Code Scanner Landing & Verification Page
+// 3. QR Code Scanner Landing & Verification Page (Pure clean HTML - NO auto-redirects/iframes that blank mobile WebViews)
 router.get("/download-certificate", (req, res) => {
     if (req.query.raw === "1" || req.query.download === "1") {
         const certPath = getCertificateFilePath();
@@ -96,9 +96,9 @@ router.get("/download-certificate", (req, res) => {
       display: inline-flex;
       align-items: center;
       gap: 6px;
-      background: rgba(16, 185, 129, 0.12);
+      background: rgba(16, 185, 129, 0.15);
       color: #10b981;
-      border: 1px solid rgba(16, 185, 129, 0.25);
+      border: 1px solid rgba(16, 185, 129, 0.3);
       padding: 6px 14px;
       border-radius: 9999px;
       font-size: 11px;
@@ -196,7 +196,7 @@ router.get("/download-certificate", (req, res) => {
     .btn-view:hover { background: rgba(255, 255, 255, 0.09); }
     .toast {
       font-size: 12px;
-      color: #64748b;
+      color: #94a3b8;
       margin-top: 8px;
     }
     .footer-link {
@@ -245,7 +245,7 @@ router.get("/download-certificate", (req, res) => {
       </a>
 
       <a href="/api/certificate/file" target="_blank" class="btn-view">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
         View Full Certificate
       </a>
 
@@ -256,20 +256,6 @@ router.get("/download-certificate", (req, res) => {
       </a>
     </div>
   </div>
-
-  <script>
-    // Automatic download trigger via hidden iframe (safe for mobile and desktop)
-    window.addEventListener('load', function() {
-      setTimeout(function() {
-        try {
-          var iframe = document.createElement('iframe');
-          iframe.style.display = 'none';
-          iframe.src = '/api/certificate/download';
-          document.body.appendChild(iframe);
-        } catch(e) {}
-      }, 800);
-    });
-  </script>
 </body>
 </html>`;
 
