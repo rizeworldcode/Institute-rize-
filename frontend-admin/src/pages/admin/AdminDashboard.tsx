@@ -420,10 +420,17 @@ export default function AdminDashboard() {
           
           // Determine overall fees status
           let overallStatus: "Clear" | "Pending" | "Partial" = "Pending";
-          const allClear = admissions.every(adm => adm.feesStatus === "Clear");
-          const anyPaid = admissions.some(adm => adm.totalPaidFee > 0);
-          if (allClear) overallStatus = "Clear";
-          else if (anyPaid) overallStatus = "Partial";
+          const allClear = admissions.length > 0 
+            ? admissions.every(adm => adm.feesStatus === "Clear" || Number(adm.pendingFee) <= 0)
+            : (totalPendingFees <= 0 && totalFees > 0);
+          const anyPaid = admissions.some(adm => Number(adm.totalPaidFee) > 0) || totalPaidFees > 0;
+          if (allClear || (totalPendingFees <= 0 && totalFees > 0)) {
+            overallStatus = "Clear";
+          } else if (anyPaid) {
+            overallStatus = "Partial";
+          } else {
+            overallStatus = "Pending";
+          }
           
           // Collect all unique courses
           const allCourses = [...new Set(admissions.flatMap(adm => adm.courses))];
@@ -771,10 +778,17 @@ export default function AdminDashboard() {
           
           // Determine overall fees status
           let overallStatus: "Clear" | "Pending" | "Partial" = "Pending";
-          const allClear = admissions.every(adm => adm.feesStatus === "Clear");
-          const anyPaid = admissions.some(adm => adm.totalPaidFee > 0);
-          if (allClear) overallStatus = "Clear";
-          else if (anyPaid) overallStatus = "Partial";
+          const allClear = admissions.length > 0 
+            ? admissions.every(adm => adm.feesStatus === "Clear" || Number(adm.pendingFee) <= 0)
+            : (totalPendingFees <= 0 && totalFees > 0);
+          const anyPaid = admissions.some(adm => Number(adm.totalPaidFee) > 0) || totalPaidFees > 0;
+          if (allClear || (totalPendingFees <= 0 && totalFees > 0)) {
+            overallStatus = "Clear";
+          } else if (anyPaid) {
+            overallStatus = "Partial";
+          } else {
+            overallStatus = "Pending";
+          }
           
           // Collect all unique courses
           const allCourses = [...new Set(admissions.flatMap(adm => adm.courses))];
@@ -924,7 +938,12 @@ export default function AdminDashboard() {
   const filteredStudents = useMemo(() => {
     return students.filter(s => {
       const matchesSearch = s.id.toLowerCase().includes(search.toLowerCase()) || s.name.toLowerCase().includes(search.toLowerCase());
-      const matchesStatus = statusFilter === "All" || s.feesStatus === statusFilter;
+      let matchesStatus = true;
+      if (statusFilter === "Clear") {
+        matchesStatus = Number(s.pendingFees) <= 0 && s.feesStatus !== "Pending";
+      } else if (statusFilter === "Pending") {
+        matchesStatus = Number(s.pendingFees) > 0 || s.feesStatus === "Pending" || s.feesStatus === "Partial";
+      }
       return matchesSearch && matchesStatus;
     });
   }, [students, search, statusFilter]);
@@ -1546,7 +1565,16 @@ export default function AdminDashboard() {
                                   </thead>
                                   <tbody className="divide-y divide-neutral-100">
                                      {allStudentsData
-                                        .filter(row => detailStatusFilter === "All" || row.feesStatus === detailStatusFilter)
+                                        .filter(row => {
+                                          if (detailStatusFilter === "All") return true;
+                                          if (detailStatusFilter === "Clear") {
+                                            return Number(row.pendingFees) <= 0 && row.feesStatus !== "Pending";
+                                          }
+                                          if (detailStatusFilter === "Pending") {
+                                            return Number(row.pendingFees) > 0 || row.feesStatus === "Pending" || row.feesStatus === "Partial";
+                                          }
+                                          return row.feesStatus === detailStatusFilter;
+                                        })
                                         .map((row, idx) => (
                                         <tr key={idx} className="hover:bg-neutral-50/50 transition-colors">
                                            <td className="px-3 py-3 text-sm font-mono font-semibold text-blue-600">{row.id}</td>
