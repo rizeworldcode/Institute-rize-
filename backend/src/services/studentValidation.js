@@ -10,23 +10,40 @@ exports.student_login = async (req, res) => {
             // frontend may send 'password' or 'student_Password'
             const providedPassword = student_Password || password;
             console.log(providedPassword);
-            if (!student_ID || !providedPassword) {
-                return {
-                    message: "Student ID and password are required",
-                    success: false
-                }
+            const cleanId = (student_ID || '').trim();
+        const cleanPassword = (providedPassword || '').trim();
+        if (!cleanId || !cleanPassword) {
+            return {
+                message: "Student ID and password are required",
+                success: false
             }
-        const validStudent = await Tc_model.findOne({ student_ID }).select("+student_password");
+        }
+        const escapedId = cleanId.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&');
+        const validStudent = await Tc_model.findOne({
+            $or: [
+                { student_ID: cleanId },
+                { student_ID: { $regex: new RegExp(`^${escapedId}$`, 'i') } },
+                { phone: cleanId },
+                { email: cleanId.toLowerCase() }
+            ]
+        }).select("+student_password");
+
         if (!validStudent) {
             return {
                 message: "student data not found",
                 success: false
             }
         }
-        const isPasswordValid = await bcrypt.compare(
-            providedPassword,
-            validStudent.student_password
-        );
+
+        let isPasswordValid = false;
+        if (validStudent.student_password) {
+            isPasswordValid = await bcrypt.compare(cleanPassword, validStudent.student_password);
+        }
+        // Fallback: allow phone number as password
+        if (!isPasswordValid && validStudent.phone && cleanPassword === validStudent.phone.trim()) {
+            isPasswordValid = true;
+        }
+
         if (!isPasswordValid) {
             return {
                 message: "Invalid ID or password",

@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation, useSearchParams } from "react-router-dom";
 import { Download, CheckCircle2, User, Eye, FileText, Lock, ArrowRight, AlertCircle, LogOut, Award, ExternalLink } from "lucide-react";
-import { getApiUrl } from "../utils/api";
+import { getApiUrl, API_BASE_URL } from "../utils/api";
 import SEO from "../components/SEO";
 
 interface Certificate {
@@ -79,8 +79,8 @@ export default function Certificate() {
       const photoPath = cert.certificatePath.startsWith('http') 
         ? cert.certificatePath 
         : cert.certificatePath.startsWith('/') 
-          ? `API_BASE_URL${cert.certificatePath}` 
-          : `API_BASE_URL/${cert.certificatePath}`;
+          ? `${API_BASE_URL}${cert.certificatePath}` 
+          : `${API_BASE_URL}/${cert.certificatePath}`;
       
       const response = await fetch(photoPath);
       if (!response.ok) throw new Error("File not found");
@@ -107,8 +107,8 @@ export default function Certificate() {
       const photoPath = cert.certificatePath.startsWith('http') 
         ? cert.certificatePath 
         : cert.certificatePath.startsWith('/') 
-          ? `API_BASE_URL${cert.certificatePath}` 
-          : `API_BASE_URL/${cert.certificatePath}`;
+          ? `${API_BASE_URL}${cert.certificatePath}` 
+          : `${API_BASE_URL}/${cert.certificatePath}`;
       window.open(photoPath, '_blank');
     }
   };
@@ -147,14 +147,17 @@ export default function Certificate() {
     setIsLoggingIn(true);
 
     try {
+      const cleanStudentId = loginForm.studentId.trim();
+      const cleanPassword = loginForm.password.trim();
+
       const response = await fetch(getApiUrl("/student_login"), {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          student_ID: loginForm.studentId,
-          password: loginForm.password,
+          student_ID: cleanStudentId,
+          password: cleanPassword,
         }),
       });
 
