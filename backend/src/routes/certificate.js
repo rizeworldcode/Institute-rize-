@@ -3,6 +3,8 @@ const router = express.Router();
 const path = require("path");
 const fs = require("fs");
 
+const student_model = require("../models/studentModel");
+
 const {
     certificateData
 } = require("../controllers/certificate");
@@ -32,7 +34,7 @@ function getCertificateFilePath() {
 router.get("/api/certificate/download", (req, res) => {
     const certPath = getCertificateFilePath();
     if (certPath) {
-        return res.download(certPath, "RizeWorld_Certificate_Punit_Sharma.jpg");
+        return res.download(certPath, "RizeWorld_Certificate.jpg");
     }
     return res.status(404).json({ success: false, message: "Certificate file not found" });
 });
@@ -48,7 +50,7 @@ router.get("/api/certificate/file", (req, res) => {
     return res.status(404).send("Certificate image not found");
 });
 
-// 3. Official Logo Endpoint (High-res cropped horizontal brand logo)
+// 3. Official Logo Endpoint
 router.get("/api/certificate/logo", (req, res) => {
     const logoCandidates = [
         path.join(__dirname, "../../public/uploads/RIZE_LOGO_CROPPED.png"),
@@ -65,14 +67,55 @@ router.get("/api/certificate/logo", (req, res) => {
     return res.status(404).send("Logo not found");
 });
 
-// 4. QR Code Scanner Landing & Verification Page
-router.get("/download-certificate", (req, res) => {
+// 4. Dynamic QR Code Scanner Landing & Verification Page (Supports every individual student)
+router.get("/download-certificate", async (req, res) => {
     if (req.query.raw === "1" || req.query.download === "1") {
         const certPath = getCertificateFilePath();
         if (certPath) {
-            return res.download(certPath, "RizeWorld_Certificate_Punit_Sharma.jpg");
+            return res.download(certPath, "RizeWorld_Certificate.jpg");
         }
     }
+
+    let studentName = "Punit Sharma";
+    let courseName = "Creative Pro (Graphic + Video)";
+    let certImageUrl = "/api/certificate/file";
+    let downloadUrl = "/api/certificate/download";
+
+    // Dynamic lookup by Student ID or query parameters
+    if (req.query.id) {
+        try {
+            const queryId = req.query.id.trim();
+            const student = await student_model.findOne({
+                $or: [
+                    { student_ID: queryId },
+                    ...(queryId.match(/^[0-9a-fA-F]{24}$/) ? [{ _id: queryId }] : [])
+                ]
+            }).lean();
+
+            if (student) {
+                studentName = student.student_name || studentName;
+                if (Array.isArray(student.selected_course_name) && student.selected_course_name.length > 0) {
+                    courseName = student.selected_course_name.join(", ");
+                } else if (student.selected_course_name) {
+                    courseName = student.selected_course_name;
+                } else if (student.admissions && student.admissions.length > 0 && student.admissions[0].courses) {
+                    courseName = student.admissions[0].courses.join(", ");
+                }
+
+                if (student.certificate_photo) {
+                    certImageUrl = student.certificate_photo.startsWith("http")
+                        ? student.certificate_photo
+                        : (student.certificate_photo.startsWith("/") ? student.certificate_photo : "/" + student.certificate_photo);
+                    downloadUrl = certImageUrl;
+                }
+            }
+        } catch (err) {
+            console.error("Error fetching dynamic student certificate:", err);
+        }
+    }
+
+    if (req.query.name) studentName = req.query.name;
+    if (req.query.course) courseName = req.query.course;
 
     const html = `<!DOCTYPE html>
 <html lang="en">
@@ -241,24 +284,24 @@ router.get("/download-certificate", (req, res) => {
       <div class="info-box">
         <div class="info-row">
           <span class="info-label">Student Name</span>
-          <span class="info-val">Punit Sharma</span>
+          <span class="info-val">${studentName}</span>
         </div>
         <div class="info-row">
           <span class="info-label">Program</span>
-          <span class="info-val" style="color: #2563eb;">Creative Pro (Graphic + Video)</span>
+          <span class="info-val" style="color: #2563eb;">${courseName}</span>
         </div>
       </div>
 
       <div class="preview-wrap">
-        <img src="/api/certificate/file" alt="Punit Sharma Certificate Preview" class="preview-img" />
+        <img src="${certImageUrl}" alt="${studentName} Certificate Preview" class="preview-img" />
       </div>
 
-      <a href="/api/certificate/download" class="btn-download" id="downloadBtn">
+      <a href="${downloadUrl}" class="btn-download" id="downloadBtn">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
         Download Certificate (HD)
       </a>
 
-      <a href="/api/certificate/file" target="_blank" class="btn-view">
+      <a href="${certImageUrl}" target="_blank" class="btn-view">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
         View Full Certificate
       </a>
