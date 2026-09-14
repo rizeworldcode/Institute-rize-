@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation, useSearchParams } from "react-router-dom";
-import { Download, CheckCircle2, User, Eye, FileText, Lock, ArrowRight, AlertCircle, LogOut, Award, ExternalLink } from "lucide-react";
+import { Download, CheckCircle2, User, Eye, EyeOff, FileText, Lock, ArrowRight, AlertCircle, LogOut, Award, ExternalLink } from "lucide-react";
 import { getApiUrl, API_BASE_URL } from "../utils/api";
 import SEO from "../components/SEO";
 
@@ -30,6 +30,7 @@ export default function Certificate() {
   const [downloading, setDownloading] = useState<string | null>(null);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [loginForm, setLoginForm] = useState({ studentId: "", password: "" });
+  const [showPassword, setShowPassword] = useState(false);
   const [studentData, setStudentData] = useState<{
     name: string;
     id: string;
@@ -390,12 +391,20 @@ export default function Certificate() {
                   <Lock size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-neutral-400" />
                   <input
                     required
-                    type="password"
+                    type={showPassword ? "text" : "password"}
                     value={loginForm.password}
                     onChange={(e) => setLoginForm({ ...loginForm, password: e.target.value })}
                     placeholder="••••••••"
-                    className="w-full pl-11 pr-4 py-3.5 rounded-2xl bg-neutral-50 border border-neutral-200 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none transition-all text-sm font-semibold text-neutral-900"
+                    className="w-full pl-11 pr-12 py-3.5 rounded-2xl bg-neutral-50 border border-neutral-200 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none transition-all text-sm font-semibold text-neutral-900"
                   />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-600 focus:outline-none transition-colors p-1"
+                    aria-label={showPassword ? "Hide password" : "Show password"}
+                  >
+                    {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                  </button>
                 </div>
               </div>
 
