@@ -1,3 +1,0 @@
-Error: Command failed: python --version
-'python' is not recognized as an internal or external command,
-operable program or batch file.

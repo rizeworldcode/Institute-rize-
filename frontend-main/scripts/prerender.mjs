@@ -118,15 +118,12 @@ server.listen(PORT, async () => {
         
         const html = await page.content();
         
-        const routePath = route === '/' ? 'index.html' : `${route.startsWith('/') ? route.slice(1) : route}/index.html`;
-        const targetFile = path.join(distDir, routePath);
-        
-        fs.mkdirSync(path.dirname(targetFile), { recursive: true });
-        fs.writeFileSync(targetFile, html, 'utf8');
-        console.log(`[Prerender] Saved ${targetFile}`);
-
-        // Also write flat .html file so servers (Vite preview, Vercel cleanUrls) match URLs without trailing slash
-        if (route !== '/') {
+        if (route === '/') {
+          const targetFile = path.join(distDir, 'index.html');
+          fs.writeFileSync(targetFile, html, 'utf8');
+          console.log(`[Prerender] Saved ${targetFile}`);
+        } else {
+          // Write clean flat .html file (e.g., dist/about.html, dist/courses.html, dist/blog/slug.html)
           const cleanRoute = route.startsWith('/') ? route.slice(1) : route;
           const flatTargetFile = path.join(distDir, `${cleanRoute}.html`);
           fs.mkdirSync(path.dirname(flatTargetFile), { recursive: true });

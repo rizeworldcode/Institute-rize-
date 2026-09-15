@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Logo Cropper</title>
+</head>
+<body>
+    <h3>Cropping Logo...</h3>
+    <canvas id="canvas"></canvas>
+    <div id="output" style="word-break: break-all; font-family: monospace; margin-top: 20px;"></div>
+
+    <script>
+        const img = new Image();
+        img.src = '/logo/RIZE LOGO HORI PNG.png';
+        img.onload = function() {
+            const canvas = document.getElementById('canvas');
+            const ctx = canvas.getContext('2d');
+            
+            canvas.width = img.width;
+            canvas.height = img.height;
+            ctx.drawImage(img, 0, 0);
+            
+            const imageData = ctx.getImageData(0, 0, img.width, img.height);
+            const data = imageData.data;
+            
+            let minX = img.width, maxX = 0, minY = img.height, maxY = 0;
+            
+            // Find bounding box of non-transparent pixels
+            for (let y = 0; y < img.height; y++) {
+                for (let x = 0; x < img.width; x++) {
+                    const alpha = data[(y * img.width + x) * 4 + 3];
+                    if (alpha > 5) { // tiny threshold
+                        if (x < minX) minX = x;
+                        if (x > maxX) maxX = x;
+                        if (y < minY) minY = y;
+                        if (y > maxY) maxY = y;
+                    }
+                }
+            }
+            
+            const croppedWidth = maxX - minX + 1;
+            const croppedHeight = maxY - minY + 1;
+            
+            // Create a canvas for the cropped logo
+            const croppedCanvas = document.createElement('canvas');
+            croppedCanvas.width = croppedWidth;
+            croppedCanvas.height = croppedHeight;
+            const croppedCtx = croppedCanvas.getContext('2d');
+            croppedCtx.drawImage(canvas, minX, minY, croppedWidth, croppedHeight, 0, 0, croppedWidth, croppedHeight);
+            
+            const base64 = croppedCanvas.toDataURL('image/png');
+            
+            // Also create a square version for the favicon (making it square by adding minimal top/bottom or left/right transparent padding so it doesn't stretch)
+            const squareSize = Math.max(croppedWidth, croppedHeight);
+            const squareCanvas = document.createElement('canvas');
+            squareCanvas.width = squareSize;
+            squareCanvas.height = squareSize;
+            const squareCtx = squareCanvas.getContext('2d');
+            
+            const dx = (squareSize - croppedWidth) / 2;
+            const dy = (squareSize - croppedHeight) / 2;
+            squareCtx.drawImage(croppedCanvas, dx, dy);
+            const squareBase64 = squareCanvas.toDataURL('image/png');
+
+            document.getElementById('output').innerHTML = `
+                <h4>Cropped Base64:</h4>
+                <textarea id="cropped" style="width: 100%; height: 100px;">${base64}</textarea>
+                <h4>Square Favicon Base64 (Recommended for browser tabs):</h4>
+                <textarea id="square" style="width: 100%; height: 100px;">${squareBase64}</textarea>
+            `;
+            
+            // Set global variables for agent access
+            window.croppedBase64 = base64;
+            window.squareBase64 = squareBase64;
+            console.log("CROP_DONE");
+        };
+    </script>
+</body>
+</html>
