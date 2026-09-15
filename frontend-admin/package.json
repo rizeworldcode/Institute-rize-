@@ -5,7 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "build": "vite build && node scripts/zip.mjs",
+    "zip": "node scripts/zip.mjs",
     "preview": "vite preview"
   },
   "dependencies": {
@@ -24,6 +25,7 @@
     "@types/react": "^18.2.43",
     "@types/react-dom": "^18.2.17",
     "@vitejs/plugin-react": "^4.2.1",
+    "archiver": "^8.0.0",
     "tailwindcss": "^4.3.0",
     "typescript": "^5.9.3",
     "vite": "^5.0.8",
