@@ -119,6 +119,10 @@ const StudentSchema = new mongoose.Schema({
         type: String,
         required: true
     },
+    plain_password: {
+        type: String,
+        default: ''
+    },
     email: {
         type: String,
         default: ''

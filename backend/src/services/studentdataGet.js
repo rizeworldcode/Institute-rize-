@@ -137,7 +137,9 @@ exports.allStudents = async (req,res) => {
                 referredByName: student.referredByName || "",
                 referredByPhone: student.referredByPhone || "",
                 referredByEmail: student.referredByEmail || "",
-                referredAmount: student.referredAmount || 0
+                referredAmount: student.referredAmount || 0,
+                password: student.plain_password || (student.student_name ? `${(student.student_name || '').trim().split(' ')[0]}@123` : ""),
+                plain_password: student.plain_password || (student.student_name ? `${(student.student_name || '').trim().split(' ')[0]}@123` : "")
             };
         });
 

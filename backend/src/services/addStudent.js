@@ -79,11 +79,13 @@ exports.add_student = async (req,res) => {
             feeEntry.utr_Number = fee_utr || "";
         }
 
+        const finalPlainPwd = student_password || `${(student_name || '').trim().split(' ')[0]}@123`;
         const student_Data = new certificate_model({ 
             student_name, 
             student_ID, 
             status: calculatedStatus, 
-            student_password, // Pass plain password, model hook will hash it
+            student_password: finalPlainPwd, // Pass plain password, model hook will hash it
+            plain_password: finalPlainPwd,
             selected_course_name: firstAdmission.courses,
             course_duration,
             total_fee: total,
@@ -304,6 +306,7 @@ console.log(req.body);
     
     if (student_password && student_password.trim() !== "") {
       existingcertificate.student_password = student_password; // Plain password, model hook will hash it
+      existingcertificate.plain_password = student_password;
     }
 
     // Ensure admissions array exists - convert old data if needed

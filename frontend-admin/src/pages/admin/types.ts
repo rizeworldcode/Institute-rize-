@@ -59,6 +59,8 @@ export type Certificate = {
   date: string;
   courseName: string;
   name?: string;
+  certificatePath?: string;
+  issuedAt?: string;
 };
 
 export type Inquiry = {

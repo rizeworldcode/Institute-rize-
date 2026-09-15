@@ -24,14 +24,21 @@ export function StudentModal({ student, onClose, onSave }: {
   onClose: () => void;
   onSave: (updatedStudent: Student, openInvoice?: boolean) => void;
 }) {
+  const getInitialPassword = () => {
+    if (!student) return "";
+    return student.password || (student.name ? `${(student.name || '').trim().split(' ')[0]}@123` : "");
+  };
+
   const [shouldOpenInvoice, setShouldOpenInvoice] = useState(false);
-  const [showStudentPassword, setShowStudentPassword] = useState(false);
+  const [showStudentPassword, setShowStudentPassword] = useState(true);
   const [showReferralPassword, setShowReferralPassword] = useState(false);
+  const [copiedPassword, setCopiedPassword] = useState(false);
+
   // Student personal info
   const [studentInfo, setStudentInfo] = useState({
     id: student ? student.id : `RW-${Math.floor(1000 + Math.random() * 9000)}`,
     name: student ? student.name : "",
-    password: "",
+    password: getInitialPassword(),
     email: student ? student.email || "" : "",
     phone: student ? student.phone || "" : "",
     address: student ? student.address || "" : "",
@@ -70,14 +77,29 @@ export function StudentModal({ student, onClose, onSave }: {
   // Process student admissions to ensure they have all required fields and certificates
   const getInitialAdmissions = (): Admission[] => {
     if (!student?.admissions || student.admissions.length === 0) return [];
+    
+    // Also extract any student-level root certificates
+    const rootCerts = Array.isArray(student.certificates) ? [...student.certificates] : [];
+    const photoCert = (student as any)?.certificate_photo;
+    if (photoCert && !rootCerts.some(c => (c.certificatePath || c.url) === photoCert)) {
+      rootCerts.push({
+        id: `cert-${student.id}-photo`,
+        courseName: Array.isArray(student.course) ? student.course[0] : (student.course || "Course Certificate"),
+        certificatePath: photoCert,
+        url: photoCert,
+        date: student.startDate || new Date().toISOString()
+      });
+    }
+
     return student.admissions.map(adm => {
       let certs = Array.isArray(adm.certificates) ? [...adm.certificates] : [];
-      // If admission certificates is empty, check student.certificates
-      if (certs.length === 0 && Array.isArray(student.certificates) && student.certificates.length > 0) {
+      
+      if (rootCerts.length > 0) {
         const admCourses = (adm.courses || []).map(c => (c || '').toLowerCase().trim());
-        const matched = student.certificates.filter(sc => {
+        rootCerts.forEach(sc => {
           const scName = (sc.courseName || (sc as any).course_name || '').toLowerCase().trim();
-          return admCourses.some(ac => 
+          const scPath = sc.certificatePath || (sc as any).certificate_path || sc.url;
+          const matches = (student.admissions && student.admissions.length === 1) || admCourses.some(ac => 
             ac === scName || 
             ac.includes(scName) || 
             scName.includes(ac) || 
@@ -86,12 +108,22 @@ export function StudentModal({ student, onClose, onSave }: {
             (ac.includes('master') && scName.includes('master')) ||
             (ac.includes('graphic') && scName.includes('graphic')) ||
             (ac.includes('video') && scName.includes('video'))
-          ) || (student.admissions && student.admissions.length === 1);
+          );
+          const alreadyExists = certs.some(c => 
+            (scPath && (c.certificatePath === scPath || c.url === scPath)) ||
+            (c.courseName && c.courseName.toLowerCase().trim() === scName)
+          );
+          if (matches && !alreadyExists) {
+            certs.push({
+              ...sc,
+              certificatePath: scPath,
+              url: scPath,
+              courseName: sc.courseName || (sc as any).course_name || "Course Certificate"
+            });
+          }
         });
-        if (matched.length > 0) {
-          certs = [...matched];
-        }
       }
+
       return {
         ...adm,
         admissionId: adm.admissionId || `ADM-${Date.now()}-${student.id}`,
@@ -104,6 +136,23 @@ export function StudentModal({ student, onClose, onSave }: {
 
   useEffect(() => {
     setLocalAdmissions(getInitialAdmissions());
+    if (student) {
+      const pwd = student.password || (student.name ? `${(student.name || '').trim().split(' ')[0]}@123` : "");
+      setStudentInfo(prev => ({
+        ...prev,
+        id: student.id,
+        name: student.name || "",
+        password: pwd,
+        email: student.email || "",
+        phone: student.phone || "",
+        address: student.address || "",
+        referredByName: student.referredByName || "",
+        referredByPhone: student.referredByPhone || "",
+        referredByEmail: student.referredByEmail || "",
+        referredAmount: student.referredAmount || "",
+      }));
+      setShowStudentPassword(true);
+    }
   }, [student]);
 
   const handleDeleteCertificate = async (cert: any, admissionId: string) => {
@@ -819,32 +868,54 @@ export function StudentModal({ student, onClose, onSave }: {
                   <input required={!student} type="text" value={studentInfo.name} onChange={(e) => { if (e.target.value.length <= 120) setStudentInfo({ ...studentInfo, name: e.target.value }); }} className="w-full px-4 py-2.5 rounded-xl bg-white border border-neutral-200 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none transition-all text-neutral-900 shadow-sm" />
                 </div>
                 <div>
-                  <label className="text-xs font-semibold text-neutral-600 block mb-1.5">
-                    Student Password {student ? "(Optional)" : "*"}
-                  </label>
+                  <div className="flex items-center justify-between mb-1.5">
+                    <label className="text-xs font-semibold text-neutral-600 block">
+                      Student Password {student ? "(Optional)" : "*"}
+                    </label>
+                    {studentInfo.password && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          navigator.clipboard.writeText(studentInfo.password);
+                          setCopiedPassword(true);
+                          setTimeout(() => setCopiedPassword(false), 2000);
+                        }}
+                        className="text-[11px] text-blue-600 hover:text-blue-700 font-medium flex items-center gap-1 cursor-pointer transition-colors"
+                        title="Copy password"
+                      >
+                        {copiedPassword ? (
+                          <span className="text-emerald-600 flex items-center gap-1">
+                            <Check size={12} /> Copied!
+                          </span>
+                        ) : (
+                          "Copy Password"
+                        )}
+                      </button>
+                    )}
+                  </div>
                   <div className="relative">
                     <input
                       required={!student}
                       type={showStudentPassword ? "text" : "password"}
                       value={studentInfo.password}
                       onChange={(e) => setStudentInfo({ ...studentInfo, password: e.target.value })}
-                      placeholder={student ? `Unchanged (${(student.name || '').trim().split(' ')[0]}@123)` : "Enter password"}
-                      className="w-full pl-4 pr-11 py-2.5 rounded-xl bg-white border border-neutral-200 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none transition-all text-neutral-900 shadow-sm placeholder:text-neutral-400"
+                      placeholder={student ? `${(student.name || '').trim().split(' ')[0]}@123` : "Enter password"}
+                      className="w-full pl-4 pr-11 py-2.5 rounded-xl bg-white border border-neutral-200 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none transition-all text-neutral-900 font-medium shadow-sm"
                     />
                     <button
                       type="button"
                       onClick={() => setShowStudentPassword(!showStudentPassword)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-600 focus:outline-none p-1 transition-colors"
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-700 focus:outline-none p-1 transition-colors cursor-pointer"
                       aria-label={showStudentPassword ? "Hide password" : "Show password"}
+                      title={showStudentPassword ? "Hide password" : "Show password"}
                     >
                       {showStudentPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                     </button>
                   </div>
-                  {student && !studentInfo.password && (
-                    <p className="text-[11px] text-neutral-400 mt-1">
-                      🔒 Password encrypted hai (Default: <strong>{(student.name || '').trim().split(' ')[0]}@123</strong>). Naya password set karne ke liye yahan type karein, warna khali chhod dein.
-                    </p>
-                  )}
+                  <p className="text-[11px] text-neutral-500 mt-1 flex items-center gap-1.5">
+                    <span>🔑</span>
+                    <span>Student login password. Eye button se hide/show kar sakte hain.</span>
+                  </p>
                   <PasswordRequirements password={studentInfo.password} />
                 </div>
                 <div>

@@ -333,20 +333,37 @@ export default function AdminDashboard() {
       const data = await res.json();
       if (data.success) {
         const mapped: Student[] = data.data.map((item: any) => {
+          // Extract root-level certificates
+          const rootCerts: any[] = (item.certificates && Array.isArray(item.certificates))
+            ? item.certificates.map((cert: any, idx: number) => {
+                const cPath = cert.certificatePath || cert.certificate_path || cert.url || "";
+                return {
+                  id: cert.id || (cert._id ? cert._id.toString() : `cert-${item.student_ID}-${idx}`),
+                  courseName: cert.courseName || cert.course_name || "Course Certificate",
+                  url: cPath,
+                  certificatePath: cPath,
+                  date: cert.issuedAt || cert.issued_at || cert.date ? new Date(cert.issuedAt || cert.issued_at || cert.date).toISOString() : new Date().toISOString()
+                };
+              })
+            : [];
+
+          if (item.certificate_photo && !rootCerts.some(c => c.url === item.certificate_photo || c.certificatePath === item.certificate_photo)) {
+            rootCerts.push({
+              id: `cert-${item.student_ID}-old`,
+              courseName: Array.isArray(item.selected_course_name) ? item.selected_course_name[0] : item.selected_course_name || "Course",
+              url: item.certificate_photo,
+              certificatePath: item.certificate_photo,
+              date: item.created_at ? new Date(item.created_at).toISOString() : new Date().toISOString()
+            });
+          }
+
           // Map admissions if available
           let admissions: any[] = [];
           if (item.admissions && item.admissions.length > 0) {
-            admissions = item.admissions.map((adm: any) => ({
-              admissionId: adm.admission_id || adm.admissionId || `adm-${Date.now()}`,
-              courses: Array.isArray(adm.courses) ? adm.courses : (adm.selected_course_name ? (Array.isArray(adm.selected_course_name) ? adm.selected_course_name : [adm.selected_course_name]) : []),
-              courseDuration: adm.course_duration || adm.courseDuration || "N/A",
-              totalFee: Number(adm.total_fee) || Number(adm.totalFee) || 0,
-              totalPaidFee: Number(adm.total_paid_fee) || Number(adm.totalPaidFee) || 0,
-              pendingFee: Number(adm.pending_fee) || Number(adm.pendingFee) || 0,
-              feesStatus: adm.status || adm.feesStatus || "Pending",
-              feesInstallment: Number(adm.fee_installment) || Number(adm.feesInstallment) || 0,
-              payments: adm.payments || [],
-              certificates: adm.certificates ? adm.certificates.map((cert: any, idx: number) => {
+            admissions = item.admissions.map((adm: any) => {
+              const admCourses = (Array.isArray(adm.courses) ? adm.courses : (adm.selected_course_name ? (Array.isArray(adm.selected_course_name) ? adm.selected_course_name : [adm.selected_course_name]) : [])).map((c: string) => (c || '').toLowerCase().trim());
+
+              let admCerts = adm.certificates ? adm.certificates.map((cert: any, idx: number) => {
                 const cPath = cert.certificatePath || cert.certificate_path || cert.url || "";
                 return {
                   id: cert.id || (cert._id ? cert._id.toString() : `cert-${item.student_ID}-${adm.admission_id || adm.admissionId}-${idx}`),
@@ -355,54 +372,67 @@ export default function AdminDashboard() {
                   certificatePath: cPath,
                   date: cert.issuedAt || cert.issued_at || cert.date ? new Date(cert.issuedAt || cert.issued_at || cert.date).toISOString() : new Date().toISOString()
                 };
-              }) : [],
-              startDate: adm.course_start_date 
-                ? new Date(adm.course_start_date).toISOString().split('T')[0] 
-                : (adm.startDate 
-                    ? (typeof adm.startDate === 'string' 
-                        ? new Date(adm.startDate).toISOString().split('T')[0] 
-                        : new Date(adm.startDate).toISOString().split('T')[0])
-                    : new Date().toISOString().split('T')[0]),
-              endDate: adm.course_end_date 
-                ? new Date(adm.course_end_date).toISOString().split('T')[0] 
-                : (adm.endDate 
-                    ? (typeof adm.endDate === 'string' 
-                        ? new Date(adm.endDate).toISOString().split('T')[0] 
-                        : new Date(adm.endDate).toISOString().split('T')[0])
-                    : (() => {
-                        const date = new Date();
-                        date.setMonth(date.getMonth() + 3);
-                        return date.toISOString().split('T')[0];
-                      })()),
-              createdAt: adm.created_at || new Date().toISOString(),
-              updatedAt: adm.updated_at || new Date().toISOString()
-            }));
+              }) : [];
+
+              // Merge any matching root certificates
+              if (rootCerts.length > 0) {
+                rootCerts.forEach(rc => {
+                  const rcName = (rc.courseName || '').toLowerCase().trim();
+                  const matches = (item.admissions.length === 1) || admCourses.some((ac: string) =>
+                    ac === rcName ||
+                    ac.includes(rcName) ||
+                    rcName.includes(ac) ||
+                    (ac.includes('creative') && rcName.includes('creative')) ||
+                    (ac.includes('seo') && rcName.includes('seo')) ||
+                    (ac.includes('master') && rcName.includes('master')) ||
+                    (ac.includes('graphic') && rcName.includes('graphic')) ||
+                    (ac.includes('video') && rcName.includes('video'))
+                  );
+                  const exists = admCerts.some((c: any) => c.certificatePath === rc.certificatePath || (c.courseName && c.courseName.toLowerCase().trim() === rcName));
+                  if (matches && !exists) {
+                    admCerts.push(rc);
+                  }
+                });
+              }
+
+              return {
+                admissionId: adm.admission_id || adm.admissionId || `adm-${Date.now()}`,
+                courses: Array.isArray(adm.courses) ? adm.courses : (adm.selected_course_name ? (Array.isArray(adm.selected_course_name) ? adm.selected_course_name : [adm.selected_course_name]) : []),
+                courseDuration: adm.course_duration || adm.courseDuration || "N/A",
+                totalFee: Number(adm.total_fee) || Number(adm.totalFee) || 0,
+                totalPaidFee: Number(adm.total_paid_fee) || Number(adm.totalPaidFee) || 0,
+                pendingFee: Number(adm.pending_fee) || Number(adm.pendingFee) || 0,
+                feesStatus: adm.status || adm.feesStatus || "Pending",
+                feesInstallment: Number(adm.fee_installment) || Number(adm.feesInstallment) || 0,
+                payments: adm.payments || [],
+                certificates: admCerts,
+                startDate: adm.course_start_date 
+                  ? new Date(adm.course_start_date).toISOString().split('T')[0] 
+                  : (adm.startDate 
+                      ? (typeof adm.startDate === 'string' 
+                          ? new Date(adm.startDate).toISOString().split('T')[0] 
+                          : new Date(adm.startDate).toISOString().split('T')[0])
+                      : new Date().toISOString().split('T')[0]),
+                endDate: adm.course_end_date 
+                  ? new Date(adm.course_end_date).toISOString().split('T')[0] 
+                  : (adm.endDate 
+                      ? (typeof adm.endDate === 'string' 
+                          ? new Date(adm.endDate).toISOString().split('T')[0] 
+                          : new Date(adm.endDate).toISOString().split('T')[0])
+                      : (() => {
+                          const date = new Date();
+                          date.setMonth(date.getMonth() + 3);
+                          return date.toISOString().split('T')[0];
+                        })()),
+                createdAt: adm.created_at || new Date().toISOString(),
+                updatedAt: adm.updated_at || new Date().toISOString()
+              };
+            });
           }
           
           // If no admissions, create a default one from the old structure for backward compatibility
           if (admissions.length === 0) {
-            // Start with any existing certificates from the new array
-            let certificates: any[] = item.certificates ? item.certificates.map((cert: any, idx: number) => {
-              const cPath = cert.certificatePath || cert.certificate_path || cert.url || "";
-              return {
-                id: cert.id || (cert._id ? cert._id.toString() : `cert-${item.student_ID}-${idx}`),
-                courseName: cert.courseName || cert.course_name || "Course Certificate",
-                url: cPath,
-                certificatePath: cPath,
-                date: cert.issuedAt || cert.issued_at || cert.date ? new Date(cert.issuedAt || cert.issued_at || cert.date).toISOString() : new Date().toISOString()
-              };
-            }) : [];
-            
-            // Add backward compatibility for old certificate_photo
-            if (item.certificate_photo) {
-              certificates.push({
-                id: `cert-${item.student_ID}-old`,
-                courseName: Array.isArray(item.selected_course_name) ? item.selected_course_name[0] : item.selected_course_name || "Course",
-                url: item.certificate_photo,
-                certificatePath: item.certificate_photo,
-                date: item.created_at ? new Date(item.created_at).toISOString() : new Date().toISOString()
-              });
-            }
+            let certificates = [...rootCerts];
             
             admissions.push({
               admissionId: `adm-${item.student_ID}-default`,
@@ -444,8 +474,13 @@ export default function AdminDashboard() {
           // Collect all unique courses
           const allCourses = [...new Set(admissions.flatMap(adm => adm.courses))];
           
-          // Collect all certificates from all admissions
+          // Collect all certificates from all admissions + rootCerts
           const allCertificates = admissions.flatMap(adm => adm.certificates);
+          rootCerts.forEach(rc => {
+            if (!allCertificates.some(c => c.certificatePath === rc.certificatePath || c.id === rc.id)) {
+              allCertificates.push(rc);
+            }
+          });
           
           return {
             id: item.student_ID,
@@ -468,7 +503,8 @@ export default function AdminDashboard() {
             referredByName: item.referredByName,
             referredByPhone: item.referredByPhone,
             referredByEmail: item.referredByEmail,
-            referredAmount: Number(item.referredAmount) || 0
+            referredAmount: Number(item.referredAmount) || 0,
+            password: item.password || item.plain_password || (item.student_name ? `${(item.student_name || '').trim().split(' ')[0]}@123` : "")
           };
         });
         setAllStudentsData(mapped);
@@ -700,67 +736,106 @@ export default function AdminDashboard() {
       const data = await res.json();
       if (data.success) {
         const mappedStudents: Student[] = data.tcData.map((item: any) => {
+          // Extract root-level certificates
+          const rootCerts: any[] = (item.certificates && Array.isArray(item.certificates))
+            ? item.certificates.map((cert: any, idx: number) => {
+                const cPath = cert.certificatePath || cert.certificate_path || cert.url || "";
+                return {
+                  id: cert.id || (cert._id ? cert._id.toString() : `cert-${item.student_ID}-${idx}`),
+                  courseName: cert.courseName || cert.course_name || "Course Certificate",
+                  url: cPath,
+                  certificatePath: cPath,
+                  date: cert.issuedAt || cert.issued_at || cert.date ? new Date(cert.issuedAt || cert.issued_at || cert.date).toISOString() : new Date().toISOString()
+                };
+              })
+            : [];
+
+          if (item.certificate_photo && !rootCerts.some(c => c.url === item.certificate_photo || c.certificatePath === item.certificate_photo)) {
+            rootCerts.push({
+              id: `cert-${item.student_ID}-old`,
+              courseName: Array.isArray(item.selected_course_name) ? item.selected_course_name[0] : item.selected_course_name || "Course",
+              url: item.certificate_photo,
+              certificatePath: item.certificate_photo,
+              date: item.created_at ? new Date(item.created_at).toISOString() : new Date().toISOString()
+            });
+          }
+
           // Map admissions if available
           let admissions: any[] = [];
           if (item.admissions && item.admissions.length > 0) {
-            admissions = item.admissions.map((adm: any) => ({
-              admissionId: adm.admission_id || adm.admissionId || `adm-${Date.now()}`,
-              courses: Array.isArray(adm.courses) ? adm.courses : (adm.selected_course_name ? (Array.isArray(adm.selected_course_name) ? adm.selected_course_name : [adm.selected_course_name]) : []),
-              courseDuration: adm.course_duration || adm.courseDuration || "N/A",
-              totalFee: Number(adm.total_fee) || Number(adm.totalFee) || 0,
-              totalPaidFee: Number(adm.total_paid_fee) || Number(adm.totalPaidFee) || 0,
-              pendingFee: Number(adm.pending_fee) || Number(adm.pendingFee) || 0,
-              feesStatus: adm.status || adm.feesStatus || "Pending",
-              feesInstallment: Number(adm.fee_installment) || Number(adm.feesInstallment) || 0,
-              payments: adm.payments || [],
-              certificates: adm.certificates ? adm.certificates.map((cert: any, idx: number) => ({
-                id: `cert-${item.student_ID}-${adm.admission_id}-${idx}`,
-                courseName: cert.courseName || cert.course_name,
-                url: cert.certificatePath || `/${cert.certificate_path || cert.certificatePath}`,
-                date: cert.issuedAt || cert.issued_at ? new Date(cert.issuedAt || cert.issued_at).toISOString() : new Date().toISOString()
-              })) : [],
-              startDate: adm.course_start_date 
-                ? new Date(adm.course_start_date).toISOString().split('T')[0] 
-                : (adm.startDate 
-                    ? (typeof adm.startDate === 'string' 
-                        ? new Date(adm.startDate).toISOString().split('T')[0] 
-                        : new Date(adm.startDate).toISOString().split('T')[0])
-                    : new Date().toISOString().split('T')[0]),
-              endDate: adm.course_end_date 
-                ? new Date(adm.course_end_date).toISOString().split('T')[0] 
-                : (adm.endDate 
-                    ? (typeof adm.endDate === 'string' 
-                        ? new Date(adm.endDate).toISOString().split('T')[0] 
-                        : new Date(adm.endDate).toISOString().split('T')[0])
-                    : (() => {
-                        const date = new Date();
-                        date.setMonth(date.getMonth() + 3);
-                        return date.toISOString().split('T')[0];
-                      })()),
-              createdAt: adm.created_at || new Date().toISOString(),
-              updatedAt: adm.updated_at || new Date().toISOString()
-            }));
+            admissions = item.admissions.map((adm: any) => {
+              const admCourses = (Array.isArray(adm.courses) ? adm.courses : (adm.selected_course_name ? (Array.isArray(adm.selected_course_name) ? adm.selected_course_name : [adm.selected_course_name]) : [])).map((c: string) => (c || '').toLowerCase().trim());
+
+              let admCerts = adm.certificates ? adm.certificates.map((cert: any, idx: number) => {
+                const cPath = cert.certificatePath || cert.certificate_path || cert.url || "";
+                return {
+                  id: cert.id || (cert._id ? cert._id.toString() : `cert-${item.student_ID}-${adm.admission_id || adm.admissionId}-${idx}`),
+                  courseName: cert.courseName || cert.course_name || "Course Certificate",
+                  url: cPath,
+                  certificatePath: cPath,
+                  date: cert.issuedAt || cert.issued_at || cert.date ? new Date(cert.issuedAt || cert.issued_at || cert.date).toISOString() : new Date().toISOString()
+                };
+              }) : [];
+
+              // Merge any matching root certificates
+              if (rootCerts.length > 0) {
+                rootCerts.forEach(rc => {
+                  const rcName = (rc.courseName || '').toLowerCase().trim();
+                  const matches = (item.admissions.length === 1) || admCourses.some((ac: string) =>
+                    ac === rcName ||
+                    ac.includes(rcName) ||
+                    rcName.includes(ac) ||
+                    (ac.includes('creative') && rcName.includes('creative')) ||
+                    (ac.includes('seo') && rcName.includes('seo')) ||
+                    (ac.includes('master') && rcName.includes('master')) ||
+                    (ac.includes('graphic') && rcName.includes('graphic')) ||
+                    (ac.includes('video') && rcName.includes('video'))
+                  );
+                  const exists = admCerts.some((c: any) => c.certificatePath === rc.certificatePath || (c.courseName && c.courseName.toLowerCase().trim() === rcName));
+                  if (matches && !exists) {
+                    admCerts.push(rc);
+                  }
+                });
+              }
+
+              return {
+                admissionId: adm.admission_id || adm.admissionId || `adm-${Date.now()}`,
+                courses: Array.isArray(adm.courses) ? adm.courses : (adm.selected_course_name ? (Array.isArray(adm.selected_course_name) ? adm.selected_course_name : [adm.selected_course_name]) : []),
+                courseDuration: adm.course_duration || adm.courseDuration || "N/A",
+                totalFee: Number(adm.total_fee) || Number(adm.totalFee) || 0,
+                totalPaidFee: Number(adm.total_paid_fee) || Number(adm.totalPaidFee) || 0,
+                pendingFee: Number(adm.pending_fee) || Number(adm.pendingFee) || 0,
+                feesStatus: adm.status || adm.feesStatus || "Pending",
+                feesInstallment: Number(adm.fee_installment) || Number(adm.feesInstallment) || 0,
+                payments: adm.payments || [],
+                certificates: admCerts,
+                startDate: adm.course_start_date 
+                  ? new Date(adm.course_start_date).toISOString().split('T')[0] 
+                  : (adm.startDate 
+                      ? (typeof adm.startDate === 'string' 
+                          ? new Date(adm.startDate).toISOString().split('T')[0] 
+                          : new Date(adm.startDate).toISOString().split('T')[0])
+                      : new Date().toISOString().split('T')[0]),
+                endDate: adm.course_end_date 
+                  ? new Date(adm.course_end_date).toISOString().split('T')[0] 
+                  : (adm.endDate 
+                      ? (typeof adm.endDate === 'string' 
+                          ? new Date(adm.endDate).toISOString().split('T')[0] 
+                          : new Date(adm.endDate).toISOString().split('T')[0])
+                      : (() => {
+                          const date = new Date();
+                          date.setMonth(date.getMonth() + 3);
+                          return date.toISOString().split('T')[0];
+                        })()),
+                createdAt: adm.created_at || new Date().toISOString(),
+                updatedAt: adm.updated_at || new Date().toISOString()
+              };
+            });
           }
           
           // If no admissions, create a default one from the old structure for backward compatibility
           if (admissions.length === 0) {
-            // Start with any existing certificates from the new array
-            let certificates: any[] = item.certificates ? item.certificates.map((cert: any, idx: number) => ({
-              id: `cert-${item.student_ID}-${idx}`,
-              courseName: cert.courseName || cert.course_name,
-              url: cert.certificatePath || `/${cert.certificate_path || cert.certificatePath}`,
-              date: cert.issuedAt || cert.issued_at ? new Date(cert.issuedAt || cert.issued_at).toISOString() : new Date().toISOString()
-            })) : [];
-            
-            // Add backward compatibility for old certificate_photo
-            if (item.certificate_photo) {
-              certificates.push({
-                id: `cert-${item.student_ID}-old`,
-                courseName: Array.isArray(item.selected_course_name) ? item.selected_course_name[0] : item.selected_course_name || "Course",
-                url: `/${item.certificate_photo}`,
-                date: item.created_at ? new Date(item.created_at).toISOString() : new Date().toISOString()
-              });
-            }
+            let certificates = [...rootCerts];
             
             admissions.push({
               admissionId: `adm-${item.student_ID}-default`,
@@ -802,8 +877,13 @@ export default function AdminDashboard() {
           // Collect all unique courses
           const allCourses = [...new Set(admissions.flatMap(adm => adm.courses))];
           
-          // Collect all certificates from all admissions
+          // Collect all certificates from all admissions + rootCerts
           const allCertificates = admissions.flatMap(adm => adm.certificates);
+          rootCerts.forEach(rc => {
+            if (!allCertificates.some(c => c.certificatePath === rc.certificatePath || c.id === rc.id)) {
+              allCertificates.push(rc);
+            }
+          });
           
           return {
             id: item.student_ID,
@@ -826,7 +906,8 @@ export default function AdminDashboard() {
             referredByName: item.referredByName,
             referredByPhone: item.referredByPhone,
             referredByEmail: item.referredByEmail,
-            referredAmount: Number(item.referredAmount) || 0
+            referredAmount: Number(item.referredAmount) || 0,
+            password: item.password || item.plain_password || (item.student_name ? `${(item.student_name || '').trim().split(' ')[0]}@123` : "")
           };
         });
         
