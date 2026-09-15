@@ -802,3 +802,168 @@ exports.deleteStudent = async (req, res) => {
     };
   }
 };
+
+exports.deleteCertificate = async (req, res) => {
+  try {
+    const { 
+      student_ID, 
+      courseName, 
+      course_name, 
+      certificate_id, 
+      certificate_path, 
+      certificatePath, 
+      admission_id,
+      admissionId 
+    } = req.body || {};
+
+    const targetStudentId = student_ID || (req.params && req.params.student_ID);
+    const targetCourseName = (courseName || course_name || "").trim();
+    const targetCertId = certificate_id;
+    const targetCertPath = certificate_path || certificatePath;
+    const targetAdmissionId = admission_id || admissionId;
+
+    if (!targetStudentId) {
+      return {
+        success: false,
+        message: "Student ID is required",
+      };
+    }
+
+    if (!targetCourseName && !targetCertId && !targetCertPath) {
+      return {
+        success: false,
+        message: "Course name, certificate ID, or certificate path is required to delete a certificate",
+      };
+    }
+
+    let student = await certificate_model.findOne({ student_ID: targetStudentId });
+    if (!student) {
+      const mongoose = require('mongoose');
+      if (mongoose.isValidObjectId(targetStudentId)) {
+        student = await certificate_model.findById(targetStudentId);
+      }
+    }
+
+    if (!student) {
+      return {
+        success: false,
+        message: "Student not found",
+      };
+    }
+
+    const filesToDelete = new Set();
+    if (targetCertPath) filesToDelete.add(targetCertPath);
+
+    const matchesTarget = (cert) => {
+      if (!cert) return false;
+      if (targetCertId && cert._id && cert._id.toString() === targetCertId.toString()) return true;
+      if (targetCertId && cert.id && cert.id.toString() === targetCertId.toString()) return true;
+      const cName = (cert.courseName || cert.course_name || "").trim().toLowerCase();
+      const tName = targetCourseName.toLowerCase();
+      if (tName && cName) {
+        if (cName === tName || cName.includes(tName) || tName.includes(cName)) return true;
+      }
+      const cPath = cert.certificatePath || cert.certificate_path;
+      if (targetCertPath && cPath && (cPath === targetCertPath || targetCertPath.endsWith(cPath) || cPath.endsWith(targetCertPath))) {
+        return true;
+      }
+      return false;
+    };
+
+    // Pull from root certificates array
+    if (student.certificates && student.certificates.length > 0) {
+      student.certificates.forEach(c => {
+        if (matchesTarget(c)) {
+          const p = c.certificatePath || c.certificate_path;
+          if (p) filesToDelete.add(p);
+        }
+      });
+      student.certificates = student.certificates.filter(c => !matchesTarget(c));
+    }
+
+    // Pull from admissions certificates
+    if (student.admissions && student.admissions.length > 0) {
+      student.admissions.forEach(adm => {
+        const admId = adm.admissionId || adm.admission_id;
+        if (!targetAdmissionId || admId === targetAdmissionId) {
+          if (adm.certificates && adm.certificates.length > 0) {
+            adm.certificates.forEach(c => {
+              if (matchesTarget(c)) {
+                const p = c.certificatePath || c.certificate_path;
+                if (p) filesToDelete.add(p);
+              }
+            });
+            adm.certificates = adm.certificates.filter(c => !matchesTarget(c));
+          }
+        }
+      });
+    }
+
+    // Check certificate_photo
+    if (student.certificate_photo) {
+      const photoPath = student.certificate_photo;
+      if (filesToDelete.has(photoPath) || (targetCertPath && (photoPath === targetCertPath || photoPath.endsWith(targetCertPath)))) {
+        let remainingCert = null;
+        if (student.certificates && student.certificates.length > 0) {
+          remainingCert = student.certificates[0].certificatePath || student.certificates[0].certificate_path;
+        } else if (student.admissions && student.admissions.length > 0) {
+          for (const a of student.admissions) {
+            if (a.certificates && a.certificates.length > 0) {
+              remainingCert = a.certificates[0].certificatePath || a.certificates[0].certificate_path;
+              break;
+            }
+          }
+        }
+        student.certificate_photo = remainingCert || "";
+      }
+    }
+
+    student.markModified("admissions");
+    student.markModified("certificates");
+    student.updated_at = new Date();
+    await student.save();
+
+    // Delete file from disk if present locally
+    for (const rawP of filesToDelete) {
+      try {
+        if (!rawP || rawP.startsWith("http://") || rawP.startsWith("https://")) continue;
+        const fileName = path.basename(rawP);
+        const searchDirs = [
+          path.join(__dirname, "../../public/certificates"),
+          path.join(__dirname, "../../public/uploads/certificates"),
+          path.join(__dirname, "../../public/uploads"),
+          path.join(__dirname, "../../../frontend-admin/public/certificates"),
+          path.join(__dirname, "../../../frontend-main/public/certificates")
+        ];
+        for (const dir of searchDirs) {
+          const fullFilePath = path.join(dir, fileName);
+          if (fs.existsSync(fullFilePath)) {
+            try {
+              fs.unlinkSync(fullFilePath);
+              console.log("Deleted certificate file from disk:", fullFilePath);
+            } catch (uErr) {
+              console.warn("Error unlinking file:", fullFilePath, uErr.message);
+            }
+          }
+        }
+      } catch (fileErr) {
+        console.warn("Could not delete physical file:", fileErr.message);
+      }
+    }
+
+    memoryCache.clear();
+
+    return {
+      success: true,
+      message: `Certificate for "${targetCourseName || 'course'}" deleted successfully`,
+      student
+    };
+  } catch (error) {
+    console.error("Error in deleteCertificate service:", error);
+    return {
+      success: false,
+      message: error.message || "Internal server error",
+    };
+  }
+};
+

@@ -1,7 +1,7 @@
-import { useState } from "react";
-import { X, FileText, CalendarPlus, Check, Eye, EyeOff, Upload, Award } from "lucide-react";
+import { useState, useEffect } from "react";
+import { X, FileText, CalendarPlus, Check, Eye, EyeOff, Upload, Award, Trash2, Download, ExternalLink } from "lucide-react";
 import { Student, Admission } from "../types";
-import { getApiUrl } from "../../../utils/api";
+import { getApiUrl, API_BASE_URL } from "../../../utils/api";
 import { checkPasswordValidity, PasswordRequirements } from "../AdminLogin";
 
 const ALL_COURSES = [
@@ -42,11 +42,157 @@ export function StudentModal({ student, onClose, onSave }: {
     referredByPassword: "",
   });
 
-  // Process student admissions to ensure they have all required fields
-  const processedStudentAdmissions = student?.admissions?.map(adm => ({
-    ...adm,
-    admissionId: adm.admissionId || `ADM-${Date.now()}-${student.id}`,
-  })) || [];
+  // Certificate Preview Modal state
+  const [previewCertificate, setPreviewCertificate] = useState<{
+    courseName: string;
+    fullUrl: string;
+    rawUrl: string;
+    isPdf: boolean;
+  } | null>(null);
+
+  // Deleting certificate progress indicator
+  const [isDeletingCert, setIsDeletingCert] = useState<string | null>(null);
+
+  // Helper to resolve certificate URL safely
+  const resolveCertificateUrl = (rawPath?: string) => {
+    if (!rawPath) return "";
+    if (rawPath.startsWith("http://") || rawPath.startsWith("https://") || rawPath.startsWith("data:") || rawPath.startsWith("blob:")) {
+      return rawPath;
+    }
+    const clean = rawPath.startsWith("/") ? rawPath : `/${rawPath}`;
+    return `${API_BASE_URL}${clean}`;
+  };
+
+  const isPdfFile = (url: string) => {
+    return url.toLowerCase().endsWith(".pdf") || url.includes(".pdf?");
+  };
+
+  // Process student admissions to ensure they have all required fields and certificates
+  const getInitialAdmissions = (): Admission[] => {
+    if (!student?.admissions || student.admissions.length === 0) return [];
+    return student.admissions.map(adm => {
+      let certs = Array.isArray(adm.certificates) ? [...adm.certificates] : [];
+      // If admission certificates is empty, check student.certificates
+      if (certs.length === 0 && Array.isArray(student.certificates) && student.certificates.length > 0) {
+        const admCourses = (adm.courses || []).map(c => (c || '').toLowerCase().trim());
+        const matched = student.certificates.filter(sc => {
+          const scName = (sc.courseName || (sc as any).course_name || '').toLowerCase().trim();
+          return admCourses.some(ac => 
+            ac === scName || 
+            ac.includes(scName) || 
+            scName.includes(ac) || 
+            (ac.includes('creative') && scName.includes('creative')) ||
+            (ac.includes('seo') && scName.includes('seo')) ||
+            (ac.includes('master') && scName.includes('master')) ||
+            (ac.includes('graphic') && scName.includes('graphic')) ||
+            (ac.includes('video') && scName.includes('video'))
+          ) || (student.admissions && student.admissions.length === 1);
+        });
+        if (matched.length > 0) {
+          certs = [...matched];
+        }
+      }
+      return {
+        ...adm,
+        admissionId: adm.admissionId || `ADM-${Date.now()}-${student.id}`,
+        certificates: certs
+      };
+    });
+  };
+
+  const [localAdmissions, setLocalAdmissions] = useState<Admission[]>(getInitialAdmissions);
+
+  useEffect(() => {
+    setLocalAdmissions(getInitialAdmissions());
+  }, [student]);
+
+  const handleDeleteCertificate = async (cert: any, admissionId: string) => {
+    const courseTitle = cert.courseName || cert.course_name || "this course";
+    const confirmed = window.confirm(
+      `Are you sure you want to delete the certificate for "${courseTitle}"?\n\nThis will permanently delete the certificate.`
+    );
+    if (!confirmed) return;
+
+    try {
+      setIsDeletingCert(cert.id || courseTitle);
+      const token = localStorage.getItem("adminAuthToken");
+      const certPath = cert.certificatePath || cert.certificate_path || cert.url;
+      
+      const res = await fetch(getApiUrl("/deleteCertificate"), {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...(token ? { "Authorization": `Bearer ${token}` } : {})
+        },
+        body: JSON.stringify({
+          student_ID: studentInfo.id,
+          courseName: courseTitle,
+          certificate_id: cert.id,
+          certificate_path: certPath,
+          admission_id: admissionId
+        })
+      });
+
+      const data = await res.json();
+      if (data.success) {
+        // Update local admissions state immediately
+        const updatedAdmissions = localAdmissions.map(adm => {
+          if (adm.admissionId === admissionId) {
+            return {
+              ...adm,
+              certificates: (adm.certificates || []).filter(c => {
+                const cId = c.id;
+                const cName = c.courseName || (c as any).course_name;
+                const cP = c.url || (c as any).certificatePath || (c as any).certificate_path;
+                if (cert.id && cId && cId === cert.id) return false;
+                if (certPath && cP && cP === certPath) return false;
+                if (cName && courseTitle && cName === courseTitle) return false;
+                return true;
+              })
+            };
+          }
+          return adm;
+        });
+
+        setLocalAdmissions(updatedAdmissions);
+
+        if (student) {
+          const updatedStudentObj: Student = {
+            ...student,
+            admissions: updatedAdmissions,
+            certificates: (student.certificates || []).filter(c => {
+              const cName = c.courseName || (c as any).course_name;
+              const cP = c.url || (c as any).certificatePath || (c as any).certificate_path;
+              if (certPath && cP && cP === certPath) return false;
+              if (cName && courseTitle && cName === courseTitle) return false;
+              return true;
+            })
+          };
+          onSave(updatedStudentObj, false);
+        }
+
+        alert(`✅ Certificate for "${courseTitle}" deleted successfully!`);
+      } else {
+        alert(data.message || "Failed to delete certificate");
+      }
+    } catch (err) {
+      console.error("Error deleting certificate:", err);
+      alert("An error occurred while deleting the certificate: " + (err as Error).message);
+    } finally {
+      setIsDeletingCert(null);
+    }
+  };
+
+  const handlePreviewCertificate = (cert: any) => {
+    const rawUrl = cert.certificatePath || cert.certificate_path || cert.url || "";
+    const fullUrl = resolveCertificateUrl(rawUrl);
+    setPreviewCertificate({
+      courseName: cert.courseName || cert.course_name || "Course Certificate",
+      fullUrl,
+      rawUrl,
+      isPdf: isPdfFile(fullUrl)
+    });
+  };
 
   // Current admission being edited
   const [currentAdmission, setCurrentAdmission] = useState({
@@ -496,7 +642,7 @@ export function StudentModal({ student, onClose, onSave }: {
             referredByPhone: studentInfo.referredByPhone,
             referredByEmail: studentInfo.referredByEmail,
             referredAmount: Number(studentInfo.referredAmount || 0),
-            admissions: [...processedStudentAdmissions]
+            admissions: [...localAdmissions]
           };
 
           if (studentInfo.password) {
@@ -619,6 +765,7 @@ export function StudentModal({ student, onClose, onSave }: {
             setSelectedAdmissionForCertificate(null);
             setCertificateFile(null);
             setCertificateCourse("");
+            setLocalAdmissions(updatedStudent.admissions || []);
             alert(`✅ Certificate for "${uploadedCourseName}" uploaded successfully! It is now available on the student's portal.`);
           }
 
@@ -634,12 +781,12 @@ export function StudentModal({ student, onClose, onSave }: {
   };
 
   // Calculate total fees across all admissions
-  const totalFeesAcrossAdmissions = processedStudentAdmissions.reduce((sum, adm) => {
+  const totalFeesAcrossAdmissions = localAdmissions.reduce((sum, adm) => {
     const extFee = admissionExtensionUpdates[adm.admissionId]?.additionalFee || 0;
     return sum + adm.totalFee + extFee;
   }, 0);
-  const totalPaidFeesAcrossAdmissions = processedStudentAdmissions.reduce((sum, adm) => sum + adm.totalPaidFee, 0);
-  const totalPendingFeesAcrossAdmissions = processedStudentAdmissions.reduce((sum, adm) => {
+  const totalPaidFeesAcrossAdmissions = localAdmissions.reduce((sum, adm) => sum + adm.totalPaidFee, 0);
+  const totalPendingFeesAcrossAdmissions = localAdmissions.reduce((sum, adm) => {
     const extFee = admissionExtensionUpdates[adm.admissionId]?.additionalFee || 0;
     return sum + adm.pendingFee + extFee;
   }, 0);
@@ -767,10 +914,10 @@ export function StudentModal({ student, onClose, onSave }: {
             )}
 
             {/* Existing Admissions (only for existing students) */}
-            {student && processedStudentAdmissions.length > 0 && (
+            {student && localAdmissions.length > 0 && (
               <div className="space-y-4">
                 <div className="flex justify-between items-center">
-                  <h4 className="text-xs font-bold text-purple-600 uppercase tracking-widest">Student Admissions ({processedStudentAdmissions.length})</h4>
+                  <h4 className="text-xs font-bold text-purple-600 uppercase tracking-widest">Student Admissions ({localAdmissions.length})</h4>
                   <div className="text-sm text-neutral-600">
                     Total Fees: <span className="font-bold text-neutral-900">₹{totalFeesAcrossAdmissions}</span> |
                     Total Paid: <span className="font-bold text-green-600">₹{totalPaidFeesAcrossAdmissions}</span> |
@@ -778,7 +925,7 @@ export function StudentModal({ student, onClose, onSave }: {
                   </div>
                 </div>
                 <div className="space-y-3">
-                  {processedStudentAdmissions.map((admission, idx) => (
+                  {localAdmissions.map((admission, idx) => (
                     <div key={admission.admissionId} className="border border-neutral-200 rounded-xl p-4 bg-white shadow-sm">
                       <div className="flex justify-between items-start mb-3">
                         <div>
@@ -841,23 +988,6 @@ export function StudentModal({ student, onClose, onSave }: {
                           <span className="font-medium text-neutral-600">Installments:</span> {admission.feesInstallment}
                         </div>
                       </div>
-
-                      {/* Certificates for this admission */}
-                      {admission.certificates.length > 0 && (
-                        <div className="mt-3 pt-3 border-t border-neutral-100">
-                          <h6 className="text-xs font-semibold text-green-700 mb-2">Issued Certificates:</h6>
-                          <div className="flex flex-wrap gap-2">
-                            {admission.certificates.map((cert) => (
-                              <div key={cert.id} className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-green-50 border border-green-200">
-                                <span className="text-xs font-semibold text-green-800">{cert.courseName}</span>
-                                <a href={cert.url} target="_blank" rel="noopener noreferrer" className="text-xs text-blue-600 hover:underline">
-                                  View
-                                </a>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      )}
 
                       {/* Payment Controls */}
                       <div className="mt-3 pt-3 border-t border-neutral-100">
@@ -1158,105 +1288,25 @@ export function StudentModal({ student, onClose, onSave }: {
                         </div>
                       )}
 
-                      {/* Certificate upload button & list - only if fees clear */}
-                      {admission.feesStatus === "Clear" && (
-                        <div className="mt-3 pt-3 border-t border-neutral-100 space-y-3">
-                          {/* Uploaded Certificates List */}
-                          {admission.certificates && admission.certificates.length > 0 && (
-                            <div className="space-y-1.5">
-                              <span className="text-[11px] font-bold text-neutral-500 uppercase tracking-wider block">
-                                Uploaded Certificates ({admission.certificates.length}):
+                      {/* Certificates Section for this Admission */}
+                      <div className="mt-4 pt-3.5 border-t border-neutral-200/80 space-y-3">
+                        <div className="flex items-center justify-between flex-wrap gap-2">
+                          <div className="flex items-center gap-2">
+                            <div className="w-6 h-6 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0">
+                              <Award size={14} />
+                            </div>
+                            <span className="text-xs font-bold text-neutral-800 tracking-wide uppercase">
+                              Certificates ({admission.certificates?.length || 0})
+                            </span>
+                            {admission.certificates && admission.certificates.length > 0 && (
+                              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-200">
+                                {admission.certificates.length} Issued
                               </span>
-                              <div className="flex flex-wrap gap-2">
-                                {admission.certificates.map((cert: any, cIdx: number) => {
-                                  const cPath = cert.certificatePath || cert.certificate_path || cert.url;
-                                  const fullHref = cPath
-                                    ? (cPath.startsWith("http") ? cPath : `http://localhost:3001${cPath.startsWith("/") ? "" : "/"}${cPath}`)
-                                    : null;
-                                  return (
-                                    <div key={cIdx} className="flex items-center gap-2 px-3 py-1.5 bg-emerald-50 border border-emerald-200 rounded-lg text-xs font-semibold text-emerald-800">
-                                      <Award size={14} className="text-emerald-600" />
-                                      <span>{cert.courseName || cert.course_name}</span>
-                                      {fullHref && (
-                                        <a
-                                          href={fullHref}
-                                          target="_blank"
-                                          rel="noreferrer"
-                                          className="text-blue-600 hover:text-blue-800 underline font-semibold ml-1 cursor-pointer"
-                                        >
-                                          View
-                                        </a>
-                                      )}
-                                    </div>
-                                  );
-                                })}
-                              </div>
-                            </div>
-                          )}
+                            )}
+                          </div>
 
-                          {selectedAdmissionForCertificate === admission.admissionId ? (
-                            <div className="p-3.5 bg-blue-50/70 border border-blue-200 rounded-xl space-y-3">
-                              <div className="text-xs font-bold text-blue-900 flex items-center gap-1.5">
-                                <Upload size={14} className="text-blue-600" />
-                                Upload Certificate for this Admission
-                              </div>
-                              <div className="flex gap-2 flex-wrap items-center">
-                                <select 
-                                  value={certificateCourse} 
-                                  onChange={(e) => setCertificateCourse(e.target.value)} 
-                                  className="px-3 py-2 rounded-lg border border-neutral-300 bg-white text-xs font-semibold text-neutral-800 outline-none focus:border-blue-500"
-                                >
-                                  <option value="">Select course for certificate *</option>
-                                  {admission.courses.map((course) => (
-                                    <option key={course} value={course}>{course}</option>
-                                  ))}
-                                </select>
-                                <input 
-                                  type="file" 
-                                  accept="application/pdf, image/*" 
-                                  onChange={(e) => setCertificateFile(e.target.files?.[0] || null)} 
-                                  className="text-xs text-neutral-700 file:mr-2 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-blue-100 file:text-blue-700 hover:file:bg-blue-200 cursor-pointer" 
-                                />
-                                <button 
-                                  type="button" 
-                                  onClick={(e) => {
-                                    if (!certificateCourse) {
-                                      alert("Please select a course for the certificate!");
-                                      return;
-                                    }
-                                    if (!certificateFile) {
-                                      alert("Please choose a certificate file (PNG, JPG, or PDF)!");
-                                      return;
-                                    }
-                                    const form = (e.currentTarget as HTMLElement).closest("form");
-                                    if (form) {
-                                      form.requestSubmit();
-                                    }
-                                  }} 
-                                  className="px-3.5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-bold transition-all shadow-xs flex items-center gap-1.5 cursor-pointer"
-                                >
-                                  <Upload size={13} />
-                                  Upload & Save
-                                </button>
-                                <button 
-                                  type="button" 
-                                  onClick={() => {
-                                    setSelectedAdmissionForCertificate(null);
-                                    setCertificateFile(null);
-                                    setCertificateCourse("");
-                                  }} 
-                                  className="px-3 py-2 bg-neutral-200 text-neutral-700 rounded-lg text-xs font-semibold hover:bg-neutral-300 transition-all cursor-pointer"
-                                >
-                                  Cancel
-                                </button>
-                              </div>
-                              {certificateFile && (
-                                <div className="text-[11px] text-blue-700 font-medium">
-                                  Selected file: <span className="font-bold">{certificateFile.name}</span>
-                                </div>
-                              )}
-                            </div>
-                          ) : (
+                          {/* Upload Certificate toggle - if fees are clear */}
+                          {admission.feesStatus === "Clear" && selectedAdmissionForCertificate !== admission.admissionId && (
                             <button 
                               type="button" 
                               onClick={() => {
@@ -1265,14 +1315,139 @@ export function StudentModal({ student, onClose, onSave }: {
                                   setCertificateCourse(admission.courses[0]);
                                 }
                               }} 
-                              className="px-4 py-2 bg-green-100 hover:bg-green-200 text-green-700 rounded-lg text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer border border-green-200"
+                              className="px-3.5 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-300 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer shadow-2xs hover:shadow-xs"
                             >
                               <Upload size={13} />
                               + Upload Certificate
                             </button>
                           )}
                         </div>
-                      )}
+
+                        {/* Uploaded Certificates List */}
+                        {admission.certificates && admission.certificates.length > 0 ? (
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5">
+                            {admission.certificates.map((cert: any, cIdx: number) => {
+                              const isCurrentDeleting = isDeletingCert === (cert.id || cert.courseName || cert.course_name);
+
+                              return (
+                                <div 
+                                  key={cert.id || cIdx} 
+                                  className="flex items-center justify-between p-3 bg-neutral-50/80 hover:bg-emerald-50/40 border border-neutral-200 hover:border-emerald-300 rounded-2xl transition-all shadow-2xs"
+                                >
+                                  <div className="flex items-center gap-2.5 min-w-0 pr-2">
+                                    <div className="w-8 h-8 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-700 flex items-center justify-center shrink-0 shadow-2xs">
+                                      <Award size={16} />
+                                    </div>
+                                    <div className="min-w-0">
+                                      <div className="text-xs font-bold text-neutral-900 truncate" title={cert.courseName || cert.course_name}>
+                                        {cert.courseName || cert.course_name}
+                                      </div>
+                                      <div className="text-[10px] text-neutral-500 flex items-center gap-1">
+                                        <span>Issued: {cert.date ? new Date(cert.date).toLocaleDateString('en-IN') : 'Available'}</span>
+                                      </div>
+                                    </div>
+                                  </div>
+
+                                  {/* Action Buttons: View & Delete */}
+                                  <div className="flex items-center gap-1.5 shrink-0">
+                                    {/* View in Admin Panel Button */}
+                                    <button
+                                      type="button"
+                                      onClick={() => handlePreviewCertificate(cert)}
+                                      className="px-3 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 hover:border-blue-300 rounded-lg text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer shadow-2xs"
+                                      title="Admin panel mein certificate dekhein"
+                                    >
+                                      <Eye size={13} />
+                                      <span>View</span>
+                                    </button>
+
+                                    {/* Delete Certificate Button */}
+                                    <button
+                                      type="button"
+                                      onClick={() => handleDeleteCertificate(cert, admission.admissionId)}
+                                      disabled={isCurrentDeleting}
+                                      className="px-2.5 py-1.5 bg-red-50 hover:bg-red-100 text-red-700 border border-red-200 hover:border-red-300 rounded-lg text-xs font-bold flex items-center gap-1 transition-all cursor-pointer shadow-2xs disabled:opacity-50"
+                                      title="Certificate delete karein"
+                                    >
+                                      <Trash2 size={13} />
+                                      <span>{isCurrentDeleting ? "..." : "Delete"}</span>
+                                    </button>
+                                  </div>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        ) : (
+                          <div className="text-xs text-neutral-400 italic py-1 bg-neutral-50/50 px-3 rounded-lg border border-dashed border-neutral-200">
+                            Abhi tak koi certificate upload ya issue nahi hua hai.
+                          </div>
+                        )}
+
+                        {/* Upload Form */}
+                        {selectedAdmissionForCertificate === admission.admissionId && (
+                          <div className="p-4 bg-blue-50/70 border border-blue-200 rounded-2xl space-y-3 mt-2 animate-in fade-in duration-200">
+                            <div className="text-xs font-bold text-blue-900 flex items-center gap-1.5">
+                              <Upload size={14} className="text-blue-600" />
+                              Upload Certificate for this Admission
+                            </div>
+                            <div className="flex gap-2 flex-wrap items-center">
+                              <select 
+                                value={certificateCourse} 
+                                onChange={(e) => setCertificateCourse(e.target.value)} 
+                                className="px-3 py-2 rounded-xl border border-neutral-300 bg-white text-xs font-semibold text-neutral-800 outline-none focus:border-blue-500 shadow-2xs"
+                              >
+                                <option value="">Select course for certificate *</option>
+                                {admission.courses.map((course) => (
+                                  <option key={course} value={course}>{course}</option>
+                                ))}
+                              </select>
+                              <input 
+                                type="file" 
+                                accept="application/pdf, image/*" 
+                                onChange={(e) => setCertificateFile(e.target.files?.[0] || null)} 
+                                className="text-xs text-neutral-700 file:mr-2 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-blue-100 file:text-blue-700 hover:file:bg-blue-200 cursor-pointer" 
+                              />
+                              <button 
+                                type="button" 
+                                onClick={(e) => {
+                                  if (!certificateCourse) {
+                                    alert("Please select a course for the certificate!");
+                                    return;
+                                  }
+                                  if (!certificateFile) {
+                                    alert("Please choose a certificate file (PNG, JPG, or PDF)!");
+                                    return;
+                                  }
+                                  const form = (e.currentTarget as HTMLElement).closest("form");
+                                  if (form) {
+                                    form.requestSubmit();
+                                  }
+                                }} 
+                                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold transition-all shadow-xs flex items-center gap-1.5 cursor-pointer"
+                              >
+                                <Upload size={13} />
+                                Upload & Save
+                              </button>
+                              <button 
+                                type="button" 
+                                onClick={() => {
+                                  setSelectedAdmissionForCertificate(null);
+                                  setCertificateFile(null);
+                                  setCertificateCourse("");
+                                }} 
+                                className="px-3.5 py-2 bg-neutral-200 text-neutral-700 rounded-xl text-xs font-semibold hover:bg-neutral-300 transition-all cursor-pointer"
+                              >
+                                Cancel
+                              </button>
+                            </div>
+                            {certificateFile && (
+                              <div className="text-[11px] text-blue-700 font-medium">
+                                Selected file: <span className="font-bold">{certificateFile.name}</span>
+                              </div>
+                            )}
+                          </div>
+                        )}
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -1445,6 +1620,94 @@ export function StudentModal({ student, onClose, onSave }: {
           </div>
         </div>
       </div>
+
+      {/* Certificate Preview Modal */}
+      {previewCertificate && (
+        <div className="fixed inset-0 z-60 flex items-center justify-center p-4 bg-black/70 backdrop-blur-md animate-in fade-in duration-200">
+          <div className="bg-white rounded-3xl max-w-3xl w-full overflow-hidden shadow-2xl border border-neutral-200 flex flex-col max-h-[92vh] animate-in zoom-in-95 duration-200">
+            {/* Modal Header */}
+            <div className="px-6 py-4 border-b border-neutral-100 flex items-center justify-between bg-neutral-50 shrink-0">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0">
+                  <Award size={18} />
+                </div>
+                <div>
+                  <h4 className="text-sm font-bold text-neutral-900">
+                    {previewCertificate.courseName}
+                  </h4>
+                  <p className="text-[11px] text-neutral-500">
+                    Student: <span className="font-semibold text-neutral-700">{studentInfo.name}</span> ({studentInfo.id})
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <a
+                  href={previewCertificate.fullUrl}
+                  download
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-2xs transition-all"
+                  title="Download certificate"
+                >
+                  <Download size={13} />
+                  <span>Download</span>
+                </a>
+                <a
+                  href={previewCertificate.fullUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="p-2 text-neutral-600 hover:text-neutral-900 rounded-xl hover:bg-neutral-200/70 transition-colors"
+                  title="Open in new window"
+                >
+                  <ExternalLink size={16} />
+                </a>
+                <button
+                  type="button"
+                  onClick={() => setPreviewCertificate(null)}
+                  className="p-2 text-neutral-400 hover:text-neutral-700 rounded-xl hover:bg-neutral-200/70 transition-colors cursor-pointer"
+                  title="Close preview"
+                >
+                  <X size={18} />
+                </button>
+              </div>
+            </div>
+
+            {/* Certificate Preview Body */}
+            <div className="flex-1 overflow-auto p-4 bg-neutral-900/5 flex items-center justify-center min-h-[380px]">
+              {previewCertificate.isPdf ? (
+                <iframe 
+                  src={previewCertificate.fullUrl} 
+                  className="w-full h-[540px] rounded-2xl border border-neutral-300 bg-white shadow-sm" 
+                  title="Certificate PDF Preview"
+                />
+              ) : (
+                <div className="max-w-full max-h-[600px] flex items-center justify-center">
+                  <img 
+                    src={previewCertificate.fullUrl} 
+                    alt={previewCertificate.courseName} 
+                    className="max-h-[560px] w-auto max-w-full rounded-2xl shadow-xl border border-neutral-300 object-contain"
+                  />
+                </div>
+              )}
+            </div>
+
+            {/* Modal Footer */}
+            <div className="px-6 py-3 border-t border-neutral-100 bg-neutral-50 flex items-center justify-between text-xs text-neutral-600 shrink-0">
+              <span className="font-mono text-[11px] text-neutral-500 truncate max-w-md" title={previewCertificate.fullUrl}>
+                {previewCertificate.rawUrl}
+              </span>
+              <button
+                type="button"
+                onClick={() => setPreviewCertificate(null)}
+                className="px-4 py-1.5 bg-neutral-200 hover:bg-neutral-300 text-neutral-800 rounded-xl font-semibold transition-all cursor-pointer"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

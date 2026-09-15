@@ -4,7 +4,7 @@ const user_auth = require("../../middleware/user_auth");
 const multer_photo = require("../../middleware/multer");
 
 const {
-    add_student, certificate_view, updateStudentdetails, deleteStudent
+    add_student, certificate_view, updateStudentdetails, deleteStudent, deleteCertificate
 } = require("../controllers/addStudent");
 
 // Debug middleware to log incoming requests
@@ -28,5 +28,8 @@ router.get(
 
 router.delete("/deleteStudent/:student_ID", deleteStudent);
 router.post("/deleteStudent/:student_ID", deleteStudent);
+
+router.post("/deleteCertificate", deleteCertificate);
+router.delete("/deleteCertificate", deleteCertificate);
 
 module.exports = router;

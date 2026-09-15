@@ -1,4 +1,4 @@
-const { add_student, certificate_view, updateStudentdetails, deleteStudent } = require("../services/addStudent");
+const { add_student, certificate_view, updateStudentdetails, deleteStudent, deleteCertificate } = require("../services/addStudent");
 
 exports.add_student = async (req, res) => {
     try {
@@ -55,3 +55,17 @@ exports.deleteStudent = async (req, res) => {
     res.status(500).json({ success: false, message: error.message || "Internal server error" });
   }
 };
+
+exports.deleteCertificate = async (req, res) => {
+  try {
+    const data = await deleteCertificate(req, res);
+    if (data.success) {
+      res.status(200).json(data);
+    } else {
+      res.status(400).json(data);
+    }
+  } catch (error) {
+    console.log("Error in deleteCertificate controller:", error);
+    res.status(500).json({ success: false, message: error.message || "Internal server error" });
+  }
+};

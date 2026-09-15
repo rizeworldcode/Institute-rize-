@@ -346,12 +346,16 @@ export default function AdminDashboard() {
               feesStatus: adm.status || adm.feesStatus || "Pending",
               feesInstallment: Number(adm.fee_installment) || Number(adm.feesInstallment) || 0,
               payments: adm.payments || [],
-              certificates: adm.certificates ? adm.certificates.map((cert: any, idx: number) => ({
-                id: `cert-${item.student_ID}-${adm.admission_id}-${idx}`,
-                courseName: cert.courseName || cert.course_name,
-                url: cert.certificatePath || `/${cert.certificate_path || cert.certificatePath}`,
-                date: cert.issuedAt || cert.issued_at ? new Date(cert.issuedAt || cert.issued_at).toISOString() : new Date().toISOString()
-              })) : [],
+              certificates: adm.certificates ? adm.certificates.map((cert: any, idx: number) => {
+                const cPath = cert.certificatePath || cert.certificate_path || cert.url || "";
+                return {
+                  id: cert.id || (cert._id ? cert._id.toString() : `cert-${item.student_ID}-${adm.admission_id || adm.admissionId}-${idx}`),
+                  courseName: cert.courseName || cert.course_name || "Course Certificate",
+                  url: cPath,
+                  certificatePath: cPath,
+                  date: cert.issuedAt || cert.issued_at || cert.date ? new Date(cert.issuedAt || cert.issued_at || cert.date).toISOString() : new Date().toISOString()
+                };
+              }) : [],
               startDate: adm.course_start_date 
                 ? new Date(adm.course_start_date).toISOString().split('T')[0] 
                 : (adm.startDate 
@@ -378,19 +382,24 @@ export default function AdminDashboard() {
           // If no admissions, create a default one from the old structure for backward compatibility
           if (admissions.length === 0) {
             // Start with any existing certificates from the new array
-            let certificates: any[] = item.certificates ? item.certificates.map((cert: any, idx: number) => ({
-              id: `cert-${item.student_ID}-${idx}`,
-              courseName: cert.courseName || cert.course_name,
-              url: cert.certificatePath || `/${cert.certificate_path || cert.certificatePath}`,
-              date: cert.issuedAt || cert.issued_at ? new Date(cert.issuedAt || cert.issued_at).toISOString() : new Date().toISOString()
-            })) : [];
+            let certificates: any[] = item.certificates ? item.certificates.map((cert: any, idx: number) => {
+              const cPath = cert.certificatePath || cert.certificate_path || cert.url || "";
+              return {
+                id: cert.id || (cert._id ? cert._id.toString() : `cert-${item.student_ID}-${idx}`),
+                courseName: cert.courseName || cert.course_name || "Course Certificate",
+                url: cPath,
+                certificatePath: cPath,
+                date: cert.issuedAt || cert.issued_at || cert.date ? new Date(cert.issuedAt || cert.issued_at || cert.date).toISOString() : new Date().toISOString()
+              };
+            }) : [];
             
             // Add backward compatibility for old certificate_photo
             if (item.certificate_photo) {
               certificates.push({
                 id: `cert-${item.student_ID}-old`,
                 courseName: Array.isArray(item.selected_course_name) ? item.selected_course_name[0] : item.selected_course_name || "Course",
-                url: `/${item.certificate_photo}`,
+                url: item.certificate_photo,
+                certificatePath: item.certificate_photo,
                 date: item.created_at ? new Date(item.created_at).toISOString() : new Date().toISOString()
               });
             }
