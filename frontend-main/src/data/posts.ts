@@ -1417,7 +1417,6 @@ export const posts: BlogPost[] = [
       "Performance Marketing for Beginners"
     ],
     content: `
-      <h2>Get Job Ready with the Best Performance Marketing Course in India</h2>
       <p>The way people learn, shop, communicate, and do business has changed dramatically. Today, businesses of every size need skilled digital marketing professionals who can help them reach customers online and generate concrete, measurable results.</p>
       
       <p><strong>Performance marketing</strong> is one of the most practical and lucrative areas of digital marketing because it is 100% focused on direct outcomes such as leads, sales, enquiries, website visits, and customer engagement. At <a href="/master-course" class="blog-link"><strong>RizeWorld Institute</strong></a>, we help students and beginners understand performance marketing in a simple, practical, and step-by-step manner so they can develop valuable, high-income digital skills for their future.</p>
