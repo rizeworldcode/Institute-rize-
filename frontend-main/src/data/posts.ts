@@ -1907,6 +1907,363 @@ export const posts: BlogPost[] = [
         </a>
       </div>
     `
+  },
+  {
+    slug: "website-development-course-in-india",
+    title: "Website Development Course in India: Become a Job-Ready Web Developer",
+    excerpt: "Looking for the best Website Development Course in India? Master HTML, CSS, JavaScript, React JS, Node JS, PHP, and WordPress with 100% practical live project training.",
+    category: "Web Development",
+    readTime: "12 min read",
+    date: "September 24, 2026",
+    featured: false,
+    img: "/hero/Website Development Course in India.webp",
+    gridImg: "/hero/Website Development Course in India.webp",
+    keywords: [
+      "Website Development Course in India",
+      "Web Development Training in India",
+      "Full Stack Web Developer Course",
+      "React JS Course",
+      "Node JS and PHP Training",
+      "WordPress and WooCommerce Course",
+      "Web Developer Career in India",
+      "RizeWorld Institute"
+    ],
+    content: `
+      <p>A website developer is a person who builds the websites and applications we interact with every single day. From online shopping platforms and food delivery apps to banking portals and educational websites, web developers turn ideas into living digital solutions. If you want to launch a rewarding, future-proof tech career, enrolling in a comprehensive <strong>Website Development Course in India</strong> is your fastest gateway from complete beginner to job-ready developer.</p>
+
+      <div class="my-8 p-6 bg-blue-50 border-l-4 border-blue-600 rounded-r-xl">
+        <h3 class="text-blue-900 font-bold mt-0">AEO Quick Answer: What is a Website Development Course in India?</h3>
+        <p class="text-blue-950 mb-0">A <a href="/website-development" class="blog-link"><strong>Website Development Course in India</strong></a> is an intensive, practice-oriented training program that teaches you how to design, code, build, and maintain modern websites and dynamic web applications. Covering frontend and backend technologies—including <strong>HTML, CSS, JavaScript, React JS, Node JS, PHP, and WordPress</strong>—this course equips learners with 100% practical live project experience, portfolio development, and dedicated placement assistance at <a href="/master-course" class="blog-link"><strong>RizeWorld Institute</strong></a> in Alwar, Rajasthan.</p>
+      </div>
+
+      <h3>What Is a Website Development Course in India? Explained Like Building a House</h3>
+      <p>Imagine you are building a physical house. First, you create an architectural blueprint. Then you construct a solid foundation, build the sturdy brick walls, insert doors, and frame windows. Next, you paint the walls, install stylish lighting, and arrange furniture so people can live inside comfortably. Finally, you connect electricity, water supply, and drainage so everything functions smoothly.</p>
+
+      <p>A professional website development course teaches you to accomplish the exact same process, but with code instead of bricks and mortar. You do not just read theoretical concepts from outdated textbooks. You sit at a computer, write real code, watch your layout come to life on the screen in real-time, and troubleshoot issues as they arise.</p>
+
+      <div class="my-6 p-6 bg-slate-50 border-l-4 border-amber-500 rounded-r-xl">
+        <h4 class="font-bold text-neutral-900 mt-0 mb-3">A Simple Way to Remember Web Development:</h4>
+        <ul class="space-y-2 mb-0 text-neutral-700">
+          <li><strong>Plan of the house:</strong> The website layout, wireframes, and user experience design (UI/UX)</li>
+          <li><strong>Bricks and walls:</strong> HTML code providing the structural skeleton of the webpage</li>
+          <li><strong>Paint and decoration:</strong> CSS styling, typography, colors, and responsive layouts</li>
+          <li><strong>Electricity and switches:</strong> JavaScript bringing interactive buttons, animations, and actions to life</li>
+          <li><strong>Kitchen and storage room:</strong> The backend server, business logic, and databases (Node JS, PHP, SQL)</li>
+          <li><strong>Address of the house:</strong> The domain name and URL that directs visitors to your website</li>
+        </ul>
+      </div>
+
+      <h3>Website Development Course in India: Program Quick Overview</h3>
+      <div class="overflow-x-auto my-6 border border-neutral-200 rounded-xl bg-white shadow-xs">
+        <table class="w-full text-left border-collapse text-sm">
+          <thead>
+            <tr class="bg-neutral-900 text-white font-semibold">
+              <th class="p-3 border-r border-neutral-800">Program Feature</th>
+              <th class="p-3">Course Specification</th>
+            </tr>
+          </thead>
+          <tbody class="text-neutral-700">
+            <tr class="border-b border-neutral-200">
+              <td class="p-3 font-bold border-r border-neutral-200">Course Name</td>
+              <td class="p-3 text-neutral-800">Website Development Course in India</td>
+            </tr>
+            <tr class="border-b border-neutral-200">
+              <td class="p-3 font-bold border-r border-neutral-200">Training Location</td>
+              <td class="p-3 text-neutral-800"><a href="/location/alwar" class="blog-link">Alwar, Rajasthan</a> (Classroom &amp; Hands-on Lab)</td>
+            </tr>
+            <tr class="border-b border-neutral-200">
+              <td class="p-3 font-bold border-r border-neutral-200">Main Tech Stack</td>
+              <td class="p-3 text-neutral-800">HTML5, CSS3, JavaScript (ES6+), React JS, Node JS, PHP, MySQL, WordPress &amp; WooCommerce</td>
+            </tr>
+            <tr class="border-b border-neutral-200">
+              <td class="p-3 font-bold border-r border-neutral-200">Training Style</td>
+              <td class="p-3 text-green-700 font-semibold">100% Practical Learning with Live Client Projects</td>
+            </tr>
+            <tr class="border-b border-neutral-200">
+              <td class="p-3 font-bold border-r border-neutral-200">Career Support</td>
+              <td class="p-3 text-neutral-800">Live agency internships, resume reviews &amp; <a href="/hire-from-us" class="blog-link">100% placement support</a></td>
+            </tr>
+            <tr class="border-b border-neutral-200">
+              <td class="p-3 font-bold border-r border-neutral-200">Certification</td>
+              <td class="p-3 text-neutral-800">Industry-verified <a href="/certificate" class="blog-link">Developer Certificate</a></td>
+            </tr>
+            <tr>
+              <td class="p-3 font-bold border-r border-neutral-200">Trial Class</td>
+              <td class="p-3 text-blue-700 font-semibold"><a href="/contact" class="blog-link">Free Demo Class Available</a></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Why Become a Website Developer in India? Demand Is Growing Every Day</h3>
+      <p>India represents one of the fastest-growing technology ecosystems across the globe. Every day, thousands of traditional retail shops, schools, healthcare clinics, startups, and established enterprises launch their online presence. A local sweet shop needs an online delivery website. A coaching institute requires a student portal to showcase entrance exam results. A direct-to-consumer fashion brand wants an e-commerce storefront to sell products nationwide.</p>
+
+      <p>All of these businesses require skilled web developers to construct, optimize, secure, and maintain their digital properties. As a result, the demand for certified, job-ready website developers in India continues to expand exponentially.</p>
+
+      <p>Web development is also one of the few fields offering total location independence. You can work in a corporate office, work remotely from home, take on lucrative international freelance clients, or launch your own web agency. You do not need to migrate to tier-1 metro cities to get started. With practical skills, you can learn locally and build solutions for clients worldwide.</p>
+
+      <h4>Key Reasons Students Choose a Web Development Career:</h4>
+      <ul>
+        <li><strong>No Prior Coding Required:</strong> You can start from absolute zero with no computer science degree.</li>
+        <li><strong>Work From Anywhere:</strong> All you need is a laptop and reliable internet connection.</li>
+        <li><strong>Earn While You Learn:</strong> Freelance with WordPress and landing pages while mastering advanced stacks.</li>
+        <li><strong>High Entrepreneurial Potential:</strong> Build your own software product, SaaS, or agency in the future.</li>
+        <li><strong>Universal Industry Demand:</strong> Healthcare, real estate, education, e-commerce, and entertainment all hire developers.</li>
+      </ul>
+
+      <h3>Top Skills Every Website Developer in India Must Learn</h3>
+      <p>A modern web developer is like a craftsman equipped with a versatile digital toolbox. Each tool serves a unique purpose, and together they allow you to engineer sophisticated digital experiences:</p>
+
+      <ul>
+        <li><strong>Frontend Basics:</strong> HTML, CSS, modern layout frameworks, and responsive design so web pages adapt seamlessly to mobile phones, tablets, and desktop screens.</li>
+        <li><strong>JavaScript Mastery:</strong> Modern ES6+ syntax, DOM manipulation, event handling, and asynchronous API calls to build interactive elements like modals, search bars, and real-time forms.</li>
+        <li><strong>React JS:</strong> Component-based architecture, state management, custom hooks, and dynamic routing to construct snappy Single Page Applications (SPAs) and software dashboards.</li>
+        <li><strong>Backend Engineering:</strong> Node JS, Express, PHP, RESTful APIs, and relational/NoSQL databases to manage authentication, passwords, and user data safely.</li>
+        <li><strong>WordPress &amp; WooCommerce:</strong> Custom themes, plugins, and e-commerce configurations enabling fast turnarounds for commercial business websites.</li>
+      </ul>
+
+      <h3>HTML, CSS and JavaScript: The Three Building Blocks of Every Website</h3>
+      <p>Every website you browse is fundamentally composed of three foundational layers:</p>
+
+      <ol>
+        <li><strong>HTML (HyperText Markup Language):</strong> HTML is the structural skeleton of the web page. It defines the presence of headings, paragraphs, images, tables, forms, and clickable buttons. Without HTML, there is no content to show.</li>
+        <li><strong>CSS (Cascading Style Sheets):</strong> CSS acts as the styling, fashion, and visual presentation. It establishes color schemes, font hierarchies, margins, grids, flexbox layouts, and animations. You also learn responsive toolkits like Bootstrap and Tailwind to build mobile-first experiences quickly.</li>
+        <li><strong>JavaScript:</strong> If HTML is the skeleton and CSS is the clothing, JavaScript is the brain and nervous system. It makes web pages dynamic and interactive. When a user clicks a button to filter products, opens a sliding navigation menu, or validates form inputs before submission, JavaScript is running the show.</li>
+      </ol>
+
+      <h3>React JS Course: Build Fast and Modern Websites with Reusable Parts</h3>
+      <p>Once you are confident with HTML, CSS, and basic JavaScript, you level up to React JS—the world's most popular frontend library developed by Meta. Imagine building with LEGO blocks. Instead of building an entire castle from scratch every time, you craft individual reusable blocks like a navigation bar, a product card, and an authentication modal, and assemble them effortlessly into complex applications.</p>
+
+      <p>Leading tech giants—including Netflix, Instagram, Airbnb, and Uber—rely heavily on React. In our <a href="/website-development" class="blog-link"><strong>Website Development Course</strong></a>, you master components, state management, hooks, and client-side routing. By deploying live interactive React dashboards into your portfolio, you demonstrate tangible competence to hiring managers during job interviews.</p>
+
+      <h3>Node JS and PHP Training: Learn the Backend and Become a Full Stack Developer</h3>
+      <p>When you dine at a restaurant, you enjoy the ambiance of the dining hall, view the printed menu, and place orders with the server. However, the cooking, inventory management, and food preparation take place behind closed doors inside the kitchen. Websites operate under the exact same model:</p>
+
+      <ul>
+        <li><strong>The Frontend:</strong> Everything visible on the user's screen in the web browser.</li>
+        <li><strong>The Backend:</strong> Everything running on the server—processing authentication, verifying login passwords, handling payments, and storing data safely.</li>
+      </ul>
+
+      <p>Through our comprehensive Node JS and PHP modules, you learn to build secure RESTful APIs that act as digital servers transmitting messages between your frontend and database. You also connect websites to SQL (MySQL) and NoSQL (MongoDB) databases. Mastering both client-side and server-side engineering qualifies you as a versatile <strong>Full Stack Developer</strong>—one of the highest-paying profiles in the technology domain.</p>
+
+      <h3>WordPress and WooCommerce: Build Complete Online Stores Without Fear</h3>
+      <p>Not every business website needs to be written line-by-line from scratch. Industry-smart developers leverage WordPress—the Content Management System (CMS) powering over 40% of the entire internet. WordPress empowers you to launch professional, high-performance websites swiftly using tailored themes and robust plugins.</p>
+
+      <p>In this module, you master theme customizations, page builders, security configurations, and WooCommerce store setup. You will build end-to-end e-commerce stores equipped with product catalogs, shopping carts, coupons, and Indian payment gateways (such as UPI, Razorpay, and Paytm). This skill is immensely valuable for immediate freelance income, as local businesses gladly pay developers who can launch functional online stores within days.</p>
+
+      <h3>Website Development Course Syllabus in India: What You Will Study</h3>
+      <p>Here is an in-depth look at our step-by-step curriculum, curated by seasoned software engineers:</p>
+
+      <div class="overflow-x-auto my-6 border border-neutral-200 rounded-xl bg-white shadow-xs">
+        <table class="w-full text-left border-collapse text-sm">
+          <thead>
+            <tr class="bg-neutral-900 text-white font-semibold">
+              <th class="p-3 border-r border-neutral-800">Module</th>
+              <th class="p-3 border-r border-neutral-800">Domain</th>
+              <th class="p-3">Core Topics Covered</th>
+            </tr>
+          </thead>
+          <tbody class="text-neutral-700">
+            <tr class="border-b border-neutral-200">
+              <td class="p-3 font-bold border-r border-neutral-250">Module 1</td>
+              <td class="p-3 font-semibold text-blue-700 border-r border-neutral-250">Frontend Basics</td>
+              <td class="p-3">HTML5 semantic structure, CSS3 styling, Flexbox, CSS Grid, Bootstrap, mobile-first responsive layout design</td>
+            </tr>
+            <tr class="border-b border-neutral-200">
+              <td class="p-3 font-bold border-r border-neutral-250">Module 2</td>
+              <td class="p-3 font-semibold text-blue-700 border-r border-neutral-250">JavaScript Core</td>
+              <td class="p-3">Modern ES6+ syntax, DOM manipulation, event listeners, async/await, Fetch API, JSON parsing, client validation</td>
+            </tr>
+            <tr class="border-b border-neutral-200">
+              <td class="p-3 font-bold border-r border-neutral-250">Module 3</td>
+              <td class="p-3 font-semibold text-blue-700 border-r border-neutral-250">Modern React JS</td>
+              <td class="p-3">Components architecture, props, useState, useEffect, custom hooks, React Router, Single Page Applications (SPAs)</td>
+            </tr>
+            <tr class="border-b border-neutral-200">
+              <td class="p-3 font-bold border-r border-neutral-250">Module 4</td>
+              <td class="p-3 font-semibold text-blue-700 border-r border-neutral-250">Node JS Backend</td>
+              <td class="p-3">Node runtime environment, Express.js server, building REST APIs, middleware, HTTP status codes, server handling</td>
+            </tr>
+            <tr class="border-b border-neutral-200">
+              <td class="p-3 font-bold border-r border-neutral-250">Module 5</td>
+              <td class="p-3 font-semibold text-blue-700 border-r border-neutral-250">PHP &amp; Databases</td>
+              <td class="p-3">Server-side PHP scripting, MySQL database design, CRUD operations, session management, user authentication</td>
+            </tr>
+            <tr class="border-b border-neutral-200">
+              <td class="p-3 font-bold border-r border-neutral-250">Module 6</td>
+              <td class="p-3 font-semibold text-blue-700 border-r border-neutral-250">WordPress &amp; WooCommerce</td>
+              <td class="p-3">Theme installation, plugin customization, WooCommerce setup, product inventory, shipping methods, payment gateways</td>
+            </tr>
+            <tr>
+              <td class="p-3 font-bold border-r border-neutral-250">Module 7</td>
+              <td class="p-3 font-semibold text-blue-700 border-r border-neutral-250">Projects &amp; Career</td>
+              <td class="p-3">5+ Live capstone web applications, GitHub portfolio setup, technical mock interviews, resume refinement</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Live Projects and Practical Learning: Why Doing Beats Reading</h3>
+      <p>Have you ever attempted to learn how to ride a bicycle solely by reading an instruction manual? It is impossible. You only learn when your feet touch the pedals, when you experience minor wobbles, balance yourself, fall once or twice, and adjust your posture until riding becomes second nature.</p>
+
+      <p>Coding operates on the identical principle. That is why 100% practical, hands-on learning forms the core philosophy at <a href="/master-course" class="blog-link"><strong>RizeWorld Institute</strong></a>. Instead of memorizing theoretical syntax from slides, you write functional code every day in the lab. When code breaks, you inspect the error console, debug the issue under the guidance of senior mentors, and make it work.</p>
+
+      <h4>What Practical Learning Looks Like at RizeWorld:</h4>
+      <ul>
+        <li><strong>Hands-On in Every Class:</strong> You write code directly on development machines during every single session.</li>
+        <li><strong>Modular Mini-Projects:</strong> Construct a working landing page, a calculator app, an interactive quiz, or an API service after each topic.</li>
+        <li><strong>Real-Time Error Debugging:</strong> Gain confidence resolving real syntax, layout, and database connection errors.</li>
+        <li><strong>Team Collaboration:</strong> Use Git and GitHub to commit code, branch features, and collaborate like real engineering teams.</li>
+      </ul>
+
+      <h3>Build a Web Developer Portfolio That Gets You Hired</h3>
+      <p>Here is an insider secret many aspiring developers discover too late: when modern software companies hire developers, they do not base decisions on college degrees or written exam marks. They evaluate your <strong>portfolio</strong>. Your portfolio is your personal proof-of-work—a collection of live, functioning web applications that prove your technical skills far better than a piece of paper.</p>
+
+      <p>Throughout your training, you will build and deploy a portfolio containing <strong>five or more dynamic web applications</strong>. These projects demonstrate that you can structure accessible pages, handle user inputs, integrate REST APIs, connect databases, and deliver clean UI. Combined with an industry-verified developer certificate, your profile stands out distinctly to recruiters.</p>
+
+      <div class="my-6 p-6 bg-blue-50/70 border border-blue-200 rounded-2xl">
+        <h4 class="font-bold text-blue-900 mt-0 mb-3">Key Tangible Takeaways for Every Graduate:</h4>
+        <ul class="space-y-1 mb-0 text-blue-950 font-medium">
+          <li>✔ 5+ Dynamic Web Applications deployed live on personal domain or hosting</li>
+          <li>✔ Industry-verified developer certification recognized by top digital agencies</li>
+          <li>✔ Dedicated placement support workshops covering tech interview prep and HR screening</li>
+          <li>✔ 1-on-1 counselor mock drills to build calm, articulate interview confidence</li>
+        </ul>
+      </div>
+
+      <h3>Career Options After a Website Development Course in India</h3>
+      <p>After graduating from a structured web development course, numerous lucrative career pathways unlock across corporate firms, tech startups, agencies, and freelance marketplaces:</p>
+
+      <ul>
+        <li><strong>Frontend Engineer:</strong> Specializes in crafting visually appealing, lightning-fast, and responsive user interfaces using HTML, CSS, JavaScript, and React.</li>
+        <li><strong>WordPress Developer:</strong> Builds, customizes, and manages dynamic business websites, e-commerce stores, and blogs for corporate clients and international customers.</li>
+        <li><strong>Full Stack Developer:</strong> Manages both client-facing frontend design and server-side backend logic, databases, and APIs.</li>
+        <li><strong>UI Integrator / Web Designer:</strong> Bridges the gap between UI/UX design wireframes (Figma) and clean, responsive HTML/CSS web code.</li>
+        <li><strong>Freelance Web Developer:</strong> Operates independently, executing website design, maintenance, and redesign contracts for clients on platforms like Upwork and Fiverr.</li>
+        <li><strong>Digital Agency Founder:</strong> Scales an independent web development and digital marketing studio delivering end-to-end web solutions to local and national enterprises.</li>
+      </ul>
+
+      <h3>Why RizeWorld Is a Top Choice for Web Development Training in India</h3>
+      <p>When choosing where to invest your time and education, the training institute's methodology makes all the difference. RizeWorld Institute stands out for four decisive reasons:</p>
+
+      <ol>
+        <li><strong>Active Industry Trainers:</strong> You are trained by experienced software practitioners and <a href="/trainers" class="blog-link">industry mentors</a> who write production code daily—not academic lecturers reciting outdated theory.</li>
+        <li><strong>Full Tech Stack in One Place:</strong> You learn frontend, modern JavaScript libraries, server-side backend programming, databases, and CMS under one cohesive, organized curriculum.</li>
+        <li><strong>Real Agency Experience &amp; Placement:</strong> Qualify for hands-on internship opportunities inside real agency projects and enjoy comprehensive <a href="/hire-from-us" class="blog-link">placement support</a>.</li>
+        <li><strong>Zero-Risk Free Demo Class:</strong> Attend a free demo session to experience our interactive teaching style, tour our Alwar lab, and discuss your career roadmap with our friendly counselors.</li>
+      </ol>
+
+      <h3>Who Can Join a Website Development Course in India? Almost Everyone</h3>
+      <p>A common misconception among newcomers is believing you must possess strong math skills or an engineering background to code. That is simply false. Coding is a creative, structured skill that anyone can master through guided repetition and practice.</p>
+
+      <p>Our program welcomes:</p>
+      <ul>
+        <li><strong>10th / 12th Pass-Outs &amp; College Students:</strong> Build high-income technical skills early while pursuing academic degrees.</li>
+        <li><strong>Fresh Graduates &amp; Job Seekers:</strong> Bridge the skills gap and land entry-level developer and IT roles.</li>
+        <li><strong>Working Professionals:</strong> Seamlessly transition from non-technical, sales, or support jobs into technology.</li>
+        <li><strong>Business Owners &amp; Entrepreneurs:</strong> Understand web architectures, manage company websites, or build MVPs without costly vendor dependency.</li>
+        <li><strong>Aspiring Freelancers:</strong> Cultivate a global skill set allowing you to earn in foreign currencies from the comfort of home.</li>
+      </ul>
+
+      <h3>Your Step-by-Step Roadmap to Become a Web Developer in India</h3>
+      <p>Here is what your progressive transformation looks like from day one to your first developer job:</p>
+
+      <div class="space-y-3 my-6">
+        <div class="p-4 bg-white border border-neutral-200 rounded-xl shadow-xs flex items-start gap-4">
+          <span class="w-8 h-8 rounded-full bg-blue-600 text-white font-bold flex items-center justify-center shrink-0">1</span>
+          <div>
+            <h4 class="font-bold text-neutral-900 mb-1">Learn HTML &amp; CSS</h4>
+            <p class="text-sm text-neutral-600 mb-0">Build your first static webpage and experience the thrill of seeing your code appear in a browser.</p>
+          </div>
+        </div>
+        <div class="p-4 bg-white border border-neutral-200 rounded-xl shadow-xs flex items-start gap-4">
+          <span class="w-8 h-8 rounded-full bg-blue-600 text-white font-bold flex items-center justify-center shrink-0">2</span>
+          <div>
+            <h4 class="font-bold text-neutral-900 mb-1">Add JavaScript Interactivity</h4>
+            <p class="text-sm text-neutral-600 mb-0">Bring your pages alive with animations, popups, calculations, and responsive user actions.</p>
+          </div>
+        </div>
+        <div class="p-4 bg-white border border-neutral-200 rounded-xl shadow-xs flex items-start gap-4">
+          <span class="w-8 h-8 rounded-full bg-blue-600 text-white font-bold flex items-center justify-center shrink-0">3</span>
+          <div>
+            <h4 class="font-bold text-neutral-900 mb-1">Build Modern Apps with React JS</h4>
+            <p class="text-sm text-neutral-600 mb-0">Construct fast, reusable Single Page Applications and interactive software dashboards.</p>
+          </div>
+        </div>
+        <div class="p-4 bg-white border border-neutral-200 rounded-xl shadow-xs flex items-start gap-4">
+          <span class="w-8 h-8 rounded-full bg-blue-600 text-white font-bold flex items-center justify-center shrink-0">4</span>
+          <div>
+            <h4 class="font-bold text-neutral-900 mb-1">Master Backend &amp; Databases (Node JS &amp; PHP)</h4>
+            <p class="text-sm text-neutral-600 mb-0">Write APIs, process form data, handle user authentication, and manage secure databases.</p>
+          </div>
+        </div>
+        <div class="p-4 bg-white border border-neutral-200 rounded-xl shadow-xs flex items-start gap-4">
+          <span class="w-8 h-8 rounded-full bg-blue-600 text-white font-bold flex items-center justify-center shrink-0">5</span>
+          <div>
+            <h4 class="font-bold text-neutral-900 mb-1">Build Stores with WordPress &amp; WooCommerce</h4>
+            <p class="text-sm text-neutral-600 mb-0">Launch professional client websites and online storefronts to kickstart freelance earnings.</p>
+          </div>
+        </div>
+        <div class="p-4 bg-white border border-neutral-200 rounded-xl shadow-xs flex items-start gap-4">
+          <span class="w-8 h-8 rounded-full bg-blue-600 text-white font-bold flex items-center justify-center shrink-0">6</span>
+          <div>
+            <h4 class="font-bold text-neutral-900 mb-1">Finish Capstone Projects &amp; Get Certified</h4>
+            <p class="text-sm text-neutral-600 mb-0">Assemble your 5+ project live portfolio and earn an industry-recognized developer certification.</p>
+          </div>
+        </div>
+        <div class="p-4 bg-white border border-neutral-200 rounded-xl shadow-xs flex items-start gap-4">
+          <span class="w-8 h-8 rounded-full bg-blue-600 text-white font-bold flex items-center justify-center shrink-0">7</span>
+          <div>
+            <h4 class="font-bold text-neutral-900 mb-1">Join Placement Workshops &amp; Mock Interviews</h4>
+            <p class="text-sm text-neutral-600 mb-0">Sharpen your communication, practice technical coding rounds, and interview with corporate recruiters.</p>
+          </div>
+        </div>
+      </div>
+
+      <h3>Frequently Asked Questions (FAQs)</h3>
+      <div class="space-y-4 my-6">
+        <div class="p-5 bg-neutral-50 rounded-xl border border-neutral-200">
+          <p class="font-bold text-neutral-900 mb-1">Q: Do I need prior coding knowledge before joining a website development course?</p>
+          <p class="text-neutral-600 mb-0">A: No. The course begins from the absolute fundamentals of computers, browsers, and basic HTML, making it 100% accessible to complete beginners.</p>
+        </div>
+        <div class="p-5 bg-neutral-50 rounded-xl border border-neutral-200">
+          <p class="font-bold text-neutral-900 mb-1">Q: Which programming languages and technologies are taught?</p>
+          <p class="text-neutral-600 mb-0">A: You learn HTML5, CSS3, JavaScript (ES6+), React JS, Node JS, PHP, and MySQL database management, along with WordPress and WooCommerce for CMS development.</p>
+        </div>
+        <div class="p-5 bg-neutral-50 rounded-xl border border-neutral-200">
+          <p class="font-bold text-neutral-900 mb-1">Q: Can I build functional websites without writing complex code?</p>
+          <p class="text-neutral-600 mb-0">A: Yes. With WordPress and WooCommerce, you can build full-fledged business portals and e-commerce stores using themes and plugins, while also learning how to customize them with code.</p>
+        </div>
+        <div class="p-5 bg-neutral-50 rounded-xl border border-neutral-200">
+          <p class="font-bold text-neutral-900 mb-1">Q: Are there job placement and internship opportunities after the course?</p>
+          <p class="text-neutral-600 mb-0">A: Yes. RizeWorld Institute provides 100% placement assistance, resume preparation, counselor mock drills, and agency internship opportunities with working engineering teams.</p>
+        </div>
+        <div class="p-5 bg-neutral-50 rounded-xl border border-neutral-200">
+          <p class="font-bold text-neutral-900 mb-1">Q: Can I try a class before making a final decision?</p>
+          <p class="text-neutral-600 mb-0">A: Absolutely! You can book a free demo session to attend a class, explore the laboratory, and interact with our faculty counselors before enrolling.</p>
+        </div>
+      </div>
+
+      <h3>Start Your Web Developer Journey Today</h3>
+      <p>The internet continues to expand exponentially every single day, and businesses will always require skilled, dependable individuals who can construct, improve, and secure websites. With practical training, live client projects, mentorship from expert trainers, and dedicated placement support, you can turn curiosity into a high-demand, high-paying career.</p>
+
+      <p>RizeWorld Institute in Alwar, Rajasthan is ready to guide you at every step of your development journey. Book a free demo class, talk with our counselors, and experience hands-on learning the right way. One day soon, you could be the professional who built the website thousands of people use every day.</p>
+
+      <div class="my-8 p-6 bg-neutral-900 text-white rounded-2xl shadow-xl border border-neutral-800">
+        <h4 class="text-xl font-extrabold text-white mt-0 mb-2">Book a Free Demo Class</h4>
+        <p class="text-blue-400 font-bold text-sm mb-1">RizeWorld Institute of AI and Digital Marketing</p>
+        <p class="text-neutral-300 text-sm mb-2">
+          📍 C197, near Telco Circle, UIT colony, Shalimar Nagar, Alwar, Rajasthan 301001
+        </p>
+        <p class="text-neutral-300 text-sm mb-4">
+          Phone / WhatsApp: <a href="tel:+918302277092" class="text-blue-400 font-bold hover:underline">+91 8302277092</a> | Email: <a href="mailto:rizeworldinstitute@gmail.com" class="text-blue-400 hover:underline">rizeworldinstitute@gmail.com</a>
+        </p>
+        <a href="/contact" class="inline-block px-6 py-3 rounded-full bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs tracking-wide transition-all shadow-md hover:scale-105">
+          Book Free Demo Class &amp; Counseling →
+        </a>
+      </div>
+    `
   }
 ];
+
 

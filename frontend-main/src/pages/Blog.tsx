@@ -5,7 +5,7 @@ import Reveal from "../components/Reveal";
 import SEO from "../components/SEO";
 import { posts } from "../data/posts";
 
-const categories = ["All", "AI & Tools", "Marketing", "Design", "SEO", "Career Tips"];
+const categories = ["All", "AI & Tools", "Marketing", "Web Development", "Design", "SEO", "Career Tips"];
 
 export default function Blog() {
   const [filter, setFilter] = useState("All");

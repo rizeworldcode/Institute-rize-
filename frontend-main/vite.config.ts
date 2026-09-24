@@ -133,6 +133,11 @@ function viteSeoPrerenderPlugin(): Plugin {
 
 // https://vite.dev/config/
 export default defineConfig({
+  server: {
+    watch: {
+      usePolling: true,
+    },
+  },
   plugins: [react(), tailwindcss(), viteSeoPrerenderPlugin()],
   resolve: {
     alias: {
