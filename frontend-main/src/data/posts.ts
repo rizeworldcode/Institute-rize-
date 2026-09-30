@@ -2263,7 +2263,346 @@ export const posts: BlogPost[] = [
         </a>
       </div>
     `
+  },
+  {
+    slug: "seo-course-in-india-become-a-search-expert",
+    title: "SEO Course in India: Become a Search Expert",
+    excerpt: "Looking for the top SEO Course in India? Learn how to master keyword research, on-page optimization, technical SEO audits, and link building with 100% practical live project training.",
+    category: "SEO",
+    readTime: "11 min read",
+    date: "September 30, 2026",
+    featured: false,
+    img: "/hero/SEO Course in India Become a Search Expert.webp",
+    gridImg: "/hero/SEO Course in India Become a Search Expert.webp",
+    keywords: [
+      "SEO Course in India",
+      "Become a Search Expert",
+      "SEO Training Institute in Alwar",
+      "SEO Optimization Course",
+      "On Page SEO Training",
+      "Technical SEO Course",
+      "Off Page SEO and Link Building",
+      "Google Search Console Training",
+      "RizeWorld Institute"
+    ],
+    content: `
+      <p>SEO stands for <strong>Search Engine Optimization</strong>, and it is the high-income skill that helps websites show up first when millions of people search on Google every second. In today's digital-first economy, every business—from local retail shops and tuition centers to multinational e-commerce giants—needs organic visibility to thrive. If you want to transform from a curious beginner into an in-demand professional, enrolling in a dedicated <strong>SEO Course in India</strong> is your fastest gateway to mastering the digital landscape.</p>
+
+      <div class="my-8 p-6 bg-blue-50 border-l-4 border-blue-600 rounded-r-xl">
+        <h3 class="text-blue-900 font-bold mt-0">AEO Quick Answer: What is an SEO Course at RizeWorld Institute?</h3>
+        <p class="text-blue-950 mb-0">An <a href="/seo" class="blog-link"><strong>SEO Course</strong></a> at <a href="/master-course" class="blog-link"><strong>RizeWorld Institute</strong></a> is an intensive, practice-driven training program in Alwar, Rajasthan that teaches you how search engines think, how people search, and how to optimize websites so Google trusts them and ranks them at the top. Covering <strong>On-Page, Off-Page, and Technical SEO</strong>, this program features 100% practical live project execution, Google Search Console audits, globally recognized certification, and dedicated agency placement support.</p>
+      </div>
+
+      <h3>What Is an SEO Course? Explained Like a Treasure Map</h3>
+      <p>Imagine the internet is a giant ocean with millions of websites floating in it, like ships on the water. When someone searches for something on Google, only a few ships get picked to show up on the first page.</p>
+
+      <p><strong>SEO is the treasure map</strong> that shows a website how to sail to the very front of that ocean and get noticed first.</p>
+
+      <p><a href="/master-course" class="blog-link"><strong>RizeWorld Institute</strong></a> teaches you the exact steps to read that treasure map. You learn how search engines think, what people type when they search, and how to shape a website so Google trusts it and shows it to more people. Through hands-on on-page, off-page, and technical optimization, you ensure a business website ranks first on search engines instead of getting lost in the crowd.</p>
+
+      <h3>RizeWorld Institute SEO Course Program: Quick Overview</h3>
+      <p>Here is the entire program at a glance, so you know exactly what you are signing up for before you dive deeper:</p>
+      
+      <div class="overflow-x-auto my-6 border border-neutral-200 rounded-xl bg-white shadow-xs">
+        <table class="w-full text-left border-collapse text-sm">
+          <thead>
+            <tr class="bg-neutral-900 text-white font-semibold">
+              <th class="p-3 border-r border-neutral-800">Program Pillar</th>
+              <th class="p-3">Course Specification</th>
+            </tr>
+          </thead>
+          <tbody class="text-neutral-700">
+            <tr class="border-b border-neutral-200">
+              <td class="p-3 font-bold border-r border-neutral-200">Course Name</td>
+              <td class="p-3 text-neutral-800"><a href="/seo" class="blog-link">SEO Optimization Course at RizeWorld Institute</a></td>
+            </tr>
+            <tr class="border-b border-neutral-200">
+              <td class="p-3 font-bold border-r border-neutral-200">Training Institute</td>
+              <td class="p-3 text-neutral-800">RizeWorld Institute, an <a href="/location/alwar" class="blog-link">SEO Training Institute in Alwar</a></td>
+            </tr>
+            <tr class="border-b border-neutral-200">
+              <td class="p-3 font-bold border-r border-neutral-200">Expert Trainers</td>
+              <td class="p-3 text-neutral-800"><a href="/trainers" class="blog-link">Industry trainers</a> with real agency experience managing multi-million reach campaigns</td>
+            </tr>
+            <tr class="border-b border-neutral-200">
+              <td class="p-3 font-bold border-r border-neutral-200">Training Format</td>
+              <td class="p-3 text-green-700 font-semibold">100% Practical learning with live client projects</td>
+            </tr>
+            <tr class="border-b border-neutral-200">
+              <td class="p-3 font-bold border-r border-neutral-200">Certification</td>
+              <td class="p-3 text-neutral-800">Verified <a href="/certificate" class="blog-link">SEO Course Certification</a> recognized globally</td>
+            </tr>
+            <tr>
+              <td class="p-3 font-bold border-r border-neutral-200">Demo Session</td>
+              <td class="p-3 text-neutral-800"><a href="/contact" class="blog-link">Free demo class available</a> at RizeWorld Institute</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Why Become a Search Expert with RizeWorld Institute? Every Business Needs One</h3>
+      <p>Think about how many shops, schools, and companies now have a website. A website is like a shop on a busy street, but if it is hidden in a dark back alley where nobody can see it, no customers will ever walk in. That is exactly what happens to a website with no SEO. It exists, but nobody finds it.</p>
+
+      <p>This is why every business in India, from a small local tuition center to a major multi-crore e-commerce platform, is actively hunting for people who understand SEO. When you train with RizeWorld Institute, you become the person who moves a website from that dark back alley to the busiest high street in town.</p>
+
+      <p>You do not need an expensive degree or a fancy corporate background to harness this skill. You can work for a leading digital agency, freelance for multiple national and international clients, or grow your own personal website and generate passive affiliate and ad revenue directly.</p>
+
+      <div class="my-6 p-6 bg-slate-50 border-l-4 border-blue-600 rounded-r-xl">
+        <h4 class="font-bold text-neutral-900 mt-0 mb-3">Top Reasons Students Choose RizeWorld Institute for This Career:</h4>
+        <ul class="space-y-2 mb-0 text-neutral-700">
+          <li><strong>Zero Technical Background Required:</strong> You can start without prior coding knowledge or technical degrees.</li>
+          <li><strong>Location Independence:</strong> Work comfortably from home, an office, or anywhere with an active internet connection.</li>
+          <li><strong>High Freelance Potential:</strong> Freelance for business clients across India and around the globe.</li>
+          <li><strong>Direct Entrepreneurial Impact:</strong> Apply the exact same optimization skills to scale your own business or e-commerce store.</li>
+          <li><strong>Universal Market Demand:</strong> Every industry—from education, healthcare, and finance to food and fashion—urgently needs organic search visibility.</li>
+        </ul>
+      </div>
+
+      <h3>Top Skills Every RizeWorld Institute Student Learns to Become a Search Expert</h3>
+      <p>Becoming a search expert is like learning to be a <strong>detective, a writer, and a mechanic</strong> all at once. Each skill helps you solve a different part of the SEO puzzle, and RizeWorld Institute builds every module around real-world application.</p>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 my-6">
+        <div class="p-5 bg-white border border-neutral-200 rounded-xl shadow-xs">
+          <h4 class="font-bold text-blue-900 mt-0 mb-2">1. Keyword Research</h4>
+          <p class="text-sm text-neutral-600 mb-0">Search intent analysis, competition mapping, and semantic SEO clustering so you pinpoint the exact high-value words prospective buyers type into Google.</p>
+        </div>
+        <div class="p-5 bg-white border border-neutral-200 rounded-xl shadow-xs">
+          <h4 class="font-bold text-blue-900 mt-0 mb-2">2. On-Page SEO</h4>
+          <p class="text-sm text-neutral-600 mb-0">Heading tag optimization (H1-H6), content readability formatting, persuasive meta titles, CTR-boosting meta descriptions, and strategic internal linking structures.</p>
+        </div>
+        <div class="p-5 bg-white border border-neutral-200 rounded-xl shadow-xs">
+          <h4 class="font-bold text-blue-900 mt-0 mb-2">3. Technical SEO</h4>
+          <p class="text-sm text-neutral-600 mb-0">Speed optimization (Core Web Vitals), XML sitemap management, schema markup injection, and deep Google Search Console diagnostic troubleshooting.</p>
+        </div>
+        <div class="p-5 bg-white border border-neutral-200 rounded-xl shadow-xs">
+          <h4 class="font-bold text-blue-900 mt-0 mb-2">4. Off-Page SEO &amp; Link Building</h4>
+          <p class="text-sm text-neutral-600 mb-0">Backlink outreach campaigns, digital PR writing, guest posting, and local citation building so authoritative websites vouch for your brand credibility.</p>
+        </div>
+      </div>
+
+      <h3>Keyword Research at RizeWorld Institute: The First Clue in Every SEO Case</h3>
+      <p>Every good detective starts with clues, and in SEO, those clues are <strong>keywords</strong>. A keyword is simply the exact words and phrases people type into Google when they are looking for a solution, product, or answer. If you do not know what people are searching for, you cannot help a website answer their questions.</p>
+
+      <p>At <a href="/seo" class="blog-link">RizeWorld Institute</a>, you master <strong>search intent analysis</strong>—understanding not just what someone typed, but what they genuinely want (informational, navigational, commercial, or transactional). You also learn <strong>competition mapping</strong>, identifying which keywords offer rapid ranking wins and which ones are monopolized by legacy domains. On top of that, RizeWorld Institute teaches <strong>semantic SEO mapping</strong>, empowering you to cluster related topics so a single authoritative page can dominate dozens of search queries simultaneously.</p>
+
+      <h3>On-Page SEO Training: Shaping the Website from the Inside</h3>
+      <p>Once you know which keywords to target, the next step is structuring the website content so it flawlessly matches what searchers and search engines want. This is called <strong>On-Page SEO</strong>, and you can think of it like organizing a modern department store so customers discover what they need without friction.</p>
+
+      <p>At RizeWorld Institute, you learn how to craft descriptive heading tags, format engaging multimedia content, and write compelling meta titles and descriptions that entice users to click your link over competitor results. You will also master <strong>internal linking architectures</strong>, connecting related pages across a domain so visitors and Google crawler bots navigate seamlessly without encountering dead ends.</p>
+
+      <h3>Technical SEO: The Engine Room Behind Every Website</h3>
+      <p>Every ocean liner needs a powerful engine room to stay fast, buoyant, and steady—and websites operate the exact same way. <strong>Technical SEO</strong> is the vital module where you learn how to keep that engine room operating at peak performance. If a website takes five seconds to load or confuses search spiders with broken redirect chains, it will never reach page one, no matter how brilliant its articles are.</p>
+
+      <p>In this module, RizeWorld Institute trainers guide you through:</p>
+      <ul>
+        <li><strong>Core Web Vitals &amp; PageSpeed Optimization:</strong> Shrink load times to keep mobile visitors engaged and prevent bounce rates.</li>
+        <li><strong>XML Sitemap Management:</strong> Provide search engines with an organized blueprint of every public URL.</li>
+        <li><strong>Schema Markup Injection:</strong> Implement structured microdata so Google can display rich snippets, review stars, and FAQ accordions directly in SERPs.</li>
+        <li><strong>Google Search Console Diagnostics:</strong> Monitor real search impressions, inspect index coverage issues, verify mobile usability, and rectify crawl errors like an agency pro.</li>
+      </ul>
+
+      <h3>Off-Page SEO and Link Building: Earning Trust from the Whole Internet</h3>
+      <p>Imagine you are new in town: neighbors will naturally trust you much faster once several respected local figures vouch for you. Search engines evaluate websites through that exact trust mechanism. <strong>Off-Page SEO</strong> is the art and science of earning trust signals and authority from other reputable domains across the web.</p>
+
+      <p>At RizeWorld Institute, you master ethical, white-hat backlink acquisition strategies. You will practice outreach communication, digital PR writing, authoritative guest blogging, and local citation syndication. This part of the training feels like strategic networking, as you build lasting relationships between websites just like professionals build connections in real life.</p>
+
+      <h3>RizeWorld Institute SEO Syllabus: Step-by-Step Learning Path</h3>
+      <p>Here is a clear view of how your training is structured, transitioning from fundamental audits to real client campaign execution:</p>
+
+      <div class="overflow-x-auto my-6 border border-neutral-200 rounded-xl bg-white shadow-xs">
+        <table class="w-full text-left border-collapse text-sm">
+          <thead>
+            <tr class="bg-neutral-900 text-white font-semibold">
+              <th class="p-3 border-r border-neutral-800">Training Stage</th>
+              <th class="p-3">Core Practical Activities</th>
+            </tr>
+          </thead>
+          <tbody class="text-neutral-700">
+            <tr class="border-b border-neutral-200">
+              <td class="p-3 font-bold border-r border-neutral-200">1. In-Depth Audit</td>
+              <td class="p-3 text-neutral-800">Perform a complete 360° technical and content SEO audit of active websites using industry software (Ahrefs, SEMrush, Screaming Frog).</td>
+            </tr>
+            <tr class="border-b border-neutral-200">
+              <td class="p-3 font-bold border-r border-neutral-200">2. Content Strategy</td>
+              <td class="p-3 text-neutral-800">Build topical authority hierarchies using semantic clustering, keyword gap analysis, and user intent optimization.</td>
+            </tr>
+            <tr>
+              <td class="p-3 font-bold border-r border-neutral-200">3. Link Acquisition</td>
+              <td class="p-3 text-neutral-800">Master proven off-page SEO methodologies to acquire natural, high-authority backlink references that withstand algorithm updates.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Live Projects and Practical Learning: Why Doing Beats Just Reading</h3>
+      <p>Have you ever tried to learn swimming solely by watching online tutorials? You could watch a hundred videos, but you will only truly learn once you jump into the pool and paddle yourself. SEO works exactly the same way. That is why RizeWorld Institute builds the entire syllabus around hands-on, practical execution.</p>
+
+      <p>Instead of memorizing static textbook slides, you run live technical audits on actual business domains, inject keywords into live CMS pages, and execute genuine link outreach workflows. Every audit you run and every diagnostic fix you implement creates an experiential lesson that stays with you throughout your professional career.</p>
+
+      <div class="my-6 p-6 bg-slate-50 border-l-4 border-amber-500 rounded-r-xl">
+        <h4 class="font-bold text-neutral-900 mt-0 mb-3">Hands-On Learning at RizeWorld Institute Includes:</h4>
+        <ul class="space-y-2 mb-0 text-neutral-700">
+          <li>Perform real SEO audits on active, commercial websites</li>
+          <li>Apply granular keyword research directly to genuine business pages</li>
+          <li>Diagnose and troubleshoot technical indexation errors using Google Search Console</li>
+          <li>Construct organic backlink pipelines through real agency outreach systems</li>
+          <li>Collaborate on live client briefs exactly like a full-time agency digital marketer</li>
+        </ul>
+      </div>
+
+      <h3>Build a Search Expert Portfolio That Gets You Hired</h3>
+      <p>Here is an eye-opening truth many aspiring professionals discover too late: when top companies and digital agencies recruit an SEO specialist, they do not just glance at a paper certificate. They want tangible proof that you can analyze traffic drops, uncover keyword opportunities, and elevate rankings.</p>
+
+      <p>A portfolio of real-world audit reports and ranking graphs serves as your trophy shelf, demonstrating your competencies far more convincingly than words ever could. During your training at RizeWorld Institute, you compile a comprehensive portfolio comprising full-site audits, content briefs, technical fix logs, and link building case studies. Alongside this practical proof, you receive a verified <a href="/certificate" class="blog-link"><strong>SEO Course Certification</strong></a> recognized globally, giving your resume immediate credibility in front of hiring managers.</p>
+
+      <h3>Career Options After the SEO Course at RizeWorld Institute</h3>
+      <p>Upon completing the SEO course, multiple lucrative career avenues unlock across digital agencies, startups, corporate enterprises, and freelance platforms:</p>
+
+      <div class="space-y-3 my-6">
+        <div class="p-4 bg-white border border-neutral-200 rounded-xl shadow-xs">
+          <h4 class="font-bold text-neutral-900 mb-1">SEO Specialist</h4>
+          <p class="text-sm text-neutral-600 mb-0">Improves a brand's ranking and organic traffic trajectory through on-page enhancements and technical diagnostics.</p>
+        </div>
+        <div class="p-4 bg-white border border-neutral-200 rounded-xl shadow-xs">
+          <h4 class="font-bold text-neutral-900 mb-1">Organic Search Manager</h4>
+          <p class="text-sm text-neutral-600 mb-0">Oversees an entire company's search visibility strategy, leading content teams, technical developers, and outreach executives.</p>
+        </div>
+        <div class="p-4 bg-white border border-neutral-200 rounded-xl shadow-xs">
+          <h4 class="font-bold text-neutral-900 mb-1">Search Strategist</h4>
+          <p class="text-sm text-neutral-600 mb-0">Plans long-term keyword blueprints, competitor takedown strategies, and enterprise topical authority architectures.</p>
+        </div>
+        <div class="p-4 bg-white border border-neutral-200 rounded-xl shadow-xs">
+          <h4 class="font-bold text-neutral-900 mb-1">Content Optimizer</h4>
+          <p class="text-sm text-neutral-600 mb-0">Refines editorial articles and landing pages so they satisfy user curiosity while fulfilling search engine algorithm criteria.</p>
+        </div>
+        <div class="p-4 bg-white border border-neutral-200 rounded-xl shadow-xs">
+          <h4 class="font-bold text-neutral-900 mb-1">Freelance SEO Consultant</h4>
+          <p class="text-sm text-neutral-600 mb-0">Manages high-ticket client retainers independently, setting your own schedule while servicing clients across India and internationally.</p>
+        </div>
+      </div>
+
+      <p>RizeWorld Institute backs your ambition with active placement drives, agency internship opportunities, resume crafting, and mock interview preparations through our dedicated <a href="/hire-from-us" class="blog-link">placement division</a>.</p>
+
+      <h3>Why RizeWorld Institute Is a Top Choice for SEO Training in India</h3>
+      <p>Why should you choose RizeWorld Institute for your SEO journey? Four distinct pillars set our academy apart:</p>
+      <ul>
+        <li><strong>Veteran Practitioner Trainers:</strong> Our curriculum is designed and taught by certified SEO specialists who manage multi-million organic search campaigns daily, ensuring you learn cutting-edge modern strategies rather than obsolete textbook theories.</li>
+        <li><strong>100% Practical Live Workflows:</strong> You work inside actual Google Search Console accounts, research with real SEO tools, and optimize active domains.</li>
+        <li><strong>Internships &amp; Placement Support:</strong> Gain hands-on agency internship experience alongside one-on-one placement counseling to secure high-paying roles.</li>
+        <li><strong>Globally Recognized Certification:</strong> Earn verified credentials that validate your practical capabilities to corporate hiring teams and international agencies.</li>
+      </ul>
+
+      <h3>Who Can Join the SEO Course at RizeWorld Institute? (Almost Everyone!)</h3>
+      <p>If you are thinking, <em>"I have never worked on a website before, can I really learn this?"</em>—the answer is an emphatic yes. RizeWorld Institute is purposefully structured to guide you from square one, step by step.</p>
+
+      <ul>
+        <li><strong>School Pass-Outs &amp; College Students:</strong> Curious about digital technology and eager to gain an unfair career advantage before graduation.</li>
+        <li><strong>Job Seekers &amp; Graduates:</strong> Looking for a recession-proof, high-demand skill with rapid entry into the corporate workforce.</li>
+        <li><strong>Working Professionals:</strong> Seeking to transition from traditional marketing, customer support, or admin roles into dynamic digital growth marketing.</li>
+        <li><strong>Business Owners &amp; Entrepreneurs:</strong> Dedicated to reducing expensive ad spend and dominating organic Google rankings for their own products and services.</li>
+        <li><strong>Freelancers &amp; Content Creators:</strong> Looking to upsell technical SEO and organic ranking services to expand client monthly retainers.</li>
+      </ul>
+
+      <p>All you need is genuine curiosity and a willingness to learn through practical drills. SEO is not about being a math genius or a computer programmer; it is about understanding human curiosity and knowing how to configure websites to provide the best possible answers.</p>
+
+      <h3>Your Step-by-Step Roadmap to Become a Search Expert at RizeWorld Institute</h3>
+      <div class="space-y-3 my-6">
+        <div class="p-4 bg-white border border-neutral-200 rounded-xl shadow-xs flex items-start gap-4">
+          <span class="w-8 h-8 rounded-full bg-blue-600 text-white font-bold flex items-center justify-center shrink-0">1</span>
+          <div>
+            <h4 class="font-bold text-neutral-900 mb-1">Master What SEO Really Means</h4>
+            <p class="text-sm text-neutral-600 mb-0">Discover how search crawlers explore the web, build index databases, and calculate rank positions.</p>
+          </div>
+        </div>
+        <div class="p-4 bg-white border border-neutral-200 rounded-xl shadow-xs flex items-start gap-4">
+          <span class="w-8 h-8 rounded-full bg-blue-600 text-white font-bold flex items-center justify-center shrink-0">2</span>
+          <div>
+            <h4 class="font-bold text-neutral-900 mb-1">Master Keyword Research &amp; Intent</h4>
+            <p class="text-sm text-neutral-600 mb-0">Learn how to uncover what your audience is actively searching for using keyword tools and semantic cluster grouping.</p>
+          </div>
+        </div>
+        <div class="p-4 bg-white border border-neutral-200 rounded-xl shadow-xs flex items-start gap-4">
+          <span class="w-8 h-8 rounded-full bg-blue-600 text-white font-bold flex items-center justify-center shrink-0">3</span>
+          <div>
+            <h4 class="font-bold text-neutral-900 mb-1">Study On-Page SEO Architecture</h4>
+            <p class="text-sm text-neutral-600 mb-0">Format content, optimize heading tags, write click-worthy meta tags, and build resilient internal link webs.</p>
+          </div>
+        </div>
+        <div class="p-4 bg-white border border-neutral-200 rounded-xl shadow-xs flex items-start gap-4">
+          <span class="w-8 h-8 rounded-full bg-blue-600 text-white font-bold flex items-center justify-center shrink-0">4</span>
+          <div>
+            <h4 class="font-bold text-neutral-900 mb-1">Dive Deep into Technical SEO</h4>
+            <p class="text-sm text-neutral-600 mb-0">Master website loading speed, XML sitemap generation, structured schema markup, and Google Search Console performance tracking.</p>
+          </div>
+        </div>
+        <div class="p-4 bg-white border border-neutral-200 rounded-xl shadow-xs flex items-start gap-4">
+          <span class="w-8 h-8 rounded-full bg-blue-600 text-white font-bold flex items-center justify-center shrink-0">5</span>
+          <div>
+            <h4 class="font-bold text-neutral-900 mb-1">Practice Off-Page SEO &amp; Outreach</h4>
+            <p class="text-sm text-neutral-600 mb-0">Acquire natural backlinks through guest posting, digital PR releases, citation audits, and outreach networking.</p>
+          </div>
+        </div>
+        <div class="p-4 bg-white border border-neutral-200 rounded-xl shadow-xs flex items-start gap-4">
+          <span class="w-8 h-8 rounded-full bg-blue-600 text-white font-bold flex items-center justify-center shrink-0">6</span>
+          <div>
+            <h4 class="font-bold text-neutral-900 mb-1">Run a 360° Live Website SEO Audit</h4>
+            <p class="text-sm text-neutral-600 mb-0">Conduct a full agency-grade SEO audit on a real business domain and formulate an actionable strategic roadmap.</p>
+          </div>
+        </div>
+        <div class="p-4 bg-white border border-neutral-200 rounded-xl shadow-xs flex items-start gap-4">
+          <span class="w-8 h-8 rounded-full bg-blue-600 text-white font-bold flex items-center justify-center shrink-0">7</span>
+          <div>
+            <h4 class="font-bold text-neutral-900 mb-1">Earn Your Certification &amp; Step into Placement</h4>
+            <p class="text-sm text-neutral-600 mb-0">Receive your verified SEO Course Certification and transition into corporate interview rounds with a portfolio that wows employers.</p>
+          </div>
+        </div>
+      </div>
+
+      <h3>Frequently Asked Questions (FAQs)</h3>
+      <div class="space-y-4 my-6">
+        <div class="p-5 bg-neutral-50 rounded-xl border border-neutral-200">
+          <p class="font-bold text-neutral-900 mb-1">Q: What is the duration of the SEO Course at RizeWorld Institute?</p>
+          <p class="text-neutral-600 mb-0">A: The training is structured around practical, live project learning with flexible weekday and weekend batch timings. You can connect with a RizeWorld Institute counselor for the exact batch schedule that fits your routine.</p>
+        </div>
+        <div class="p-5 bg-neutral-50 rounded-xl border border-neutral-200">
+          <p class="font-bold text-neutral-900 mb-1">Q: Does RizeWorld Institute offer placement support?</p>
+          <p class="text-neutral-600 mb-0">A: Yes. The program includes comprehensive placement support, resume polishing, interview preparation drills, and internship opportunities at local and national corporate agencies.</p>
+        </div>
+        <div class="p-5 bg-neutral-50 rounded-xl border border-neutral-200">
+          <p class="font-bold text-neutral-900 mb-1">Q: What topics are covered under the Technical SEO module at RizeWorld Institute?</p>
+          <p class="text-neutral-600 mb-0">A: Technical SEO covers page speed optimization, Core Web Vitals, XML sitemap management, schema markup injection, robots.txt configuration, and extensive hands-on troubleshooting inside Google Search Console.</p>
+        </div>
+        <div class="p-5 bg-neutral-50 rounded-xl border border-neutral-200">
+          <p class="font-bold text-neutral-900 mb-1">Q: Who conducts the SEO specialist training at RizeWorld Institute?</p>
+          <p class="text-neutral-600 mb-0">A: All training sessions are led by certified SEO specialist trainers who manage multi-million organic search campaigns on a daily basis.</p>
+        </div>
+        <div class="p-5 bg-neutral-50 rounded-xl border border-neutral-200">
+          <p class="font-bold text-neutral-900 mb-1">Q: Can I attend a free demo class before registering?</p>
+          <p class="text-neutral-600 mb-0">A: Yes! You can book a free demo class to experience the classroom atmosphere, interact with faculty trainers, and inspect the curriculum firsthand.</p>
+        </div>
+      </div>
+
+      <h3>Start Your Journey to Become a Search Expert Today</h3>
+      <p>The internet is only going to expand, and every single website online will need someone who understands how to help it get discovered. If you have ever wondered how certain websites always appear right at the top of Google, this is your golden opportunity to learn exactly how that magic happens—and to become the professional who makes it possible for businesses.</p>
+
+      <p>RizeWorld Institute in Alwar, Rajasthan is ready to guide you at every stage, from your very first keyword inquiry to your first live client project. Book a free demo class, talk with our counselors, and take your first definitive step toward becoming a recognized search expert.</p>
+
+      <div class="my-8 p-6 bg-neutral-900 text-white rounded-2xl shadow-xl border border-neutral-800">
+        <h4 class="text-xl font-extrabold text-white mt-0 mb-2">Book a Free Demo Class at RizeWorld Institute</h4>
+        <p class="text-blue-400 font-bold text-sm mb-1">RizeWorld Institute of AI and Digital Marketing</p>
+        <p class="text-neutral-300 text-sm mb-2">
+          📍 C197, near Telco Circle, UIT colony, Shalimar Nagar, Alwar, Rajasthan 301001
+        </p>
+        <p class="text-neutral-300 text-sm mb-4">
+          Phone / WhatsApp: <a href="tel:+918302277092" class="text-blue-400 font-bold hover:underline">+91 8302277092</a> | Email: <a href="mailto:rizeworldinstitute@gmail.com" class="text-blue-400 hover:underline">rizeworldinstitute@gmail.com</a>
+        </p>
+        <a href="/contact" class="inline-block px-6 py-3 rounded-full bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs tracking-wide transition-all shadow-md hover:scale-105">
+          Book Free Demo Class &amp; Counseling →
+        </a>
+      </div>
+    `
   }
 ];
+
 
 

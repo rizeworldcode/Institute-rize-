@@ -92,7 +92,7 @@
   </url>
   <url>
     <loc>https://rizeworldinstitute.in/blog</loc>
-    <lastmod>2026-09-24</lastmod>
+    <lastmod>2026-09-30</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -189,6 +189,12 @@
   <url>
     <loc>https://rizeworldinstitute.in/blog/website-development-course-in-india</loc>
     <lastmod>2026-09-24</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://rizeworldinstitute.in/blog/seo-course-in-india-become-a-search-expert</loc>
+    <lastmod>2026-09-30</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
