@@ -26,14 +26,14 @@ const combos = [
   {
     name: "Creative Pro",
     desc: "Design + video + content creation powerhouse.",
-    modules: ["AI Tools", "Graphic Design", "Video Editing", "SMO"],
+    modules: ["AI Tools", "Graphic Design", "Video Editing"],
     color: "green",
     popular: true,
   },
   {
     name: "Tech Pro",
     desc: "Web dev + AI + automation for tech-driven marketers.",
-    modules: ["AI Tools", "Website Development", "SEO", "Performance Marketing"],
+    modules: ["AI Tools", "Website Development"],
     color: "orange",
     popular: false,
   },
@@ -92,7 +92,7 @@ export default function Courses() {
             <div className="bg-neutral-900 rounded-[2.5rem] p-10 md:p-16 relative overflow-hidden text-white shadow-2xl">
               <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-blue-600/20 blur-[100px] rounded-full pointer-events-none" />
               <div className="absolute bottom-0 left-0 w-[300px] h-[300px] bg-orange-600/20 blur-[80px] rounded-full pointer-events-none" />
-              
+
               <div className="relative z-10 grid lg:grid-cols-2 gap-12 items-center">
                 <div>
                   <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-500/20 border border-blue-400/30 text-xs font-semibold text-blue-300 mb-6">
@@ -105,7 +105,7 @@ export default function Courses() {
                   <p className="text-neutral-300 text-base md:text-lg mb-8 max-w-xl leading-relaxed">
                     Looking for the best <strong>Digital Marketing institutes in Alwar</strong>? RizeWorld Institute offers an industry-leading <strong>Digital Marketing course in Alwar</strong>. Recognized among the top <strong>Digital Marketing institutes in Rajasthan</strong>, our practical curriculum delivers complete mastery across 7 modules with the most career-focused <strong>Digital Marketing course in Rajasthan</strong>.
                   </p>
-                  
+
                   <div className="flex flex-wrap gap-4">
                     <Link to="/master-course" className="px-8 py-4 rounded-full bg-blue-600 text-white font-bold hover:bg-blue-700 transition-all flex items-center gap-2">
                       View Full Syllabus <ArrowRight size={18} />
@@ -115,7 +115,7 @@ export default function Courses() {
                     </Link>
                   </div>
                 </div>
-                
+
                 <div className="grid sm:grid-cols-2 gap-4">
                   {[
                     { icon: Layers, text: "All 7 Modules Included" },
@@ -191,8 +191,9 @@ export default function Courses() {
                   <div className="inline-block px-3 py-1 rounded-full text-xs font-bold mb-4 bg-orange-50 text-orange-600 self-start">
                     {c.name.toUpperCase()}
                   </div>
-                  <h3 className="font-display text-xl font-bold text-neutral-900 mb-6 flex-1">{c.desc}</h3>
-                  <div className="space-y-4 pt-6 border-t border-neutral-100">
+                  <h3 className="font-display text-xl font-bold text-neutral-900 mb-6">{c.desc}</h3>
+                  <div className="w-full border-t border-neutral-100" />
+                  <div className="flex-1 flex flex-col justify-center space-y-4 py-6">
                     {c.modules.map((mod, j) => (
                       <div key={j} className="flex items-start gap-3">
                         <CheckCircle2 size={16} className="text-blue-600 mt-0.5" />
@@ -202,7 +203,7 @@ export default function Courses() {
                   </div>
                   <Link
                     to="/contact"
-                    className="w-full mt-10 flex items-center justify-center gap-2 px-6 py-4 rounded-full font-bold transition-all bg-neutral-100 text-neutral-900 hover:bg-blue-600 hover:text-white"
+                    className="w-full mt-auto flex items-center justify-center gap-2 px-6 py-4 rounded-full font-bold transition-all bg-neutral-100 text-neutral-900 hover:bg-blue-600 hover:text-white"
                   >
                     Choose {c.name} <ArrowRight size={16} />
                   </Link>

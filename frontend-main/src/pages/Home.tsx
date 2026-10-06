@@ -1,8 +1,9 @@
 import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
+import { motion, useSpring } from "framer-motion";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { Clock, ArrowRight, Layers, Rocket, GraduationCap, Brain, Palette, Video, TrendingUp, Search, BarChart3, Code, Users, Award, Zap, CheckCircle2, Quote, Star, MapPin, BookOpen, Briefcase } from "lucide-react";
+import { Clock, ArrowRight, Layers, Rocket, GraduationCap, Brain, Palette, Video, TrendingUp, Search, BarChart3, Code, Users, Award, Zap, CheckCircle2, Quote, Star, MapPin, BookOpen, Briefcase, Volume2, VolumeX } from "lucide-react";
 import Reveal from "../components/Reveal";
 import SEO from "../components/SEO";
 
@@ -18,11 +19,24 @@ const courses = [
   { icon: Brain, title: "AI Tools + DM Basics", desc: "Master ChatGPT, Midjourney, and AI-powered marketing workflows.", color: "orange" },
 ];
 
-const testimonials = [
-  { name: "Priya Sharma", role: "Digital Marketer", text: "RizeWorld transformed my career. The AI tools module alone was worth the entire course. I landed a senior role within 2 months.", rating: 5 },
-  { name: "Rahul Verma", role: "Freelance Designer", text: "The trainers are industry pros who genuinely care. The glass-classroom vibe and hands-on projects made learning addictive.", rating: 5 },
-  { name: "Anjali Mehta", role: "Content Creator", text: "From zero to 100K followers on Instagram. The SMO and video editing modules are pure gold. Highly recommended.", rating: 5 },
+
+const videoTestimonials = [
+  {
+    name: "Priya Sharma",
+    role: "Digital Marketer",
+    videoUrl: "/video/VID_20261005_235023_731.mp4",
+    posterUrl: "/student/punit.png",
+    desc: "\"RizeWorld transformed my career within 2 months.\""
+  },
+  {
+    name: "Rahul Verma",
+    role: "Freelance Designer",
+    videoUrl: "/video/VID_20261006_001249_312.mp4",
+    posterUrl: "/student/punit.png",
+    desc: "\"Hands-on projects made learning truly addictive.\""
+  }
 ];
+
 
 const faqs = [
   { q: "What is the Best Digital Marketing Course in India?", a: "The Best Digital Marketing Course in India is a comprehensive 3-month program combining search engine optimization, paid advertising, and prompt engineering, offered by RizeWorld Institute. It provides practical learning and verified certifications." },
@@ -608,46 +622,8 @@ export default function Home() {
       </section>
 
 
-
-      {/* ============ TESTIMONIALS ============ */}
-      <section className="py-24 md:py-32 bg-premium-light relative overflow-hidden">
-        <div className="absolute inset-0 bg-grid opacity-30" />
-        <div className="max-w-7xl mx-auto px-6 relative">
-          <Reveal>
-            <div className="text-center mb-16 relative z-10">
-              <div className="premium-pill inline-flex items-center gap-2 px-4 py-1.5 text-xs font-semibold text-blue-600 mb-4">
-                <Quote size={12} /> STUDENT STORIES
-              </div>
-              <h2 className="font-display text-4xl md:text-6xl font-extrabold text-neutral-900 tracking-tight">
-                Voices from <span className="gradient-text">the community.</span>
-              </h2>
-            </div>
-          </Reveal>
-
-          <div className="grid md:grid-cols-3 gap-6">
-            {testimonials.map((t, i) => (
-              <Reveal key={i} delay={i * 0.1}>
-                <div className="premium-card-light border-none rounded-4xl p-8 h-full hover:shadow-[0_30px_60px_rgba(99,102,241,0.15)] transition-all hover:-translate-y-2 duration-500 relative z-10 flex flex-col">
-                  <div className="flex mb-4">
-                    {[...Array(t.rating)].map((_, j) => <Star key={j} size={14} fill="#4168b2" className="text-blue-600" />)}
-                  </div>
-                  <Quote size={24} className="text-blue-600 opacity-40 mb-3" />
-                  <p className="text-neutral-600 leading-relaxed mb-6 flex-1">"{t.text}"</p>
-                  <div className="flex items-center gap-3 pt-4 border-t border-white/10 mt-auto">
-                    <div className="w-12 h-12 rounded-full bg-blue-600 flex items-center justify-center font-bold text-white">
-                      {t.name[0]}
-                    </div>
-                    <div>
-                      <div className="font-semibold text-neutral-900">{t.name}</div>
-                      <div className="text-xs text-neutral-500">{t.role}</div>
-                    </div>
-                  </div>
-                </div>
-              </Reveal>
-            ))}
-          </div>
-        </div>
-      </section>
+      {/* ============ VIDEO TESTIMONIALS — BloomRow Style ============ */}
+      <VideoTestimonialsSection />
 
       {/* ============ FAQ ============ */}
       <section className="py-24 md:py-32 bg-premium-light">
@@ -793,6 +769,243 @@ function StackingCards() {
         );
       })}
     </div>
+  );
+}
+
+function VideoTestimonialsSection() {
+  const [open, setOpen] = useState<number | null>(null);
+  const [activeSound, setActiveSound] = useState<number | null>(null);
+  const [inView, setInView] = useState(false);
+  const sectionRef = useRef<HTMLDivElement>(null);
+  const rowRef = useRef<HTMLDivElement>(null);
+
+  const driftX = useSpring(0, { stiffness: 90, damping: 22, mass: 0.6 });
+  const driftY = useSpring(0, { stiffness: 90, damping: 22, mass: 0.6 });
+
+  useEffect(() => {
+    const node = sectionRef.current;
+    if (!node) return;
+    const io = new IntersectionObserver(
+      ([entry]) => setInView(entry?.isIntersecting ?? false),
+      { threshold: 0 }
+    );
+    io.observe(node);
+    return () => io.disconnect();
+  }, []);
+
+  const gutter = 20;
+  const unhoveredHeight = 280;
+  const hoveredHeight = 440;
+  
+  const baseSeat = 240;
+  const openWidth = 340;
+  const shrunk = 180;
+
+  const easeTransition = { duration: 0.65, ease: [0.19, 1, 0.22, 1] };
+  const fadeTransition = { duration: 0.4, ease: [0.19, 1, 0.22, 1] };
+
+  const activeIndex = open !== null ? open : 0;
+
+  return (
+    <section className="relative overflow-hidden bg-[#0a0a0a] py-20" style={{ minHeight: hoveredHeight + 140 }}>
+      {/* Dynamic blurred studio background from active card */}
+      <div className="absolute inset-0 z-0 pointer-events-none">
+        {videoTestimonials.map((t, i) => (
+          <motion.div
+            key={i}
+            initial={false}
+            animate={{ opacity: activeIndex === i ? 1 : 0 }}
+            transition={fadeTransition}
+            style={{
+              position: "absolute", inset: 0,
+              backgroundImage: `url(${t.posterUrl})`,
+              backgroundSize: "cover", backgroundPosition: "center",
+              filter: "blur(60px) brightness(0.45)",
+              transform: "scale(1.25)",
+              willChange: "opacity",
+            }}
+          />
+        ))}
+        <div className="absolute inset-0 bg-black/40" />
+      </div>
+
+      {/* Header */}
+      <div className="relative z-10 text-center pb-14 px-6">
+        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/10 border border-white/20 text-xs font-mono font-semibold text-white/80 mb-4 tracking-wider uppercase">
+          <Quote size={12} className="text-white" /> STUDENT STORIES
+        </div>
+        <h2 className="font-display text-4xl md:text-6xl font-extrabold text-white tracking-tight">
+          Voices from <span className="text-blue-400">the community.</span>
+        </h2>
+      </div>
+
+      {/* Interactive Grid */}
+      <div ref={sectionRef} className="relative z-10 px-6 md:px-16 max-w-3xl mx-auto">
+        <div
+          ref={rowRef}
+          className="flex items-start justify-center"
+          style={{ gap: gutter, minHeight: hoveredHeight + 40 }}
+          onPointerLeave={() => {
+            setOpen(null);
+            driftX.set(0);
+            driftY.set(0);
+          }}
+        >
+          {videoTestimonials.map((t, i) => {
+            const isOpen = open === i;
+            const isAudioOn = activeSound === i;
+            const slot = open !== null ? (isOpen ? openWidth : shrunk) : baseSeat;
+            const currentHeight = isOpen ? hoveredHeight : unhoveredHeight;
+
+            return (
+              <motion.div
+                key={i}
+                initial={false}
+                animate={{ width: Math.round(slot) }}
+                transition={easeTransition}
+                style={{ position: "relative", flex: "0 0 auto" }}
+              >
+                {/* Monospace Column Number above */}
+                <motion.div
+                  initial={false}
+                  animate={{ opacity: open !== null && !isOpen ? 0.4 : 0.85 }}
+                  transition={fadeTransition}
+                  style={{
+                    fontSize: 13,
+                    fontFamily: "monospace",
+                    fontWeight: 600,
+                    letterSpacing: "0.06em",
+                    color: "#ffffff",
+                    marginBottom: 12,
+                  }}
+                >
+                  {String(i + 1).padStart(3, "0")}
+                </motion.div>
+
+                {/* Card Container */}
+                <motion.div
+                  animate={{ height: currentHeight }}
+                  transition={easeTransition}
+                  onPointerEnter={() => setOpen(i)}
+                  onPointerMove={(e) => {
+                    if (!isOpen) return;
+                    const box = e.currentTarget.getBoundingClientRect();
+                    const fx = (e.clientX - box.left) / box.width - 0.5;
+                    const fy = (e.clientY - box.top) / box.height - 0.5;
+                    driftX.set(-fx * 12);
+                    driftY.set(-fy * 12);
+                  }}
+                  style={{
+                    position: "relative",
+                    width: "100%",
+                    overflow: "hidden",
+                    borderRadius: 8,
+                    background: "#181818",
+                    cursor: "pointer",
+                    zIndex: isOpen ? 4 : 2,
+                    willChange: "height, width",
+                  }}
+                >
+                  {/* Media Content */}
+                  <motion.div
+                    initial={false}
+                    animate={{ scale: isOpen ? 1.04 : 1 }}
+                    transition={easeTransition}
+                    style={{
+                      position: "absolute", inset: 0,
+                      x: isOpen ? driftX : 0,
+                      y: isOpen ? driftY : 0,
+                      willChange: "transform",
+                    }}
+                  >
+                    {t.videoUrl ? (
+                      <VideoPanel
+                        src={t.videoUrl}
+                        poster={t.posterUrl}
+                        muted={!isAudioOn}
+                        running={inView && (isOpen || open === null)}
+                      />
+                    ) : (
+                      <img
+                        src={t.posterUrl}
+                        alt={t.name}
+                        draggable={false}
+                        style={{ display: "block", width: "100%", height: "100%", objectFit: "cover", userSelect: "none" }}
+                      />
+                    )}
+                  </motion.div>
+
+                  {/* Sound Toggle Button */}
+                  {t.videoUrl && (
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setActiveSound(isAudioOn ? null : i);
+                      }}
+                      className={`absolute top-3 right-3 z-30 p-2.5 rounded-full backdrop-blur-md transition-all duration-300 shadow-lg cursor-pointer ${
+                        isAudioOn
+                          ? "bg-blue-600 text-white shadow-blue-500/50 scale-110"
+                          : "bg-black/60 border border-white/20 text-white/80 hover:bg-black/80 hover:text-white"
+                      }`}
+                      title={isAudioOn ? "Mute Voice" : "Unmute Voice"}
+                    >
+                      {isAudioOn ? <Volume2 size={16} /> : <VolumeX size={16} />}
+                    </button>
+                  )}
+
+                  {/* Non-active dim layer */}
+                  <motion.div
+                    initial={false}
+                    animate={{ opacity: open !== null && !isOpen ? 0.3 : 0 }}
+                    transition={fadeTransition}
+                    style={{ position: "absolute", inset: 0, background: "#000000", pointerEvents: "none" }}
+                  />
+                </motion.div>
+              </motion.div>
+            );
+          })}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function VideoPanel({ src, poster, running, muted }: { src: string; poster: string; running: boolean; muted: boolean }) {
+  const ref = useRef<HTMLVideoElement>(null);
+  
+  useEffect(() => {
+    const v = ref.current;
+    if (!v) return;
+    v.muted = muted;
+  }, [muted]);
+
+  useEffect(() => {
+    const v = ref.current;
+    if (!v) return;
+    if (running) {
+      v.currentTime = 0;
+      v.play().catch(() => {});
+    } else {
+      v.pause();
+    }
+  }, [running, src]);
+
+  useEffect(() => {
+    const v = ref.current;
+    return () => { if (v) v.pause(); };
+  }, []);
+
+  return (
+    <video
+      ref={ref}
+      src={src}
+      poster={poster}
+      muted={muted}
+      loop
+      playsInline
+      preload={running ? "auto" : "metadata"}
+      style={{ display: "block", width: "100%", height: "100%", objectFit: "cover" }}
+    />
   );
 }
 

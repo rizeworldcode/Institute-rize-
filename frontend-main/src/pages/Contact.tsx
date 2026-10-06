@@ -11,11 +11,11 @@ export default function Contact() {
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     // Construct WhatsApp message
     const phoneNumber = "918302277092";
     const dateStr = new Date().toLocaleString();
-    
+
     const messageTemplate = `🌟 *NEW CONTACT INQUIRY* 🌟
 ━━━━━━━━━━━━━━━━━━━━━
 👤 *Name:* ${form.name}
@@ -44,13 +44,13 @@ _${form.message}_
         message: form.message
       }),
     })
-    .then(res => res.json())
-    .then(data => {
-      if (data.success) {
-        console.log("Inquiry saved to database");
-      }
-    })
-    .catch(err => console.error("Error saving inquiry:", err));
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          console.log("Inquiry saved to database");
+        }
+      })
+      .catch(err => console.error("Error saving inquiry:", err));
 
     // Open WhatsApp
     const url = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(messageTemplate)}`;
@@ -100,7 +100,7 @@ _${form.message}_
                 "contactOption": "TollFree",
                 "hoursAvailable": {
                   "@type": "OpeningHoursSpecification",
-                  "dayOfWeek": ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"],
+                  "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"],
                   "opens": "09:00",
                   "closes": "19:00"
                 }
@@ -180,7 +180,7 @@ _${form.message}_
               <div className="bg-white/90 backdrop-blur-xl border border-neutral-200 rounded-3xl p-6 shadow-sm hover:shadow-md transition-all">
                 <Clock size={24} className="text-green-600 mb-3" />
                 <h3 className="font-display font-bold text-neutral-900 mb-2">Office Hours</h3>
-                <p className="text-sm text-neutral-600">Mon - Sat: 9:00 AM - 7:00 PM</p>
+                <p className="text-sm text-neutral-600">Mon - Sat: 9:00 AM - 6:00 PM</p>
                 <p className="text-sm text-neutral-600">Sunday: By appointment only</p>
               </div>
             </Reveal>

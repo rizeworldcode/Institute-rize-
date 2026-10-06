@@ -9,13 +9,12 @@ import SEO from "../components/SEO";
 gsap.registerPlugin(ScrollTrigger);
 
 const roadmap = [
-  { week: "Week 1-2", title: "AI Tools + DM Basics", desc: "Master ChatGPT, Midjourney, and foundational digital marketing principles.", icon: Brain, color: "orange" },
-  { week: "Week 3-4", title: "Graphic Design + Photoshop", desc: "Design stunning visuals, brand identities, and social creatives.", icon: Palette, color: "green" },
-  { week: "Week 5-6", title: "Video Editing", desc: "Cinematic editing, Reels, and YouTube content creation mastery.", icon: Video, color: "orange" },
-  { week: "Week 7-8", title: "SMO", desc: "Build and grow audiences on Instagram, Facebook, LinkedIn.", icon: TrendingUp, color: "green" },
-  { week: "Week 9", title: "SEO", desc: "Rank #1 on Google with on-page, off-page, and technical SEO.", icon: Search, color: "orange" },
-  { week: "Week 10-11", title: "Performance Marketing", desc: "Run profitable Meta and Google ads with data-driven strategies.", icon: BarChart3, color: "green" },
-  { week: "Week 12", title: "Website Development", desc: "Build fast, modern websites with WordPress and Webflow.", icon: Code, color: "orange" },
+  { week: "Week 1-2", title: "Graphic Design + Photoshop", desc: "Design stunning visuals, brand identities, and social creatives.", icon: Palette, color: "green" },
+  { week: "Week 3-4", title: "Video Editing", desc: "Cinematic editing, Reels, and YouTube content creation mastery.", icon: Video, color: "orange" },
+  { week: "Week 5-6", title: "Website Development", desc: "Build fast, modern websites with WordPress and Webflow.", icon: Code, color: "orange" },
+  { week: "Week 7-8", title: "SEO", desc: "Rank #1 on Google with on-page, off-page, and technical SEO.", icon: Search, color: "orange" },
+  { week: "Week 9-10", title: "SMO", desc: "Build and grow audiences on Instagram, Facebook, LinkedIn.", icon: TrendingUp, color: "green" },
+  { week: "Week 11-12", title: "Performance Marketing", desc: "Run profitable Meta and Google ads with data-driven strategies.", icon: BarChart3, color: "green" },
 ];
 
 const highlights = [
@@ -166,6 +165,9 @@ export default function MasterCourse() {
               <p className="mt-6 text-lg text-neutral-600">
                 A structured path from curious beginner to confident professional.
               </p>
+              <div className="mt-3 inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-blue-50 border border-blue-200 text-xs font-semibold text-blue-700">
+                <Brain size={14} className="text-blue-600" />  Fully AI-Integrated Curriculum
+              </div>
             </div>
           </Reveal>
 
@@ -181,15 +183,13 @@ export default function MasterCourse() {
                     <div className="absolute left-4 md:left-1/2 md:-translate-x-1/2 w-5 h-5 rounded-full bg-white border-4 border-blue-600 z-10 shadow-sm" />
                     <div className="md:w-1/2 pl-12 md:pl-0 md:px-8">
                       <div className="bg-white border border-neutral-200 rounded-2xl p-6 hover:shadow-[0_20px_50px_rgba(0,0,0,0.08)] transition-all duration-500 hover:border-blue-500">
-                        <div className={`inline-block px-3 py-1 rounded-full text-[10px] font-bold tracking-widest mb-3 ${
-                          r.color === "orange" ? "bg-orange-50 text-orange-600" : "bg-green-50 text-green-600"
-                        }`}>
+                        <div className={`inline-block px-3 py-1 rounded-full text-[10px] font-bold tracking-widest mb-3 ${r.color === "orange" ? "bg-orange-50 text-orange-600" : "bg-green-50 text-green-600"
+                          }`}>
                           {r.week.toUpperCase()}
                         </div>
                         <div className="flex items-start gap-4">
-                          <div className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 ${
-                            r.color === "orange" ? "bg-orange-50" : "bg-green-50"
-                          }`}>
+                          <div className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 ${r.color === "orange" ? "bg-orange-50" : "bg-green-50"
+                            }`}>
                             <r.icon size={22} className={r.color === "orange" ? "text-orange-600" : "text-green-600"} />
                           </div>
                           <div>

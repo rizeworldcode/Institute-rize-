@@ -1,6 +1,5 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
-import { ArrowRight, CheckCircle2, Users, Award, Brain, Briefcase, Target, TrendingUp, Heart, Lightbulb, Palette } from "lucide-react";
+import { ArrowRight, ArrowUpRight, CheckCircle2, Users, Award, Brain, Briefcase, Target, TrendingUp, Heart, Lightbulb } from "lucide-react";
 import Reveal from "../components/Reveal";
 import { getApiUrl } from "../utils/api";
 import SEO from "../components/SEO";
@@ -27,13 +26,28 @@ export default function HireFromUs() {
   const [form, setForm] = useState({ name: "", company: "", email: "", phone: "", message: "" });
   const [sent, setSent] = useState(false);
 
+  const handleSelectCandidate = (candidateName: string, candidateRole: string) => {
+    setForm((prev) => ({
+      ...prev,
+      message: `I am interested in hiring ${candidateName} (${candidateRole}). Please share portfolio and availability.`,
+    }));
+    const formElement = document.getElementById("inquiry-form");
+    if (formElement) {
+      formElement.scrollIntoView({ behavior: "smooth" });
+      setTimeout(() => {
+        const firstInput = formElement.querySelector("input") as HTMLInputElement;
+        if (firstInput) firstInput.focus();
+      }, 500);
+    }
+  };
+
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     // Construct WhatsApp message
     const phoneNumber = "918302277092";
     const dateStr = new Date().toLocaleString();
-    
+
     const messageTemplate = `💼 *NEW HIRING INQUIRY* 💼
 ━━━━━━━━━━━━━━━━━━━━━
 🏢 *Company:* ${form.company}
@@ -61,13 +75,13 @@ _${form.message || 'No additional requirements specified.'}_
         message: form.message || "Hiring Inquiry"
       }),
     })
-    .then(res => res.json())
-    .then(data => {
-      if (data.success) {
-        console.log("Hiring inquiry saved to database");
-      }
-    })
-    .catch(err => console.error("Error saving hiring inquiry:", err));
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          console.log("Hiring inquiry saved to database");
+        }
+      })
+      .catch(err => console.error("Error saving hiring inquiry:", err));
 
     // Open WhatsApp
     const url = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(messageTemplate)}`;
@@ -127,116 +141,61 @@ _${form.message || 'No additional requirements specified.'}_
       />
 
       {/* Hero */}
-      <section className="relative pt-20 pb-16 overflow-hidden bg-white border-b border-neutral-100">
+      <section className="relative pt-20 pb-20 overflow-hidden bg-white border-b border-neutral-100">
         <div className="max-w-7xl mx-auto px-6 relative">
+          {/* Hero Heading & Intro */}
           <Reveal>
             <div className="max-w-4xl mb-12">
               <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-orange-50 border border-orange-200 text-xs font-semibold text-orange-600 mb-5">
                 <Briefcase size={12} /> FOR COMPANIES & AGENCIES
               </div>
-              <h1 className="font-display text-5xl md:text-7xl font-extrabold text-neutral-900 leading-none tracking-tight">
-                Hire <span className="text-blue-600">Digital Marketing Professionals</span>
+              <h1 className="font-display text-4xl sm:text-6xl lg:text-7xl font-extrabold text-neutral-900 leading-[1.08] tracking-tight">
+                Hire <span className="text-blue-600">Digital Marketing</span> Professionals
               </h1>
-              <p className="mt-6 text-lg text-neutral-500 max-w-2xl leading-relaxed">
+              <p className="mt-6 text-lg text-neutral-600 max-w-2xl leading-relaxed">
                 RizeWorld Institute is your destination for Digital Marketing Recruitment. Hire Job Ready Digital Marketers and Hire Digital Marketing Experts today for your business.
               </p>
+
             </div>
           </Reveal>
 
-          {/* Featured Student Showcase Card */}
+          {/* Framer-Style Candidate Card Directly Below Text */}
           <Reveal delay={0.15}>
-            <div className="relative bg-neutral-900 text-white rounded-[2.5rem] p-8 md:p-12 overflow-hidden shadow-2xl border border-neutral-800">
-              {/* Background ambient lighting */}
-              <div className="absolute top-0 right-0 w-[450px] h-[450px] bg-blue-600/20 blur-[120px] rounded-full pointer-events-none" />
-              <div className="absolute bottom-0 left-0 w-80 h-80 bg-orange-500/15 blur-[100px] rounded-full pointer-events-none" />
+            <div className="pt-2 flex flex-wrap gap-8 items-center">
+              {/* Framer Team Card Hover Component */}
+              <div
+                className="group relative w-[320px] sm:w-[373px] h-[460px] sm:h-[497px] rounded-[16px] overflow-hidden cursor-pointer bg-neutral-900 shadow-2xl transition-all duration-500 hover:shadow-[0_25px_60px_rgba(0,0,0,0.35)] flex flex-col justify-end p-3 select-none"
+                onClick={() => handleSelectCandidate("Punit Sharma", "Graphic Designer")}
+              >
+                {/* Subtle Background Glow */}
+                <div className="absolute inset-0 bg-radial from-neutral-800/60 via-neutral-900 to-black pointer-events-none" />
 
-              <div className="relative z-10 grid lg:grid-cols-12 gap-8 lg:gap-12 items-center">
-                {/* Left: Candidate Information */}
-                <div className="lg:col-span-7 flex flex-col justify-center">
-                  <div className="flex flex-wrap items-center gap-3 mb-4">
-                    <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-semibold">
-                      <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                      Available for Immediate Joining
+                {/* Member Photo */}
+                <img
+                  src="/student/punit.png"
+                  alt="Punit Sharma - Graphic Designer"
+                  className="absolute inset-0 w-full h-full object-contain object-bottom transition-transform duration-700 ease-out group-hover:scale-105"
+                />
+
+                {/* Masking Gradient (Framer exact gradient) */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-transparent pointer-events-none group-hover:from-black/95 transition-all duration-500" />
+
+                {/* Information Overlay Box */}
+                <div className="relative z-10 w-full backdrop-blur-md bg-[rgba(52,59,53,0.35)] border border-white/20 rounded-[12px] p-4 sm:p-5 flex items-center justify-between gap-3 transition-all duration-500 group-hover:bg-[rgba(52,59,53,0.6)] group-hover:border-white/30">
+                  <div className="flex flex-col items-start min-w-0">
+                    {/* Role Pill */}
+                    <span className="inline-block px-3 py-1 rounded-full border border-white/40 text-[11px] sm:text-xs font-medium text-white tracking-wide uppercase mb-1.5 backdrop-blur-sm">
+                      Graphic Designer
                     </span>
-                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 text-neutral-300 text-xs font-medium border border-white/10">
-                      <Award size={12} className="text-[#ff6b1a]" /> Featured Candidate
-                    </span>
+                    {/* Name */}
+                    <h3 className="font-display text-xl sm:text-2xl font-bold text-white tracking-tight truncate">
+                      Punit Sharma
+                    </h3>
                   </div>
 
-                  <h2 className="font-display text-3xl md:text-5xl font-black text-white tracking-tight mb-2">
-                    Punit Sharma
-                  </h2>
-                  <div className="inline-flex items-center gap-2 text-blue-400 font-semibold text-lg md:text-xl mb-4">
-                    <Palette size={18} /> Graphic Designer
-                  </div>
-
-                  <p className="text-neutral-300 text-sm md:text-base leading-relaxed mb-6 max-w-xl">
-                    Specialized in brand identity creation, social media creatives, advertising banners, and print packaging. Trained with 100% practical agency workflows and real-world client briefs at RizeWorld Institute.
-                  </p>
-
-                  {/* Skills tags */}
-                  <div className="mb-8">
-                    <div className="text-xs font-bold text-neutral-400 uppercase tracking-wider mb-3">
-                      Core Competencies
-                    </div>
-                    <div className="flex flex-wrap gap-2">
-                      {[
-                        "Adobe Photoshop",
-                        "Adobe Illustrator",
-                        "Brand Identity",
-                        "Social Media Design",
-                        "Canva Pro",
-                        "Print & Packaging",
-                        "Typography & Layouts"
-                      ].map((skill, idx) => (
-                        <span
-                          key={idx}
-                          className="px-3 py-1.5 rounded-xl bg-white/5 border border-white/10 text-xs font-medium text-neutral-200"
-                        >
-                          {skill}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* CTA Buttons */}
-                  <div className="flex flex-wrap items-center gap-4 pt-2">
-                    <a
-                      href="#inquiry-form"
-                      className="px-8 py-3.5 rounded-full bg-blue-600 text-white font-bold hover:bg-blue-700 transition-all flex items-center gap-2 shadow-lg shadow-blue-600/30 text-sm hover:scale-102"
-                    >
-                      Hire Punit Sharma <ArrowRight size={16} />
-                    </a>
-                    <Link
-                      to="/contact"
-                      className="px-6 py-3.5 rounded-full bg-white/10 text-white font-semibold hover:bg-white/20 transition-all border border-white/15 text-sm"
-                    >
-                      Request Portfolio
-                    </Link>
-                  </div>
-                </div>
-
-                {/* Right: Candidate Photo */}
-                <div className="lg:col-span-5 flex justify-center items-end relative">
-                  <div className="relative w-full max-w-sm aspect-4/5 rounded-3xl overflow-hidden bg-linear-to-b from-blue-600/20 via-neutral-800/60 to-neutral-900 border border-white/10 flex items-end justify-center p-4 shadow-2xl group">
-                    <div className="absolute inset-0 bg-radial from-blue-500/20 to-transparent opacity-60" />
-                    
-                    <img
-                      src="/student/punit.png"
-                      alt="Punit Sharma - Graphic Designer"
-                      className="relative z-10 w-full h-full object-contain object-bottom drop-shadow-[0_20px_30px_rgba(0,0,0,0.6)] group-hover:scale-105 transition-transform duration-500"
-                    />
-
-                    {/* Overlay Tag at bottom */}
-                    <div className="absolute bottom-4 left-4 right-4 z-20 bg-neutral-950/80 backdrop-blur-md border border-white/15 rounded-2xl p-3 flex items-center justify-between">
-                      <div>
-                        <div className="text-xs font-bold text-white">Punit Sharma</div>
-                        <div className="text-[11px] text-blue-400">Certified Graphic Designer</div>
-                      </div>
-                      <span className="px-2.5 py-1 rounded-full bg-blue-500/20 text-blue-300 text-[10px] font-bold uppercase tracking-wider border border-blue-400/30">
-                        Job-Ready
-                      </span>
-                    </div>
+                  {/* Framer Icon / Arrow */}
+                  <div className="w-10 h-10 rounded-full border border-white/30 bg-white/10 flex items-center justify-center text-white shrink-0 transition-transform duration-500 group-hover:rotate-45 group-hover:bg-white group-hover:text-black shadow-md">
+                    <ArrowUpRight size={20} />
                   </div>
                 </div>
               </div>
@@ -290,9 +249,8 @@ _${form.message || 'No additional requirements specified.'}_
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
             {skillHighlights.map((s, i) => (
               <Reveal key={i} delay={i * 0.1}>
-                <div className={`rounded-3xl p-6 h-full transition-all duration-500 hover:-translate-y-1 ${
-                  i % 2 === 0 ? "glass-orange hover:shadow-orange" : "glass-green hover:shadow-green"
-                }`}>
+                <div className={`rounded-3xl p-6 h-full transition-all duration-500 hover:-translate-y-1 ${i % 2 === 0 ? "glass-orange hover:shadow-orange" : "glass-green hover:shadow-green"
+                  }`}>
                   <div className="font-display font-bold text-white mb-4">{s.title}</div>
                   <div className="space-y-2">
                     {s.skills.map((skill, j) => (
@@ -386,6 +344,18 @@ _${form.message || 'No additional requirements specified.'}_
           <Reveal delay={0.2}>
             <form onSubmit={submit} className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-8 shadow-luxury">
               <h3 className="font-display text-2xl font-bold text-white mb-6">Send inquiry</h3>
+              {form.message.includes("Punit Sharma") && (
+                <div className="mb-4 flex items-center justify-between px-4 py-2.5 rounded-xl bg-[#ff6b1a]/15 border border-[#ff6b1a]/30 text-xs text-orange-400">
+                  <span className="font-medium"> Selected Candidate: <strong>Punit Sharma (Graphic Designer)</strong></span>
+                  <button
+                    type="button"
+                    onClick={() => setForm((prev) => ({ ...prev, message: "" }))}
+                    className="text-neutral-400 hover:text-white underline cursor-pointer text-[11px]"
+                  >
+                    Clear
+                  </button>
+                </div>
+              )}
               <div className="space-y-4">
                 <input
                   required

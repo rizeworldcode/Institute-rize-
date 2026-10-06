@@ -92,9 +92,9 @@ export default function Navbar() {
               Location Alwar
             </Link>
             <div className="relative group py-2">
-              <Link to="/courses" className="hover:text-blue-600 transition-colors uppercase">Explore Courses</Link>
+              <span className="hover:text-blue-600 transition-colors uppercase cursor-pointer select-none">Explore Courses</span>
               <div className="absolute top-full left-0 mt-1 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 w-64 bg-white/95 backdrop-blur-xl rounded-2xl shadow-lg border border-neutral-200 p-2 flex flex-col gap-1 z-50 normal-case">
-                <Link to="/courses" className="px-4 py-2 text-xs font-semibold text-neutral-600 hover:text-blue-600 hover:bg-neutral-100 rounded-xl transition-colors uppercase">Digital Marketing Course</Link>
+                <Link to="/courses" className="px-4 py-2 text-xs font-semibold text-neutral-600 hover:text-blue-600 hover:bg-neutral-100 rounded-xl transition-colors uppercase">Courses</Link>
                 <Link to="/seo" className="px-4 py-2 text-xs font-semibold text-neutral-600 hover:text-blue-600 hover:bg-neutral-100 rounded-xl transition-colors uppercase">SEO Course</Link>
                 <Link to="/social-media-marketing" className="px-4 py-2 text-xs font-semibold text-neutral-600 hover:text-blue-600 hover:bg-neutral-100 rounded-xl transition-colors uppercase">Social Media Marketing</Link>
                 <Link to="/performance-marketing" className="px-4 py-2 text-xs font-semibold text-neutral-600 hover:text-blue-600 hover:bg-neutral-100 rounded-xl transition-colors uppercase">Performance Marketing</Link>
@@ -146,7 +146,7 @@ export default function Navbar() {
 
           <div className="flex-1 overflow-y-auto p-6 space-y-1" style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 400 }}>
             <MobileLink to="/location/alwar" label="Location Alwar" onClick={() => setMobileOpen(false)} isActive={location.pathname === "/location/alwar"} />
-            <MobileLink to="/courses" label="Explore Courses" onClick={() => setMobileOpen(false)} isActive={location.pathname === "/courses"} />
+            <MobileLink to="/courses" label="Courses" onClick={() => setMobileOpen(false)} isActive={location.pathname === "/courses"} />
             <MobileLink to="/master-course" label="Program Master Course" onClick={() => setMobileOpen(false)} isActive={location.pathname === "/master-course"} />
             <MobileLink to="/certificate" label="Certificate" onClick={() => setMobileOpen(false)} isActive={location.pathname === "/certificate"} />
             <MobileLink to="/about" label="About Us" onClick={() => setMobileOpen(false)} isActive={location.pathname === "/about"} />
