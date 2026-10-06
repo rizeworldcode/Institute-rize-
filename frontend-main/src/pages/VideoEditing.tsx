@@ -12,8 +12,8 @@ export default function VideoEditingPage() {
     {
       "@context": "https://schema.org",
       "@type": "Course",
-      "name": "Video Editing Course",
-      "description": "Enroll in the Best Video Editing Course. Master Adobe Premiere Pro Course, DaVinci Resolve Course, and Youtube Video Editing.",
+      "name": "Video Editing Course in Alwar & Rajasthan",
+      "description": "Enroll in the Best Video Editing Course in Alwar at RizeWorld Institute. Leading Video Editing Institute in Rajasthan offering a Professional Video Editing Course in Rajasthan.",
       "provider": {
         "@type": "EducationalOrganization",
         "name": "RizeWorld Institute",
@@ -25,28 +25,28 @@ export default function VideoEditingPage() {
 
   const faqs = [
     {
-      q: "What software is covered in this Professional Video Editing Course?",
-      a: "Our curriculum covers Adobe Premiere Pro Course, Adobe After Effects Course, DaVinci Resolve Course, and Final Cut Pro Course concepts."
+      q: "Where can I find the Best Video Editing Course in Alwar?",
+      a: "RizeWorld Institute offers the Best Video Editing Course in Alwar, featuring dedicated high-end editing workstations, real YouTube and commercial brand footage, and 1-on-1 mentor guidance."
     },
     {
-      q: "Do I need a high-end computer to join Video Editing Classes?",
-      a: "No, RizeWorld Institute features high-performance editing systems in our physical computer lab. Students get complete access during course hours."
+      q: "What makes RizeWorld the top Video Editing Institute in Alwar?",
+      a: "As the premier Video Editing Institute in Alwar, RizeWorld provides comprehensive hands-on training across Adobe Premiere Pro, After Effects, and DaVinci Resolve, complemented by color grading and audio engineering modules."
     },
     {
-      q: "Is YouTube Video Editing covered in the curriculum?",
-      a: "Yes, we focus heavily on YouTube Video Editing, Reels production, TikTok structures, Video Animation, and audio design workflows."
+      q: "Is this a Professional Video Editing Course in Rajasthan with job placement?",
+      a: "Yes, our Professional Video Editing Course in Rajasthan includes complete placement support, internship opportunities with active media houses, and assistance building a professional creator portfolio."
     },
     {
-      q: "Do you offer placement support for editors?",
-      a: "Yes, we provide placement support and internship opportunities. RizeWorld Institute connects graduates with media agencies, production houses, and marketing firms."
+      q: "Why choose this Video Editing Course in Rajasthan at RizeWorld Institute?",
+      a: "Unlike institutes that teach only basic cuts, our Video Editing Course in Rajasthan and training at our Video Editing Institute in Rajasthan focus on cinematic storytelling, pacing, sound design, and viral short-form editing."
     }
   ];
 
   return (
     <main className="pt-28 bg-[#0a0a0c] text-white min-h-screen">
       <SEO
-        title="Best Video Editing Course in India | Professional Video Editing Classes"
-        description="Enroll in the professional Video Editing Course at RizeWorld Institute. Master Premiere Pro, After Effects, DaVinci Resolve, and Video Animation."
+        title="Best Video Editing Course in Alwar | Video Editing Institute in Rajasthan"
+        description="Join the Best Video Editing Course in Alwar at RizeWorld Institute. Premier Video Editing Institute in Alwar offering a Professional Video Editing Course in Rajasthan."
         canonicalPath="/video-editing"
         schemas={pageSchema}
       />
@@ -60,10 +60,10 @@ export default function VideoEditingPage() {
                 <Video size={12} className="text-blue-400" /> CREATIVE EDITING
               </div>
               <h1 className="font-display text-4xl md:text-6xl font-extrabold text-white leading-tight">
-                Master Storytelling with our <span className="text-blue-400">Video Editing Course</span>
+                Master Storytelling with the <span className="text-blue-400">Best Video Editing Course in Alwar</span>
               </h1>
               <p className="mt-6 text-lg text-neutral-400 leading-relaxed font-medium">
-                Enroll in the Best Video Editing Course India. Train at our leading Video Editing Institute and acquire advanced skills in Adobe Premiere Pro Course and DaVinci Resolve Course structures.
+                Transform raw footage into captivating cinematic stories at RizeWorld Institute, recognized as the premier <strong>Video Editing Institute in Alwar</strong>. Whether you seek the <strong>Best Video Editing Course in Alwar</strong> or wish to enroll in a comprehensive <strong>Video Editing Course in Alwar</strong>, our advanced lab training establishes us as the top <strong>Video Editing Institute in Rajasthan</strong>. Gain industry-standard post-production skills with our acclaimed <strong>Video Editing Course in Rajasthan</strong> and our career-defining <strong>Professional Video Editing Course in Rajasthan</strong>.
               </p>
               <div className="mt-8 flex flex-wrap gap-4">
                 <Link to="/contact" className="px-8 py-4 rounded-full bg-blue-600 text-white font-bold hover:bg-blue-700 transition-all flex items-center gap-2">
@@ -80,19 +80,19 @@ export default function VideoEditingPage() {
               <div className="space-y-4 text-sm">
                 <div className="flex justify-between border-b border-white/10 pb-2">
                   <span className="text-neutral-400">Course</span>
-                  <span className="font-semibold text-white">Video Editing Course in India</span>
+                  <span className="font-semibold text-white">Best Video Editing Course in Alwar</span>
                 </div>
                 <div className="flex justify-between border-b border-white/10 pb-2">
-                  <span className="text-neutral-400">Institute</span>
+                  <span className="text-neutral-400">Campus</span>
                   <span className="font-semibold text-white">Video Editing Institute in Alwar</span>
                 </div>
                 <div className="flex justify-between border-b border-white/10 pb-2">
-                  <span className="text-neutral-400">Main Focus</span>
-                  <span className="font-semibold text-white">Premiere Pro Video Editing Course & Effects</span>
+                  <span className="text-neutral-400">Regional Reach</span>
+                  <span className="font-semibold text-white">Video Editing Institute in Rajasthan</span>
                 </div>
                 <div className="flex justify-between pb-2">
-                  <span className="text-neutral-400">Method</span>
-                  <span className="font-semibold text-white">Practical learning (Live Projects)</span>
+                  <span className="text-neutral-400">Program</span>
+                  <span className="font-semibold text-white">Professional Video Editing Course in Rajasthan</span>
                 </div>
               </div>
               <Link to="/contact" className="mt-6 w-full py-3.5 rounded-xl bg-blue-600 hover:bg-blue-700 transition-all flex items-center justify-center font-bold gap-2 text-sm text-white">
@@ -108,8 +108,8 @@ export default function VideoEditingPage() {
         <div className="max-w-5xl mx-auto px-6">
           <Reveal>
             <div className="text-center mb-16">
-              <h2 className="font-display text-3xl md:text-4xl font-extrabold text-white">Video Editing Training India Course Breakdown</h2>
-              <p className="mt-4 text-neutral-400 font-medium">Clear answers formatted for modern voice-search and generative engines</p>
+              <h2 className="font-display text-3xl md:text-4xl font-extrabold text-white">Video Editing Training Structure</h2>
+              <p className="mt-4 text-neutral-400 font-medium">Direct answers regarding our Video Editing Course in Alwar & Rajasthan</p>
             </div>
           </Reveal>
 
@@ -117,28 +117,28 @@ export default function VideoEditingPage() {
             <div className="p-8 bg-white/5 rounded-2xl border border-white/10">
               <h3 className="font-display font-bold text-lg text-white mb-2">What is a Video Editing Course?</h3>
               <p className="text-sm text-neutral-400 leading-relaxed">
-                A <strong>Video Editing Course</strong> is an educational curriculum covering footage cutting, audio alignment, color grading, and special effects. It teaches you to compile video sequences for commercial brands and YouTube.
+                A <strong>Video Editing Course</strong> covers timeline assembly, multi-camera editing, visual effects, and color grading. RizeWorld Institute provides an advanced <strong>Video Editing Course in Alwar</strong> and <strong>Video Editing Course in Rajasthan</strong> covering Premiere Pro, After Effects, and DaVinci Resolve.
               </p>
             </div>
 
             <div className="p-8 bg-white/5 rounded-2xl border border-white/10">
-              <h3 className="font-display font-bold text-lg text-white mb-2">Why choose RizeWorld Institute for editing?</h3>
+              <h3 className="font-display font-bold text-lg text-white mb-2">Why choose RizeWorld as your Video Editing Institute in Alwar?</h3>
               <p className="text-sm text-neutral-400 leading-relaxed">
-                We are a premier digital institute providing industry trainers, high-performance systems, live project training, internship opportunities, and placement support.
+                As the leading <strong>Video Editing Institute in Alwar</strong> and premier <strong>Video Editing Institute in Rajasthan</strong>, RizeWorld offers high-end editing rigs, live production footage, certified mentors, and the <strong>Best Video Editing Course in Alwar</strong>.
               </p>
             </div>
 
             <div className="p-8 bg-white/5 rounded-2xl border border-white/10">
-              <h3 className="font-display font-bold text-lg text-white mb-2">Benefits of our Video Editing Classes</h3>
+              <h3 className="font-display font-bold text-lg text-white mb-2">Benefits of our Professional Video Editing Course in Rajasthan</h3>
               <p className="text-sm text-neutral-400 leading-relaxed">
-                Learn modern Premiere Pro Video Editing Course modules, master DaVinci Resolve Course setups for color workflows, and learn to compile professional Video Animation.
+                Enrolling in our <strong>Professional Video Editing Course in Rajasthan</strong> allows you to build an impressive portfolio of commercial edits, YouTube videos, and dynamic reels with verifiable credentials.
               </p>
             </div>
 
             <div className="p-8 bg-white/5 rounded-2xl border border-white/10">
-              <h3 className="font-display font-bold text-lg text-white mb-2">Career opportunities after Video Editing Training</h3>
+              <h3 className="font-display font-bold text-lg text-white mb-2">Career opportunities from our Video Editing Institute in Rajasthan</h3>
               <p className="text-sm text-neutral-400 leading-relaxed">
-                Open professional pathways as a Video Editor, Motion Graphic Designer, YouTube Editor, or Studio Post-Production Specialist, with comprehensive support from our counseling team.
+                Graduates from our campus—a recognized standard among any <strong>Video Editing Institute in Rajasthan</strong>—step into in-demand roles as Video Editors, Motion Graphic Artists, and Post-Production Leads with full placement support.
               </p>
             </div>
           </div>
@@ -150,7 +150,7 @@ export default function VideoEditingPage() {
         <div className="max-w-7xl mx-auto px-6">
           <Reveal>
             <div className="mb-12 text-center">
-              <h2 className="font-display text-3xl font-extrabold text-white">Video Editing Training India Technical Breakdown</h2>
+              <h2 className="font-display text-3xl font-extrabold text-white">Video Editing Training Technical Breakdown</h2>
               <p className="mt-4 text-neutral-400 font-medium">Comparison of professional editing systems and engines taught in class</p>
             </div>
           </Reveal>
@@ -209,9 +209,9 @@ export default function VideoEditingPage() {
         <div className="max-w-7xl mx-auto px-6 grid lg:grid-cols-2 gap-12 items-center">
           <Reveal>
             <div>
-              <h2 className="font-display text-3xl font-extrabold text-white mb-6">Learn at a Premier Video Editing Institute</h2>
+              <h2 className="font-display text-3xl font-extrabold text-white mb-6">Premier Professional Video Editing Course in Rajasthan</h2>
               <p className="text-neutral-400 leading-relaxed mb-6 font-medium">
-                Our Video Editing Training India structure centers on practical learning. Work alongside veteran film creators, execute live project training, secure internship opportunities with active studios, and receive full placement support.
+                Our <strong>Professional Video Editing Course in Rajasthan</strong> and practical training at our <strong>Video Editing Institute in Alwar</strong> center on real-world workflows. Distinguishing us as the premier <strong>Video Editing Institute in Rajasthan</strong>, students work alongside veteran film creators, execute live client projects, secure studio internships, and receive dedicated job placement assistance.
               </p>
               <div className="space-y-4">
                 {[
@@ -232,7 +232,7 @@ export default function VideoEditingPage() {
             <div className="bg-linear-to-br from-blue-700 to-indigo-950 text-white rounded-3xl p-10 relative overflow-hidden border border-white/10">
               <h3 className="font-display text-2xl font-bold mb-4">Start Creative Editing</h3>
               <p className="text-neutral-300 text-sm mb-6">
-                Fill out our course admission enquiry today to book a free demo class at our Video Editing Training center in Alwar.
+                Fill out our course admission enquiry today to book a free demo class at our leading video editing institute in Alwar, Rajasthan.
               </p>
               <Link to="/contact" className="inline-flex items-center gap-2 px-6 py-3 bg-white text-neutral-900 rounded-full font-bold hover:scale-105 transition-transform">
                 Talk to Our Counselor <ArrowRight size={16} />
@@ -247,7 +247,7 @@ export default function VideoEditingPage() {
         <div className="max-w-4xl mx-auto px-6">
           <Reveal>
             <div className="text-center mb-16">
-              <h2 className="font-display text-3xl md:text-4xl font-extrabold text-white">Video Editing Course FAQs</h2>
+              <h2 className="font-display text-3xl md:text-4xl font-extrabold text-white">Video Editing Course in Alwar & Rajasthan FAQs</h2>
             </div>
           </Reveal>
           <div className="space-y-4">

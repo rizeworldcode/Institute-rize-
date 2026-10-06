@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { Sparkles, Target, Eye, Heart } from "lucide-react";
+import { Compass, Target, Eye, Heart } from "lucide-react";
 import Reveal from "../components/Reveal";
 import SEO from "../components/SEO";
 import ExploreLinks from "../components/ExploreLinks";
@@ -28,7 +28,7 @@ export default function About() {
           <Reveal>
             <div>
               <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-orange-50 border border-orange-200 text-xs font-semibold text-orange-600 mb-5">
-                <Sparkles size={12} /> OUR JOURNEY
+                <Compass size={13} /> OUR JOURNEY
               </div>
               <h1 className="font-display text-5xl md:text-7xl font-extrabold text-neutral-900 leading-[0.95] tracking-tight">
                 About <span className="text-blue-600">RizeWorld Institute</span>

@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { ArrowRight, CheckCircle2, Sparkles, Users, Award, Brain, Briefcase, Target, TrendingUp, Heart, Lightbulb } from "lucide-react";
+import { Link } from "react-router-dom";
+import { ArrowRight, CheckCircle2, Users, Award, Brain, Briefcase, Target, TrendingUp, Heart, Lightbulb, Palette } from "lucide-react";
 import Reveal from "../components/Reveal";
 import { getApiUrl } from "../utils/api";
 import SEO from "../components/SEO";
@@ -126,19 +127,119 @@ _${form.message || 'No additional requirements specified.'}_
       />
 
       {/* Hero */}
-      <section className="relative py-20 overflow-hidden bg-white">
+      <section className="relative pt-20 pb-16 overflow-hidden bg-white border-b border-neutral-100">
         <div className="max-w-7xl mx-auto px-6 relative">
           <Reveal>
-            <div className="max-w-4xl">
+            <div className="max-w-4xl mb-12">
               <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-orange-50 border border-orange-200 text-xs font-semibold text-orange-600 mb-5">
                 <Briefcase size={12} /> FOR COMPANIES & AGENCIES
               </div>
               <h1 className="font-display text-5xl md:text-7xl font-extrabold text-neutral-900 leading-none tracking-tight">
                 Hire <span className="text-blue-600">Digital Marketing Professionals</span>
               </h1>
-              <p className="mt-6 text-lg text-neutral-500 max-w-2xl">
+              <p className="mt-6 text-lg text-neutral-500 max-w-2xl leading-relaxed">
                 RizeWorld Institute is your destination for Digital Marketing Recruitment. Hire Job Ready Digital Marketers and Hire Digital Marketing Experts today for your business.
               </p>
+            </div>
+          </Reveal>
+
+          {/* Featured Student Showcase Card */}
+          <Reveal delay={0.15}>
+            <div className="relative bg-neutral-900 text-white rounded-[2.5rem] p-8 md:p-12 overflow-hidden shadow-2xl border border-neutral-800">
+              {/* Background ambient lighting */}
+              <div className="absolute top-0 right-0 w-[450px] h-[450px] bg-blue-600/20 blur-[120px] rounded-full pointer-events-none" />
+              <div className="absolute bottom-0 left-0 w-80 h-80 bg-orange-500/15 blur-[100px] rounded-full pointer-events-none" />
+
+              <div className="relative z-10 grid lg:grid-cols-12 gap-8 lg:gap-12 items-center">
+                {/* Left: Candidate Information */}
+                <div className="lg:col-span-7 flex flex-col justify-center">
+                  <div className="flex flex-wrap items-center gap-3 mb-4">
+                    <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-semibold">
+                      <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                      Available for Immediate Joining
+                    </span>
+                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 text-neutral-300 text-xs font-medium border border-white/10">
+                      <Award size={12} className="text-[#ff6b1a]" /> Featured Candidate
+                    </span>
+                  </div>
+
+                  <h2 className="font-display text-3xl md:text-5xl font-black text-white tracking-tight mb-2">
+                    Punit Sharma
+                  </h2>
+                  <div className="inline-flex items-center gap-2 text-blue-400 font-semibold text-lg md:text-xl mb-4">
+                    <Palette size={18} /> Graphic Designer
+                  </div>
+
+                  <p className="text-neutral-300 text-sm md:text-base leading-relaxed mb-6 max-w-xl">
+                    Specialized in brand identity creation, social media creatives, advertising banners, and print packaging. Trained with 100% practical agency workflows and real-world client briefs at RizeWorld Institute.
+                  </p>
+
+                  {/* Skills tags */}
+                  <div className="mb-8">
+                    <div className="text-xs font-bold text-neutral-400 uppercase tracking-wider mb-3">
+                      Core Competencies
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      {[
+                        "Adobe Photoshop",
+                        "Adobe Illustrator",
+                        "Brand Identity",
+                        "Social Media Design",
+                        "Canva Pro",
+                        "Print & Packaging",
+                        "Typography & Layouts"
+                      ].map((skill, idx) => (
+                        <span
+                          key={idx}
+                          className="px-3 py-1.5 rounded-xl bg-white/5 border border-white/10 text-xs font-medium text-neutral-200"
+                        >
+                          {skill}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* CTA Buttons */}
+                  <div className="flex flex-wrap items-center gap-4 pt-2">
+                    <a
+                      href="#inquiry-form"
+                      className="px-8 py-3.5 rounded-full bg-blue-600 text-white font-bold hover:bg-blue-700 transition-all flex items-center gap-2 shadow-lg shadow-blue-600/30 text-sm hover:scale-102"
+                    >
+                      Hire Punit Sharma <ArrowRight size={16} />
+                    </a>
+                    <Link
+                      to="/contact"
+                      className="px-6 py-3.5 rounded-full bg-white/10 text-white font-semibold hover:bg-white/20 transition-all border border-white/15 text-sm"
+                    >
+                      Request Portfolio
+                    </Link>
+                  </div>
+                </div>
+
+                {/* Right: Candidate Photo */}
+                <div className="lg:col-span-5 flex justify-center items-end relative">
+                  <div className="relative w-full max-w-sm aspect-4/5 rounded-3xl overflow-hidden bg-linear-to-b from-blue-600/20 via-neutral-800/60 to-neutral-900 border border-white/10 flex items-end justify-center p-4 shadow-2xl group">
+                    <div className="absolute inset-0 bg-radial from-blue-500/20 to-transparent opacity-60" />
+                    
+                    <img
+                      src="/student/punit.png"
+                      alt="Punit Sharma - Graphic Designer"
+                      className="relative z-10 w-full h-full object-contain object-bottom drop-shadow-[0_20px_30px_rgba(0,0,0,0.6)] group-hover:scale-105 transition-transform duration-500"
+                    />
+
+                    {/* Overlay Tag at bottom */}
+                    <div className="absolute bottom-4 left-4 right-4 z-20 bg-neutral-950/80 backdrop-blur-md border border-white/15 rounded-2xl p-3 flex items-center justify-between">
+                      <div>
+                        <div className="text-xs font-bold text-white">Punit Sharma</div>
+                        <div className="text-[11px] text-blue-400">Certified Graphic Designer</div>
+                      </div>
+                      <span className="px-2.5 py-1 rounded-full bg-blue-500/20 text-blue-300 text-[10px] font-bold uppercase tracking-wider border border-blue-400/30">
+                        Job-Ready
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           </Reveal>
         </div>
@@ -150,7 +251,7 @@ _${form.message || 'No additional requirements specified.'}_
           <Reveal>
             <div className="mb-12 text-center">
               <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full glass-green text-xs font-semibold text-[#059669] mb-4">
-                <Sparkles size={12} /> WHY COLLABORATE
+                <Briefcase size={13} /> WHY COLLABORATE
               </div>
               <h2 className="font-display text-4xl md:text-5xl font-extrabold text-white">
                 Why <span className="gradient-text">RizeWorld?</span>
@@ -251,7 +352,7 @@ _${form.message || 'No additional requirements specified.'}_
       </section>
 
       {/* Inquiry Form */}
-      <section className="py-24 bg-[#0a0a0a] relative overflow-hidden">
+      <section id="inquiry-form" className="py-24 bg-[#0a0a0a] relative overflow-hidden">
         <div className="absolute inset-0 bg-dots" />
         <div className="relative max-w-6xl mx-auto px-6 grid lg:grid-cols-2 gap-12">
           <Reveal>

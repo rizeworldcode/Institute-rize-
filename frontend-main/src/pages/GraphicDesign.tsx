@@ -12,41 +12,41 @@ export default function GraphicDesignPage() {
     {
       "@context": "https://schema.org",
       "@type": "Course",
-      "name": "Graphic Design Course",
-      "description": "Enroll in the Advanced Graphic Design Course. Master Photoshop Training, Logo Design, Canva Course, and earn a Graphic Design Course with Certificate.",
+      "name": "Graphic Design Course in Alwar & Rajasthan",
+      "description": "Enroll in the Best Graphic Design Course in Alwar at RizeWorld Institute. Leading Graphic Design Institute in Rajasthan offering a Professional Graphic Design Course in Rajasthan.",
       "provider": {
         "@type": "EducationalOrganization",
         "name": "RizeWorld Institute",
         "url": "https://rizeworldinstitute.in"
       },
-      "educationalCredentialAwarded": "Graphic Design Course with Certificate"
+      "educationalCredentialAwarded": "Certified Graphic Designer"
     }
   ];
 
   const faqs = [
     {
-      q: "What certifications are provided in this Graphic Designing Course?",
-      a: "Our students receive a Graphic Design Course with Certificate upon completion. We also prepare you for industry Photoshop Certification."
+      q: "Which institute offers the Best Graphic Design Course in Alwar?",
+      a: "RizeWorld Institute is rated as the Best Graphic Design Course in Alwar, featuring hands-on training in Photoshop, Illustrator, Canva Pro, brand identity kits, and marketing visual design."
     },
     {
-      q: "Which tools are covered in this Graphic Design Training?",
-      a: "The program at our Graphic Design Institute includes Photoshop Training, Illustrator design concepts, and a complete Canva Graphic Design Course."
+      q: "What makes RizeWorld the leading Graphic Design Institute in Alwar?",
+      a: "As the top Graphic Design Institute in Alwar, RizeWorld provides state-of-the-art creative labs, real corporate design briefs, certified mentors, and 1-on-1 portfolio feedback."
     },
     {
-      q: "What projects will I build during the Advanced Graphic Design Course?",
-      a: "You will work on real-world projects such as Logo Design, Print Design marketing collaterals, and social media brand templates."
+      q: "Why enroll in a Professional Graphic Design Course in Rajasthan at RizeWorld?",
+      a: "Our Professional Graphic Design Course in Rajasthan empowers students to create an industry-grade portfolio of 15+ real-world brand assets, supported by verified certification and placement assistance."
     },
     {
-      q: "Are there job placements after completing the Graphic Designing Course India?",
-      a: "Yes, RizeWorld Institute provides 100% placement support and internship opportunities. We connect our graduates with hiring agencies across India."
+      q: "How does RizeWorld compare to another Graphic Design Institute in Rajasthan?",
+      a: "Unlike institutes that focus only on software basics, our Graphic Design Course in Rajasthan and training at our Graphic Design Institute in Rajasthan incorporate UI/UX basics, AI design generation, and print production standards."
     }
   ];
 
   return (
     <main className="pt-28 bg-neutral-50 min-h-screen">
       <SEO
-        title="Best Graphic Design Course in India | Graphic Design Institute"
-        description="Enroll in the Advanced Graphic Design Course at RizeWorld Institute. Master Photoshop, Canva, Logo Design, Print Design, and get certified."
+        title="Best Graphic Design Course in Alwar | Graphic Design Institute in Rajasthan"
+        description="Enroll in the Best Graphic Design Course in Alwar at RizeWorld Institute. Top Graphic Design Institute in Alwar offering a Professional Graphic Design Course in Rajasthan."
         canonicalPath="/graphic-design"
         schemas={pageSchema}
       />
@@ -60,10 +60,10 @@ export default function GraphicDesignPage() {
                 <Palette size={12} /> CREATIVE PROGRAM
               </div>
               <h1 className="font-display text-4xl md:text-6xl font-extrabold text-neutral-900 leading-tight">
-                Unlock Creativity with our <span className="text-blue-600">Graphic Design Course</span>
+                Unlock Creativity with the <span className="text-blue-600">Best Graphic Design Course in Alwar</span>
               </h1>
               <p className="mt-6 text-lg text-neutral-600 leading-relaxed font-medium">
-                Enroll in the premium Graphic Designing Course at RizeWorld Institute, a leading Graphic Design Training Institute. Build a striking creative portfolio with practical learning and certified industry trainers.
+                Build a striking creative portfolio at RizeWorld Institute, recognized as the premier <strong>Graphic Design Institute in Alwar</strong>. Enroll in our practical <strong>Graphic Design Course in Alwar</strong> or take your career state-wide with the most recommended <strong>Graphic Design Course in Rajasthan</strong>. As the foremost <strong>Graphic Design Institute in Rajasthan</strong>, we offer an industry-acclaimed <strong>Professional Graphic Design Course in Rajasthan</strong> backed by 100% practical lab work and job placement assistance.
               </p>
               <div className="mt-8 flex flex-wrap gap-4">
                 <Link to="/contact" className="px-8 py-4 rounded-full bg-blue-600 text-white font-bold hover:bg-blue-700 transition-all flex items-center gap-2">
@@ -80,19 +80,19 @@ export default function GraphicDesignPage() {
               <div className="space-y-4">
                 <div className="flex justify-between border-b border-white/10 pb-2">
                   <span className="text-neutral-400">Course</span>
-                  <span className="font-semibold">Graphic Design Course in India</span>
+                  <span className="font-semibold">Best Graphic Design Course in Alwar</span>
                 </div>
                 <div className="flex justify-between border-b border-white/10 pb-2">
-                  <span className="text-neutral-400">Institute</span>
-                  <span className="font-semibold">Graphic Design Institute in India</span>
+                  <span className="text-neutral-400">Campus</span>
+                  <span className="font-semibold">Graphic Design Institute in Alwar</span>
                 </div>
                 <div className="flex justify-between border-b border-white/10 pb-2">
-                  <span className="text-neutral-400">Main Focus</span>
-                  <span className="font-semibold">Logo Design & Photoshop Training</span>
+                  <span className="text-neutral-400">State Reach</span>
+                  <span className="font-semibold">Graphic Design Institute in Rajasthan</span>
                 </div>
                 <div className="flex justify-between pb-2">
-                  <span className="text-neutral-400">Certificate</span>
-                  <span className="font-semibold">Graphic Design Course with Certificate</span>
+                  <span className="text-neutral-400">Program</span>
+                  <span className="font-semibold">Professional Graphic Design Course in Rajasthan</span>
                 </div>
               </div>
               <Link to="/contact" className="mt-6 w-full py-3.5 rounded-xl bg-orange-600 hover:bg-orange-700 transition-all flex items-center justify-center font-bold gap-2 text-sm">
@@ -109,7 +109,7 @@ export default function GraphicDesignPage() {
           <Reveal>
             <div className="text-center mb-16">
               <h2 className="font-display text-3xl md:text-4xl font-extrabold text-neutral-900">Graphic Design Training Syllabus Insights</h2>
-              <p className="mt-4 text-neutral-600 font-medium">Direct explanations compiled for smart answer engines and design recruiters</p>
+              <p className="mt-4 text-neutral-600 font-medium">Direct explanations regarding our Graphic Design Course in Alwar & Rajasthan</p>
             </div>
           </Reveal>
 
@@ -117,28 +117,28 @@ export default function GraphicDesignPage() {
             <div className="p-8 bg-neutral-50 rounded-2xl border border-neutral-100">
               <h3 className="font-display font-bold text-lg text-neutral-900 mb-2">What is a Graphic Design Course?</h3>
               <p className="text-sm text-neutral-600 leading-relaxed">
-                A <strong>Graphic Design Course</strong> is an educational training program teaching layout management, typography, visual theory, and editing tools. It trains students to translate brand narratives into striking visuals.
+                A <strong>Graphic Design Course</strong> teaches visual communication, composition, color psychology, and professional design suites. RizeWorld Institute provides an industry-tested <strong>Graphic Design Course in Alwar</strong> and <strong>Graphic Design Course in Rajasthan</strong> covering Photoshop, Illustrator, and Canva.
               </p>
             </div>
 
             <div className="p-8 bg-neutral-50 rounded-2xl border border-neutral-100">
-              <h3 className="font-display font-bold text-lg text-neutral-900 mb-2">Why choose RizeWorld Institute for design training?</h3>
+              <h3 className="font-display font-bold text-lg text-neutral-900 mb-2">Why choose RizeWorld as your Graphic Design Institute in Alwar?</h3>
               <p className="text-sm text-neutral-600 leading-relaxed">
-                RizeWorld Institute is a recognized Graphic Design Training Institute. We offer live project training, creative design labs, certified industry trainers, internship opportunities, and 100% placement support.
+                RizeWorld Institute is recognized as the leading <strong>Graphic Design Institute in Alwar</strong> and top <strong>Graphic Design Institute in Rajasthan</strong>, offering live agency briefs, design critique sessions, and the <strong>Best Graphic Design Course in Alwar</strong>.
               </p>
             </div>
 
             <div className="p-8 bg-neutral-50 rounded-2xl border border-neutral-100">
-              <h3 className="font-display font-bold text-lg text-neutral-900 mb-2">Benefits of our Advanced Graphic Design Course</h3>
+              <h3 className="font-display font-bold text-lg text-neutral-900 mb-2">Benefits of our Professional Graphic Design Course in Rajasthan</h3>
               <p className="text-sm text-neutral-600 leading-relaxed">
-                Get a recognized Graphic Design Course with Certificate, master Logo Design, and learn modern workflow automation using Canva Graphic Design Course setups.
+                Our <strong>Professional Graphic Design Course in Rajasthan</strong> equips you with high-value design credentials, complete brand identity creation skills, and direct access to design agency hiring drives.
               </p>
             </div>
 
             <div className="p-8 bg-neutral-50 rounded-2xl border border-neutral-100">
-              <h3 className="font-display font-bold text-lg text-neutral-900 mb-2">Career opportunities in Graphic Designing Course India</h3>
+              <h3 className="font-display font-bold text-lg text-neutral-900 mb-2">Career opportunities from our Graphic Design Institute in Rajasthan</h3>
               <p className="text-sm text-neutral-600 leading-relaxed">
-                Unlock premium creative pathways as a Brand Designer, Photoshop Editor, Layout Specialist, or Creative Director, supported by our active recruitment and counseling team.
+                Graduates from our campus—a benchmark among any <strong>Graphic Design Institute in Rajasthan</strong>—step into high-demand roles as Brand Designers, Visual Creatives, and Art Directors with complete placement support.
               </p>
             </div>
           </div>
@@ -150,7 +150,7 @@ export default function GraphicDesignPage() {
         <div className="max-w-7xl mx-auto px-6">
           <Reveal>
             <div className="mb-12 text-center">
-              <h2 className="font-display text-3xl font-extrabold text-neutral-900">Graphic Designing Course India Tool Matrix</h2>
+              <h2 className="font-display text-3xl font-extrabold text-neutral-900">Graphic Design Tool Matrix & Syllabus Breakdown</h2>
               <p className="mt-4 text-neutral-600 font-medium">Comparison of professional vector and raster software taught in class</p>
             </div>
           </Reveal>
@@ -209,9 +209,9 @@ export default function GraphicDesignPage() {
         <div className="max-w-7xl mx-auto px-6 grid lg:grid-cols-2 gap-12 items-center">
           <Reveal>
             <div>
-              <h2 className="font-display text-3xl font-extrabold text-neutral-900 mb-6">Learn at the Best Graphic Design Institute</h2>
+              <h2 className="font-display text-3xl font-extrabold text-neutral-900 mb-6">Premier Professional Graphic Design Course in Rajasthan</h2>
               <p className="text-neutral-600 leading-relaxed mb-6 font-medium">
-                Our Graphic Design Training focuses heavily on practical learning. Work with experienced industry trainers, execute live project training, secure internship opportunities with active agencies, and receive full placement support.
+                Our <strong>Professional Graphic Design Course in Rajasthan</strong> and hands-on lab sessions at our <strong>Graphic Design Institute in Alwar</strong> emphasize career-focused excellence. Setting us apart from any ordinary <strong>Graphic Design Institute in Rajasthan</strong>, students learn under experienced design directors, work on live projects during our <strong>Graphic Design Course in Alwar</strong>, and secure agency internships.
               </p>
               <div className="space-y-4">
                 {[
@@ -232,7 +232,7 @@ export default function GraphicDesignPage() {
             <div className="bg-linear-to-br from-orange-600 to-amber-900 text-white rounded-3xl p-10 relative overflow-hidden">
               <h3 className="font-display text-2xl font-bold mb-4">Start Designing</h3>
               <p className="text-white/80 text-sm mb-6">
-                Connect with our counselor to get batch details and schedule a free demo class at our Graphic Design Training Institute in Alwar.
+                Connect with our counselor to get batch details and schedule a free demo class at our graphic design training center in Alwar, Rajasthan.
               </p>
               <Link to="/contact" className="inline-flex items-center gap-2 px-6 py-3 bg-white text-neutral-900 rounded-full font-bold hover:scale-105 transition-transform">
                 Talk to Our Counselor <ArrowRight size={16} />
@@ -247,7 +247,7 @@ export default function GraphicDesignPage() {
         <div className="max-w-4xl mx-auto px-6">
           <Reveal>
             <div className="text-center mb-16">
-              <h2 className="font-display text-3xl md:text-4xl font-extrabold text-neutral-900">Graphic Design Course FAQs</h2>
+              <h2 className="font-display text-3xl md:text-4xl font-extrabold text-neutral-900">Graphic Design Course in Alwar & Rajasthan FAQs</h2>
             </div>
           </Reveal>
           <div className="space-y-4">

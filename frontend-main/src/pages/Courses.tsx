@@ -1,16 +1,18 @@
+import { useState } from "react";
 import { Link } from "react-router-dom";
-import { Brain, Palette, Video, TrendingUp, Search, BarChart3, Code, ArrowRight, CheckCircle2, Sparkles, Zap } from "lucide-react";
+import { Brain, Palette, Video, TrendingUp, Search, BarChart3, Code, ArrowRight, CheckCircle2, Award, Layers, BookOpen, Zap } from "lucide-react";
 import Reveal from "../components/Reveal";
 import SEO from "../components/SEO";
+import ExploreLinks from "../components/ExploreLinks";
 
 const modules = [
-  { icon: Search, title: "SEO (Search Engine Optimization)", desc: "Rank #1 on Google with advanced on-page, off-page, and technical SEO strategies.", duration: "1.5 weeks", topics: ["Keyword Research", "On-Page SEO", "Technical SEO", "Link Building", "Local SEO"] },
-  { icon: TrendingUp, title: "SMO (Social Media Optimization)", desc: "Build, grow, and monetize audiences across Instagram, Facebook, LinkedIn, and emerging platforms.", duration: "1.5 weeks", topics: ["Content Strategy", "Community Building", "Influencer Marketing", "Reels Growth", "Analytics"] },
-  { icon: BarChart3, title: "Performance Marketing", desc: "Run profitable Meta, Google, and YouTube ad campaigns with data-driven strategies.", duration: "2 weeks", topics: ["Meta Ads", "Google Ads", "YouTube Ads", "Conversion Tracking", "ROAS Optimization"] },
-  { icon: Code, title: "Website Development", desc: "Build fast, modern websites with WordPress, Webflow, and basic HTML/CSS.", duration: "1.5 weeks", topics: ["WordPress", "Webflow", "HTML/CSS Basics", "Landing Pages", "E-commerce"] },
-  { icon: Palette, title: "Graphic Design + Photoshop", desc: "Create stunning visuals, brand identities, and social media creatives with industry-standard tools.", duration: "2 weeks", topics: ["Photoshop Mastery", "Canva Pro", "Brand Identity", "Social Media Design", "Print & Digital"] },
+  { icon: Search, title: "SEO (Search Engine Optimization)", desc: "Rank #1 on Google with advanced on-page, off-page, and technical SEO strategies taught in our top-rated Digital Marketing course in Alwar.", duration: "1.5 weeks", topics: ["Keyword Research", "On-Page SEO", "Technical SEO", "Link Building", "Local SEO"] },
+  { icon: TrendingUp, title: "SMO (Social Media Optimization)", desc: "Build, grow, and monetize audiences across Instagram, Facebook, and LinkedIn with practical agency methodologies.", duration: "1.5 weeks", topics: ["Content Strategy", "Community Building", "Influencer Marketing", "Reels Growth", "Analytics"] },
+  { icon: BarChart3, title: "Performance Marketing", desc: "Run profitable Meta, Google, and YouTube ad campaigns with data-driven ROAS strategies from top Digital Marketing institutes in Rajasthan.", duration: "2 weeks", topics: ["Meta Ads", "Google Ads", "YouTube Ads", "Conversion Tracking", "ROAS Optimization"] },
+  { icon: Code, title: "Website Development", desc: "Build fast, modern websites with WordPress, Webflow, and basic HTML/CSS tailored for high-converting landing pages.", duration: "1.5 weeks", topics: ["WordPress", "Webflow", "HTML/CSS Basics", "Landing Pages", "E-commerce"] },
+  { icon: Palette, title: "Graphic Design + Photoshop", desc: "Create stunning visuals, brand identities, and social media creatives with industry-standard design tools.", duration: "2 weeks", topics: ["Photoshop Mastery", "Canva Pro", "Brand Identity", "Social Media Design", "Print & Digital"] },
   { icon: Video, title: "Video Editing", desc: "Cinematic editing for YouTube, Reels, Shorts, and brand storytelling using Premiere Pro & CapCut.", duration: "1.5 weeks", topics: ["Premiere Pro", "CapCut Mastery", "Color Grading", "Motion Graphics", "Reels & Shorts"] },
-  { icon: Brain, title: "AI Tools + DM Basics", desc: "Master ChatGPT, Gemini, Claude, Midjourney, and modern AI workflows for digital marketing automation.", duration: "2 weeks", topics: ["ChatGPT for Marketing", "Midjourney & DALL-E", "AI Copywriting", "Workflow Automation", "Prompt Engineering"] },
+  { icon: Brain, title: "AI Tools + DM Basics", desc: "Master ChatGPT, Gemini, Claude, Midjourney, and modern AI workflows in the foremost Digital Marketing course in Rajasthan.", duration: "2 weeks", topics: ["ChatGPT for Marketing", "Midjourney & DALL-E", "AI Copywriting", "Workflow Automation", "Prompt Engineering"] },
 ];
 
 const combos = [
@@ -18,7 +20,6 @@ const combos = [
     name: "Marketing Pro",
     desc: "Complete digital marketing mastery — from AI to paid ads.",
     modules: ["AI Tools", "SMO", "SEO", "Performance Marketing"],
-    
     color: "orange",
     popular: false,
   },
@@ -26,7 +27,6 @@ const combos = [
     name: "Creative Pro",
     desc: "Design + video + content creation powerhouse.",
     modules: ["AI Tools", "Graphic Design", "Video Editing", "SMO"],
-    
     color: "green",
     popular: true,
   },
@@ -34,20 +34,57 @@ const combos = [
     name: "Tech Pro",
     desc: "Web dev + AI + automation for tech-driven marketers.",
     modules: ["AI Tools", "Website Development", "SEO", "Performance Marketing"],
-   
     color: "orange",
     popular: false,
   },
 ];
 
 export default function Courses() {
+  const [openFaq, setOpenFaq] = useState<number | null>(null);
+
+  const courseSchema = [
+    {
+      "@context": "https://schema.org",
+      "@type": "Course",
+      "name": "Digital Marketing Course in Alwar & Rajasthan",
+      "description": "Enroll in the premier Digital Marketing course in Alwar at RizeWorld Institute. Recognized among top Digital Marketing institutes in Rajasthan.",
+      "provider": {
+        "@type": "EducationalOrganization",
+        "name": "RizeWorld Institute",
+        "url": "https://rizeworldinstitute.in"
+      },
+      "educationalCredentialAwarded": "Certified Digital Marketing Specialist"
+    }
+  ];
+
+  const faqs = [
+    {
+      q: "Which are the best Digital Marketing institutes in Alwar?",
+      a: "RizeWorld Institute is rated among the top Digital Marketing institutes in Alwar. We offer an AI-integrated curriculum, 100% practical live project training, high-tech lab infrastructure, and dedicated placement assistance."
+    },
+    {
+      q: "What is covered in the Digital Marketing course in Alwar?",
+      a: "Our Digital Marketing course in Alwar covers 7 core modules: Search Engine Optimization (SEO), Social Media Optimization (SMO), Performance Marketing (Meta & Google Ads), Graphic Design, Video Editing, Website Development, and AI automation tools."
+    },
+    {
+      q: "Why choose RizeWorld for a Digital Marketing course in Rajasthan?",
+      a: "As the premier choice for a Digital Marketing course in Rajasthan, RizeWorld Institute provides live ad spend budget handling, real client briefs, agency internship opportunities, and certificates recognized across India."
+    },
+    {
+      q: "How does RizeWorld compare with other Digital Marketing institutes in Rajasthan?",
+      a: "Unlike traditional theory-focused centers among Digital Marketing institutes in Rajasthan, RizeWorld Institute provides personalized 1-on-1 mentorship, an AI-first practical syllabus, portfolio building sessions, and direct recruitment access."
+    }
+  ];
+
   return (
     <main className="pt-28 bg-neutral-50 min-h-screen">
       <SEO
-        title="Explore Digital Marketing & AI Courses | RizeWorld Institute"
-        description="Explore our specialized digital marketing courses at RizeWorld Institute. Master SEO, Performance Marketing, Social Media, Video Editing, and AI tools."
+        title="Best Digital Marketing Course in Alwar & Rajasthan | RizeWorld Institute"
+        description="Looking for the top Digital Marketing institutes in Alwar? Join our premier Digital Marketing course in Alwar. Leading choice among Digital Marketing institutes in Rajasthan."
         canonicalPath="/courses"
+        schemas={courseSchema}
       />
+
       {/* Master Course Featured */}
       <section className="py-12 md:py-16">
         <div className="max-w-7xl mx-auto px-6">
@@ -59,26 +96,29 @@ export default function Courses() {
               <div className="relative z-10 grid lg:grid-cols-2 gap-12 items-center">
                 <div>
                   <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-500/20 border border-blue-400/30 text-xs font-semibold text-blue-300 mb-6">
-                    <Sparkles size={12} /> FLAGSHIP PROGRAM
+                    <Award size={13} /> FLAGSHIP PROGRAM
                   </div>
-                  <h2 className="font-display text-4xl md:text-5xl font-extrabold mb-6 leading-tight">
-                    The 3-Month <br />
-                    <span className="text-blue-400">Job-Ready</span> Master Course.
-                  </h2>
-                  <p className="text-neutral-400 text-lg mb-8 max-w-md">
-                    Complete digital marketing mastery from AI tools to paid ads. 7 modules, 12 weeks, 100% practical training.
+                  <h1 className="font-display text-4xl md:text-5xl font-extrabold mb-6 leading-tight">
+                    The Premier <br />
+                    <span className="text-blue-400">Digital Marketing Course</span> in Alwar.
+                  </h1>
+                  <p className="text-neutral-300 text-base md:text-lg mb-8 max-w-xl leading-relaxed">
+                    Looking for the best <strong>Digital Marketing institutes in Alwar</strong>? RizeWorld Institute offers an industry-leading <strong>Digital Marketing course in Alwar</strong>. Recognized among the top <strong>Digital Marketing institutes in Rajasthan</strong>, our practical curriculum delivers complete mastery across 7 modules with the most career-focused <strong>Digital Marketing course in Rajasthan</strong>.
                   </p>
                   
                   <div className="flex flex-wrap gap-4">
                     <Link to="/master-course" className="px-8 py-4 rounded-full bg-blue-600 text-white font-bold hover:bg-blue-700 transition-all flex items-center gap-2">
                       View Full Syllabus <ArrowRight size={18} />
                     </Link>
+                    <Link to="/contact" className="px-8 py-4 rounded-full bg-white/10 text-white font-bold hover:bg-white/20 transition-all flex items-center gap-2 border border-white/20">
+                      Book Free Demo Class
+                    </Link>
                   </div>
                 </div>
                 
                 <div className="grid sm:grid-cols-2 gap-4">
                   {[
-                    { icon: Sparkles, text: "All 7 Modules Included" },
+                    { icon: Layers, text: "All 7 Modules Included" },
                     { icon: CheckCircle2, text: "12 Weeks Duration" },
                     { icon: Brain, text: "AI-First Approach" },
                     { icon: Zap, text: "100% Job Assistance" }
@@ -101,10 +141,10 @@ export default function Courses() {
           <Reveal>
             <div className="mb-16 text-center">
               <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-50 border border-blue-200 text-xs font-semibold text-blue-600 mb-4">
-                <Sparkles size={12} /> INDIVIDUAL MODULES
+                <BookOpen size={13} /> INDIVIDUAL MODULES
               </div>
-              <h2 className="font-display text-4xl md:text-5xl font-extrabold text-neutral-900">Master every skill.</h2>
-              <p className="mt-4 text-lg text-neutral-600 font-medium">Duration: 1 Month</p>
+              <h2 className="font-display text-4xl md:text-5xl font-extrabold text-neutral-900">Master Every Skill with the Best Digital Marketing Course in Alwar</h2>
+              <p className="mt-4 text-lg text-neutral-600 font-medium">Learn from the top Digital Marketing institutes in Alwar • Duration: 1 Month per module</p>
             </div>
           </Reveal>
 
@@ -140,7 +180,7 @@ export default function Courses() {
               <h2 className="font-display text-4xl md:text-5xl font-extrabold text-neutral-900 tracking-tight">
                 Stack skills. <span className="text-blue-600">Save more.</span>
               </h2>
-              <p className="mt-4 text-lg text-neutral-600 font-medium">Duration: 2 Months</p>
+              <p className="mt-4 text-lg text-neutral-600 font-medium">Specialized skill bundles crafted by leading Digital Marketing institutes in Rajasthan</p>
             </div>
           </Reveal>
 
@@ -172,6 +212,36 @@ export default function Courses() {
           </div>
         </div>
       </section>
+
+      {/* FAQs Section */}
+      <section className="py-20 bg-white border-t border-neutral-200">
+        <div className="max-w-4xl mx-auto px-6">
+          <Reveal>
+            <div className="text-center mb-16">
+              <h2 className="font-display text-3xl md:text-4xl font-extrabold text-neutral-900">
+                Digital Marketing Course in Alwar FAQs
+              </h2>
+              <p className="mt-4 text-neutral-600 font-medium">Common questions about learning from premier Digital Marketing institutes in Alwar & Rajasthan</p>
+            </div>
+          </Reveal>
+          <div className="space-y-4">
+            {faqs.map((faq, idx) => {
+              const isOpen = openFaq === idx;
+              return (
+                <div key={idx} onClick={() => setOpenFaq(isOpen ? null : idx)} className="bg-neutral-50 border border-neutral-200 rounded-2xl p-6 cursor-pointer transition-all">
+                  <div className="flex justify-between items-center gap-4">
+                    <span className="font-display font-bold text-neutral-900 text-lg">{faq.q}</span>
+                    <span className="text-xl font-bold">{isOpen ? "-" : "+"}</span>
+                  </div>
+                  {isOpen && <p className="mt-4 text-neutral-600 text-sm leading-relaxed">{faq.a}</p>}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
+      <ExploreLinks activePath="/courses" />
     </main>
   );
 }

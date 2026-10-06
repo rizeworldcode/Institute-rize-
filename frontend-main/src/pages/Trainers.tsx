@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { Sparkles, Mail, Phone, GraduationCap, ExternalLink, ArrowRight } from "lucide-react";
+import { Mail, Phone, GraduationCap, ExternalLink, ArrowRight } from "lucide-react";
 import Reveal from "../components/Reveal";
 import { getApiUrl } from "../utils/api";
 import SEO from "../components/SEO";
@@ -107,7 +107,7 @@ export default function Trainers() {
         <div className="max-w-7xl mx-auto px-6 relative z-10 text-center">
           <Reveal>
             <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-xs font-semibold text-orange-400 mb-6 tracking-wide uppercase">
-              <Sparkles size={12} className="animate-pulse" /> Our Faculty & Mentors
+              <GraduationCap size={14} className="text-orange-400" /> Our Faculty & Mentors
             </div>
             <h1 className="font-display text-5xl md:text-7xl font-extrabold tracking-tight leading-none">
               Learn from the <br />

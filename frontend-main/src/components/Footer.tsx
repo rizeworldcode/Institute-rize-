@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { Instagram, Linkedin, Mail, Phone, MapPin, Sparkles } from "lucide-react";
+import { Instagram, Linkedin, Mail, Phone, MapPin, Rocket } from "lucide-react";
 
 export default function Footer() {
   return (
@@ -18,7 +18,7 @@ export default function Footer() {
           
           <div className="relative z-10 flex flex-col items-center justify-center max-w-4xl mx-auto">
             <div className="inline-flex items-center gap-2 px-5 py-2 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-xs font-bold mb-8 text-white tracking-widest shadow-lg uppercase">
-              <Sparkles size={14} className="text-[#ffb088]" />
+              <Rocket size={14} className="text-[#ffb088]" />
               Ready To Rise?
             </div>
             <h3 className="font-display text-5xl md:text-6xl lg:text-7xl font-black leading-[1.1] text-white mb-6 tracking-tight">

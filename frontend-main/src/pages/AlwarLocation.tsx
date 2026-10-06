@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { MapPin, Phone, Mail, Clock, Users, Award, Calendar, Sparkles, ChevronRight, CheckCircle2 } from "lucide-react";
+import { MapPin, Phone, Mail, Clock, Users, Award, Calendar, ChevronRight, CheckCircle2 } from "lucide-react";
 import Reveal from "../components/Reveal";
 import SEO from "../components/SEO";
 import ExploreLinks from "../components/ExploreLinks";
@@ -286,7 +286,7 @@ export default function AlwarLocation() {
                     to="/contact"
                     className="inline-flex items-center gap-2 px-6 py-3.5 rounded-full bg-orange-500 text-white font-bold hover:bg-orange-600 transition-all shadow-orange"
                   >
-                    Schedule a Visit <Sparkles size={14} />
+                    Schedule a Visit <Calendar size={14} />
                   </Link>
                 </div>
               </div>

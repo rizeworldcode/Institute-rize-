@@ -12,8 +12,8 @@ export default function PerformanceMarketingPage() {
     {
       "@context": "https://schema.org",
       "@type": "Course",
-      "name": "Performance Marketing Course",
-      "description": "Master Meta Ads, Google Ads, Google Analytics, and ROAS Optimization Training. Enroll in the premium Performance Marketing Institute India.",
+      "name": "Performance Marketing Course in Alwar & Rajasthan",
+      "description": "Enroll in the premier Performance Marketing Course in Alwar at RizeWorld Institute. Recognized among top Performance Marketing institutes in Rajasthan.",
       "provider": {
         "@type": "EducationalOrganization",
         "name": "RizeWorld Institute",
@@ -25,28 +25,28 @@ export default function PerformanceMarketingPage() {
 
   const faqs = [
     {
-      q: "What certifications are supported in the Performance Marketing Course?",
-      a: "Our curriculum prepares you for standard industry credentials including Google Ads Certification, Meta Ads Certification, and Google Analytics Certification, validating your skills to top employers."
+      q: "Which is the best institute for a Performance Marketing Course in Alwar?",
+      a: "RizeWorld Institute is rated as the premier destination for a Performance Marketing Course in Alwar. As a top choice among Performance Marketing institutes in Alwar, we provide hands-on experience managing live Google and Meta ad budgets with conversion tracking."
     },
     {
-      q: "What tools are covered in this Performance Ads training?",
-      a: "The program covers Facebook Ads, Google Ads, Google Tag Manager Training, Google Analytics Training, and advanced dashboarding for scale."
+      q: "What topics are included in this Performance Marketing Course in Rajasthan?",
+      a: "Our Performance Marketing Course in Rajasthan covers Google Ads (Search, Display, Performance Max, YouTube), Meta Ads (Facebook & Instagram), Google Analytics 4, Tag Manager, server-side tracking, and ROAS optimization strategies."
     },
     {
-      q: "Who is the ideal candidate for the Performance Marketing Institute courses?",
-      a: "This course is ideal for working professionals, entrepreneurs aiming to lower customer acquisition costs, and freshers looking for a job-oriented career path in digital marketing."
+      q: "Why choose RizeWorld over other Performance Marketing institutes in Rajasthan?",
+      a: "Unlike institutes that focus only on theoretical ad concepts, RizeWorld Institute stands out among Performance Marketing institutes in Rajasthan by letting students execute real campaigns with actual ad budgets and live ROAS tuning."
     },
     {
-      q: "Is there practical ROAS Optimization Training?",
-      a: "Yes, you will manage live ad budgets during the course, learning real-world media buying, campaign structuring, A/B testing, and ROAS Optimization Training."
+      q: "Can beginners join the Performance Marketing Course in Alwar?",
+      a: "Yes! Our Performance Marketing Course in Alwar starts from foundational media buying principles and scales up to advanced funnel architectures, making it suitable for freshers, freelancers, and entrepreneurs."
     }
   ];
 
   return (
     <main className="pt-28 bg-neutral-50 min-h-screen">
       <SEO
-        title="Best Performance Marketing Course in India | Google & Meta Ads Training"
-        description="Enroll in the flagship Performance Marketing Course at RizeWorld Institute. Master Google Ads, Facebook Ads, conversion tracking, and earn certifications."
+        title="Best Performance Marketing Course in Alwar | Performance Marketing Institutes in Rajasthan"
+        description="Enroll in the premier Performance Marketing Course in Alwar at RizeWorld Institute. Top choice among Performance Marketing institutes in Alwar and Rajasthan."
         canonicalPath="/performance-marketing"
         schemas={pageSchema}
       />
@@ -60,10 +60,10 @@ export default function PerformanceMarketingPage() {
                 <BarChart3 size={12} /> PAID ADS PROGRAM
               </div>
               <h1 className="font-display text-4xl md:text-6xl font-extrabold text-neutral-900 leading-tight">
-                Advanced <span className="text-blue-600">Performance Marketing Course</span>
+                Advanced <span className="text-blue-600">Performance Marketing Course in Alwar</span>
               </h1>
               <p className="mt-6 text-lg text-neutral-600 leading-relaxed font-medium">
-                Learn media buying from the leading Performance Marketing Institute. Scale brand revenues using paid search, social media ads, and technical web analytics.
+                Master paid advertising and media buying at RizeWorld Institute, recognized among the premier <strong>Performance Marketing institutes in Alwar</strong>. Our flagship <strong>Performance Marketing Course in Alwar</strong> and comprehensive <strong>Performance Marketing Course in Rajasthan</strong> train you to scale brand revenues using Meta Ads, Google Ads, and analytics, setting the standard among <strong>Performance Marketing institutes in Rajasthan</strong>.
               </p>
               <div className="mt-8 flex flex-wrap gap-4">
                 <Link to="/contact" className="px-8 py-4 rounded-full bg-blue-600 text-white font-bold hover:bg-blue-700 transition-all flex items-center gap-2">
@@ -80,19 +80,19 @@ export default function PerformanceMarketingPage() {
               <div className="space-y-4">
                 <div className="flex justify-between border-b border-white/10 pb-2">
                   <span className="text-neutral-400">Course</span>
-                  <span className="font-semibold">Performance Marketing Course in India</span>
+                  <span className="font-semibold">Performance Marketing Course in Alwar</span>
                 </div>
                 <div className="flex justify-between border-b border-white/10 pb-2">
-                  <span className="text-neutral-400">Paid Ad Modules</span>
-                  <span className="font-semibold">Google Ads Training & Facebook Ads Course</span>
+                  <span className="text-neutral-400">Institute</span>
+                  <span className="font-semibold">Performance Marketing institutes in Alwar</span>
                 </div>
                 <div className="flex justify-between border-b border-white/10 pb-2">
-                  <span className="text-neutral-400">Analytics</span>
-                  <span className="font-semibold">Google Analytics Training</span>
+                  <span className="text-neutral-400">State Reach</span>
+                  <span className="font-semibold">Performance Marketing institutes in Rajasthan</span>
                 </div>
                 <div className="flex justify-between pb-2">
                   <span className="text-neutral-400">Optimization</span>
-                  <span className="font-semibold">ROAS Optimization Training</span>
+                  <span className="font-semibold">ROAS Optimization & Live Media Buying</span>
                 </div>
               </div>
               <Link to="/contact" className="mt-6 w-full py-3.5 rounded-xl bg-orange-600 hover:bg-orange-700 transition-all flex items-center justify-center font-bold gap-2 text-sm">
@@ -108,8 +108,8 @@ export default function PerformanceMarketingPage() {
         <div className="max-w-5xl mx-auto px-6">
           <Reveal>
             <div className="text-center mb-16">
-              <h2 className="font-display text-3xl md:text-4xl font-extrabold text-neutral-900">Performance Marketing Training India Structure</h2>
-              <p className="mt-4 text-neutral-600 font-medium">Quick explanations optimized for answer engines and prospective applicants</p>
+              <h2 className="font-display text-3xl md:text-4xl font-extrabold text-neutral-900">Performance Marketing Training Structure</h2>
+              <p className="mt-4 text-neutral-600 font-medium">Direct answers regarding our Performance Marketing Course in Alwar & Rajasthan</p>
             </div>
           </Reveal>
 
@@ -117,28 +117,28 @@ export default function PerformanceMarketingPage() {
             <div className="p-8 bg-neutral-50 rounded-2xl border border-neutral-100">
               <h3 className="font-display font-bold text-lg text-neutral-900 mb-2">What is a Performance Marketing Course?</h3>
               <p className="text-sm text-neutral-600 leading-relaxed">
-                It is a results-driven training program that focuses on paid media planning, execution, and data analytics. Students learn to design campaigns on Google, Meta, and LinkedIn with absolute control over budget and conversions.
+                A <strong>Performance Marketing Course</strong> is an intensive training program focused on paid media acquisition, tracking tags, and conversion analytics. RizeWorld Institute provides an advanced <strong>Performance Marketing Course in Alwar</strong> and <strong>Performance Marketing Course in Rajasthan</strong> covering Google, Meta, and multi-channel campaigns.
               </p>
             </div>
 
             <div className="p-8 bg-neutral-50 rounded-2xl border border-neutral-100">
-              <h3 className="font-display font-bold text-lg text-neutral-900 mb-2">Why choose our Performance Marketing Institute?</h3>
+              <h3 className="font-display font-bold text-lg text-neutral-900 mb-2">Why choose RizeWorld among Performance Marketing institutes in Alwar?</h3>
               <p className="text-sm text-neutral-600 leading-relaxed">
-                RizeWorld Institute stands as the preferred Performance Marketing Institute India. We combine certified trainers, real ad budgets, live project training, and placement support to ensure professional success.
+                RizeWorld Institute stands as the leader among <strong>Performance Marketing institutes in Alwar</strong> and <strong>Performance Marketing institutes in Rajasthan</strong>. We provide real advertising budgets, live campaign execution, and complete placement support.
               </p>
             </div>
 
             <div className="p-8 bg-neutral-50 rounded-2xl border border-neutral-100">
-              <h3 className="font-display font-bold text-lg text-neutral-900 mb-2">Benefits of Google Ads Training & Facebook Ads Course</h3>
+              <h3 className="font-display font-bold text-lg text-neutral-900 mb-2">Benefits of our Performance Marketing Course in Rajasthan</h3>
               <p className="text-sm text-neutral-600 leading-relaxed">
-                Mastering Google Ads Course and Facebook Ads Course modules equips you with ROAS Optimization Training, campaign automation techniques, and advanced tag implementation skills.
+                Enrolling in our <strong>Performance Marketing Course in Rajasthan</strong> gives you mastery in ROAS optimization, server-side tracking, A/B creative testing, and credentials valued across corporate agencies.
               </p>
             </div>
 
             <div className="p-8 bg-neutral-50 rounded-2xl border border-neutral-100">
-              <h3 className="font-display font-bold text-lg text-neutral-900 mb-2">Career opportunities after Performance Marketing Training</h3>
+              <h3 className="font-display font-bold text-lg text-neutral-900 mb-2">Career opportunities from top Performance Marketing institutes in Rajasthan</h3>
               <p className="text-sm text-neutral-600 leading-relaxed">
-                Graduates transition into roles such as Media Buyers, Performance Marketing Specialists, PPC Managers, and Analytics Experts, supported by our network internships and recruitment assistance.
+                Graduates from our campus—a benchmark among <strong>Performance Marketing institutes in Rajasthan</strong>—step into high-paying roles as Media Buyers, Paid Ads Specialists, and Performance Marketing Leads.
               </p>
             </div>
           </div>
@@ -150,7 +150,7 @@ export default function PerformanceMarketingPage() {
         <div className="max-w-7xl mx-auto px-6">
           <Reveal>
             <div className="mb-12 text-center">
-              <h2 className="font-display text-3xl font-extrabold text-neutral-900">Paid Acquisition & Web Analytics Engine breakdown</h2>
+              <h2 className="font-display text-3xl font-extrabold text-neutral-900">Paid Acquisition & Web Analytics Engine Breakdown</h2>
               <p className="mt-4 text-neutral-600 font-medium">Core technical competencies developed during class hours</p>
             </div>
           </Reveal>
@@ -209,14 +209,14 @@ export default function PerformanceMarketingPage() {
         <div className="max-w-7xl mx-auto px-6 grid lg:grid-cols-2 gap-12 items-center">
           <Reveal>
             <div>
-              <h2 className="font-display text-3xl font-extrabold text-neutral-900 mb-6">Learn from a Certified Performance Marketing Institute India</h2>
+              <h2 className="font-display text-3xl font-extrabold text-neutral-900 mb-6">Expert-Led Performance Marketing Course in Rajasthan & Alwar</h2>
               <p className="text-neutral-600 leading-relaxed mb-6 font-medium">
-                Our curriculum emphasizes practical learning over textbook theories. Work alongside senior media buyers, gain access to live project training, get internship opportunities at agency levels, and acquire certifications recognized internationally.
+                Our curriculum emphasizes practical learning over textbook theories. Setting us apart from ordinary <strong>Performance Marketing institutes in Rajasthan</strong> and <strong>Performance Marketing institutes in Alwar</strong>, our students work alongside senior media buyers, manage live budgets during our <strong>Performance Marketing Course in Alwar</strong>, and acquire credentials recognized globally.
               </p>
               <div className="space-y-4">
                 {[
                   "Hands-on budget management on real Google and Facebook accounts",
-                  "100% placement support with resume builders and placement mock drills",
+                  "100% placement support with resume builders and mock drills",
                   "Taught by active industry trainers managing digital campaigns",
                   "Direct counseling and lifetime community updates"
                 ].map((item, idx) => (
@@ -232,7 +232,7 @@ export default function PerformanceMarketingPage() {
             <div className="bg-linear-to-br from-orange-600 to-red-900 text-white rounded-3xl p-10 relative overflow-hidden">
               <h3 className="font-display text-2xl font-bold mb-4">Start Ad Management</h3>
               <p className="text-white/80 text-sm mb-6">
-                Fill out our admission enquiry form today to book a free demo class at our Performance Marketing Institute in Alwar.
+                Fill out our admission enquiry form today to book a free demo class at our premier performance marketing campus in Alwar, Rajasthan.
               </p>
               <Link to="/contact" className="inline-flex items-center gap-2 px-6 py-3 bg-white text-neutral-900 rounded-full font-bold hover:scale-105 transition-transform">
                 Talk to Our Counselor <ArrowRight size={16} />
@@ -247,7 +247,7 @@ export default function PerformanceMarketingPage() {
         <div className="max-w-4xl mx-auto px-6">
           <Reveal>
             <div className="text-center mb-16">
-              <h2 className="font-display text-3xl md:text-4xl font-extrabold text-neutral-900">Performance Marketing Course FAQ</h2>
+              <h2 className="font-display text-3xl md:text-4xl font-extrabold text-neutral-900">Performance Marketing Course in Alwar & Rajasthan FAQs</h2>
             </div>
           </Reveal>
           <div className="space-y-4">

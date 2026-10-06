@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { Clock, ArrowRight, Sparkles, Brain, Palette, Video, TrendingUp, Search, BarChart3, Code, Users, Award, Zap, CheckCircle2, Quote, Star, MapPin, BookOpen, Briefcase } from "lucide-react";
+import { Clock, ArrowRight, Layers, Rocket, GraduationCap, Brain, Palette, Video, TrendingUp, Search, BarChart3, Code, Users, Award, Zap, CheckCircle2, Quote, Star, MapPin, BookOpen, Briefcase } from "lucide-react";
 import Reveal from "../components/Reveal";
 import SEO from "../components/SEO";
 
@@ -379,7 +379,7 @@ export default function Home() {
                 return (
                   <div key={j} className="flex items-center gap-12">
                     <span className={`font-display text-3xl md:text-5xl font-extrabold transition-colors ${colors[j % colors.length]} hover:opacity-80`}>{t}</span>
-                    <Sparkles size={24} className="text-orange-500 opacity-50" />
+                    <Zap size={20} className="text-orange-500 opacity-60" />
                   </div>
                 );
               })}
@@ -398,7 +398,7 @@ export default function Home() {
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 mb-20">
               <div className="max-w-2xl">
                 <div className="premium-pill inline-flex items-center gap-2 text-xs font-bold tracking-[0.2em] text-neutral-600 mb-6 uppercase">
-                  <Sparkles size={12} className="text-blue-600" />
+                  <Layers size={13} className="text-blue-600" />
                   Individual Modules
                 </div>
                 <h2 className="font-display text-5xl md:text-7xl font-black text-neutral-900 tracking-tighter leading-[0.95]">
@@ -455,7 +455,7 @@ export default function Home() {
 
                 <div className="relative z-10">
                   <div className="w-16 h-16 rounded-[1.25rem] bg-blue-600 flex items-center justify-center mx-auto mb-6 animate-float shadow-[0_20px_40px_-10px_rgba(65,104,178,0.4)] group-hover:scale-110 transition-transform duration-500 text-white">
-                    <Sparkles size={28} />
+                    <GraduationCap size={28} />
                   </div>
                   <h3 className="font-display text-2xl font-bold text-white mb-4">Master Course</h3>
                   <p className="text-white/70 font-medium mb-8">Get all 7 modules + 100% placement assistance.</p>
@@ -564,7 +564,7 @@ export default function Home() {
                 <div className="grid lg:grid-cols-2 gap-10 items-center">
                   <div>
                     <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/10 backdrop-blur border border-white/20 text-xs font-bold tracking-widest text-white mb-5">
-                      <Sparkles size={12} /> FLAGSHIP PROGRAM
+                      <Award size={13} /> FLAGSHIP PROGRAM
                     </div>
                     <h2 className="font-display text-4xl md:text-6xl font-extrabold leading-tight text-white">
                       The 3-Month <br /><span className="text-[#fcbf12]">Job-Ready Master Course</span>
@@ -683,7 +683,7 @@ export default function Home() {
           <Reveal>
             <div className="premium-card-dark p-12 md:p-20 relative overflow-hidden">
               <div className="absolute inset-0 bg-grid opacity-20" />
-              <Sparkles size={40} className="text-blue-600 mx-auto mb-6 animate-pulse relative z-10" />
+              <Rocket size={42} className="text-blue-400 mx-auto mb-6 relative z-10" />
               <h2 className="font-display text-5xl md:text-8xl font-extrabold text-white leading-none tracking-tight relative z-10">
                 Ready to <span className="gradient-text">Rize?</span>
               </h2>

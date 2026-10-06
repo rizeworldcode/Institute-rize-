@@ -2,7 +2,7 @@ import { useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { ArrowRight, CheckCircle2, Calendar, MapPin, Users, Zap, Brain, Palette, Video, TrendingUp, Search, BarChart3, Code, Sparkles, Target } from "lucide-react";
+import { ArrowRight, CheckCircle2, Calendar, MapPin, Users, Zap, Brain, Palette, Video, TrendingUp, Search, BarChart3, Code, Award, Target } from "lucide-react";
 import Reveal from "../components/Reveal";
 import SEO from "../components/SEO";
 
@@ -62,8 +62,8 @@ export default function MasterCourse() {
   return (
     <main className="pt-28 bg-neutral-50 min-h-screen">
       <SEO
-        title="3-Month Job-Ready Master Course in AI & Marketing | RizeWorld"
-        description="12-week intensive master program combining AI tools, digital marketing, portfolio building, and 100% placement support. Enroll today."
+        title="3-Month Job-Ready Master Digital Marketing Course in Alwar | RizeWorld"
+        description="Enroll in the premier Digital Marketing course in Alwar. Rated among the top Digital Marketing institutes in Rajasthan with AI tools and 100% placement support."
         canonicalPath="/master-course"
         schemas={masterCourseSchema}
       />
@@ -80,14 +80,15 @@ export default function MasterCourse() {
           <Reveal>
             <div>
               <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-orange-50 border border-orange-200 text-xs font-semibold text-orange-600 mb-5">
-                <Sparkles size={12} /> FLAGSHIP PROGRAM
+                <Award size={13} /> FLAGSHIP PROGRAM
               </div>
               <h1 className="font-display text-5xl md:text-7xl font-extrabold text-neutral-900 leading-[0.95] tracking-tight">
                 The 3-Month <br /><span className="text-blue-600">Job-Ready</span> <br />Master Course.
               </h1>
-              <div className="mt-6 text-lg text-neutral-600 max-w-lg leading-relaxed font-medium space-y-2 border-l-4 border-blue-600 pl-4">
-                <p>3-month job-ready program | Alwar, Rajasthan</p>
-                <p className="font-bold text-neutral-900">7 modules • 12 weeks</p>
+              <div className="mt-6 text-base text-neutral-600 max-w-lg leading-relaxed font-medium space-y-2 border-l-4 border-blue-600 pl-4">
+                <p>Top-rated <strong>Digital Marketing course in Alwar</strong> & <strong>Digital Marketing course in Rajasthan</strong> | RizeWorld Institute</p>
+                <p className="text-sm">Recognized among the finest <strong>Digital Marketing institutes in Alwar</strong> and <strong>Digital Marketing institutes in Rajasthan</strong> with 100% placement support.</p>
+                <p className="font-bold text-neutral-900 text-sm">7 modules • 12 weeks • AI-Integrated</p>
               </div>
 
               <div className="mt-8 flex flex-wrap gap-4">
