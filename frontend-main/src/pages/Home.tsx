@@ -20,19 +20,17 @@ const courses = [
 ];
 
 
-const videoTestimonials = [
+const videoTestimonials: { videoUrl: string; desc: string; posterUrl?: string }[] = [
   {
-    name: "Priya Sharma",
-    role: "Digital Marketer",
-    videoUrl: "/video/VID_20261005_235023_731.mp4",
-    posterUrl: "/student/punit.png",
+
+    videoUrl: "/video/video 1.mp4",
+
     desc: "\"RizeWorld transformed my career within 2 months.\""
   },
   {
-    name: "Rahul Verma",
-    role: "Freelance Designer",
-    videoUrl: "/video/VID_20261006_001249_312.mp4",
-    posterUrl: "/student/punit.png",
+
+    videoUrl: "/video/video 2.mp4",
+
     desc: "\"Hands-on projects made learning truly addictive.\""
   }
 ];
@@ -268,7 +266,7 @@ export default function Home() {
       },
       "openingHoursSpecification": {
         "@type": "OpeningHoursSpecification",
-        "dayOfWeek": ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"],
+        "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"],
         "opens": "09:00",
         "closes": "19:00"
       },
@@ -796,7 +794,7 @@ function VideoTestimonialsSection() {
   const gutter = 20;
   const unhoveredHeight = 280;
   const hoveredHeight = 440;
-  
+
   const baseSeat = 240;
   const openWidth = 340;
   const shrunk = 180;
@@ -921,14 +919,14 @@ function VideoTestimonialsSection() {
                     {t.videoUrl ? (
                       <VideoPanel
                         src={t.videoUrl}
-                        poster={t.posterUrl}
+                        poster={t.posterUrl || ""}
                         muted={!isAudioOn}
                         running={inView && (isOpen || open === null)}
                       />
                     ) : (
                       <img
-                        src={t.posterUrl}
-                        alt={t.name}
+                        src={t.posterUrl || ""}
+                        alt="Student Testimonial"
                         draggable={false}
                         style={{ display: "block", width: "100%", height: "100%", objectFit: "cover", userSelect: "none" }}
                       />
@@ -942,11 +940,10 @@ function VideoTestimonialsSection() {
                         e.stopPropagation();
                         setActiveSound(isAudioOn ? null : i);
                       }}
-                      className={`absolute top-3 right-3 z-30 p-2.5 rounded-full backdrop-blur-md transition-all duration-300 shadow-lg cursor-pointer ${
-                        isAudioOn
-                          ? "bg-blue-600 text-white shadow-blue-500/50 scale-110"
-                          : "bg-black/60 border border-white/20 text-white/80 hover:bg-black/80 hover:text-white"
-                      }`}
+                      className={`absolute top-3 right-3 z-30 p-2.5 rounded-full backdrop-blur-md transition-all duration-300 shadow-lg cursor-pointer ${isAudioOn
+                        ? "bg-blue-600 text-white shadow-blue-500/50 scale-110"
+                        : "bg-black/60 border border-white/20 text-white/80 hover:bg-black/80 hover:text-white"
+                        }`}
                       title={isAudioOn ? "Mute Voice" : "Unmute Voice"}
                     >
                       {isAudioOn ? <Volume2 size={16} /> : <VolumeX size={16} />}
@@ -970,9 +967,9 @@ function VideoTestimonialsSection() {
   );
 }
 
-function VideoPanel({ src, poster, running, muted }: { src: string; poster: string; running: boolean; muted: boolean }) {
+function VideoPanel({ src, poster, running, muted }: { src: string; poster?: string; running: boolean; muted: boolean }) {
   const ref = useRef<HTMLVideoElement>(null);
-  
+
   useEffect(() => {
     const v = ref.current;
     if (!v) return;
@@ -984,7 +981,7 @@ function VideoPanel({ src, poster, running, muted }: { src: string; poster: stri
     if (!v) return;
     if (running) {
       v.currentTime = 0;
-      v.play().catch(() => {});
+      v.play().catch(() => { });
     } else {
       v.pause();
     }

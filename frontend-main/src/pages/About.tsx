@@ -41,7 +41,7 @@ export default function About() {
 
           <Reveal delay={0.2}>
             <div className="relative">
-              <img src="/images/about-hero.jpeg" alt="RizeWorld Institute Campus" className="w-full h-[350px] object-cover rounded-3xl shadow-luxury" />
+              <img src="/images/FOUNDER.jpg.jpeg" alt="RizeWorld Institute Founder" className="w-full h-[500px] md:h-[620px] object-cover object-top rounded-3xl shadow-luxury" />
             </div>
           </Reveal>
         </div>
