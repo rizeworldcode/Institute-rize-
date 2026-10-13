@@ -12,7 +12,7 @@ exports.connectDB = async () => {
       family: 4 // Use IPv4, skip trying IPv6
     };
 
-    const dbUri = process.env.mongo_URI || process.env.MONGO_URI || process.env.MONGODB_URI;
+    const dbUri = process.env.mongo_URI || process.env.MONGO_URI || process.env.Mongo_URI || process.env.MONGODB_URI;
     const conn = await mongoose.connect(dbUri, options);
     
     if (conn) {

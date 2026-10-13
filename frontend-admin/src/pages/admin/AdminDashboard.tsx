@@ -3,7 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { 
   Users, Search, Plus, Edit2, LogOut, Shield, Menu,
   AlertCircle, LayoutDashboard, MessagesSquare, X, ArrowLeft,
-  Award, Bell, UserCircle, Mail, IndianRupee, CheckCircle2, Activity, Trash2, UserX, UserMinus, FileText
+  Award, Bell, UserCircle, Mail, IndianRupee, CheckCircle2, Activity, Trash2, UserX, UserMinus, FileText, Filter
 } from "lucide-react";
 
 import { Student } from "./types";
@@ -28,6 +28,8 @@ export default function AdminDashboard() {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<"All" | "Clear" | "Pending">("All");
   const [detailStatusFilter, setDetailStatusFilter] = useState<"All" | "Clear" | "Pending">("All");
+  const [detailSearch, setDetailSearch] = useState("");
+  const [earningsFilter, setEarningsFilter] = useState<"received" | "pending" | "all">("received");
 
   const [students, setStudents] = useState<Student[]>([]);
   const [stats, setStats] = useState({
@@ -39,7 +41,7 @@ export default function AdminDashboard() {
     pendingFees: 0,
     totalReferralPaid: 0,
   });
-  const [expandedStats, setExpandedStats] = useState({
+  const [, setExpandedStats] = useState({
     totalEntries: 0,
     growth: "0",
     recentActivity: 0
@@ -53,6 +55,50 @@ export default function AdminDashboard() {
   const [graphData, setGraphData] = useState<any[]>([]);
   const [graphMetric, setGraphMetric] = useState<"earnings" | "students">("earnings");
   const [topCourses, setTopCourses] = useState<any[]>([]);
+
+  const totalPendingDuesAcrossSystem = useMemo(() => {
+    if (pendingFeeStudentsData.length > 0) {
+      return pendingFeeStudentsData.reduce((acc, curr) => acc + Number(curr.pendingFees || 0), 0);
+    }
+    if (allStudentsData.length > 0) {
+      return allStudentsData.reduce((acc, curr) => acc + Number(curr.pendingFees || 0), 0);
+    }
+    return students.reduce((acc, curr) => acc + Number(curr.pendingFees || 0), 0);
+  }, [pendingFeeStudentsData, allStudentsData, students]);
+
+  const totalStudentsSummary = useMemo(() => {
+    const list = allStudentsData.length > 0 ? allStudentsData : students;
+    const totalBilled = list.reduce((acc, curr) => acc + (Number(curr.totalFees) || 0), 0);
+    const totalPaid = list.reduce((acc, curr) => acc + (Number(curr.paidFees) || 0), 0);
+    const totalPending = list.reduce((acc, curr) => acc + (Number(curr.pendingFees) || 0), 0);
+    return {
+      count: list.length,
+      totalBilled,
+      totalPaid,
+      totalPending,
+      clearCount: list.filter(s => Number(s.pendingFees) <= 0).length,
+      pendingCount: list.filter(s => Number(s.pendingFees) > 0).length,
+    };
+  }, [allStudentsData, students]);
+
+  const totalClearSummary = useMemo(() => {
+    const totalPaid = clearFeeStudentsData.reduce((acc, curr) => acc + (Number(curr.paidFees) || 0), 0);
+    return {
+      count: clearFeeStudentsData.length,
+      totalPaid,
+      avgPaid: clearFeeStudentsData.length > 0 ? Math.round(totalPaid / clearFeeStudentsData.length) : 0
+    };
+  }, [clearFeeStudentsData]);
+
+  const totalEarningsSummary = useMemo(() => {
+    const totalReceived = earningsDetailsData.reduce((acc, curr) => acc + Number(curr.amount || 0), 0);
+    return {
+      count: earningsDetailsData.length,
+      totalReceived,
+      totalPending: totalPendingDuesAcrossSystem,
+      totalExpected: totalReceived + totalPendingDuesAcrossSystem
+    };
+  }, [earningsDetailsData, totalPendingDuesAcrossSystem]);
 
   const [isSetAmountModalOpen, setIsSetAmountModalOpen] = useState(false);
   const [globalReferralAmount, setGlobalReferralAmount] = useState<number | string>("");
@@ -702,6 +748,9 @@ export default function AdminDashboard() {
   };
 
   useEffect(() => {
+    setDetailSearch("");
+    setDetailStatusFilter("All");
+    setEarningsFilter("received");
     if (expandedStat === "total-students") {
       fetchAllStudents();
     } else if (expandedStat === "certificate-issued") {
@@ -714,6 +763,8 @@ export default function AdminDashboard() {
       fetchClearFeeStudents();
     } else if (expandedStat === "total-earnings") {
       fetchEarningsDetails();
+      fetchPendingFeeStudents();
+      fetchAllStudents();
     }
   }, [expandedStat]);
 
@@ -1607,39 +1658,581 @@ export default function AdminDashboard() {
                           </div>
                           {expandedStat.replace(/-/g, ' ')} Details
                        </h2>
-                       {expandedStat === "total-students" && (
-                          <select 
-                            value={detailStatusFilter} 
-                            onChange={(e: any) => setDetailStatusFilter(e.target.value)}
-                            className="px-4 py-2.5 rounded-xl bg-white border border-neutral-200 text-sm text-neutral-700 focus:border-blue-500 focus:outline-none w-full md:w-48 appearance-none cursor-pointer shadow-sm"
-                          >
-                            <option value="All">All Status</option>
-                            <option value="Clear">Clear Fees</option>
-                            <option value="Pending">Pending Fees</option>
-                          </select>
-                       )}
+                        {expandedStat === "total-students" && (
+                           <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+                              <div className="relative w-full sm:w-64">
+                                 <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-neutral-400" />
+                                 <input
+                                    type="text"
+                                    placeholder="Search student, course, phone..."
+                                    value={detailSearch}
+                                    onChange={(e) => setDetailSearch(e.target.value)}
+                                    className="w-full pl-10 pr-4 py-2 rounded-xl bg-white border border-neutral-200 focus:border-blue-500 focus:ring-1 focus:ring-blue-500/50 focus:outline-none transition-all text-sm text-neutral-900 placeholder-neutral-400 shadow-xs"
+                                 />
+                              </div>
+                              <select 
+                                value={detailStatusFilter} 
+                                onChange={(e: any) => setDetailStatusFilter(e.target.value)}
+                                className="px-4 py-2 rounded-xl bg-white border border-neutral-200 text-sm text-neutral-700 focus:border-blue-500 focus:outline-none w-full sm:w-36 appearance-none cursor-pointer shadow-xs"
+                              >
+                                <option value="All">All Status</option>
+                                <option value="Clear">Clear Fees</option>
+                                <option value="Pending">Pending Fees</option>
+                              </select>
+                              <div className="flex items-center gap-2 bg-emerald-50 border border-emerald-200/90 px-3 py-2 rounded-xl shrink-0">
+                                 <span className="text-xs font-bold uppercase tracking-wider text-emerald-700">Received:</span>
+                                 <span className="text-sm font-black text-emerald-600">
+                                    ₹{totalStudentsSummary.totalPaid.toLocaleString('en-IN')}
+                                 </span>
+                              </div>
+                              <div className="flex items-center gap-2 bg-red-50 border border-red-200/90 px-3 py-2 rounded-xl shrink-0">
+                                 <span className="text-xs font-bold uppercase tracking-wider text-red-700">Pending:</span>
+                                 <span className="text-sm font-black text-red-600">
+                                    ₹{totalStudentsSummary.totalPending.toLocaleString('en-IN')}
+                                 </span>
+                              </div>
+                           </div>
+                        )}
+                        {expandedStat === "total-clear-fees" && (
+                           <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+                              <div className="relative w-full sm:w-64">
+                                 <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-neutral-400" />
+                                 <input
+                                    type="text"
+                                    placeholder="Search student, course, phone..."
+                                    value={detailSearch}
+                                    onChange={(e) => setDetailSearch(e.target.value)}
+                                    className="w-full pl-10 pr-4 py-2 rounded-xl bg-white border border-neutral-200 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/50 focus:outline-none transition-all text-sm text-neutral-900 placeholder-neutral-400 shadow-xs"
+                                 />
+                              </div>
+                              <div className="flex items-center gap-2 bg-emerald-50 border border-emerald-200/90 px-3.5 py-2 rounded-xl shrink-0">
+                                 <span className="text-xs font-bold uppercase tracking-wider text-emerald-700">Total Cleared:</span>
+                                 <span className="text-base font-black text-emerald-600">
+                                    ₹{totalClearSummary.totalPaid.toLocaleString('en-IN')}
+                                 </span>
+                              </div>
+                           </div>
+                        )}
+                        {expandedStat === "total-earnings" && (
+                           <div className="flex flex-col lg:flex-row items-stretch lg:items-center gap-3">
+                              <div className="relative w-full sm:w-64">
+                                 <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-neutral-400" />
+                                 <input
+                                    type="text"
+                                    placeholder={
+                                      earningsFilter === "pending" ? "Search pending student, course..." :
+                                      earningsFilter === "all" ? "Search student, course, phone..." :
+                                      "Search txn ID, student, method..."
+                                    }
+                                    value={detailSearch}
+                                    onChange={(e) => setDetailSearch(e.target.value)}
+                                    className="w-full pl-10 pr-4 py-2 rounded-xl bg-white border border-neutral-200 focus:border-purple-500 focus:ring-1 focus:ring-purple-500/50 focus:outline-none transition-all text-sm text-neutral-900 placeholder-neutral-400 shadow-xs"
+                                 />
+                              </div>
+                              <div className="flex items-center bg-neutral-100 p-1 rounded-xl border border-neutral-200 text-xs font-bold gap-1 shrink-0">
+                                 <button
+                                   type="button"
+                                   onClick={() => setEarningsFilter("received")}
+                                   className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer flex items-center gap-1.5 ${
+                                     earningsFilter === "received" ? "bg-white text-emerald-700 shadow-xs font-extrabold" : "text-neutral-600 hover:text-neutral-900"
+                                   }`}
+                                 >
+                                   <CheckCircle2 size={13} />
+                                   Received Txns
+                                 </button>
+                                 <button
+                                   type="button"
+                                   onClick={() => setEarningsFilter("pending")}
+                                   className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer flex items-center gap-1.5 ${
+                                     earningsFilter === "pending" ? "bg-white text-red-600 shadow-xs font-extrabold" : "text-neutral-600 hover:text-neutral-900"
+                                   }`}
+                                 >
+                                   <AlertCircle size={13} />
+                                   Pending Dues
+                                 </button>
+                                 <button
+                                   type="button"
+                                   onClick={() => setEarningsFilter("all")}
+                                   className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer flex items-center gap-1.5 ${
+                                     earningsFilter === "all" ? "bg-white text-blue-700 shadow-xs font-extrabold" : "text-neutral-600 hover:text-neutral-900"
+                                   }`}
+                                 >
+                                   <Users size={13} />
+                                   All Revenue
+                                 </button>
+                              </div>
+                              <div className="flex items-center gap-2 bg-emerald-50 border border-emerald-200/90 px-3 py-2 rounded-xl shrink-0">
+                                 <span className="text-xs font-bold uppercase tracking-wider text-emerald-700">Received:</span>
+                                 <span className="text-sm font-black text-emerald-600">
+                                    ₹{totalEarningsSummary.totalReceived.toLocaleString('en-IN')}
+                                 </span>
+                              </div>
+                              <div className="flex items-center gap-2 bg-red-50 border border-red-200/90 px-3 py-2 rounded-xl shrink-0">
+                                 <span className="text-xs font-bold uppercase tracking-wider text-red-700">Pending:</span>
+                                 <span className="text-sm font-black text-red-600">
+                                    ₹{totalEarningsSummary.totalPending.toLocaleString('en-IN')}
+                                 </span>
+                              </div>
+                           </div>
+                        )}
+                        {expandedStat === "total-pending-fees" && (
+                           <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+                              <div className="relative w-full sm:w-64">
+                                 <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-neutral-400" />
+                                 <input
+                                    type="text"
+                                    placeholder="Search student, course, phone..."
+                                    value={detailSearch}
+                                    onChange={(e) => setDetailSearch(e.target.value)}
+                                    className="w-full pl-10 pr-4 py-2 rounded-xl bg-white border border-neutral-200 focus:border-red-500 focus:ring-1 focus:ring-red-500/50 focus:outline-none transition-all text-sm text-neutral-900 placeholder-neutral-400 shadow-xs"
+                                 />
+                              </div>
+                              <div className="flex items-center gap-2 bg-red-50 border border-red-200/90 px-3.5 py-2 rounded-xl shrink-0">
+                                 <span className="text-xs font-bold uppercase tracking-wider text-red-700">Total Pending Dues:</span>
+                                 <span className="text-base font-black text-red-600">
+                                    ₹{pendingFeeStudentsData.reduce((acc, curr) => acc + (Number(curr.pendingFees) || 0), 0).toLocaleString('en-IN')}
+                                 </span>
+                              </div>
+                           </div>
+                        )}
                    </div>
                    
-                   {expandedStat === "total-students" && (
-                      <div className="mt-4 flex gap-4 mb-6">
-                         <div className="bg-neutral-50 p-4 rounded-2xl flex-1 border border-neutral-100">
-                            <div className="text-xs font-bold text-neutral-500 uppercase tracking-wider mb-1">Total Entries</div>
-                            <div className="text-2xl font-bold text-neutral-900">{expandedStats.totalEntries}</div>
+                    {/* STAT CARDS FOR TOTAL-STUDENTS */}
+                    {expandedStat === "total-students" && (
+                       <div className="mt-2 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                          <div 
+                             onClick={() => setDetailStatusFilter("All")}
+                             className={`p-5 rounded-2xl border transition-all duration-200 cursor-pointer select-none relative overflow-hidden group ${
+                                detailStatusFilter === "All"
+                                   ? "bg-blue-50/60 border-blue-500 ring-2 ring-blue-500/30 shadow-md"
+                                   : "bg-white border-neutral-200 hover:border-blue-300 hover:shadow-md hover:-translate-y-0.5"
+                             }`}
+                          >
+                             <div className="flex items-center justify-between mb-2">
+                                <span className="text-xs font-bold text-neutral-500 uppercase tracking-wider">Total Enrolled Students</span>
+                                <div className={`w-8 h-8 rounded-xl flex items-center justify-center transition-colors ${
+                                   detailStatusFilter === "All" ? "bg-blue-600 text-white" : "bg-blue-100 text-blue-700"
+                                }`}>
+                                   <Users size={16} />
+                                </div>
+                             </div>
+                             <div className="text-2xl lg:text-3xl font-black text-neutral-900 tracking-tight">
+                                {totalStudentsSummary.count}
+                             </div>
+                             <div className="flex items-center justify-between mt-2 pt-1 border-t border-neutral-100">
+                                <div className="text-xs font-medium text-neutral-500">
+                                   {totalStudentsSummary.clearCount} Clear • {totalStudentsSummary.pendingCount} Pending
+                                </div>
+                                <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full transition-all ${
+                                   detailStatusFilter === "All" 
+                                      ? "bg-blue-600 text-white shadow-xs" 
+                                      : "bg-neutral-100 text-neutral-600 group-hover:bg-blue-50 group-hover:text-blue-700"
+                                }`}>
+                                   {detailStatusFilter === "All" ? "Active (All)" : "Show All"}
+                                </span>
+                             </div>
+                          </div>
+
+                          <div 
+                             onClick={() => setDetailStatusFilter(detailStatusFilter === "Clear" ? "All" : "Clear")}
+                             className={`p-5 rounded-2xl border transition-all duration-200 cursor-pointer select-none relative overflow-hidden group ${
+                                detailStatusFilter === "Clear"
+                                   ? "bg-emerald-50 border-emerald-500 ring-2 ring-emerald-500/40 shadow-md"
+                                   : "bg-gradient-to-br from-emerald-50 via-teal-50/50 to-white border-emerald-200/80 hover:border-emerald-400 hover:shadow-md hover:-translate-y-0.5"
+                             }`}
+                          >
+                             <div className="flex items-center justify-between mb-2">
+                                <span className="text-xs font-bold text-emerald-700 uppercase tracking-wider">Total Received Fees</span>
+                                <div className={`w-8 h-8 rounded-xl flex items-center justify-center transition-colors ${
+                                   detailStatusFilter === "Clear" ? "bg-emerald-600 text-white" : "bg-emerald-100 text-emerald-700"
+                                }`}>
+                                   <CheckCircle2 size={16} />
+                                </div>
+                             </div>
+                             <div className="text-2xl lg:text-3xl font-black text-emerald-600 tracking-tight">
+                                ₹{totalStudentsSummary.totalPaid.toLocaleString('en-IN')}
+                             </div>
+                             <div className="flex items-center justify-between mt-2 pt-1 border-t border-emerald-200/40">
+                                <div className="text-xs font-medium text-emerald-700/80">Total amount collected</div>
+                                <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full transition-all ${
+                                   detailStatusFilter === "Clear" 
+                                      ? "bg-emerald-600 text-white shadow-xs" 
+                                      : "bg-emerald-100/90 text-emerald-800 group-hover:bg-emerald-200"
+                                }`}>
+                                   {detailStatusFilter === "Clear" ? "Filter Active" : "Click to filter"}
+                                </span>
+                             </div>
+                          </div>
+
+                          <div 
+                             onClick={() => setDetailStatusFilter(detailStatusFilter === "Pending" ? "All" : "Pending")}
+                             className={`p-5 rounded-2xl border transition-all duration-200 cursor-pointer select-none relative overflow-hidden group ${
+                                detailStatusFilter === "Pending"
+                                   ? "bg-red-50 border-red-500 ring-2 ring-red-500/40 shadow-md"
+                                   : "bg-gradient-to-br from-red-50 via-rose-50/50 to-white border-red-200/80 hover:border-red-400 hover:shadow-md hover:-translate-y-0.5"
+                             }`}
+                          >
+                             <div className="flex items-center justify-between mb-2">
+                                <span className="text-xs font-bold text-red-600 uppercase tracking-wider">Total Pending Dues</span>
+                                <div className={`w-8 h-8 rounded-xl flex items-center justify-center transition-colors ${
+                                   detailStatusFilter === "Pending" ? "bg-red-600 text-white" : "bg-red-100 text-red-600"
+                                }`}>
+                                   <AlertCircle size={16} />
+                                </div>
+                             </div>
+                             <div className="text-2xl lg:text-3xl font-black text-red-600 tracking-tight">
+                                ₹{totalStudentsSummary.totalPending.toLocaleString('en-IN')}
+                             </div>
+                             <div className="flex items-center justify-between mt-2 pt-1 border-t border-red-200/40">
+                                <div className="text-xs font-medium text-red-500/90">Outstanding pending balance</div>
+                                <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full transition-all ${
+                                   detailStatusFilter === "Pending" 
+                                      ? "bg-red-600 text-white shadow-xs" 
+                                      : "bg-red-100/90 text-red-800 group-hover:bg-red-200"
+                                }`}>
+                                   {detailStatusFilter === "Pending" ? "Filter Active" : "Click to filter"}
+                                </span>
+                             </div>
+                          </div>
+
+                          <div 
+                             onClick={() => setDetailStatusFilter("All")}
+                             className="bg-white p-5 rounded-2xl border border-neutral-200 hover:border-neutral-300 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 cursor-pointer select-none shadow-xs group"
+                          >
+                             <div className="flex items-center justify-between mb-2">
+                                <span className="text-xs font-bold text-neutral-500 uppercase tracking-wider">Total Course Value</span>
+                                <div className="w-8 h-8 rounded-xl bg-neutral-100 text-neutral-700 flex items-center justify-center">
+                                   <IndianRupee size={16} />
+                                </div>
+                             </div>
+                             <div className="text-2xl lg:text-3xl font-black text-neutral-900 tracking-tight">
+                                ₹{totalStudentsSummary.totalBilled.toLocaleString('en-IN')}
+                             </div>
+                             <div className="flex items-center justify-between mt-2 pt-1 border-t border-neutral-100">
+                                <div className="text-xs font-medium text-neutral-500">Agreed total course fees</div>
+                                <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-neutral-100 text-neutral-600 group-hover:bg-neutral-200">
+                                   Reset view
+                                </span>
+                             </div>
+                          </div>
+                       </div>
+                    )}
+                   {/* STAT CARDS FOR TOTAL-CLEAR-FEES */}
+                   {expandedStat === "total-clear-fees" && (
+                      <div className="mt-2 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                         <div className="bg-gradient-to-br from-emerald-50 via-teal-50/50 to-white p-5 rounded-2xl border border-emerald-200/80 shadow-xs">
+                            <div className="flex items-center justify-between mb-2">
+                               <span className="text-xs font-bold text-emerald-700 uppercase tracking-wider">Total Fees Cleared</span>
+                               <div className="w-8 h-8 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center">
+                                  <CheckCircle2 size={16} />
+                               </div>
+                            </div>
+                            <div className="text-2xl lg:text-3xl font-black text-emerald-600 tracking-tight">
+                               ₹{totalClearSummary.totalPaid.toLocaleString('en-IN')}
+                            </div>
+                            <div className="text-xs font-medium text-emerald-600/80 mt-1">100% collected from cleared students</div>
                          </div>
-                         <div className="bg-neutral-50 p-4 rounded-2xl flex-1 border border-neutral-100">
-                            <div className="text-xs font-bold text-neutral-500 uppercase tracking-wider mb-1">Growth (Last 30 Days)</div>
-                            <div className="text-2xl font-bold text-emerald-600">+{expandedStats.growth}%</div>
+
+                         <div className="bg-white p-5 rounded-2xl border border-neutral-200 shadow-xs">
+                            <div className="flex items-center justify-between mb-2">
+                               <span className="text-xs font-bold text-neutral-500 uppercase tracking-wider">Cleared Students</span>
+                               <div className="w-8 h-8 rounded-xl bg-neutral-100 text-neutral-700 flex items-center justify-center">
+                                  <Users size={16} />
+                               </div>
+                            </div>
+                            <div className="text-2xl lg:text-3xl font-black text-neutral-900 tracking-tight">
+                               {totalClearSummary.count}
+                            </div>
+                            <div className="text-xs font-medium text-neutral-500 mt-1">Students with zero pending dues</div>
                          </div>
-                         <div className="bg-neutral-50 p-4 rounded-2xl flex-1 border border-neutral-100">
-                            <div className="text-xs font-bold text-neutral-500 uppercase tracking-wider mb-1">Recent Activity</div>
-                            <div className="text-2xl font-bold text-blue-600">{expandedStats.recentActivity}</div>
+
+                         <div className="bg-white p-5 rounded-2xl border border-neutral-200 shadow-xs">
+                            <div className="flex items-center justify-between mb-2">
+                               <span className="text-xs font-bold text-neutral-500 uppercase tracking-wider">Pending Dues</span>
+                               <div className="w-8 h-8 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center">
+                                  <Shield size={16} />
+                               </div>
+                            </div>
+                            <div className="text-2xl lg:text-3xl font-black text-emerald-600 tracking-tight">
+                               ₹0
+                            </div>
+                            <div className="text-xs font-medium text-emerald-600/80 mt-1">Zero pending dues for these students</div>
+                         </div>
+
+                         <div className="bg-white p-5 rounded-2xl border border-neutral-200 shadow-xs">
+                            <div className="flex items-center justify-between mb-2">
+                               <span className="text-xs font-bold text-neutral-500 uppercase tracking-wider">Average Paid Fee</span>
+                               <div className="w-8 h-8 rounded-xl bg-blue-100 text-blue-700 flex items-center justify-center">
+                                  <IndianRupee size={16} />
+                               </div>
+                            </div>
+                            <div className="text-2xl lg:text-3xl font-black text-neutral-900 tracking-tight">
+                               ₹{totalClearSummary.avgPaid.toLocaleString('en-IN')}
+                            </div>
+                            <div className="text-xs font-medium text-neutral-500 mt-1">Per cleared student average</div>
                          </div>
                       </div>
                    )}
 
+                    {/* STAT CARDS FOR TOTAL-EARNINGS */}
+                    {expandedStat === "total-earnings" && (
+                       <div className="mt-2 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                          <div 
+                             onClick={() => setEarningsFilter("received")}
+                             className={`p-5 rounded-2xl border transition-all duration-200 cursor-pointer select-none relative overflow-hidden group ${
+                                earningsFilter === "received"
+                                   ? "bg-emerald-50 border-emerald-500 ring-2 ring-emerald-500/40 shadow-md"
+                                   : "bg-gradient-to-br from-emerald-50 via-teal-50/50 to-white border-emerald-200/80 hover:border-emerald-400 hover:shadow-md hover:-translate-y-0.5"
+                             }`}
+                          >
+                             <div className="flex items-center justify-between mb-2">
+                                <span className="text-xs font-bold text-emerald-700 uppercase tracking-wider">Total Received (Collected)</span>
+                                <div className={`w-8 h-8 rounded-xl flex items-center justify-center transition-colors ${
+                                   earningsFilter === "received" ? "bg-emerald-600 text-white" : "bg-emerald-100 text-emerald-700"
+                                }`}>
+                                   <CheckCircle2 size={16} />
+                                </div>
+                             </div>
+                             <div className="text-2xl lg:text-3xl font-black text-emerald-600 tracking-tight">
+                                ₹{totalEarningsSummary.totalReceived.toLocaleString('en-IN')}
+                             </div>
+                             <div className="flex items-center justify-between mt-2 pt-1 border-t border-emerald-200/40">
+                                <div className="text-xs font-medium text-emerald-700/80">Total revenue collected to date</div>
+                                <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full transition-all ${
+                                   earningsFilter === "received" 
+                                      ? "bg-emerald-600 text-white shadow-xs" 
+                                      : "bg-emerald-100/90 text-emerald-800 group-hover:bg-emerald-200"
+                                }`}>
+                                   {earningsFilter === "received" ? "Active Filter" : "Click to view"}
+                                </span>
+                             </div>
+                          </div>
+
+                          <div 
+                             onClick={() => setEarningsFilter(earningsFilter === "pending" ? "received" : "pending")}
+                             className={`p-5 rounded-2xl border transition-all duration-200 cursor-pointer select-none relative overflow-hidden group ${
+                                earningsFilter === "pending"
+                                   ? "bg-red-50 border-red-500 ring-2 ring-red-500/40 shadow-md"
+                                   : "bg-gradient-to-br from-red-50 via-rose-50/50 to-white border-red-200/80 hover:border-red-400 hover:shadow-md hover:-translate-y-0.5"
+                             }`}
+                          >
+                             <div className="flex items-center justify-between mb-2">
+                                <span className="text-xs font-bold text-red-600 uppercase tracking-wider">Total Pending Dues</span>
+                                <div className={`w-8 h-8 rounded-xl flex items-center justify-center transition-colors ${
+                                   earningsFilter === "pending" ? "bg-red-600 text-white" : "bg-red-100 text-red-600"
+                                }`}>
+                                   <AlertCircle size={16} />
+                                </div>
+                             </div>
+                             <div className="text-2xl lg:text-3xl font-black text-red-600 tracking-tight">
+                                ₹{totalEarningsSummary.totalPending.toLocaleString('en-IN')}
+                             </div>
+                             <div className="flex items-center justify-between mt-2 pt-1 border-t border-red-200/40">
+                                <div className="text-xs font-medium text-red-500/90">Outstanding pending balance</div>
+                                <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full transition-all ${
+                                   earningsFilter === "pending" 
+                                      ? "bg-red-600 text-white shadow-xs" 
+                                      : "bg-red-100/90 text-red-800 group-hover:bg-red-200"
+                                }`}>
+                                   {earningsFilter === "pending" ? "Filter Active" : "Click to filter"}
+                                </span>
+                             </div>
+                          </div>
+
+                          <div 
+                             onClick={() => setEarningsFilter(earningsFilter === "all" ? "received" : "all")}
+                             className={`p-5 rounded-2xl border transition-all duration-200 cursor-pointer select-none relative overflow-hidden group ${
+                                earningsFilter === "all"
+                                   ? "bg-blue-50/70 border-blue-500 ring-2 ring-blue-500/30 shadow-md"
+                                   : "bg-white border-neutral-200 hover:border-blue-400 hover:shadow-md hover:-translate-y-0.5"
+                             }`}
+                          >
+                             <div className="flex items-center justify-between mb-2">
+                                <span className="text-xs font-bold text-neutral-500 uppercase tracking-wider">Total Expected Revenue</span>
+                                <div className={`w-8 h-8 rounded-xl flex items-center justify-center transition-colors ${
+                                   earningsFilter === "all" ? "bg-blue-600 text-white" : "bg-blue-100 text-blue-700"
+                                }`}>
+                                   <IndianRupee size={16} />
+                                </div>
+                             </div>
+                             <div className="text-2xl lg:text-3xl font-black text-neutral-900 tracking-tight">
+                                ₹{totalEarningsSummary.totalExpected.toLocaleString('en-IN')}
+                             </div>
+                             <div className="flex items-center justify-between mt-2 pt-1 border-t border-neutral-100">
+                                <div className="text-xs font-medium text-neutral-500">Agreed fees (Received + Pending)</div>
+                                <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full transition-all ${
+                                   earningsFilter === "all" 
+                                      ? "bg-blue-600 text-white shadow-xs" 
+                                      : "bg-neutral-100 text-neutral-600 group-hover:bg-blue-50 group-hover:text-blue-700"
+                                }`}>
+                                   {earningsFilter === "all" ? "Filter Active" : "Click to view"}
+                                </span>
+                             </div>
+                          </div>
+
+                          <div 
+                             onClick={() => setEarningsFilter("received")}
+                             className={`p-5 rounded-2xl border transition-all duration-200 cursor-pointer select-none relative overflow-hidden group ${
+                                earningsFilter === "received"
+                                   ? "bg-purple-50/50 border-purple-500 ring-2 ring-purple-500/30 shadow-md"
+                                   : "bg-white border-neutral-200 hover:border-purple-300 hover:shadow-md hover:-translate-y-0.5"
+                             }`}
+                          >
+                             <div className="flex items-center justify-between mb-2">
+                                <span className="text-xs font-bold text-neutral-500 uppercase tracking-wider">Total Transactions</span>
+                                <div className={`w-8 h-8 rounded-xl flex items-center justify-center transition-colors ${
+                                   earningsFilter === "received" ? "bg-purple-600 text-white" : "bg-purple-100 text-purple-700"
+                                }`}>
+                                   <Activity size={16} />
+                                </div>
+                             </div>
+                             <div className="text-2xl lg:text-3xl font-black text-neutral-900 tracking-tight">
+                                {totalEarningsSummary.count}
+                             </div>
+                             <div className="flex items-center justify-between mt-2 pt-1 border-t border-neutral-100">
+                                <div className="text-xs font-medium text-neutral-500">Payment entries recorded</div>
+                                <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full transition-all ${
+                                   earningsFilter === "received" 
+                                      ? "bg-purple-600 text-white shadow-xs" 
+                                      : "bg-neutral-100 text-neutral-600 group-hover:bg-purple-50 group-hover:text-purple-700"
+                                }`}>
+                                   {earningsFilter === "received" ? "Active" : "Click to view"}
+                                </span>
+                             </div>
+                          </div>
+                       </div>
+                    )}
+                   {/* STAT CARDS FOR TOTAL-PENDING-FEES */}
+                   {expandedStat === "total-pending-fees" && (
+                      <div className="mt-2 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                         <div className="bg-gradient-to-br from-red-50 via-rose-50/50 to-white p-5 rounded-2xl border border-red-200/80 shadow-xs">
+                            <div className="flex items-center justify-between mb-2">
+                               <span className="text-xs font-bold text-red-600 uppercase tracking-wider">Total Pending Dues</span>
+                               <div className="w-8 h-8 rounded-xl bg-red-100 text-red-600 flex items-center justify-center">
+                                  <AlertCircle size={16} />
+                               </div>
+                            </div>
+                            <div className="text-2xl lg:text-3xl font-black text-red-600 tracking-tight">
+                               ₹{pendingFeeStudentsData.reduce((acc, curr) => acc + (Number(curr.pendingFees) || 0), 0).toLocaleString('en-IN')}
+                            </div>
+                            <div className="text-xs font-medium text-red-500/80 mt-1">Total outstanding fee balance</div>
+                         </div>
+
+                         <div className="bg-white p-5 rounded-2xl border border-neutral-200 shadow-xs">
+                            <div className="flex items-center justify-between mb-2">
+                               <span className="text-xs font-bold text-neutral-500 uppercase tracking-wider">Students with Dues</span>
+                               <div className="w-8 h-8 rounded-xl bg-neutral-100 text-neutral-700 flex items-center justify-center">
+                                  <Users size={16} />
+                               </div>
+                            </div>
+                            <div className="text-2xl lg:text-3xl font-black text-neutral-900 tracking-tight">
+                               {pendingFeeStudentsData.length}
+                            </div>
+                            <div className="text-xs font-medium text-neutral-500 mt-1">Students awaiting payment</div>
+                         </div>
+
+                         <div className="bg-white p-5 rounded-2xl border border-neutral-200 shadow-xs">
+                            <div className="flex items-center justify-between mb-2">
+                               <span className="text-xs font-bold text-neutral-500 uppercase tracking-wider">Total Fee Collected</span>
+                               <div className="w-8 h-8 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center">
+                                  <CheckCircle2 size={16} />
+                               </div>
+                            </div>
+                            <div className="text-2xl lg:text-3xl font-black text-emerald-600 tracking-tight">
+                               ₹{pendingFeeStudentsData.reduce((acc, curr) => acc + (Number(curr.paidFees) || 0), 0).toLocaleString('en-IN')}
+                            </div>
+                            <div className="text-xs font-medium text-emerald-600/80 mt-1">Already received from them</div>
+                         </div>
+
+                         <div className="bg-white p-5 rounded-2xl border border-neutral-200 shadow-xs">
+                            <div className="flex items-center justify-between mb-2">
+                               <span className="text-xs font-bold text-neutral-500 uppercase tracking-wider">Total Agreed Fees</span>
+                               <div className="w-8 h-8 rounded-xl bg-blue-100 text-blue-700 flex items-center justify-center">
+                                  <IndianRupee size={16} />
+                               </div>
+                            </div>
+                            <div className="text-2xl lg:text-3xl font-black text-neutral-900 tracking-tight">
+                               ₹{pendingFeeStudentsData.reduce((acc, curr) => acc + (Number(curr.totalFees) || 0), 0).toLocaleString('en-IN')}
+                            </div>
+                            <div className="text-xs font-medium text-neutral-500 mt-1">Total course fees for these students</div>
+                         </div>
+                      </div>
+                   )}
+
+                    {/* ACTIVE FILTER INDICATORS */}
+                    {expandedStat === "total-students" && detailStatusFilter !== "All" && (
+                       <div className="flex items-center justify-between mb-3 px-1">
+                          <div className="flex items-center gap-2">
+                             <span className="text-xs font-bold text-neutral-500 uppercase tracking-wider">Filtered View:</span>
+                             <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold ${
+                                detailStatusFilter === "Pending" 
+                                   ? "bg-red-100 text-red-700 border border-red-200" 
+                                   : "bg-emerald-100 text-emerald-700 border border-emerald-200"
+                             }`}>
+                                <Filter size={12} />
+                                {detailStatusFilter === "Pending" ? `Pending Dues (${totalStudentsSummary.pendingCount} Students)` : `Clear Fees (${totalStudentsSummary.clearCount} Students)`}
+                             </span>
+                          </div>
+                          <button 
+                             onClick={() => setDetailStatusFilter("All")}
+                             className="text-xs font-bold text-neutral-600 hover:text-neutral-900 underline cursor-pointer flex items-center gap-1"
+                          >
+                             <X size={12} /> Clear Filter (Show All {totalStudentsSummary.count} Students)
+                          </button>
+                       </div>
+                    )}
+
+                    {expandedStat === "total-earnings" && (
+                       <div className="flex items-center justify-between mb-3 px-1">
+                          <div className="flex items-center gap-2">
+                             <span className="text-xs font-bold text-neutral-500 uppercase tracking-wider">Table View:</span>
+                             <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold ${
+                                earningsFilter === "pending" 
+                                   ? "bg-red-100 text-red-700 border border-red-200" 
+                                   : earningsFilter === "all"
+                                   ? "bg-blue-100 text-blue-700 border border-blue-200"
+                                   : "bg-emerald-100 text-emerald-700 border border-emerald-200"
+                             }`}>
+                                <Filter size={12} />
+                                {earningsFilter === "pending" ? `Students with Pending Dues (${pendingFeeStudentsData.length})` :
+                                 earningsFilter === "all" ? `All Students Revenue Breakdown (${allStudentsData.length || students.length})` :
+                                 `Received Payment Transactions (${earningsDetailsData.length})`}
+                             </span>
+                          </div>
+                          {earningsFilter !== "received" && (
+                             <button 
+                                onClick={() => setEarningsFilter("received")}
+                                className="text-xs font-bold text-neutral-600 hover:text-neutral-900 underline cursor-pointer flex items-center gap-1"
+                             >
+                                <X size={12} /> Reset to Received Transactions
+                             </button>
+                          )}
+                       </div>
+                    )}
+
                    <div className="flex-1 border border-neutral-200 rounded-2xl overflow-hidden bg-white shadow-sm overflow-x-auto">
                       {(() => {
                          if (expandedStat === "total-students") {
+                            const filteredStudents = allStudentsData
+                               .filter(row => {
+                                  if (detailStatusFilter === "Clear") {
+                                     if (Number(row.pendingFees) > 0 || row.feesStatus === "Pending") return false;
+                                  } else if (detailStatusFilter === "Pending") {
+                                     if (Number(row.pendingFees) <= 0 && row.feesStatus !== "Pending" && row.feesStatus !== "Partial") return false;
+                                  }
+                                  if (!detailSearch.trim()) return true;
+                                  const q = detailSearch.toLowerCase().trim();
+                                  const name = (row.name || '').toLowerCase();
+                                  const id = (row.id || '').toLowerCase();
+                                  const phone = (row.phone || '').toLowerCase();
+                                  const courseStr = Array.isArray(row.course) ? row.course.join(' ').toLowerCase() : (row.course || '').toLowerCase();
+                                  return name.includes(q) || id.includes(q) || phone.includes(q) || courseStr.includes(q);
+                               });
+
+                            const sumTotal = filteredStudents.reduce((acc, curr) => acc + (Number(curr.totalFees) || 0), 0);
+                            const sumPaid = filteredStudents.reduce((acc, curr) => acc + (Number(curr.paidFees) || 0), 0);
+                            const sumPending = filteredStudents.reduce((acc, curr) => acc + (Number(curr.pendingFees) || 0), 0);
+
                             return (
                                <table className="w-full text-left border-collapse text-sm">
                                   <thead className="bg-neutral-50 border-b border-neutral-200">
@@ -1649,23 +2242,14 @@ export default function AdminDashboard() {
                                         <th className="px-3 py-3 text-xs font-bold text-neutral-500 uppercase tracking-wider">Course</th>
                                         <th className="px-3 py-3 text-xs font-bold text-neutral-500 uppercase tracking-wider">Duration</th>
                                         <th className="px-3 py-3 text-xs font-bold text-neutral-500 uppercase tracking-wider">Total Fee</th>
+                                        <th className="px-3 py-3 text-xs font-bold text-neutral-500 uppercase tracking-wider">Paid Fee</th>
                                         <th className="px-3 py-3 text-xs font-bold text-neutral-500 uppercase tracking-wider">Pending Fee</th>
                                         <th className="px-3 py-3 text-xs font-bold text-neutral-500 uppercase tracking-wider">Status</th>
+                                        <th className="px-3 py-3 text-xs font-bold text-neutral-500 uppercase tracking-wider">Action</th>
                                      </tr>
                                   </thead>
                                   <tbody className="divide-y divide-neutral-100">
-                                     {allStudentsData
-                                        .filter(row => {
-                                          if (detailStatusFilter === "All") return true;
-                                          if (detailStatusFilter === "Clear") {
-                                            return Number(row.pendingFees) <= 0 && row.feesStatus !== "Pending";
-                                          }
-                                          if (detailStatusFilter === "Pending") {
-                                            return Number(row.pendingFees) > 0 || row.feesStatus === "Pending" || row.feesStatus === "Partial";
-                                          }
-                                          return row.feesStatus === detailStatusFilter;
-                                        })
-                                        .map((row, idx) => (
+                                     {filteredStudents.map((row, idx) => (
                                         <tr key={idx} className="hover:bg-neutral-50/50 transition-colors">
                                            <td className="px-3 py-3 text-sm font-mono font-semibold text-blue-600">{row.id}</td>
                                            <td className="px-3 py-3 text-sm">
@@ -1676,16 +2260,51 @@ export default function AdminDashboard() {
                                            </td>
                                            <td className="px-3 py-3 text-sm font-semibold text-neutral-700">{Array.isArray(row.course) ? row.course.join(", ") : row.course}</td>
                                            <td className="px-3 py-3 text-sm text-neutral-600">{row.duration}</td>
-                                           <td className="px-3 py-3 text-sm font-bold text-neutral-900">₹{(row.totalFees || 0).toLocaleString()}</td>
-                                            <td className="px-3 py-3 text-sm font-bold text-red-600">₹{(row.pendingFees || 0).toLocaleString()}</td>
+                                           <td className="px-3 py-3 text-sm font-bold text-neutral-900">₹{(row.totalFees || 0).toLocaleString('en-IN')}</td>
+                                           <td className="px-3 py-3 text-sm font-bold text-emerald-600">₹{(row.paidFees || 0).toLocaleString('en-IN')}</td>
+                                           <td className="px-3 py-3 text-sm font-bold text-red-600">₹{(row.pendingFees || 0).toLocaleString('en-IN')}</td>
                                            <td className="px-3 py-3 text-sm">
                                               <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold ${row.feesStatus === 'Clear' ? 'bg-emerald-100 text-emerald-700' : 'bg-orange-100 text-orange-700'}`}>
                                                  {row.feesStatus}
                                               </span>
                                            </td>
+                                           <td className="px-3 py-3 text-sm">
+                                              <button 
+                                                onClick={() => setViewingStudent(row)} 
+                                                className="text-neutral-600 hover:text-neutral-700 text-sm font-bold underline cursor-pointer"
+                                              >
+                                                Details
+                                              </button>
+                                           </td>
                                         </tr>
                                      ))}
+                                     {filteredStudents.length === 0 && (
+                                        <tr>
+                                           <td colSpan={9} className="py-20 text-center text-neutral-400 italic">No students found matching your criteria.</td>
+                                        </tr>
+                                     )}
                                   </tbody>
+                                  {filteredStudents.length > 0 && (
+                                     <tfoot className="bg-neutral-900 text-white border-t-2 border-neutral-800">
+                                        <tr>
+                                           <td colSpan={4} className="px-3 py-4 text-xs font-bold uppercase tracking-wider text-neutral-300">
+                                              Total Summary ({filteredStudents.length} Students)
+                                           </td>
+                                           <td className="px-3 py-4 text-sm font-bold text-neutral-100">
+                                              ₹{sumTotal.toLocaleString('en-IN')}
+                                           </td>
+                                           <td className="px-3 py-4 text-sm font-bold text-emerald-400">
+                                              ₹{sumPaid.toLocaleString('en-IN')}
+                                           </td>
+                                           <td className="px-3 py-4 text-base font-black text-rose-400">
+                                              ₹{sumPending.toLocaleString('en-IN')}
+                                           </td>
+                                           <td colSpan={2} className="px-3 py-4 text-xs font-semibold text-neutral-400">
+                                              {filteredStudents.filter(s => Number(s.pendingFees) <= 0).length} Clear • {filteredStudents.filter(s => Number(s.pendingFees) > 0).length} Pending
+                                           </td>
+                                        </tr>
+                                     </tfoot>
+                                  )}
                                </table>
                             );
                          }
@@ -1771,52 +2390,264 @@ export default function AdminDashboard() {
                             );
                          }
 
-                         if (expandedStat === "total-earnings") {
-                            return (
-                               <table className="w-full text-left border-collapse text-sm">
-                                  <thead className="bg-neutral-50 border-b border-neutral-200">
-                                     <tr>
-                                        <th className="px-3 py-3 text-xs font-bold text-neutral-500 uppercase tracking-wider">TXN ID</th>
-                                        <th className="px-3 py-3 text-xs font-bold text-neutral-500 uppercase tracking-wider">Student Name</th>
-                                        <th className="px-3 py-3 text-xs font-bold text-neutral-500 uppercase tracking-wider">Amount</th>
-                                        <th className="px-3 py-3 text-xs font-bold text-neutral-500 uppercase tracking-wider">Date</th>
-                                        <th className="px-3 py-3 text-xs font-bold text-neutral-500 uppercase tracking-wider">Method</th>
-                                     </tr>
-                                  </thead>
-                                  <tbody className="divide-y divide-neutral-100">
-                                     {earningsDetailsData.map((row, idx) => (
-                                        <tr key={idx} className="hover:bg-neutral-50/50 transition-colors">
-                                           <td className="px-3 py-3 text-sm font-mono font-semibold text-purple-600 truncate max-w-[150px]" title={row.txn_id}>{row.txn_id}</td>
-                                           <td className="px-3 py-3 text-sm font-bold text-neutral-900 capitalize">{row.student_name}</td>
-                                           <td className="px-3 py-3 text-sm font-bold text-emerald-600">₹{Number(row.amount).toLocaleString()}</td>
-                                           <td className="px-3 py-3 text-sm text-neutral-600">
-                                              {new Date(row.date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
-                                           </td>
-                                           <td className="px-3 py-3 text-sm font-semibold text-neutral-700 uppercase">{row.method}</td>
-                                        </tr>
-                                     ))}
-                                     {earningsDetailsData.length === 0 && (
-                                        <tr>
-                                           <td colSpan={5} className="py-20 text-center text-neutral-400 italic">No earnings records found.</td>
-                                        </tr>
-                                     )}
-                                  </tbody>
-                                  {earningsDetailsData.length > 0 && (
-                                     <tfoot className="bg-neutral-900 text-white">
-                                        <tr>
-                                           <td colSpan={2} className="px-6 py-5 text-sm font-bold uppercase tracking-widest">Total Earning Amount</td>
-                                           <td className="px-6 py-5 text-xl font-black text-emerald-400">
-                                              ₹{earningsDetailsData.reduce((acc, curr) => acc + Number(curr.amount || 0), 0).toLocaleString()}
-                                           </td>
-                                           <td colSpan={2} className="px-6 py-5"></td>
-                                        </tr>
-                                     </tfoot>
-                                  )}
-                               </table>
-                            );
-                         }
+                          if (expandedStat === "total-earnings") {
+                             if (earningsFilter === "pending") {
+                                const filteredPending = pendingFeeStudentsData.filter(s => {
+                                   if (!detailSearch.trim()) return true;
+                                   const q = detailSearch.toLowerCase().trim();
+                                   const name = (s.name || '').toLowerCase();
+                                   const id = (s.id || '').toLowerCase();
+                                   const phone = (s.phone || '').toLowerCase();
+                                   const courseStr = Array.isArray(s.course) ? s.course.join(' ').toLowerCase() : (s.course || '').toLowerCase();
+                                   return name.includes(q) || id.includes(q) || phone.includes(q) || courseStr.includes(q);
+                                });
 
+                                const sumTotal = filteredPending.reduce((acc, curr) => acc + (Number(curr.totalFees) || 0), 0);
+                                const sumPaid = filteredPending.reduce((acc, curr) => acc + (Number(curr.paidFees) || 0), 0);
+                                const sumPending = filteredPending.reduce((acc, curr) => acc + (Number(curr.pendingFees) || 0), 0);
+
+                                return (
+                                   <table className="w-full text-left border-collapse text-sm">
+                                      <thead className="bg-neutral-50 border-b border-neutral-200">
+                                         <tr>
+                                            <th className="px-3 py-3 text-xs font-bold text-neutral-500 uppercase tracking-wider">ID</th>
+                                            <th className="px-3 py-3 text-xs font-bold text-neutral-500 uppercase tracking-wider">Student Name</th>
+                                            <th className="px-3 py-3 text-xs font-bold text-neutral-500 uppercase tracking-wider">Course</th>
+                                            <th className="px-3 py-3 text-xs font-bold text-neutral-500 uppercase tracking-wider">Duration</th>
+                                            <th className="px-3 py-3 text-xs font-bold text-neutral-500 uppercase tracking-wider">Total Fee</th>
+                                            <th className="px-3 py-3 text-xs font-bold text-neutral-500 uppercase tracking-wider">Paid Fee</th>
+                                            <th className="px-3 py-3 text-xs font-bold text-neutral-500 uppercase tracking-wider">Pending Fee</th>
+                                            <th className="px-3 py-3 text-xs font-bold text-neutral-500 uppercase tracking-wider">Status</th>
+                                            <th className="px-3 py-3 text-xs font-bold text-neutral-500 uppercase tracking-wider">Action</th>
+                                         </tr>
+                                      </thead>
+                                      <tbody className="divide-y divide-neutral-100">
+                                         {filteredPending.map((row: Student, idx: number) => (
+                                            <tr key={idx} className="hover:bg-neutral-50/50 transition-colors">
+                                               <td className="px-3 py-3 text-sm font-mono font-semibold text-blue-600">{row.id}</td>
+                                               <td className="px-3 py-3 text-sm">
+                                                  <div className="flex items-center gap-3">
+                                                     <div className="w-8 h-8 rounded-full bg-red-100 text-red-700 flex items-center justify-center font-bold text-xs uppercase">{row.name.charAt(0)}</div>
+                                                     <div className="font-bold text-neutral-900 capitalize">{row.name}</div>
+                                                  </div>
+                                               </td>
+                                               <td className="px-3 py-3 text-sm font-semibold text-neutral-700">{Array.isArray(row.course) ? row.course.join(", ") : row.course}</td>
+                                               <td className="px-3 py-3 text-sm text-neutral-600">{row.duration}</td>
+                                               <td className="px-3 py-3 text-sm font-bold text-neutral-900">₹{(row.totalFees || 0).toLocaleString('en-IN')}</td>
+                                               <td className="px-3 py-3 text-sm font-bold text-emerald-600">₹{(row.paidFees || 0).toLocaleString('en-IN')}</td>
+                                               <td className="px-3 py-3 text-sm font-bold text-red-600">₹{(row.pendingFees || 0).toLocaleString('en-IN')}</td>
+                                               <td className="px-3 py-3 text-sm">
+                                                  <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-orange-100 text-orange-700">
+                                                     {row.feesStatus || 'Pending'}
+                                                  </span>
+                                               </td>
+                                               <td className="px-3 py-3 text-sm">
+                                                  <button 
+                                                    onClick={() => setViewingStudent(row)} 
+                                                    className="text-neutral-600 hover:text-neutral-700 text-sm font-bold underline cursor-pointer"
+                                                  >
+                                                    Details
+                                                  </button>
+                                               </td>
+                                            </tr>
+                                         ))}
+                                         {filteredPending.length === 0 && (
+                                            <tr>
+                                               <td colSpan={9} className="py-20 text-center text-neutral-400 italic">No students with pending dues found.</td>
+                                            </tr>
+                                         )}
+                                      </tbody>
+                                      {filteredPending.length > 0 && (
+                                         <tfoot className="bg-neutral-900 text-white border-t-2 border-neutral-800">
+                                            <tr>
+                                               <td colSpan={4} className="px-3 py-4 text-xs font-bold uppercase tracking-wider text-neutral-300">
+                                                  Total Pending Summary ({filteredPending.length} Students)
+                                               </td>
+                                               <td className="px-3 py-4 text-sm font-bold text-neutral-100">
+                                                  ₹{sumTotal.toLocaleString('en-IN')}
+                                               </td>
+                                               <td className="px-3 py-4 text-sm font-bold text-emerald-400">
+                                                  ₹{sumPaid.toLocaleString('en-IN')}
+                                               </td>
+                                               <td className="px-3 py-4 text-base font-black text-rose-400">
+                                                  ₹{sumPending.toLocaleString('en-IN')}
+                                               </td>
+                                               <td colSpan={2} className="px-3 py-4 text-xs font-semibold text-rose-300">
+                                                  Total Outstanding Dues
+                                               </td>
+                                            </tr>
+                                         </tfoot>
+                                      )}
+                                   </table>
+                                );
+                             }
+
+                             if (earningsFilter === "all") {
+                                const studentList = allStudentsData.length > 0 ? allStudentsData : students;
+                                const filteredAll = studentList.filter(row => {
+                                   if (!detailSearch.trim()) return true;
+                                   const q = detailSearch.toLowerCase().trim();
+                                   const name = (row.name || '').toLowerCase();
+                                   const id = (row.id || '').toLowerCase();
+                                   const phone = (row.phone || '').toLowerCase();
+                                   const courseStr = Array.isArray(row.course) ? row.course.join(' ').toLowerCase() : (row.course || '').toLowerCase();
+                                   return name.includes(q) || id.includes(q) || phone.includes(q) || courseStr.includes(q);
+                                });
+
+                                const sumTotal = filteredAll.reduce((acc, curr) => acc + (Number(curr.totalFees) || 0), 0);
+                                const sumPaid = filteredAll.reduce((acc, curr) => acc + (Number(curr.paidFees) || 0), 0);
+                                const sumPending = filteredAll.reduce((acc, curr) => acc + (Number(curr.pendingFees) || 0), 0);
+
+                                return (
+                                   <table className="w-full text-left border-collapse text-sm">
+                                      <thead className="bg-neutral-50 border-b border-neutral-200">
+                                         <tr>
+                                            <th className="px-3 py-3 text-xs font-bold text-neutral-500 uppercase tracking-wider">ID</th>
+                                            <th className="px-3 py-3 text-xs font-bold text-neutral-500 uppercase tracking-wider">Student Name</th>
+                                            <th className="px-3 py-3 text-xs font-bold text-neutral-500 uppercase tracking-wider">Course</th>
+                                            <th className="px-3 py-3 text-xs font-bold text-neutral-500 uppercase tracking-wider">Duration</th>
+                                            <th className="px-3 py-3 text-xs font-bold text-neutral-500 uppercase tracking-wider">Total Fee</th>
+                                            <th className="px-3 py-3 text-xs font-bold text-neutral-500 uppercase tracking-wider">Paid Fee</th>
+                                            <th className="px-3 py-3 text-xs font-bold text-neutral-500 uppercase tracking-wider">Pending Fee</th>
+                                            <th className="px-3 py-3 text-xs font-bold text-neutral-500 uppercase tracking-wider">Status</th>
+                                            <th className="px-3 py-3 text-xs font-bold text-neutral-500 uppercase tracking-wider">Action</th>
+                                         </tr>
+                                      </thead>
+                                      <tbody className="divide-y divide-neutral-100">
+                                         {filteredAll.map((row: Student, idx: number) => (
+                                            <tr key={idx} className="hover:bg-neutral-50/50 transition-colors">
+                                               <td className="px-3 py-3 text-sm font-mono font-semibold text-blue-600">{row.id}</td>
+                                               <td className="px-3 py-3 text-sm">
+                                                  <div className="flex items-center gap-3">
+                                                     <div className="w-8 h-8 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center font-bold text-xs uppercase">{row.name.charAt(0)}</div>
+                                                     <div className="font-bold text-neutral-900 capitalize">{row.name}</div>
+                                                  </div>
+                                               </td>
+                                               <td className="px-3 py-3 text-sm font-semibold text-neutral-700">{Array.isArray(row.course) ? row.course.join(", ") : row.course}</td>
+                                               <td className="px-3 py-3 text-sm text-neutral-600">{row.duration}</td>
+                                               <td className="px-3 py-3 text-sm font-bold text-neutral-900">₹{(row.totalFees || 0).toLocaleString('en-IN')}</td>
+                                               <td className="px-3 py-3 text-sm font-bold text-emerald-600">₹{(row.paidFees || 0).toLocaleString('en-IN')}</td>
+                                               <td className="px-3 py-3 text-sm font-bold text-red-600">₹{(row.pendingFees || 0).toLocaleString('en-IN')}</td>
+                                               <td className="px-3 py-3 text-sm">
+                                                  <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold ${row.feesStatus === 'Clear' ? 'bg-emerald-100 text-emerald-700' : 'bg-orange-100 text-orange-700'}`}>
+                                                     {row.feesStatus}
+                                                  </span>
+                                               </td>
+                                               <td className="px-3 py-3 text-sm">
+                                                  <button 
+                                                    onClick={() => setViewingStudent(row)} 
+                                                    className="text-neutral-600 hover:text-neutral-700 text-sm font-bold underline cursor-pointer"
+                                                  >
+                                                    Details
+                                                  </button>
+                                               </td>
+                                            </tr>
+                                         ))}
+                                         {filteredAll.length === 0 && (
+                                            <tr>
+                                               <td colSpan={9} className="py-20 text-center text-neutral-400 italic">No student revenue records found.</td>
+                                            </tr>
+                                         )}
+                                      </tbody>
+                                      {filteredAll.length > 0 && (
+                                         <tfoot className="bg-neutral-900 text-white border-t-2 border-neutral-800">
+                                            <tr>
+                                               <td colSpan={4} className="px-3 py-4 text-xs font-bold uppercase tracking-wider text-neutral-300">
+                                                  Total Expected Revenue ({filteredAll.length} Students)
+                                               </td>
+                                               <td className="px-3 py-4 text-sm font-bold text-neutral-100">
+                                                  ₹{sumTotal.toLocaleString('en-IN')}
+                                               </td>
+                                               <td className="px-3 py-4 text-sm font-bold text-emerald-400">
+                                                  ₹{sumPaid.toLocaleString('en-IN')}
+                                               </td>
+                                               <td className="px-3 py-4 text-base font-black text-rose-400">
+                                                  ₹{sumPending.toLocaleString('en-IN')}
+                                               </td>
+                                               <td colSpan={2} className="px-3 py-4 text-xs font-semibold text-neutral-400">
+                                                  {filteredAll.filter(s => Number(s.pendingFees) <= 0).length} Clear • {filteredAll.filter(s => Number(s.pendingFees) > 0).length} Pending
+                                               </td>
+                                            </tr>
+                                         </tfoot>
+                                      )}
+                                   </table>
+                                );
+                             }
+
+                             const filteredEarnings = earningsDetailsData.filter(row => {
+                                if (!detailSearch.trim()) return true;
+                                const q = detailSearch.toLowerCase().trim();
+                                const txn = (row.txn_id || '').toLowerCase();
+                                const student = (row.student_name || '').toLowerCase();
+                                const method = (row.method || '').toLowerCase();
+                                return txn.includes(q) || student.includes(q) || method.includes(q);
+                             });
+                             const sumEarningsFiltered = filteredEarnings.reduce((acc, curr) => acc + Number(curr.amount || 0), 0);
+
+                             return (
+                                <table className="w-full text-left border-collapse text-sm">
+                                   <thead className="bg-neutral-50 border-b border-neutral-200">
+                                      <tr>
+                                         <th className="px-3 py-3 text-xs font-bold text-neutral-500 uppercase tracking-wider">TXN ID</th>
+                                         <th className="px-3 py-3 text-xs font-bold text-neutral-500 uppercase tracking-wider">Student Name</th>
+                                         <th className="px-3 py-3 text-xs font-bold text-neutral-500 uppercase tracking-wider">Amount</th>
+                                         <th className="px-3 py-3 text-xs font-bold text-neutral-500 uppercase tracking-wider">Date</th>
+                                         <th className="px-3 py-3 text-xs font-bold text-neutral-500 uppercase tracking-wider">Method</th>
+                                      </tr>
+                                   </thead>
+                                   <tbody className="divide-y divide-neutral-100">
+                                      {filteredEarnings.map((row, idx) => (
+                                         <tr key={idx} className="hover:bg-neutral-50/50 transition-colors">
+                                            <td className="px-3 py-3 text-sm font-mono font-semibold text-purple-600 truncate max-w-[150px]" title={row.txn_id}>{row.txn_id}</td>
+                                            <td className="px-3 py-3 text-sm font-bold text-neutral-900 capitalize">{row.student_name}</td>
+                                            <td className="px-3 py-3 text-sm font-bold text-emerald-600">₹{Number(row.amount).toLocaleString('en-IN')}</td>
+                                            <td className="px-3 py-3 text-sm text-neutral-600">
+                                               {new Date(row.date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
+                                            </td>
+                                            <td className="px-3 py-3 text-sm font-semibold text-neutral-700 uppercase">{row.method}</td>
+                                         </tr>
+                                      ))}
+                                      {filteredEarnings.length === 0 && (
+                                         <tr>
+                                            <td colSpan={5} className="py-20 text-center text-neutral-400 italic">
+                                               {detailSearch ? "No earnings records matching your search." : "No earnings records found."}
+                                            </td>
+                                         </tr>
+                                      )}
+                                   </tbody>
+                                   {filteredEarnings.length > 0 && (
+                                      <tfoot className="bg-neutral-900 text-white border-t-2 border-neutral-800">
+                                         <tr>
+                                            <td colSpan={2} className="px-4 py-4 text-xs font-bold uppercase tracking-wider text-neutral-300">
+                                               Total Received ({filteredEarnings.length} Transactions)
+                                            </td>
+                                            <td className="px-3 py-4 text-base font-black text-emerald-400">
+                                               ₹{sumEarningsFiltered.toLocaleString('en-IN')}
+                                            </td>
+                                            <td colSpan={2} className="px-4 py-4 text-xs font-semibold text-neutral-400">
+                                               System Pending Dues: <span className="text-rose-400 font-bold ml-1">₹{totalEarningsSummary.totalPending.toLocaleString('en-IN')}</span>
+                                            </td>
+                                         </tr>
+                                      </tfoot>
+                                   )}
+                                </table>
+                             );
+                          }
                          if (expandedStat === "total-pending-fees") {
+                            const filteredList = pendingFeeStudentsData.filter(s => {
+                               if (!detailSearch.trim()) return true;
+                               const q = detailSearch.toLowerCase().trim();
+                               const name = (s.name || '').toLowerCase();
+                               const id = (s.id || '').toLowerCase();
+                               const phone = (s.phone || '').toLowerCase();
+                               const courseStr = Array.isArray(s.course) ? s.course.join(' ').toLowerCase() : (s.course || '').toLowerCase();
+                               return name.includes(q) || id.includes(q) || phone.includes(q) || courseStr.includes(q);
+                            });
+
+                            const sumTotalFees = filteredList.reduce((acc, curr) => acc + Number(curr.totalFees || 0), 0);
+                            const sumPaidFees = filteredList.reduce((acc, curr) => acc + Number(curr.paidFees || 0), 0);
+                            const sumPendingFees = filteredList.reduce((acc, curr) => acc + Number(curr.pendingFees || 0), 0);
+
                             return (
                                <table className="w-full text-left border-collapse text-sm">
                                   <thead className="bg-neutral-50 border-b border-neutral-200">
@@ -1831,27 +2662,61 @@ export default function AdminDashboard() {
                                      </tr>
                                   </thead>
                                   <tbody className="divide-y divide-neutral-100">
-                                     {pendingFeeStudentsData.map((row: Student, idx) => (
+                                     {filteredList.map((row: Student, idx) => (
                                         <tr key={idx} className="hover:bg-neutral-50/50 transition-colors">
                                            <td className="px-3 py-3 text-sm font-mono font-semibold text-red-600">{row.id}</td>
                                            <td className="px-3 py-3 text-sm font-bold text-neutral-900 capitalize">{row.name}</td>
                                            <td className="px-3 py-3 text-sm font-semibold text-neutral-700">{Array.isArray(row.course) ? row.course.join(", ") : row.course}</td>
-                                           <td className="px-3 py-3 text-sm font-bold text-neutral-900">₹{Number(row.totalFees).toLocaleString()}</td>
-                                           <td className="px-3 py-3 text-sm font-bold text-emerald-600">₹{Number(row.paidFees).toLocaleString()}</td>
-                                           <td className="px-3 py-3 text-sm font-bold text-red-600">₹{Number(row.pendingFees).toLocaleString()}</td>
+                                           <td className="px-3 py-3 text-sm font-bold text-neutral-900">₹{Number(row.totalFees).toLocaleString('en-IN')}</td>
+                                           <td className="px-3 py-3 text-sm font-bold text-emerald-600">₹{Number(row.paidFees).toLocaleString('en-IN')}</td>
+                                           <td className="px-3 py-3 text-sm font-bold text-red-600">₹{Number(row.pendingFees).toLocaleString('en-IN')}</td>
                                            <td className="px-3 py-3 text-sm font-semibold text-neutral-700">{row.phone}</td>
                                         </tr>
                                      ))}
-                                     {pendingFeeStudentsData.length === 0 && (
+                                     {filteredList.length === 0 && (
                                         <tr>
-                                           <td colSpan={7} className="py-20 text-center text-neutral-400 italic">No students with pending fees found.</td>
+                                           <td colSpan={7} className="py-20 text-center text-neutral-400 italic">
+                                              {detailSearch ? "No students matching your search." : "No students with pending fees found."}
+                                           </td>
                                         </tr>
                                      )}
                                   </tbody>
+                                  {filteredList.length > 0 && (
+                                     <tfoot className="bg-neutral-900 text-white border-t-2 border-neutral-800">
+                                        <tr>
+                                           <td colSpan={3} className="px-3 py-4 text-xs font-bold uppercase tracking-wider text-neutral-300">
+                                              Total Pending Dues ({filteredList.length} {filteredList.length === 1 ? 'Student' : 'Students'})
+                                           </td>
+                                           <td className="px-3 py-4 text-sm font-bold text-neutral-100">
+                                              ₹{sumTotalFees.toLocaleString('en-IN')}
+                                           </td>
+                                           <td className="px-3 py-4 text-sm font-bold text-emerald-400">
+                                              ₹{sumPaidFees.toLocaleString('en-IN')}
+                                           </td>
+                                           <td className="px-3 py-4 text-base font-black text-rose-400">
+                                              ₹{sumPendingFees.toLocaleString('en-IN')}
+                                           </td>
+                                           <td className="px-3 py-4 text-xs font-semibold text-neutral-400">
+                                              Total Dues: ₹{sumPendingFees.toLocaleString('en-IN')}
+                                           </td>
+                                        </tr>
+                                     </tfoot>
+                                  )}
                                </table>
                             );
                          }
                          if (expandedStat === "total-clear-fees") {
+                            const filteredClear = clearFeeStudentsData.filter(s => {
+                               if (!detailSearch.trim()) return true;
+                               const q = detailSearch.toLowerCase().trim();
+                               const name = (s.name || '').toLowerCase();
+                               const id = (s.id || '').toLowerCase();
+                               const phone = (s.phone || '').toLowerCase();
+                               const courseStr = Array.isArray(s.course) ? s.course.join(' ').toLowerCase() : (s.course || '').toLowerCase();
+                               return name.includes(q) || id.includes(q) || phone.includes(q) || courseStr.includes(q);
+                            });
+                            const sumPaidClear = filteredClear.reduce((acc, curr) => acc + Number(curr.paidFees || 0), 0);
+
                             return (
                                <table className="w-full text-left border-collapse text-sm">
                                   <thead className="bg-neutral-50 border-b border-neutral-200">
@@ -1865,12 +2730,12 @@ export default function AdminDashboard() {
                                      </tr>
                                   </thead>
                                   <tbody className="divide-y divide-neutral-100">
-                                     {clearFeeStudentsData.map((row: Student, idx) => (
+                                     {filteredClear.map((row: Student, idx) => (
                                         <tr key={idx} className="hover:bg-neutral-50/50 transition-colors">
                                            <td className="px-3 py-3 text-sm font-mono font-semibold text-cyan-600">{row.id}</td>
                                            <td className="px-3 py-3 text-sm font-bold text-neutral-900 capitalize">{row.name}</td>
                                            <td className="px-3 py-3 text-sm font-semibold text-neutral-700">{Array.isArray(row.course) ? row.course.join(", ") : row.course}</td>
-                                           <td className="px-3 py-3 text-sm font-bold text-neutral-900">₹{Number(row.paidFees).toLocaleString()}</td>
+                                           <td className="px-3 py-3 text-sm font-bold text-emerald-600">₹{Number(row.paidFees).toLocaleString('en-IN')}</td>
                                            <td className="px-3 py-3 text-sm"><span className="inline-flex items-center px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-700 text-xs font-bold">Clear</span></td>
                                            <td className="px-3 py-3 text-sm">
                                               <button 
@@ -1882,51 +2747,37 @@ export default function AdminDashboard() {
                                            </td>
                                         </tr>
                                      ))}
-                                     {clearFeeStudentsData.length === 0 && (
+                                     {filteredClear.length === 0 && (
                                         <tr>
-                                           <td colSpan={5} className="py-20 text-center text-neutral-400 italic">No students with clear fees found.</td>
+                                           <td colSpan={6} className="py-20 text-center text-neutral-400 italic">
+                                              {detailSearch ? "No cleared fee students matching your search." : "No students with clear fees found."}
+                                           </td>
                                         </tr>
                                      )}
                                   </tbody>
+                                  {filteredClear.length > 0 && (
+                                     <tfoot className="bg-neutral-900 text-white border-t-2 border-neutral-800">
+                                        <tr>
+                                           <td colSpan={3} className="px-3 py-4 text-xs font-bold uppercase tracking-wider text-neutral-300">
+                                              Total Cleared Fees ({filteredClear.length} {filteredClear.length === 1 ? 'Student' : 'Students'})
+                                           </td>
+                                           <td className="px-3 py-4 text-sm font-black text-emerald-400">
+                                              ₹{sumPaidClear.toLocaleString('en-IN')}
+                                           </td>
+                                           <td className="px-3 py-4 text-xs font-semibold text-emerald-300">
+                                              100% Cleared
+                                           </td>
+                                           <td className="px-3 py-4 text-xs font-semibold text-neutral-400">
+                                              ₹0 Pending
+                                           </td>
+                                        </tr>
+                                     </tfoot>
+                                  )}
                                </table>
                             );
                          }
 
-                         if (expandedStat === "total-pending-fees") {
-                            return (
-                               <table className="w-full text-left border-collapse text-sm">
-                                  <thead className="bg-neutral-50 border-b border-neutral-200">
-                                     <tr>
-                                        <th className="px-3 py-3 text-xs font-bold text-neutral-500 uppercase tracking-wider">ID</th>
-                                        <th className="px-3 py-3 text-xs font-bold text-neutral-500 uppercase tracking-wider">Student Name</th>
-                                        <th className="px-3 py-3 text-xs font-bold text-neutral-500 uppercase tracking-wider">Course</th>
-                                        <th className="px-3 py-3 text-xs font-bold text-neutral-500 uppercase tracking-wider">Total Fee</th>
-                                        <th className="px-3 py-3 text-xs font-bold text-neutral-500 uppercase tracking-wider">Paid Fee</th>
-                                        <th className="px-3 py-3 text-xs font-bold text-neutral-500 uppercase tracking-wider">Pending Fee</th>
-                                        <th className="px-3 py-3 text-xs font-bold text-neutral-500 uppercase tracking-wider">Phone Number</th>
-                                     </tr>
-                                  </thead>
-                                  <tbody className="divide-y divide-neutral-100">
-                                     {pendingFeeStudentsData.map((row: Student, idx) => (
-                                        <tr key={idx} className="hover:bg-neutral-50/50 transition-colors">
-                                           <td className="px-3 py-3 text-sm font-mono font-semibold text-red-600">{row.id}</td>
-                                           <td className="px-3 py-3 text-sm font-bold text-neutral-900 capitalize">{row.name}</td>
-                                           <td className="px-3 py-3 text-sm font-semibold text-neutral-700">{Array.isArray(row.course) ? row.course.join(", ") : row.course}</td>
-                                           <td className="px-3 py-3 text-sm font-bold text-neutral-900">₹{Number(row.totalFees).toLocaleString()}</td>
-                                           <td className="px-3 py-3 text-sm font-bold text-emerald-600">₹{Number(row.paidFees).toLocaleString()}</td>
-                                           <td className="px-3 py-3 text-sm font-bold text-red-600">₹{Number(row.pendingFees).toLocaleString()}</td>
-                                           <td className="px-3 py-3 text-sm font-semibold text-neutral-700">{row.phone}</td>
-                                        </tr>
-                                     ))}
-                                     {pendingFeeStudentsData.length === 0 && (
-                                        <tr>
-                                           <td colSpan={7} className="py-20 text-center text-neutral-400 italic">No students with pending fees found.</td>
-                                        </tr>
-                                     )}
-                                  </tbody>
-                               </table>
-                            );
-                         }
+
 
 
                          return null;
