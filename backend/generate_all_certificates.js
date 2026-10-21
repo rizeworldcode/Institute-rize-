@@ -1,11 +1,13 @@
 require('dotenv').config();
 const fs = require('fs');
 const path = require('path');
+const url = require('url');
 const QRCode = require('qrcode');
 const mongoose = require('mongoose');
 const { execSync } = require('child_process');
 
 const student_model = require('./src/models/studentModel');
+const { getChromePath } = require('./src/utils/certificateGenerator');
 
 // Helper to format date
 function formatDate(d) {
@@ -142,16 +144,16 @@ async function run() {
   await mongoose.connect(process.env.mongo_URI);
   console.log('Connected to MongoDB.');
 
-  const chromePath = 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe';
-  const baseCertPath = 'd:/desktop/Aman/rizeworld institute/rizeworld institute/rizeworld institute/frontend-admin/public/hero/COURSE CERTIFICATE.original.png';
-  const signCroppedPath = 'd:/desktop/Aman/rizeworld institute/rizeworld institute/rizeworld institute/frontend-admin/public/hero/sign_with_line.png';
+  const chromePath = getChromePath();
+  const baseCertPath = path.join(__dirname, '../frontend-admin/public/hero/COURSE CERTIFICATE.original.png');
+  const signCroppedPath = path.join(__dirname, '../frontend-admin/public/hero/sign_with_line.png');
 
   const baseCertBase64 = `data:image/png;base64,${fs.readFileSync(baseCertPath).toString('base64')}`;
   const signBase64 = `data:image/png;base64,${fs.readFileSync(signCroppedPath).toString('base64')}`;
 
-  const dirAdmin = 'd:/desktop/Aman/rizeworld institute/rizeworld institute/rizeworld institute/frontend-admin/public/certificates';
-  const dirMain = 'd:/desktop/Aman/rizeworld institute/rizeworld institute/rizeworld institute/frontend-main/public/certificates';
-  const dirBackend = 'd:/desktop/Aman/rizeworld institute/rizeworld institute/rizeworld institute/backend/public/uploads/certificates';
+  const dirAdmin = path.join(__dirname, '../frontend-admin/public/certificates');
+  const dirMain = path.join(__dirname, '../frontend-main/public/certificates');
+  const dirBackend = path.join(__dirname, 'public/uploads/certificates');
 
   // Clean old/duplicate certificate files
   [dirAdmin, dirMain, dirBackend].forEach(d => {
@@ -370,8 +372,9 @@ async function run() {
 
       fs.writeFileSync(tempHtmlPath, htmlContent);
 
-      const cmd = `"${chromePath}" --headless --disable-gpu --screenshot="${tempPngPath}" --window-size=2000,1414 --hide-scrollbars "file:///${tempHtmlPath.replace(/\\/g, '/')}"`;
-      execSync(cmd);
+      const fileUrl = url.pathToFileURL(tempHtmlPath).href;
+      const cmd = `"${chromePath}" --headless --disable-gpu --screenshot="${tempPngPath}" --window-size=2000,1414 --hide-scrollbars "${fileUrl}"`;
+      execSync(cmd, { stdio: 'pipe' });
 
       // Unique file name per course
       const cleanId = studentId.replace(/[^a-zA-Z0-9-_]/g, '_');
@@ -403,8 +406,8 @@ async function run() {
 
       // If Punit Sharma and Creative Pro, also update hero/COURSE CERTIFICATE.png
       if (studentId === 'RW-6678' && courseObj.slug === 'Creative_Pro') {
-        const heroAdmin = 'd:/desktop/Aman/rizeworld institute/rizeworld institute/rizeworld institute/frontend-admin/public/hero/COURSE CERTIFICATE.png';
-        const heroMain = 'd:/desktop/Aman/rizeworld institute/rizeworld institute/rizeworld institute/frontend-main/public/hero/COURSE CERTIFICATE.png';
+        const heroAdmin = path.join(__dirname, '../frontend-admin/public/hero/COURSE CERTIFICATE.png');
+        const heroMain = path.join(__dirname, '../frontend-main/public/hero/COURSE CERTIFICATE.png');
         fs.writeFileSync(heroAdmin, renderedBuffer);
         fs.writeFileSync(heroMain, renderedBuffer);
         console.log(`      ✓ Updated hero/COURSE CERTIFICATE.png for Punit Sharma`);

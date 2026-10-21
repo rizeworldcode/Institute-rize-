@@ -332,6 +332,13 @@ exports.totalEarningsDetails = async (req, res) => {
 
 exports.certificateissuedStudentsData = async (req,res) => {
     try {
+        const { checkAndGenerateEligibleCertificates, isStudentFeeClear } = require("../utils/certificateGenerator");
+        try {
+            await checkAndGenerateEligibleCertificates();
+        } catch (autoErr) {
+            console.error("AutoCert error in certificateissuedStudentsData:", autoErr.message);
+        }
+
         const Studentdata = await student_model.find({ 
             is_deleted: { $ne: true }, 
             $or: [
@@ -341,30 +348,63 @@ exports.certificateissuedStudentsData = async (req,res) => {
             ] 
         }).sort({ updated_at: -1 });
         
-        const mappedData = Studentdata.map(student => {
+        // Strict requirement: Student fee must be 100% clear to have an issued certificate
+        const eligibleStudents = Studentdata.filter(student => isStudentFeeClear(student));
+
+        const mappedData = [];
+        for (const student of eligibleStudents) {
             const paid = parseFloat(student.total_paid_fee || 0);
             const total = parseFloat(student.total_fee || 0);
-            const pending = total - paid;
+            const pending = Math.max(0, total - paid);
+
+            // Extract all courses that have issued certificates
+            const issuedSet = new Set();
+            if (student.certificates && student.certificates.length > 0) {
+                student.certificates.forEach(c => {
+                    if (c.course_name) issuedSet.add(c.course_name);
+                    else if (c.courseName) issuedSet.add(c.courseName);
+                });
+            }
+            if (student.admissions && student.admissions.length > 0) {
+                student.admissions.forEach(adm => {
+                    if (adm.certificates && adm.certificates.length > 0) {
+                        adm.certificates.forEach(c => {
+                            if (c.courseName) issuedSet.add(c.courseName);
+                            else if (c.course_name) issuedSet.add(c.course_name);
+                        });
+                    }
+                });
+            }
+            if (issuedSet.size === 0 && student.certificate_photo) {
+                const cFallback = Array.isArray(student.selected_course_name) ? student.selected_course_name[0] : student.selected_course_name;
+                if (cFallback) issuedSet.add(cFallback);
+            }
             
-            return {
-                student_name: student.student_name,
-                student_ID: student.student_ID,
-                selected_course_name: student.selected_course_name,
-                course_duration: student.course_duration,
-                total_fee: student.total_fee,
-                total_paid_fee: student.total_paid_fee,
-                pending_fee: pending.toString(),
-                email: student.email,
-                phone: student.phone,
-                address: student.address,
-                course_start_date: student.course_start_date,
-                course_end_date: student.course_end_date,
-                fee_installment: student.fee_installment,
-                fee: student.fee,
-                certificate_photo: student.certificate_photo,
-                updated_at: student.updated_at
-            };
-        });
+            // Only add student if they have at least one course certificate issued
+            if (issuedSet.size > 0) {
+                mappedData.push({
+                    student_name: student.student_name,
+                    student_ID: student.student_ID,
+                    selected_course_name: student.selected_course_name,
+                    issuedCourses: Array.from(issuedSet),
+                    certificates: student.certificates || [],
+                    admissions: student.admissions || [],
+                    course_duration: student.course_duration,
+                    total_fee: student.total_fee,
+                    total_paid_fee: student.total_paid_fee,
+                    pending_fee: pending.toString(),
+                    email: student.email,
+                    phone: student.phone,
+                    address: student.address,
+                    course_start_date: student.course_start_date,
+                    course_end_date: student.course_end_date,
+                    fee_installment: student.fee_installment,
+                    fee: student.fee,
+                    certificate_photo: student.certificate_photo,
+                    updated_at: student.updated_at
+                });
+            }
+        }
 
         return {
             success: true,
@@ -383,19 +423,42 @@ exports.certificateissuedStudentsData = async (req,res) => {
 
 exports.certificateunissuedStudentsData = async (req,res) => {
     try {
-        const Studentdata = await student_model.find({ 
-            is_deleted: { $ne: true }, 
-            $and: [
-                { $or: [{ certificate_photo: { $in: ["", null] } }, { certificate_photo: { $exists: false } }] },
-                { "certificates.0": { $exists: false } },
-                { "admissions.certificates.0": { $exists: false } }
-            ]
+        const { checkAndGenerateEligibleCertificates, isStudentFeeClear } = require("../utils/certificateGenerator");
+        try {
+            await checkAndGenerateEligibleCertificates();
+        } catch (autoErr) {
+            console.error("AutoCert error in certificateunissuedStudentsData:", autoErr.message);
+        }
+
+        // Get all active students
+        const allStudents = await student_model.find({ 
+            is_deleted: { $ne: true }
         }).sort({ created_at: -1 });
+
+        // A student is considered "Issued" only if they have certificates AND fee is 100% clear
+        const unissuedStudents = allStudents.filter(student => {
+            const hasFeeClear = isStudentFeeClear(student);
+            
+            const hasCerts = (Array.isArray(student.certificates) && student.certificates.length > 0) ||
+                (Array.isArray(student.admissions) && student.admissions.some(adm => Array.isArray(adm.certificates) && adm.certificates.length > 0)) ||
+                Boolean(student.certificate_photo);
+
+            // If fee is NOT clear, or student does NOT have a valid certificate, they are unissued!
+            return !hasFeeClear || !hasCerts;
+        });
         
-        const mappedData = Studentdata.map(student => {
+        const mappedData = unissuedStudents.map(student => {
             const paid = parseFloat(student.total_paid_fee || 0);
             const total = parseFloat(student.total_fee || 0);
-            const pending = total - paid;
+            const pending = Math.max(0, total - paid);
+            
+            let status = "Clear";
+            if (pending > 0) {
+                status = paid > 0 ? "Partial" : "Pending";
+            }
+            if (student.status) {
+                status = student.status;
+            }
             
             return {
                 student_name: student.student_name,
@@ -412,7 +475,8 @@ exports.certificateunissuedStudentsData = async (req,res) => {
                 course_end_date: student.course_end_date,
                 fee_installment: student.fee_installment,
                 fee: student.fee,
-                status: pending > 0 ? "Pending" : "Clear"
+                status: status,
+                admissions: student.admissions || []
             };
         });
 

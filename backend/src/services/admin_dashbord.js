@@ -10,57 +10,72 @@ exports.admin_dashboardGet = async (req, res) => {
         if (cached) {
             return cached;
         }
+        // Trigger automated check for newly eligible completed certificates
+        try {
+            const { checkAndGenerateEligibleCertificates } = require("../utils/certificateGenerator");
+            await checkAndGenerateEligibleCertificates();
+        } catch (autoErr) {
+            console.error("AutoCert error in admin_dashboardGet:", autoErr.message);
+        }
+
         // 1. Total Students
         const total_students = await Tc_model.countDocuments({ is_deleted: { $ne: true } });
 
         // 2. Total Issued/Unissued Certificates
-    // Count unique students who have at least one certificate, plus backward compatibility
-    const students = await Tc_model.find({ is_deleted: { $ne: true } }).lean();
-    
-    // Collect all students with certificates + their issued courses
-    const studentsWithCertificates = [];
-    students.forEach(student => {
-      // Collect all unique courses with certificates for this student
-      const issuedCourses = new Set();
-      
-      // Check certificates from admissions
-      if (student.admissions && student.admissions.length > 0) {
-        student.admissions.forEach(adm => {
-          if (adm.certificates && adm.certificates.length > 0) {
-            adm.certificates.forEach(cert => {
-              if (cert.courseName) {
+        // Count unique students who have at least one certificate, plus backward compatibility
+        const students = await Tc_model.find({ is_deleted: { $ne: true } }).lean();
+        
+        // Collect all students with certificates + their issued courses
+        const studentsWithCertificates = [];
+        students.forEach(student => {
+          // Collect all unique courses with certificates for this student
+          const issuedCourses = new Set();
+          
+          // Check certificates from admissions
+          if (student.admissions && student.admissions.length > 0) {
+            student.admissions.forEach(adm => {
+              if (adm.certificates && adm.certificates.length > 0) {
+                adm.certificates.forEach(cert => {
+                  if (cert.courseName) {
+                    issuedCourses.add(cert.courseName);
+                  } else if (cert.course_name) {
+                    issuedCourses.add(cert.course_name);
+                  }
+                });
+              }
+            });
+          }
+          if (student.certificates && student.certificates.length > 0) {
+            student.certificates.forEach(cert => {
+              if (cert.course_name) {
+                issuedCourses.add(cert.course_name);
+              } else if (cert.courseName) {
                 issuedCourses.add(cert.courseName);
               }
             });
           }
-        });
-      }
-      // Backward compatibility
-      if (student.certificate_photo && student.certificate_photo !== "") {
-        issuedCourses.add("Default Course");
-      }
-      if (student.certificates && student.certificates.length > 0) {
-        student.certificates.forEach(cert => {
-          if (cert.course_name) {
-            issuedCourses.add(cert.course_name);
-          } else if (cert.courseName) {
-            issuedCourses.add(cert.courseName);
+          // Backward compatibility only if no courses found yet
+          if (issuedCourses.size === 0 && student.certificate_photo && student.certificate_photo !== "") {
+            const fallbackCourse = Array.isArray(student.selected_course_name)
+              ? student.selected_course_name[0]
+              : (student.selected_course_name || "Course Certificate");
+            issuedCourses.add(fallbackCourse);
+          }
+          
+          // Both Fee Clear AND Course Certificate must be present
+          const { isStudentFeeClear } = require("../utils/certificateGenerator");
+          const isFeeClear = isStudentFeeClear(student);
+          if (issuedCourses.size > 0 && isFeeClear) {
+            studentsWithCertificates.push({
+              studentId: student.student_ID,
+              studentName: student.student_name,
+              issuedCourses: Array.from(issuedCourses)
+            });
           }
         });
-      }
-      
-      // If student has any certificate
-      if (issuedCourses.size > 0) {
-        studentsWithCertificates.push({
-          studentId: student.student_ID,
-          studentName: student.student_name,
-          issuedCourses: Array.from(issuedCourses)
-        });
-      }
-    });
-    
-    const total_issued_certificates = studentsWithCertificates.length;
-    const total_unissued_certificates = Math.max(0, total_students - total_issued_certificates);
+        
+        const total_issued_certificates = studentsWithCertificates.length;
+        const total_unissued_certificates = Math.max(0, total_students - total_issued_certificates);
 
         // 3. Total Earnings & Fee Status Counts
         let total_earnings = 0;

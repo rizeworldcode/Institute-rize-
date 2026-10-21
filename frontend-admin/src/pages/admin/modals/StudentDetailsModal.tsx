@@ -1,14 +1,134 @@
-import { useState } from "react";
-import { UserCircle, X, Banknote, IndianRupee, Wallet, CreditCard, CheckCircle2, Calendar, BookOpen, Contact, Phone, Mail, MapPin, Activity, Trash2, FileText } from "lucide-react";
+import { useState, useMemo } from "react";
+import { UserCircle, X, Banknote, IndianRupee, Wallet, CreditCard, CheckCircle2, Calendar, BookOpen, Contact, Phone, Mail, MapPin, Activity, Trash2, FileText, Award, Download, ExternalLink, Eye, Loader2 } from "lucide-react";
 import { StudentInvoiceModal } from "./StudentInvoiceModal";
+import { API_BASE_URL, getApiUrl } from "../../../utils/api";
 
 export function StudentDetailsModal({ student, onClose, onDelete }: any) {
    const [paymentTab, setPaymentTab] = useState<"one-time" | "installment">("one-time");
    const [invoiceModalState, setInvoiceModalState] = useState<{ isOpen: boolean; paymentIndex?: number }>({ isOpen: false });
+   const [downloadingCert, setDownloadingCert] = useState(false);
+   const [previewModalOpen, setPreviewModalOpen] = useState(false);
+   const [selectedCertUrl, setSelectedCertUrl] = useState<string | null>(null);
+   const [selectedCertTitle, setSelectedCertTitle] = useState<string>("");
+
    // Calculate percentages for chart
    const total = Number(student.totalFees) || 0;
    const paid = Number(student.paidFees) || 0;
    const paidPercent = total > 0 ? Math.round((paid / total) * 100) : 0;
+
+   const isFeeClear = student.feesStatus === "Clear" || (!student.pendingFees || Number(student.pendingFees) <= 0);
+
+   // Collect all certificates for this student (only if fee is 100% clear)
+   const studentCerts = useMemo(() => {
+      const certs: { courseName: string; url: string; date?: string }[] = [];
+      if (!isFeeClear) return certs;
+      
+      if (Array.isArray(student.certificates)) {
+         student.certificates.forEach((c: any) => {
+            const url = c.certificatePath || c.certificate_path || c.url;
+            if (url) {
+               certs.push({
+                  courseName: c.courseName || c.course_name || "Course Certificate",
+                  url,
+                  date: c.date || c.issuedAt || c.issued_at
+               });
+            }
+         });
+      }
+      
+      if (Array.isArray(student.admissions)) {
+         student.admissions.forEach((adm: any) => {
+            const admFeePending = adm.feesStatus !== 'Clear' || (adm.pendingFee && Number(adm.pendingFee) > 0);
+            if (admFeePending) return;
+            if (Array.isArray(adm.certificates)) {
+               adm.certificates.forEach((c: any) => {
+                  const url = c.certificatePath || c.certificate_path || c.url;
+                  if (url && !certs.some(item => item.url === url)) {
+                     certs.push({
+                        courseName: c.courseName || c.course_name || (adm.courses && adm.courses[0]) || "Course Certificate",
+                        url,
+                        date: c.date || c.issuedAt || c.issued_at
+                     });
+                  }
+               });
+            }
+         });
+      }
+      
+      if (student.certificate_photo && !certs.some(item => item.url === student.certificate_photo)) {
+         const cName = Array.isArray(student.course) ? student.course[0] : (student.course || "Course Certificate");
+         certs.push({ courseName: cName, url: student.certificate_photo, date: student.startDate });
+      }
+      
+      return certs;
+   }, [student, isFeeClear]);
+
+   const primaryCourse = (studentCerts.length > 0 ? studentCerts[0].courseName : (Array.isArray(student.course) ? student.course[0] : student.course)) || "Course";
+
+   const handleDownloadCertificate = async (specificCourse?: string, directUrl?: string) => {
+      if (!isFeeClear) {
+         alert(`❌ Cannot download certificate: Student has pending fees (Pending: ₹${student.pendingFees || 0}). Both Course Completion and 100% Fee Clearance are strictly required.`);
+         return;
+      }
+      setDownloadingCert(true);
+      try {
+         const courseName = specificCourse || primaryCourse;
+         const filename = `Certificate_${(student.name || 'Student').replace(/[^a-zA-Z0-9]/g, '_')}_${(courseName || 'Course').replace(/[^a-zA-Z0-9]/g, '_')}.png`;
+
+         // 1. If directUrl provided or known in certs
+         let targetUrl = directUrl;
+         if (!targetUrl && studentCerts.length > 0) {
+            if (specificCourse) {
+               const found = studentCerts.find(c => c.courseName.toLowerCase().includes(specificCourse.toLowerCase()) || specificCourse.toLowerCase().includes(c.courseName.toLowerCase()));
+               if (found) targetUrl = found.url;
+            } else {
+               targetUrl = studentCerts[0].url;
+            }
+         }
+
+         // 2. If targetUrl is available, resolve and download
+         if (targetUrl) {
+            let fullUrl = targetUrl;
+            if (!targetUrl.startsWith("http://") && !targetUrl.startsWith("https://") && !targetUrl.startsWith("data:") && !targetUrl.startsWith("blob:")) {
+               const clean = targetUrl.startsWith("/") ? targetUrl : `/${targetUrl}`;
+               fullUrl = `${API_BASE_URL}${clean}`;
+            }
+
+            try {
+               const res = await fetch(fullUrl);
+               if (res.ok) {
+                  const blob = await res.blob();
+                  const blobUrl = window.URL.createObjectURL(blob);
+                  const link = document.createElement("a");
+                  link.href = blobUrl;
+                  link.download = filename;
+                  document.body.appendChild(link);
+                  link.click();
+                  document.body.removeChild(link);
+                  setTimeout(() => window.URL.revokeObjectURL(blobUrl), 1000);
+                  return;
+               }
+            } catch (e) {
+               // fallback to backend download endpoint
+            }
+         }
+
+         // 3. Fallback: Trigger backend download directly
+         const downloadEndpoint = getApiUrl(`/api/certificate/download?id=${encodeURIComponent(student.id)}&course=${encodeURIComponent(courseName)}&force=1`);
+         const link = document.createElement("a");
+         link.href = downloadEndpoint;
+         link.download = filename;
+         link.target = "_blank";
+         document.body.appendChild(link);
+         link.click();
+         document.body.removeChild(link);
+      } catch (err: any) {
+         console.error("Certificate download error:", err);
+         alert("Error downloading certificate: " + (err.message || "Unknown error"));
+      } finally {
+         setDownloadingCert(false);
+      }
+   };
 
    return (
       <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6">
@@ -29,6 +149,22 @@ export function StudentDetailsModal({ student, onClose, onDelete }: any) {
                      <FileText size={15} />
                      Fee Bill / Invoice
                   </button>
+
+                  {/* Certificate Download Button */}
+                  <button 
+                     onClick={() => handleDownloadCertificate()}
+                     disabled={downloadingCert || !isFeeClear}
+                     className={`flex items-center gap-1.5 px-3.5 py-1.5 font-bold rounded-xl text-xs transition-all shadow-xs ${
+                        isFeeClear
+                           ? "bg-emerald-500 hover:bg-emerald-600 text-white cursor-pointer hover:shadow-md disabled:opacity-60"
+                           : "bg-neutral-100 text-neutral-400 border border-neutral-200 cursor-not-allowed opacity-60"
+                     }`}
+                     title={isFeeClear ? "Download Official Course Certificate (HD)" : `Fee pending (₹${student.pendingFees || 0}). Both Course Completion and Fee Clearance required.`}
+                  >
+                     {downloadingCert ? <Loader2 size={15} className="animate-spin" /> : <Award size={15} />}
+                     <span>{downloadingCert ? "Downloading..." : (isFeeClear ? "Download Certificate" : "🔒 Fee Pending")}</span>
+                  </button>
+
                   {onDelete && (
                      <button 
                         onClick={onDelete} 
@@ -327,6 +463,80 @@ export function StudentDetailsModal({ student, onClose, onDelete }: any) {
                            </div>
                         </div>
                      </div>
+
+                     {/* Course Certificate Section */}
+                     <div className="mt-5 pt-5 border-t border-neutral-100 relative z-10 space-y-3">
+                        <div className="flex items-center justify-between">
+                           <span className="text-xs font-bold uppercase tracking-wider text-neutral-500 flex items-center gap-1.5">
+                              <Award size={14} className="text-emerald-600" /> Certificate
+                           </span>
+                           <span className={`inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold ${
+                              studentCerts.length > 0 ? "bg-emerald-100 text-emerald-700" : (!isFeeClear ? "bg-orange-100 text-orange-700" : "bg-neutral-100 text-neutral-600")
+                           }`}>
+                              {studentCerts.length > 0 ? "Issued & Available" : (!isFeeClear ? "Locked (Fee Pending)" : "Ready to Download")}
+                           </span>
+                        </div>
+
+                        {studentCerts.length > 0 ? (
+                           <div className="space-y-2">
+                              {studentCerts.map((cert, cIdx) => (
+                                 <div key={cIdx} className="bg-neutral-50 hover:bg-emerald-50/50 p-3.5 rounded-2xl border border-neutral-200/70 transition-all flex items-center justify-between gap-3">
+                                    <div className="min-w-0">
+                                       <div className="font-bold text-neutral-900 text-xs truncate">{cert.courseName}</div>
+                                       <div className="text-[10px] text-neutral-400 font-mono">Official HD Certificate</div>
+                                    </div>
+                                    <div className="flex items-center gap-1.5 shrink-0">
+                                       <button
+                                          type="button"
+                                          onClick={() => {
+                                             setSelectedCertUrl(cert.url);
+                                             setSelectedCertTitle(cert.courseName);
+                                             setPreviewModalOpen(true);
+                                          }}
+                                          className="px-2.5 py-1.5 bg-white hover:bg-neutral-100 text-neutral-700 border border-neutral-200 rounded-xl text-xs font-semibold flex items-center gap-1 transition-all shadow-2xs cursor-pointer"
+                                          title="View Certificate"
+                                       >
+                                          <Eye size={13} /> View
+                                       </button>
+                                       <button
+                                          type="button"
+                                          onClick={() => handleDownloadCertificate(cert.courseName, cert.url)}
+                                          disabled={downloadingCert}
+                                          className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-2xs hover:shadow-xs transition-all cursor-pointer disabled:opacity-50"
+                                          title="Download Certificate"
+                                       >
+                                          <Download size={13} /> Download
+                                       </button>
+                                    </div>
+                                 </div>
+                              ))}
+                           </div>
+                        ) : !isFeeClear ? (
+                           <div className="bg-orange-50/70 p-3.5 rounded-2xl border border-orange-200/80 flex items-center justify-between gap-3">
+                              <div className="text-xs text-orange-900">
+                                 <span className="font-bold">🔒 Certificate Locked:</span> Student fee is pending (Pending: ₹{student.pendingFees || 0}). Both Course Completion and 100% Fee Clearance are strictly required to issue certificate.
+                              </div>
+                              <span className="px-2.5 py-1 bg-orange-100 text-orange-700 rounded-lg text-xs font-bold border border-orange-200 shrink-0">
+                                 Fee Pending
+                              </span>
+                           </div>
+                        ) : (
+                           <div className="bg-neutral-50 p-3.5 rounded-2xl border border-dashed border-neutral-300 flex items-center justify-between gap-3">
+                              <div className="text-xs text-neutral-600">
+                                 <span className="font-semibold text-neutral-800">Generate or download</span> official certificate with QR code
+                              </div>
+                              <button
+                                 type="button"
+                                 onClick={() => handleDownloadCertificate()}
+                                 disabled={downloadingCert}
+                                 className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-2xs transition-all cursor-pointer shrink-0 disabled:opacity-50"
+                              >
+                                 {downloadingCert ? <Loader2 size={13} className="animate-spin" /> : <Download size={13} />}
+                                 {downloadingCert ? "Generating..." : "Download"}
+                              </button>
+                           </div>
+                        )}
+                     </div>
                   </div>
 
                   {/* Personal Details */}
@@ -369,6 +579,55 @@ export function StudentDetailsModal({ student, onClose, onDelete }: any) {
 
             </div>
          </div>
+
+         {/* Fullscreen Certificate Preview Modal */}
+         {previewModalOpen && selectedCertUrl && (
+            <div className="fixed inset-0 z-60 flex items-center justify-center p-4 bg-black/70 backdrop-blur-md animate-in fade-in duration-200">
+               <div className="relative w-full max-w-4xl bg-white rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[95vh]">
+                  <div className="flex items-center justify-between px-6 py-4 bg-white border-b border-neutral-100 shrink-0">
+                     <div className="flex items-center gap-2">
+                        <Award className="text-emerald-600" size={20} />
+                        <div>
+                           <h3 className="font-bold text-neutral-900 text-base">{selectedCertTitle || "Course Certificate"}</h3>
+                           <p className="text-xs text-neutral-500 font-mono">{student.name} ({student.id})</p>
+                        </div>
+                     </div>
+                     <div className="flex items-center gap-2">
+                        <button
+                           onClick={() => handleDownloadCertificate(selectedCertTitle, selectedCertUrl)}
+                           disabled={downloadingCert}
+                           className="flex items-center gap-1.5 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-xs shadow-xs transition-all cursor-pointer disabled:opacity-50"
+                        >
+                           <Download size={14} /> Download HD
+                        </button>
+                        <a
+                           href={selectedCertUrl.startsWith("http") ? selectedCertUrl : `${API_BASE_URL}${selectedCertUrl.startsWith("/") ? "" : "/"}${selectedCertUrl}`}
+                           target="_blank"
+                           rel="noopener noreferrer"
+                           className="p-2 text-neutral-600 hover:text-neutral-900 rounded-xl hover:bg-neutral-100 transition-colors"
+                           title="Open in new window"
+                        >
+                           <ExternalLink size={18} />
+                        </a>
+                        <button
+                           onClick={() => setPreviewModalOpen(false)}
+                           className="p-2 text-neutral-400 hover:text-neutral-700 rounded-xl hover:bg-neutral-100 transition-colors cursor-pointer"
+                        >
+                           <X size={20} />
+                        </button>
+                     </div>
+                  </div>
+                  <div className="p-4 bg-neutral-100 flex-1 overflow-auto flex items-center justify-center">
+                     <img 
+                        src={selectedCertUrl.startsWith("http") ? selectedCertUrl : `${API_BASE_URL}${selectedCertUrl.startsWith("/") ? "" : "/"}${selectedCertUrl}`} 
+                        alt="Certificate Preview" 
+                        className="max-w-full max-h-[75vh] object-contain rounded-xl shadow-lg border border-neutral-200 bg-white"
+                     />
+                  </div>
+               </div>
+            </div>
+         )}
+
          {invoiceModalState.isOpen && (
             <StudentInvoiceModal 
                student={student}

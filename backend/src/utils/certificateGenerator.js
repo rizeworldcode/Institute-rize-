@@ -1,23 +1,52 @@
 const fs = require('fs');
 const path = require('path');
+const url = require('url');
 const QRCode = require('qrcode');
 const { execSync } = require('child_process');
 const student_model = require('../models/studentModel');
+const memoryCache = require('./cache');
 
-// Resolve Chrome executable path
+// Resolve Chrome executable path across macOS, Windows, and Linux
 function getChromePath() {
   const candidates = [
-    'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe',
-    'C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe',
+    // macOS
+    '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
+    '/Applications/Google Chrome Canary.app/Contents/MacOS/Google Chrome Canary',
+    '/Applications/Chromium.app/Contents/MacOS/Chromium',
+    '/Applications/Brave Browser.app/Contents/MacOS/Brave Browser',
+    '/Applications/Microsoft Edge.app/Contents/MacOS/Microsoft Edge',
+    // Linux
     process.env.CHROME_BIN,
     '/usr/bin/google-chrome',
-    '/usr/bin/chromium-browser'
+    '/usr/bin/google-chrome-stable',
+    '/usr/bin/chromium',
+    '/usr/bin/chromium-browser',
+    // Windows
+    'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe',
+    'C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe',
+    process.env.LOCALAPPDATA ? path.join(process.env.LOCALAPPDATA, 'Google/Chrome/Application/chrome.exe') : null,
+    process.env.PROGRAMFILES ? path.join(process.env.PROGRAMFILES, 'Google/Chrome/Application/chrome.exe') : null,
+    process.env['PROGRAMFILES(X86)'] ? path.join(process.env['PROGRAMFILES(X86)'], 'Google/Chrome/Application/chrome.exe') : null,
   ].filter(Boolean);
 
   for (const p of candidates) {
     if (fs.existsSync(p)) return p;
   }
-  return 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe';
+
+  // Fallback to which command on POSIX
+  try {
+    const whichCmd = process.platform === 'win32' ? 'where chrome' : 'which google-chrome || which chromium || which chrome';
+    const found = execSync(whichCmd, { stdio: 'pipe' }).toString().trim().split('\n')[0];
+    if (found && fs.existsSync(found)) return found;
+  } catch (e) {
+    // Ignore error
+  }
+
+  return process.platform === 'darwin'
+    ? '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'
+    : (process.platform === 'win32'
+        ? 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe'
+        : '/usr/bin/google-chrome');
 }
 
 // Helper to format date
@@ -145,6 +174,55 @@ function getCourseCompletionDate(student, courseObj) {
     return calcEnd < end ? calcEnd : end;
   }
   return calcEnd;
+}
+
+// Helper to strictly check if fees are 100% clear for a student and/or course
+function isStudentFeeClear(student, courseObj) {
+  if (!student) return false;
+
+  // 1. If student has admissions array, check matching admission
+  if (student.admissions && Array.isArray(student.admissions) && student.admissions.length > 0) {
+    let matchedAdm = null;
+    if (courseObj) {
+      const targetSlug = (courseObj.slug || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+      const targetTitle = (courseObj.title || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+
+      matchedAdm = student.admissions.find(adm => {
+        const admCourses = (adm.courses || []).map(c => (c || '').toLowerCase().replace(/[^a-z0-9]/g, ''));
+        return admCourses.some(ac => {
+          const acClean = ac.replace(/[^a-z0-9]/g, '');
+          return acClean === targetSlug || acClean === targetTitle || targetTitle.includes(acClean) || acClean.includes(targetTitle);
+        });
+      });
+    }
+
+    if (!matchedAdm && student.admissions.length === 1) {
+      matchedAdm = student.admissions[0];
+    }
+
+    if (matchedAdm) {
+      const admTotal = parseFloat(matchedAdm.totalFee || matchedAdm.total_fee || 0);
+      const admPaid = parseFloat(matchedAdm.totalPaidFee || matchedAdm.total_paid_fee || 0);
+      const admPending = parseFloat(matchedAdm.pendingFee ?? matchedAdm.pending_fee ?? (admTotal - admPaid));
+      const admStatus = (matchedAdm.feesStatus || matchedAdm.status || '').toLowerCase().trim();
+
+      if (admStatus === 'clear' || (admPending <= 0 && admPaid >= admTotal && admTotal > 0)) {
+        return true;
+      }
+      return false;
+    }
+  }
+
+  // 2. Student root-level fee check
+  const total = parseFloat(student.total_fee || 0);
+  const paid = parseFloat(student.total_paid_fee || 0);
+  const pending = parseFloat(student.pending_fee ?? (total - paid));
+  const status = (student.fees_status || '').toLowerCase().trim();
+
+  if (status === 'clear' || (pending <= 0 && paid >= total && total > 0)) {
+    return true;
+  }
+  return false;
 }
 
 // Render a single certificate image and save to destination folders
@@ -342,8 +420,9 @@ async function renderCertificate(student, courseObj) {
   try {
     fs.writeFileSync(tempHtmlPath, htmlContent);
 
-    const cmd = `"${chromePath}" --headless --disable-gpu --screenshot="${tempPngPath}" --window-size=2000,1414 --hide-scrollbars "file:///${tempHtmlPath.replace(/\\/g, '/')}"`;
-    execSync(cmd);
+    const fileUrl = url.pathToFileURL(tempHtmlPath).href;
+    const cmd = `"${chromePath}" --headless --disable-gpu --screenshot="${tempPngPath}" --window-size=2000,1414 --hide-scrollbars "${fileUrl}"`;
+    execSync(cmd, { stdio: 'pipe' });
 
     const cleanId = studentId.replace(/[^a-zA-Z0-9-_]/g, '_');
     const safeName = studentName.replace(/[^a-zA-Z0-9-_]/g, '_');
@@ -369,9 +448,50 @@ async function renderCertificate(student, courseObj) {
   }
 }
 
-// Automatically check all students and generate certificates for any completed course
+// Helper to attach a certificate into matching admission
+function syncCertificateToAdmissions(student, courseTitle, certPublicPath) {
+  if (!student.admissions || !Array.isArray(student.admissions) || student.admissions.length === 0) {
+    return;
+  }
+  const targetTitle = (courseTitle || '').toLowerCase().trim();
+  const targetClean = targetTitle.replace(/[^a-z0-9]/g, '');
+
+  for (const adm of student.admissions) {
+    const admCourses = (adm.courses || []).map(c => (c || '').toLowerCase().trim());
+    const matches = admCourses.some(ac => {
+      const acClean = ac.replace(/[^a-z0-9]/g, '');
+      return ac === targetTitle ||
+        targetTitle.includes(ac) ||
+        ac.includes(targetTitle) ||
+        (acClean && targetClean && (acClean.includes(targetClean) || targetClean.includes(acClean)));
+    }) || student.admissions.length === 1;
+
+    if (matches) {
+      if (!Array.isArray(adm.certificates)) adm.certificates = [];
+      const already = adm.certificates.some(c => {
+        const cName = (c.courseName || c.course_name || '').toLowerCase().trim();
+        const cPath = c.certificatePath || c.certificate_path || c.url;
+        return cName === targetTitle || cPath === certPublicPath;
+      });
+      if (!already) {
+        adm.certificates.push({
+          courseName: courseTitle,
+          course_name: courseTitle,
+          certificatePath: certPublicPath,
+          certificate_path: certPublicPath,
+          url: certPublicPath,
+          issuedAt: new Date(),
+          issued_at: new Date()
+        });
+      }
+    }
+  }
+  student.markModified('admissions');
+}
+
+// Automatically check all students and generate certificates only if BOTH Fee is Clear AND Course is Complete
 async function checkAndGenerateEligibleCertificates() {
-  console.log('[AutoCert] Checking active students for newly completed courses...');
+  console.log('[AutoCert] Checking active students for eligible courses (Fee Clear AND Course Complete)...');
   const students = await student_model.find({ is_deleted: { $ne: true } });
   const now = new Date();
   let generatedCount = 0;
@@ -380,14 +500,83 @@ async function checkAndGenerateEligibleCertificates() {
     const studentId = (s.student_ID || '').trim();
     const studentName = (s.student_name || '').trim();
     const courseList = getStudentCourseList(s);
-    const existingCerts = s.certificates || [];
+    let existingCerts = s.certificates || [];
     let studentUpdated = false;
+
+    // Safety: If student has pending fees for any course, revoke certificate for that course
+    for (const courseObj of courseList) {
+      const isFeeClear = isStudentFeeClear(s, courseObj);
+      if (!isFeeClear) {
+        const initialLen = existingCerts.length;
+        existingCerts = existingCerts.filter(c => {
+          const cn = (c.courseName || c.course_name || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+          const tn = courseObj.title.toLowerCase().replace(/[^a-z0-9]/g, '');
+          const sn = courseObj.slug.toLowerCase().replace(/[^a-z0-9]/g, '');
+          return !(cn && (cn === tn || cn === sn || cn.includes(sn) || tn.includes(cn)));
+        });
+
+        if (existingCerts.length !== initialLen) {
+          studentUpdated = true;
+          console.log(`[AutoCert] Student ${studentName} (${studentId}) has pending fees for ${courseObj.title}. Revoking certificate from DB.`);
+        }
+
+        // Also clean up from admissions
+        if (s.admissions && Array.isArray(s.admissions)) {
+          s.admissions.forEach(adm => {
+            if (adm.certificates && adm.certificates.length > 0) {
+              const prevAdmLen = adm.certificates.length;
+              adm.certificates = adm.certificates.filter(c => {
+                const cn = (c.courseName || c.course_name || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+                const tn = courseObj.title.toLowerCase().replace(/[^a-z0-9]/g, '');
+                const sn = courseObj.slug.toLowerCase().replace(/[^a-z0-9]/g, '');
+                return !(cn && (cn === tn || cn === sn || cn.includes(sn) || tn.includes(cn)));
+              });
+              if (adm.certificates.length !== prevAdmLen) {
+                studentUpdated = true;
+              }
+            }
+          });
+        }
+
+        // Delete any generated physical certificate files for this unpaid course
+        const cleanId = studentId.replace(/[^a-zA-Z0-9-_]/g, '_');
+        const safeName = studentName.replace(/[^a-zA-Z0-9-_]/g, '_');
+        const fileName = `Certificate_${cleanId}_${safeName}_${courseObj.slug}.png`;
+        [
+          path.join(__dirname, '../../../frontend-admin/public/certificates', fileName),
+          path.join(__dirname, '../../../frontend-main/public/certificates', fileName),
+          path.join(__dirname, '../../public/uploads/certificates', fileName)
+        ].forEach(f => {
+          if (fs.existsSync(f)) {
+            try { fs.unlinkSync(f); } catch (e) {}
+          }
+        });
+      }
+    }
+
+    const feeClearForAny = courseList.some(c => isStudentFeeClear(s, c));
+    if (!feeClearForAny) {
+      if (s.certificate_photo) {
+        s.certificate_photo = '';
+        studentUpdated = true;
+      }
+      if (existingCerts.length > 0) {
+        existingCerts = [];
+        studentUpdated = true;
+      }
+    }
 
     for (const courseObj of courseList) {
       const completionDate = getCourseCompletionDate(s, courseObj);
       const isCompleted = now >= completionDate;
+      const isFeeClear = isStudentFeeClear(s, courseObj);
 
-      if (!isCompleted) continue; // Skip ongoing
+      // BOTH CONDITIONS MUST BE STRICTLY TRUE:
+      // Condition 1: Fee is 100% Clear
+      // Condition 2: Course is 100% Completed
+      if (!isCompleted || !isFeeClear) {
+        continue;
+      }
 
       const cleanId = studentId.replace(/[^a-zA-Z0-9-_]/g, '_');
       const safeName = studentName.replace(/[^a-zA-Z0-9-_]/g, '_');
@@ -404,8 +593,7 @@ async function checkAndGenerateEligibleCertificates() {
       });
 
       if (!fileExists || !dbHasCert) {
-
-        console.log(`[AutoCert] Auto-generating certificate for completed course: ${courseObj.title} (${studentName} - ${studentId})...`);
+        console.log(`[AutoCert] Auto-generating certificate for eligible course (Fee Clear & Course Complete): ${courseObj.title} (${studentName} - ${studentId})...`);
         try {
           const res = await renderCertificate(s, courseObj);
           if (!dbHasCert) {
@@ -419,6 +607,8 @@ async function checkAndGenerateEligibleCertificates() {
             });
             studentUpdated = true;
           }
+          syncCertificateToAdmissions(s, courseObj.title, res.publicPath);
+          studentUpdated = true;
           generatedCount++;
         } catch (err) {
           console.error(`[AutoCert] Failed to auto-generate certificate for ${studentName}:`, err.message);
@@ -431,9 +621,14 @@ async function checkAndGenerateEligibleCertificates() {
       if (!s.certificate_photo && existingCerts.length > 0) {
         s.certificate_photo = existingCerts[0].certificate_path || existingCerts[0].certificatePath;
       }
+      s.updated_at = new Date();
       await s.save();
       console.log(`[AutoCert] Updated DB certificates for ${studentName}`);
     }
+  }
+
+  if (generatedCount > 0) {
+    memoryCache.clear();
   }
 
   console.log(`[AutoCert] Finished check. ${generatedCount} new certificate(s) generated.`);
@@ -441,7 +636,7 @@ async function checkAndGenerateEligibleCertificates() {
 }
 
 // Generate on-demand for a single student if eligible
-async function generateSingleStudentCertificate(studentId, courseTitleOrSlug) {
+async function generateSingleStudentCertificate(studentId, courseTitleOrSlug, force = false) {
   const student = await student_model.findOne({
     $or: [
       { student_ID: studentId },
@@ -462,11 +657,28 @@ async function generateSingleStudentCertificate(studentId, courseTitleOrSlug) {
     }
 
     const completionDate = getCourseCompletionDate(student, courseObj);
-    if (now < completionDate) {
-      return { eligible: false, completionDate };
+    const isCompleted = now >= completionDate;
+    const isFeeClear = isStudentFeeClear(student, courseObj);
+
+    // STRICT RULE: Fees MUST be clear!
+    if (!isFeeClear) {
+      return { 
+        eligible: false, 
+        message: "Cannot issue certificate: Fees must be 100% clear. Please clear pending fees first.",
+        feePending: true 
+      };
     }
 
-    // Eligible! Generate certificate
+    // Course MUST be complete
+    if (!force && !isCompleted) {
+      return { 
+        eligible: false, 
+        message: `Cannot issue certificate: Course is currently in progress until ${completionDate.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}`,
+        completionDate 
+      };
+    }
+
+    // Both conditions satisfied! Generate certificate
     const res = await renderCertificate(student, courseObj);
     
     // Save to student record if not already recorded
@@ -482,11 +694,16 @@ async function generateSingleStudentCertificate(studentId, courseTitleOrSlug) {
         issuedAt: new Date()
       });
       student.certificates = certs;
-      if (!student.certificate_photo) {
-        student.certificate_photo = res.publicPath;
-      }
-      await student.save();
     }
+
+    if (!student.certificate_photo) {
+      student.certificate_photo = res.publicPath;
+    }
+
+    syncCertificateToAdmissions(student, courseObj.title, res.publicPath);
+    student.updated_at = new Date();
+    await student.save();
+    memoryCache.clear();
 
     return { eligible: true, cert: res };
   }
@@ -498,5 +715,7 @@ module.exports = {
   checkAndGenerateEligibleCertificates,
   generateSingleStudentCertificate,
   getCourseCompletionDate,
+  isStudentFeeClear,
+  getChromePath,
   formatDate
 };

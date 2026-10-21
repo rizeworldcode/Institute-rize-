@@ -243,6 +243,62 @@ export function StudentModal({ student, onClose, onSave }: {
     });
   };
 
+  const [generatingCertForAdm, setGeneratingCertForAdm] = useState<string | null>(null);
+
+  const handleAutoGenerateCertificate = async (admission: any) => {
+    if (!student?.id) return;
+
+    const isFeeClear = admission.feesStatus === "Clear" || (admission.pendingFee && Number(admission.pendingFee) <= 0);
+    if (!isFeeClear) {
+      alert(`❌ Cannot generate certificate: Student's fee is pending for this admission (Pending: ₹${admission.pendingFee || 0}). Both Course Completion and 100% Fee Clearance are strictly required.`);
+      return;
+    }
+
+    const courseTitle = admission.courses && admission.courses.length > 0 ? admission.courses[0] : "";
+    setGeneratingCertForAdm(admission.admissionId);
+    try {
+      const res = await fetch(getApiUrl("/api/certificate/generate-student"), {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          studentId: student.id,
+          courseTitle: courseTitle,
+          force: true
+        })
+      });
+      const data = await res.json();
+      if (data.success && data.cert) {
+        alert("✅ Certificate automatically generated and issued successfully!");
+        const newCert = {
+          id: `cert-${Date.now()}`,
+          courseName: data.cert.courseTitle || courseTitle,
+          url: data.cert.publicPath,
+          certificatePath: data.cert.publicPath,
+          date: new Date().toISOString()
+        };
+        const updatedAdmissions = studentAdmissions.map((adm: any) => {
+          if (adm.admissionId === admission.admissionId) {
+            const certs = Array.isArray(adm.certificates) ? [...adm.certificates] : [];
+            certs.push(newCert);
+            return { ...adm, certificates: certs };
+          }
+          return adm;
+        });
+        setStudentAdmissions(updatedAdmissions);
+        if (student) {
+          student.certificates = [...(student.certificates || []), newCert];
+        }
+      } else {
+        alert(data.message || "Failed to generate certificate.");
+      }
+    } catch (err: any) {
+      console.error("Auto generate error:", err);
+      alert("Error generating certificate: " + (err.message || "Network error"));
+    } finally {
+      setGeneratingCertForAdm(null);
+    }
+  };
+
   // Current admission being edited
   const [currentAdmission, setCurrentAdmission] = useState({
     admissionId: `ADM-${Date.now()}`,
@@ -1376,21 +1432,44 @@ export function StudentModal({ student, onClose, onSave }: {
                             )}
                           </div>
 
-                          {/* Upload Certificate toggle - if fees are clear */}
-                          {admission.feesStatus === "Clear" && selectedAdmissionForCertificate !== admission.admissionId && (
-                            <button 
-                              type="button" 
-                              onClick={() => {
-                                setSelectedAdmissionForCertificate(admission.admissionId);
-                                if (admission.courses.length === 1) {
-                                  setCertificateCourse(admission.courses[0]);
-                                }
-                              }} 
-                              className="px-3.5 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-300 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer shadow-2xs hover:shadow-xs"
-                            >
-                              <Upload size={13} />
-                              + Upload Certificate
-                            </button>
+                          {/* Certificate Actions: Auto-generate & Manual Upload */}
+                          {selectedAdmissionForCertificate !== admission.admissionId && (
+                            <div className="flex items-center gap-2">
+                              {(() => {
+                                const isAdmFeeClear = admission.feesStatus === "Clear" || (admission.pendingFee && Number(admission.pendingFee) <= 0);
+                                return (
+                                  <button 
+                                    type="button" 
+                                    onClick={() => handleAutoGenerateCertificate(admission)}
+                                    disabled={generatingCertForAdm === admission.admissionId || !isAdmFeeClear}
+                                    className={`px-3.5 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all shadow-2xs ${
+                                      isAdmFeeClear
+                                        ? "bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 hover:border-blue-300 cursor-pointer disabled:opacity-50"
+                                        : "bg-neutral-100 text-neutral-400 border border-neutral-200 cursor-not-allowed opacity-60"
+                                    }`}
+                                    title={isAdmFeeClear ? "Template aur QR code ke sath automatically certificate banayein" : `Fee pending (₹${admission.pendingFee || 0}). Both Course Completion and Fee Clearance required.`}
+                                  >
+                                    <Award size={13} />
+                                    {generatingCertForAdm === admission.admissionId ? "Generating..." : (isAdmFeeClear ? "⚡ Auto Generate" : "🔒 Fees Pending")}
+                                  </button>
+                                );
+                              })()}
+                              {admission.feesStatus === "Clear" && (
+                                <button 
+                                  type="button" 
+                                  onClick={() => {
+                                    setSelectedAdmissionForCertificate(admission.admissionId);
+                                    if (admission.courses.length === 1) {
+                                      setCertificateCourse(admission.courses[0]);
+                                    }
+                                  }} 
+                                  className="px-3.5 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-300 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer shadow-2xs hover:shadow-xs"
+                                >
+                                  <Upload size={13} />
+                                  + Upload Certificate
+                                </button>
+                              )}
+                            </div>
                           )}
                         </div>
 

@@ -4,8 +4,8 @@ const QRCode = require('qrcode');
 const { Jimp, loadFont, HorizontalAlign } = require('jimp');
 
 async function stampCertificate(options = {}) {
-  const originalBackupPath = 'd:/desktop/Aman/rizeworld institute/rizeworld institute/rizeworld institute/frontend-admin/public/hero/COURSE CERTIFICATE.original.png';
-  const defaultInputPath = 'd:/desktop/Aman/rizeworld institute/rizeworld institute/rizeworld institute/frontend-admin/public/hero/COURSE CERTIFICATE.png';
+  const originalBackupPath = path.join(__dirname, '../frontend-admin/public/hero/COURSE CERTIFICATE.original.png');
+  const defaultInputPath = path.join(__dirname, '../frontend-admin/public/hero/COURSE CERTIFICATE.png');
   
   // Choose input: prefer clean original backup, then defaultInput, then old template
   let inputCertPath = options.inputPath;
@@ -15,16 +15,16 @@ async function stampCertificate(options = {}) {
     } else if (fs.existsSync(defaultInputPath)) {
       inputCertPath = defaultInputPath;
     } else {
-      inputCertPath = 'd:/desktop/Aman/rizeworld institute/rizeworld institute/rizeworld institute/frontend-admin/public/hero/White and Gold Simple Elegant Appreciation Certificate.original.jpeg';
+      inputCertPath = path.join(__dirname, '../frontend-admin/public/hero/White and Gold Simple Elegant Appreciation Certificate.original.jpeg');
     }
   }
 
-  const outputCourseCertAdminPath = 'd:/desktop/Aman/rizeworld institute/rizeworld institute/rizeworld institute/frontend-admin/public/hero/COURSE CERTIFICATE.png';
-  const outputCourseCertMainPath = 'd:/desktop/Aman/rizeworld institute/rizeworld institute/rizeworld institute/frontend-main/public/hero/COURSE CERTIFICATE.png';
-  const outputAdminCertPath = 'd:/desktop/Aman/rizeworld institute/rizeworld institute/rizeworld institute/frontend-admin/public/hero/White and Gold Simple Elegant Appreciation Certificate.jpg.jpeg';
-  const outputMainHeroCertPath = 'd:/desktop/Aman/rizeworld institute/rizeworld institute/rizeworld institute/frontend-main/public/hero/White and Gold Simple Elegant Appreciation Certificate.jpg.jpeg';
-  const outputMainPublicCertPath = 'd:/desktop/Aman/rizeworld institute/rizeworld institute/rizeworld institute/frontend-main/public/certificate/RizeWorld_Certificate_Punit_Sharma.jpg';
-  const outputBackendUploadPath = 'd:/desktop/Aman/rizeworld institute/rizeworld institute/rizeworld institute/backend/public/uploads/RizeWorld_Certificate_Punit_Sharma.jpg';
+  const outputCourseCertAdminPath = path.join(__dirname, '../frontend-admin/public/hero/COURSE CERTIFICATE.png');
+  const outputCourseCertMainPath = path.join(__dirname, '../frontend-main/public/hero/COURSE CERTIFICATE.png');
+  const outputAdminCertPath = path.join(__dirname, '../frontend-admin/public/hero/White and Gold Simple Elegant Appreciation Certificate.jpg.jpeg');
+  const outputMainHeroCertPath = path.join(__dirname, '../frontend-main/public/hero/White and Gold Simple Elegant Appreciation Certificate.jpg.jpeg');
+  const outputMainPublicCertPath = path.join(__dirname, '../frontend-main/public/certificate/RizeWorld_Certificate_Punit_Sharma.jpg');
+  const outputBackendUploadPath = path.join(__dirname, 'public/uploads/RizeWorld_Certificate_Punit_Sharma.jpg');
 
   // Read certificate base image
   const certImage = await Jimp.read(inputCertPath);

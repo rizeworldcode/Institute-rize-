@@ -17,18 +17,24 @@ router.post(
     certificateData
 );
 
-function getCertificateFilePath(studentId) {
+function getCertificateFilePath(studentId, specificCourse) {
     if (studentId) {
         const cleanId = studentId.replace(/[^a-zA-Z0-9-_]/g, '_');
+        const cleanCourse = specificCourse ? specificCourse.replace(/[^a-zA-Z0-9-_]/g, '_').toLowerCase() : null;
         const certDirs = [
             path.join(__dirname, "../../../frontend-admin/public/certificates"),
             path.join(__dirname, "../../../frontend-main/public/certificates"),
-            path.join(__dirname, "../../public/uploads/certificates")
+            path.join(__dirname, "../../public/uploads/certificates"),
+            path.join(__dirname, "../../public/certificates")
         ];
 
         for (const dir of certDirs) {
             if (fs.existsSync(dir)) {
                 const files = fs.readdirSync(dir);
+                if (cleanCourse) {
+                    const matchedWithCourse = files.find(f => f.startsWith(`Certificate_${cleanId}`) && f.toLowerCase().includes(cleanCourse));
+                    if (matchedWithCourse) return path.join(dir, matchedWithCourse);
+                }
                 const matched = files.find(f => f.startsWith(`Certificate_${cleanId}`));
                 if (matched) return path.join(dir, matched);
             }
@@ -80,17 +86,27 @@ function getCourseCompletionDate(student, specificCourse) {
     return calcEnd;
 }
 
-const { generateSingleStudentCertificate } = require('../utils/certificateGenerator');
+const { generateSingleStudentCertificate, isStudentFeeClear } = require('../utils/certificateGenerator');
 
 // 1. Direct raw binary download endpoint
 router.get("/api/certificate/download", async (req, res) => {
     const studentId = req.query.id;
+    const courseTitle = req.query.course;
+    const isForce = req.query.force === "1" || req.query.force === "true";
+
     if (studentId) {
         try {
             const student = await student_model.findOne({ student_ID: studentId.trim() }).lean();
             if (student) {
-                const compDate = getCourseCompletionDate(student, req.query.course);
-                if (new Date() < compDate) {
+                const feeClear = isStudentFeeClear(student, { title: courseTitle, slug: courseTitle });
+                if (!feeClear) {
+                    return res.status(403).json({
+                        success: false,
+                        message: "Fees pending. Certificate download is locked until all fees are 100% clear."
+                    });
+                }
+                const compDate = getCourseCompletionDate(student, courseTitle);
+                if (new Date() < compDate && !isForce) {
                     return res.status(403).json({
                         success: false,
                         message: `Course is currently in progress. Certificate will be available after ${compDate.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}.`
@@ -101,43 +117,69 @@ router.get("/api/certificate/download", async (req, res) => {
             console.error("Error checking completion date:", e);
         }
     }
-    let certPath = getCertificateFilePath(studentId);
+
+    let certPath = getCertificateFilePath(studentId, courseTitle);
     if (!certPath && studentId) {
         try {
-            const genRes = await generateSingleStudentCertificate(studentId, req.query.course);
-            if (genRes && genRes.eligible) {
-                certPath = getCertificateFilePath(studentId);
+            const genRes = await generateSingleStudentCertificate(studentId, courseTitle, isForce);
+            if (genRes && (genRes.eligible || isForce)) {
+                certPath = getCertificateFilePath(studentId, courseTitle);
             }
         } catch (err) {
             console.error("On-demand certificate generation error:", err);
         }
     }
+
     if (certPath) {
-        return res.download(certPath, `RizeWorld_Certificate_${studentId || 'Official'}.png`);
+        const downloadName = `RizeWorld_Certificate_${studentId || 'Official'}${courseTitle ? '_' + courseTitle.replace(/[^a-zA-Z0-9]/g, '_') : ''}.png`;
+        return res.download(path.resolve(certPath), downloadName);
     }
-    return res.status(404).json({ success: false, message: "Certificate file not found or course not completed yet" });
+    return res.status(404).json({ success: false, message: "Certificate file not found or conditions not met (Fee must be clear and course completed)" });
 });
 
 // 2. Direct inline image view endpoint
 router.get("/api/certificate/file", async (req, res) => {
     const studentId = req.query.id;
-    let certPath = getCertificateFilePath(studentId);
+    const courseTitle = req.query.course;
+    const isForce = req.query.force === "1" || req.query.force === "true";
+
+    if (studentId) {
+        try {
+            const student = await student_model.findOne({ student_ID: studentId.trim() }).lean();
+            if (student) {
+                const feeClear = isStudentFeeClear(student, { title: courseTitle, slug: courseTitle });
+                if (!feeClear) {
+                    return res.status(403).json({
+                        success: false,
+                        message: "Fees pending. Certificate preview is locked until all fees are 100% clear."
+                    });
+                }
+            }
+        } catch (e) {
+            console.error(e);
+        }
+    }
+
+    let certPath = getCertificateFilePath(studentId, courseTitle);
     if (!certPath && studentId) {
         try {
-            const genRes = await generateSingleStudentCertificate(studentId, req.query.course);
-            if (genRes && genRes.eligible) {
-                certPath = getCertificateFilePath(studentId);
+            const genRes = await generateSingleStudentCertificate(studentId, courseTitle, isForce);
+            if (genRes && (genRes.eligible || isForce)) {
+                certPath = getCertificateFilePath(studentId, courseTitle);
             }
         } catch (err) {
             console.error("On-demand certificate generation error:", err);
         }
     }
+
     if (certPath) {
-        res.setHeader("Content-Type", certPath.endsWith(".png") ? "image/png" : "image/jpeg");
+        const ext = path.extname(certPath).toLowerCase();
+        const contentType = ext === '.png' ? 'image/png' : (ext === '.pdf' ? 'application/pdf' : 'image/jpeg');
+        res.setHeader("Content-Type", contentType);
         res.setHeader("Cache-Control", "public, max-age=86400");
-        return res.sendFile(certPath);
+        return res.sendFile(path.resolve(certPath));
     }
-    return res.status(404).send("Certificate image not found");
+    return res.status(404).json({ success: false, message: "Certificate file not found" });
 });
 
 
@@ -166,6 +208,7 @@ router.get("/download-certificate", async (req, res) => {
     let certImageUrl = "/api/certificate/file";
     let downloadUrl = "/api/certificate/download";
     let isCourseOngoing = false;
+    let isFeePending = false;
     let completionDateFormatted = "";
 
     // Dynamic lookup by Student ID or query parameters
@@ -191,15 +234,21 @@ router.get("/download-certificate", async (req, res) => {
                     courseName = student.admissions[0].courses.join(", ");
                 }
 
-                // Check completion date
+                // Check fee clear status
                 const targetCourse = req.query.course || courseName;
+                const feeClear = isStudentFeeClear(student, { title: targetCourse, slug: targetCourse });
+                if (!feeClear) {
+                    isFeePending = true;
+                }
+
+                // Check completion date
                 const compDate = getCourseCompletionDate(student, targetCourse);
                 const now = new Date();
                 if (now < compDate) {
                     isCourseOngoing = true;
                     completionDateFormatted = compDate.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
-                } else {
-                    let certPath = getCertificateFilePath(studentId);
+                } else if (feeClear) {
+                    let certPath = getCertificateFilePath(studentId, targetCourse);
                     if (!certPath) {
                         try {
                             await generateSingleStudentCertificate(studentId, targetCourse);
@@ -213,14 +262,13 @@ router.get("/download-certificate", async (req, res) => {
                     certImageUrl = student.certificate_photo;
                     downloadUrl = certImageUrl;
                 } else {
-                    certImageUrl = `/api/certificate/file?id=${encodeURIComponent(studentId)}`;
-                    downloadUrl = `/api/certificate/download?id=${encodeURIComponent(studentId)}`;
+                    certImageUrl = `/api/certificate/file?id=${encodeURIComponent(studentId)}&course=${encodeURIComponent(targetCourse)}`;
+                    downloadUrl = `/api/certificate/download?id=${encodeURIComponent(studentId)}&course=${encodeURIComponent(targetCourse)}`;
                 }
             }
         } catch (err) {
             console.error("Error fetching dynamic student certificate:", err);
         }
-
     } else {
         certImageUrl = `/api/certificate/file?id=${encodeURIComponent(studentId)}`;
         downloadUrl = `/api/certificate/download?id=${encodeURIComponent(studentId)}`;
@@ -230,6 +278,9 @@ router.get("/download-certificate", async (req, res) => {
     if (req.query.course) courseName = req.query.course;
 
     if (req.query.raw === "1" || req.query.download === "1") {
+        if (isFeePending) {
+            return res.status(403).send("Cannot access certificate: Student has pending fees. Both Course Completion and 100% Fee Clearance are strictly required.");
+        }
         if (isCourseOngoing) {
             return res.status(403).send(`Course is currently in progress. Certificate will be available after ${completionDateFormatted}.`);
         }
@@ -425,7 +476,17 @@ router.get("/download-certificate", async (req, res) => {
         </div>
       </div>
 
-      ${isCourseOngoing ? `
+      ${isFeePending ? `
+      <div style="padding: 28px 20px; background: #fef2f2; border: 1.5px solid #fecaca; border-radius: 18px; margin-bottom: 22px; text-align: center;">
+        <div style="font-size: 34px; margin-bottom: 10px;">💳</div>
+        <div style="font-weight: 800; font-size: 16px; color: #991b1b; margin-bottom: 6px;">Fees Pending — Certificate Locked</div>
+        <div style="font-size: 13.5px; color: #b91c1c; line-height: 1.55;">Student fee clearance is pending for <strong>${courseName}</strong>. Official certificate is only issued and unlocked when all institute dues are 100% cleared.</div>
+      </div>
+
+      <div style="width: 100%; background: #f8fafc; color: #94a3b8; font-size: 13.5px; font-weight: 700; padding: 14px; border-radius: 16px; margin-bottom: 12px; text-align: center; border: 1px dashed #cbd5e1;">
+        🔒 Certificate Download Locked (Pending Fees)
+      </div>
+      ` : isCourseOngoing ? `
       <div style="padding: 28px 20px; background: #fffbeb; border: 1.5px solid #fde68a; border-radius: 18px; margin-bottom: 22px; text-align: center;">
         <div style="font-size: 34px; margin-bottom: 10px;">⏳</div>
         <div style="font-weight: 800; font-size: 16px; color: #92400e; margin-bottom: 6px;">Course Currently In Progress</div>
@@ -462,6 +523,51 @@ router.get("/download-certificate", async (req, res) => {
 
     res.setHeader("Content-Type", "text/html; charset=utf-8");
     return res.send(html);
+});
+
+// Admin API: Auto-check and generate certificates for all eligible completed courses
+router.post("/api/certificate/generate-all", async (req, res) => {
+    try {
+        const { checkAndGenerateEligibleCertificates } = require('../utils/certificateGenerator');
+        const count = await checkAndGenerateEligibleCertificates();
+        return res.json({
+            success: true,
+            message: `Check complete. ${count} certificate(s) generated.`,
+            count
+        });
+    } catch (err) {
+        console.error("Error in /api/certificate/generate-all:", err);
+        return res.status(500).json({ success: false, message: err.message });
+    }
+});
+
+// Admin API: Generate certificate on-demand for a specific student and course
+router.post("/api/certificate/generate-student", async (req, res) => {
+    try {
+        const { studentId, courseTitle, force } = req.body;
+        if (!studentId) {
+            return res.status(400).json({ success: false, message: "studentId is required" });
+        }
+        const { generateSingleStudentCertificate } = require('../utils/certificateGenerator');
+        const result = await generateSingleStudentCertificate(studentId, courseTitle, Boolean(force));
+        if (result && result.cert) {
+            return res.json({
+                success: true,
+                message: "Certificate generated successfully!",
+                cert: result.cert
+            });
+        }
+        if (result && !result.eligible) {
+            return res.json({
+                success: false,
+                message: `Course is in progress until ${new Date(result.completionDate).toLocaleDateString('en-GB')}`
+            });
+        }
+        return res.status(404).json({ success: false, message: "Student not found or not enrolled in course" });
+    } catch (err) {
+        console.error("Error in /api/certificate/generate-student:", err);
+        return res.status(500).json({ success: false, message: err.message });
+    }
 });
 
 module.exports = router;

@@ -3,7 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { 
   Users, Search, Plus, Edit2, LogOut, Shield, Menu,
   AlertCircle, LayoutDashboard, MessagesSquare, X, ArrowLeft,
-  Award, Bell, UserCircle, Mail, IndianRupee, CheckCircle2, Activity, Trash2, UserX, UserMinus, FileText, Filter
+  Award, Bell, UserCircle, Mail, IndianRupee, CheckCircle2, Activity, Trash2, UserX, UserMinus, FileText, Filter, Download
 } from "lucide-react";
 
 import { Student } from "./types";
@@ -15,7 +15,7 @@ import { ReferredByTab } from "./tabs/ReferredByTab";
 import { DeletedReferrersTab } from "./tabs/DeletedReferrersTab";
 import { DeletedStudentsTab } from "./tabs/DeletedStudentsTab";
 import { ReferrerModal } from "./modals/ReferrerModal";
-import { getApiUrl } from "../../utils/api";
+import { getApiUrl, API_BASE_URL } from "../../utils/api";
 
 export default function AdminDashboard() {
   const navigate = useNavigate();
@@ -573,14 +573,132 @@ export default function AdminDashboard() {
         const mapped = data.data.map((item: any) => ({
           studentId: item.student_ID,
           studentName: item.student_name,
-          issuedCourses: Array.isArray(item.selected_course_name) 
-            ? item.selected_course_name 
-            : (item.selected_course_name ? [item.selected_course_name] : ["N/A"])
+          certificates: item.certificates || [],
+          admissions: item.admissions || [],
+          rawItem: item,
+          issuedCourses: Array.isArray(item.issuedCourses) && item.issuedCourses.length > 0
+            ? item.issuedCourses
+            : (Array.isArray(item.selected_course_name) 
+                ? item.selected_course_name 
+                : (item.selected_course_name ? [item.selected_course_name] : ["N/A"]))
         }));
         setStudentsWithCertificates(mapped);
       }
     } catch (error) {
       console.error("Failed to fetch issued certificates:", error);
+    }
+  };
+
+  const [isCheckingCertificates, setIsCheckingCertificates] = useState(false);
+  const [autoGeneratingId, setAutoGeneratingId] = useState<string | null>(null);
+  const [downloadingCertId, setDownloadingCertId] = useState<string | null>(null);
+
+  const handleDownloadCertificateDirect = async (studentId: string, studentName?: string, courseTitle?: string, directUrl?: string) => {
+    setDownloadingCertId(`${studentId}_${courseTitle || ''}`);
+    try {
+      const courseParam = courseTitle || "";
+      const filename = `Certificate_${(studentName || studentId).replace(/[^a-zA-Z0-9]/g, '_')}_${courseParam.replace(/[^a-zA-Z0-9]/g, '_')}.png`;
+
+      // 1. If directUrl provided
+      if (directUrl) {
+        let fullUrl = directUrl;
+        if (!directUrl.startsWith("http://") && !directUrl.startsWith("https://") && !directUrl.startsWith("data:") && !directUrl.startsWith("blob:")) {
+          const clean = directUrl.startsWith("/") ? directUrl : `/${directUrl}`;
+          fullUrl = `${API_BASE_URL}${clean}`;
+        }
+        try {
+          const res = await fetch(fullUrl);
+          if (res.ok) {
+            const blob = await res.blob();
+            const blobUrl = window.URL.createObjectURL(blob);
+            const link = document.createElement("a");
+            link.href = blobUrl;
+            link.download = filename;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            setTimeout(() => window.URL.revokeObjectURL(blobUrl), 1000);
+            return;
+          }
+        } catch (e) {
+          // fallback
+        }
+      }
+
+      // 2. Direct backend download endpoint
+      const downloadEndpoint = getApiUrl(`/api/certificate/download?id=${encodeURIComponent(studentId)}&course=${encodeURIComponent(courseParam)}&force=1`);
+      const link = document.createElement("a");
+      link.href = downloadEndpoint;
+      link.download = filename;
+      link.target = "_blank";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } catch (err: any) {
+      console.error("Certificate download error:", err);
+      alert("Error downloading certificate: " + (err.message || "Unknown error"));
+    } finally {
+      setDownloadingCertId(null);
+    }
+  };
+
+  const handleSyncAndGenerateAll = async () => {
+    setIsCheckingCertificates(true);
+    try {
+      const res = await fetch(getApiUrl("/api/certificate/generate-all"), {
+        method: "POST",
+        headers: { "Content-Type": "application/json" }
+      });
+      const data = await res.json();
+      if (data.success) {
+        alert(data.message || "Certificates checked and generated successfully!");
+        fetchIssuedCertificates();
+        fetchUnissuedCertificates();
+        fetchDashboardData();
+      } else {
+        alert(data.message || "Failed to check certificates.");
+      }
+    } catch (e: any) {
+      console.error(e);
+      alert("Error checking certificates: " + (e.message || "Network error"));
+    } finally {
+      setIsCheckingCertificates(false);
+    }
+  };
+
+  const handleDirectAutoGenerate = async (studentRow: Student) => {
+    // STRICT RULE: Fees must be 100% clear AND course completed
+    if (studentRow.feesStatus !== "Clear" || (studentRow.pendingFees && Number(studentRow.pendingFees) > 0)) {
+      alert(`❌ Cannot generate certificate: Student's fee is pending (Pending: ₹${studentRow.pendingFees || 0}). Both Course Completion and 100% Fee Clearance are strictly required.`);
+      return;
+    }
+
+    setAutoGeneratingId(studentRow.id);
+    const courseTitle = Array.isArray(studentRow.course) ? studentRow.course[0] : studentRow.course;
+    try {
+      const res = await fetch(getApiUrl("/api/certificate/generate-student"), {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          studentId: studentRow.id,
+          courseTitle: courseTitle,
+          force: true
+        })
+      });
+      const data = await res.json();
+      if (data.success) {
+        alert(`✅ Certificate for ${studentRow.name} generated successfully!`);
+        fetchIssuedCertificates();
+        fetchUnissuedCertificates();
+        fetchDashboardData();
+      } else {
+        alert(data.message || "Failed to generate certificate.");
+      }
+    } catch (e: any) {
+      console.error(e);
+      alert("Error generating certificate: " + e.message);
+    } finally {
+      setAutoGeneratingId(null);
     }
   };
 
@@ -1619,10 +1737,20 @@ export default function AdminDashboard() {
                                 </button>
                                 <button 
                                   onClick={() => setViewingStudent(s)}
-                                  className="px-3 py-1.5 text-xs font-semibold bg-white hover:bg-neutral-50 text-neutral-700 rounded-lg border border-neutral-200 shadow-sm transition-all ml-1"
+                                  className="px-3 py-1.5 text-xs font-semibold bg-white hover:bg-neutral-50 text-neutral-700 rounded-lg border border-neutral-200 shadow-sm transition-all ml-1 cursor-pointer"
                                 >
                                   Details
                                 </button>
+                                {s.certificates && s.certificates.length > 0 && (
+                                  <button
+                                    onClick={() => handleDownloadCertificateDirect(s.id, s.name, Array.isArray(s.course) ? s.course[0] : s.course, s.certificates[0]?.url)}
+                                    disabled={downloadingCertId?.startsWith(s.id)}
+                                    className="p-1.5 text-emerald-600 hover:bg-emerald-50 rounded-lg border border-emerald-200 transition-all ml-1 cursor-pointer disabled:opacity-50"
+                                    title="Download Certificate"
+                                  >
+                                    <Award size={16} />
+                                  </button>
+                                )}
                               </div>
                             </td>
                           </tr>
@@ -1793,6 +1921,18 @@ export default function AdminDashboard() {
                                     ₹{pendingFeeStudentsData.reduce((acc, curr) => acc + (Number(curr.pendingFees) || 0), 0).toLocaleString('en-IN')}
                                  </span>
                               </div>
+                           </div>
+                        )}
+                        {(expandedStat === "certificate-issued" || expandedStat === "certificate-unissued") && (
+                           <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+                              <button
+                                 onClick={handleSyncAndGenerateAll}
+                                 disabled={isCheckingCertificates}
+                                 className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-xl text-xs font-bold transition-all shadow-sm cursor-pointer disabled:opacity-50"
+                              >
+                                 <Award size={15} />
+                                 {isCheckingCertificates ? "Checking..." : "⚡ Check & Auto-Generate All"}
+                              </button>
                            </div>
                         )}
                    </div>
@@ -2269,12 +2409,25 @@ export default function AdminDashboard() {
                                               </span>
                                            </td>
                                            <td className="px-3 py-3 text-sm">
-                                              <button 
-                                                onClick={() => setViewingStudent(row)} 
-                                                className="text-neutral-600 hover:text-neutral-700 text-sm font-bold underline cursor-pointer"
-                                              >
-                                                Details
-                                              </button>
+                                              <div className="flex items-center gap-2">
+                                                 <button 
+                                                   onClick={() => setViewingStudent(row)} 
+                                                   className="text-neutral-600 hover:text-neutral-700 text-sm font-bold underline cursor-pointer"
+                                                 >
+                                                   Details
+                                                 </button>
+                                                 {row.certificates && row.certificates.length > 0 && (
+                                                    <button
+                                                       onClick={() => handleDownloadCertificateDirect(row.id, row.name, Array.isArray(row.course) ? row.course[0] : row.course, row.certificates[0]?.url)}
+                                                       disabled={downloadingCertId?.startsWith(row.id)}
+                                                       className="px-2 py-1 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center gap-1 shadow-2xs disabled:opacity-50"
+                                                       title="Download Certificate"
+                                                    >
+                                                       <Download size={11} />
+                                                       Cert
+                                                    </button>
+                                                 )}
+                                              </div>
                                            </td>
                                         </tr>
                                      ))}
@@ -2317,6 +2470,7 @@ export default function AdminDashboard() {
                                         <th className="px-3 py-3 text-xs font-bold text-neutral-500 uppercase tracking-wider">Student ID</th>
                                         <th className="px-3 py-3 text-xs font-bold text-neutral-500 uppercase tracking-wider">Student Name</th>
                                         <th className="px-3 py-3 text-xs font-bold text-neutral-500 uppercase tracking-wider">Issued Courses</th>
+                                        <th className="px-3 py-3 text-xs font-bold text-neutral-500 uppercase tracking-wider text-right">Actions</th>
                                      </tr>
                                   </thead>
                                   <tbody className="divide-y divide-neutral-100">
@@ -2333,11 +2487,55 @@ export default function AdminDashboard() {
                                                  ))}
                                               </div>
                                            </td>
+                                           <td className="px-3 py-3 text-sm text-right">
+                                              <div className="flex items-center justify-end gap-2">
+                                                 {row.issuedCourses.map((course: string, cIdx: number) => (
+                                                    <button
+                                                       key={cIdx}
+                                                       onClick={() => handleDownloadCertificateDirect(row.studentId, row.studentName, course)}
+                                                       disabled={downloadingCertId === `${row.studentId}_${course}`}
+                                                       className="px-2.5 py-1 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center gap-1 shadow-2xs disabled:opacity-50"
+                                                       title={`Download ${course} Certificate`}
+                                                    >
+                                                       <Download size={12} />
+                                                       {downloadingCertId === `${row.studentId}_${course}` ? "..." : (row.issuedCourses.length > 1 ? `Download ${course}` : "Download")}
+                                                    </button>
+                                                 ))}
+                                                 <button
+                                                    onClick={() => {
+                                                       const fullStudent = allStudentsData.find(s => s.id === row.studentId);
+                                                       if (fullStudent) {
+                                                          setViewingStudent(fullStudent);
+                                                       } else if (row.rawItem) {
+                                                          setViewingStudent({
+                                                             id: row.rawItem.student_ID,
+                                                             name: row.rawItem.student_name,
+                                                             feesStatus: row.rawItem.fees_status || "Clear",
+                                                             course: row.rawItem.selected_course_name,
+                                                             duration: row.rawItem.course_duration,
+                                                             totalFees: row.rawItem.total_fee,
+                                                             paidFees: row.rawItem.total_paid_fee,
+                                                             pendingFees: row.rawItem.total_pending_fee,
+                                                             email: row.rawItem.email,
+                                                             phone: row.rawItem.phone,
+                                                             address: row.rawItem.address,
+                                                             certificates: row.rawItem.certificates || [],
+                                                             admissions: row.rawItem.admissions || [],
+                                                             fee: row.rawItem.fee || []
+                                                          } as any);
+                                                       }
+                                                    }}
+                                                    className="text-neutral-600 hover:text-neutral-700 text-sm font-bold underline cursor-pointer"
+                                                 >
+                                                    Details
+                                                 </button>
+                                              </div>
+                                           </td>
                                         </tr>
                                      ))}
                                      {studentsWithCertificates.length === 0 && (
                                         <tr>
-                                           <td colSpan={3} className="py-20 text-center text-neutral-400 italic">No issued certificates found.</td>
+                                           <td colSpan={4} className="py-20 text-center text-neutral-400 italic">No issued certificates found.</td>
                                         </tr>
                                      )}
                                   </tbody>
@@ -2371,12 +2569,27 @@ export default function AdminDashboard() {
                                               </span>
                                            </td>
                                            <td className="px-3 py-3 text-sm">
-                                              <button 
-                                                onClick={() => setViewingStudent(row)} 
-                                                className="text-neutral-600 hover:text-neutral-700 text-sm font-bold underline cursor-pointer"
-                                              >
-                                                Details
-                                              </button>
+                                              <div className="flex items-center gap-2">
+                                                <button 
+                                                  onClick={() => setViewingStudent(row)} 
+                                                  className="text-neutral-600 hover:text-neutral-700 text-sm font-bold underline cursor-pointer"
+                                                >
+                                                  Details
+                                                </button>
+                                                <button
+                                                  onClick={() => handleDirectAutoGenerate(row)}
+                                                  disabled={autoGeneratingId === row.id || row.feesStatus !== 'Clear' || Boolean(row.pendingFees && Number(row.pendingFees) > 0)}
+                                                  className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all flex items-center gap-1 shadow-2xs ${
+                                                    row.feesStatus === 'Clear' && (!row.pendingFees || Number(row.pendingFees) <= 0)
+                                                      ? 'bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 cursor-pointer'
+                                                      : 'bg-neutral-100 text-neutral-400 border border-neutral-200 cursor-not-allowed opacity-60'
+                                                  }`}
+                                                  title={row.feesStatus === 'Clear' && (!row.pendingFees || Number(row.pendingFees) <= 0) ? "Template aur QR code ke sath automatically certificate banayein" : `Fee pending (₹${row.pendingFees || 0}). Clear fee first to generate certificate.`}
+                                                >
+                                                  <Award size={12} />
+                                                  {autoGeneratingId === row.id ? "..." : (row.feesStatus === 'Clear' && (!row.pendingFees || Number(row.pendingFees) <= 0) ? "⚡ Generate" : "🔒 Fee Pending")}
+                                                </button>
+                                              </div>
                                            </td>
                                         </tr>
                                      ))}
