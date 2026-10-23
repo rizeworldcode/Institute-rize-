@@ -413,3 +413,129 @@ body {
   font-weight: 700;
 }
 
+/* Dark Callout Cards & Admissions Cards inside Blog Content */
+.blog-content .bg-neutral-900,
+.blog-content .bg-neutral-950,
+.blog-content [class*="bg-neutral-900"],
+.blog-content [class*="bg-neutral-950"],
+.blog-content .blog-admission-card {
+  background: #111827 !important;
+  border: 1px solid #1f2937 !important;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.35), 0 8px 10px -6px rgba(0, 0, 0, 0.3) !important;
+  color: #f8fafc !important;
+}
+
+.blog-content .bg-neutral-900 h1,
+.blog-content .bg-neutral-900 h2,
+.blog-content .bg-neutral-900 h3,
+.blog-content .bg-neutral-900 h4,
+.blog-content .bg-neutral-950 h1,
+.blog-content .bg-neutral-950 h2,
+.blog-content .bg-neutral-950 h3,
+.blog-content .bg-neutral-950 h4,
+.blog-content [class*="bg-neutral-900"] h1,
+.blog-content [class*="bg-neutral-900"] h2,
+.blog-content [class*="bg-neutral-900"] h3,
+.blog-content [class*="bg-neutral-900"] h4,
+.blog-content .blog-admission-card h1,
+.blog-content .blog-admission-card h2,
+.blog-content .blog-admission-card h3,
+.blog-content .blog-admission-card h4 {
+  color: #ffffff !important;
+  font-weight: 800 !important;
+  letter-spacing: -0.01em !important;
+}
+
+.blog-content .bg-neutral-900 p,
+.blog-content .bg-neutral-950 p,
+.blog-content [class*="bg-neutral-900"] p,
+.blog-content .blog-admission-card p {
+  color: #e2e8f0 !important;
+  line-height: 1.6 !important;
+}
+
+.blog-content .bg-neutral-900 p.text-blue-400,
+.blog-content [class*="bg-neutral-900"] p.text-blue-400,
+.blog-content .blog-admission-card p.text-blue-400,
+.blog-content .bg-neutral-900 .text-blue-400,
+.blog-content [class*="bg-neutral-900"] .text-blue-400,
+.blog-content .blog-admission-card .text-blue-400 {
+  color: #60a5fa !important;
+  font-weight: 700 !important;
+}
+
+.blog-content .bg-neutral-900 p.text-neutral-300,
+.blog-content [class*="bg-neutral-900"] p.text-neutral-300,
+.blog-content .blog-admission-card p.text-neutral-300,
+.blog-content .bg-neutral-900 p.text-neutral-400,
+.blog-content [class*="bg-neutral-900"] p.text-neutral-400,
+.blog-content .blog-admission-card p.text-neutral-400 {
+  color: #cbd5e1 !important;
+}
+
+.blog-content .bg-neutral-900 p.text-white,
+.blog-content [class*="bg-neutral-900"] p.text-white,
+.blog-content .blog-admission-card p.text-white {
+  color: #ffffff !important;
+}
+
+.blog-content .bg-neutral-900 strong,
+.blog-content .bg-neutral-950 strong,
+.blog-content [class*="bg-neutral-900"] strong,
+.blog-content .blog-admission-card strong {
+  color: #ffffff !important;
+}
+
+.blog-content .bg-neutral-900 a:not([class*="bg-"]),
+.blog-content .bg-neutral-950 a:not([class*="bg-"]),
+.blog-content [class*="bg-neutral-900"] a:not([class*="bg-"]),
+.blog-content .blog-admission-card a:not([class*="bg-"]) {
+  color: #60a5fa !important;
+  text-decoration: underline !important;
+  text-underline-offset: 3px !important;
+  font-weight: 600 !important;
+}
+
+.blog-content .bg-neutral-900 a:not([class*="bg-"]):hover,
+.blog-content .bg-neutral-950 a:not([class*="bg-"]):hover,
+.blog-content [class*="bg-neutral-900"] a:not([class*="bg-"]):hover,
+.blog-content .blog-admission-card a:not([class*="bg-"]):hover {
+  color: #93c5fd !important;
+}
+
+.blog-content .bg-neutral-900 a[class*="bg-"],
+.blog-content [class*="bg-neutral-900"] a[class*="bg-"],
+.blog-content .blog-admission-card a[class*="bg-"] {
+  color: #ffffff !important;
+  background-color: #2563eb !important;
+  text-decoration: none !important;
+  box-shadow: 0 4px 14px 0 rgba(37, 99, 235, 0.35) !important;
+}
+
+.blog-content .bg-neutral-900 a[class*="bg-"]:hover,
+.blog-content [class*="bg-neutral-900"] a[class*="bg-"]:hover,
+.blog-content .blog-admission-card a[class*="bg-"]:hover {
+  background-color: #1d4ed8 !important;
+}
+
+.blog-content table th {
+  color: #ffffff !important;
+}
+
+/* Also support blue gradient cards */
+.blog-content [class*="from-blue-"] h1,
+.blog-content [class*="from-blue-"] h2,
+.blog-content [class*="from-blue-"] h3,
+.blog-content [class*="from-blue-"] h4,
+.blog-content [class*="from-blue-"] p,
+.blog-content [class*="from-blue-"] strong {
+  color: #ffffff !important;
+}
+
+.blog-content [class*="from-blue-"] p.text-blue-100,
+.blog-content [class*="from-blue-"] p.text-blue-200 {
+  color: #dbeafe !important;
+}
+
+
+

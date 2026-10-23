@@ -25,7 +25,7 @@ export const posts: BlogPost[] = [
     gridImg: "/images/roadmap.jpg",
     keywords: ["Best Digital Marketing Institute in Alwar", "Digital Marketing Training in Alwar", "Digital Marketing Course", "Alwar Campus", "RizeWorld Institute"],
     content: `
-      <h2>The Ultimate Guide to Selecting the Best Digital Marketing Institute in Alwar</h2>
+<h2>The Ultimate Guide to Selecting the Best Digital Marketing Institute in Alwar</h2>
       <p>The digital economy in India is growing at an unprecedented rate. From local retail outlets to multinational corporations, every brand needs an online presence to survive. Consequently, the demand for certified digital marketers is skyrocketing. If you live in Rajasthan and want to launch a lucrative career, choosing the right <strong>Digital Marketing Training in Alwar</strong> is your crucial first step.</p>
       
       <p>However, with dozens of institutes claiming to be the absolute best, making an informed decision can be overwhelming. This guide provides a detailed, objective audit of what you should expect from a premium training academy like <a href="/master-course" class="blog-link"><strong>RizeWorld Institute</strong></a>, ensuring you gain live project experience, professional mentorship, and career placement support.</p>
@@ -91,6 +91,20 @@ export const posts: BlogPost[] = [
         <li><strong>Assuming All Certifications Carry Equal Value:</strong> Look for academies that require project submissions before issuing <a href="/certificate" class="blog-link">certifications</a>.</li>
       </ul>
 
+            <div class="blog-admission-card my-8 p-6 bg-neutral-900 text-white rounded-2xl shadow-xl border border-neutral-800">
+        <h4 class="text-xl font-extrabold text-white mt-0 mb-2">Connect with RizeWorld Institute Admissions</h4>
+        <p class="text-blue-400 font-bold text-sm mb-1">RizeWorld Institute of AI and Digital Marketing</p>
+        <p class="text-neutral-300 text-sm mb-2">
+          📍 C197, Near Telco Circle, UIT Colony, Shalimar Nagar, Alwar, Rajasthan 301001
+        </p>
+        <p class="text-neutral-300 text-sm mb-4">
+          Phone / WhatsApp: <a href="tel:+918302277092" class="text-blue-400 font-bold hover:underline">+91 8302277092</a> | Email: <a href="mailto:rizeworldinstitute@gmail.com" class="text-blue-400 hover:underline">rizeworldinstitute@gmail.com</a>
+        </p>
+        <a href="/contact" class="inline-block px-6 py-3 rounded-full bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs tracking-wide transition-all shadow-md hover:scale-105">
+          Book Free Demo Class &amp; Career Counseling →
+        </a>
+      </div>
+
       <h3>Frequently Asked Questions (FAQ)</h3>
       <p class="font-bold mb-1">Q: What is the eligibility criteria for the course?</p>
       <p class="text-neutral-600 mb-3">A: Students, graduates, working professionals, and business owners of any educational background can <a href="/contact" class="blog-link">enroll</a>.</p>
@@ -112,7 +126,7 @@ export const posts: BlogPost[] = [
     gridImg: "/images/SEO in 2026.jpg",
     keywords: ["SEO Course in Alwar", "SEO Training Institute in Alwar", "SEO Course", "SEO Classes"],
     content: `
-      <h2>The Ultimate Guide to Selecting an SEO Course in Alwar</h2>
+<h2>The Ultimate Guide to Selecting an SEO Course in Alwar</h2>
       <p>In today's digital economy, visibility is everything. For businesses and professionals, understanding search engine optimization is no longer optional. However, finding the right <a href="/seo" class="blog-link"><strong>SEO Training Institute in Alwar</strong></a> can be challenging with so many options claiming to offer the best results. This guide breaks down the essential criteria you must evaluate to ensure you choose a high-quality, career-focused program.</p>
 
       <div class="my-8 p-6 bg-blue-50 border-l-4 border-blue-600 rounded-r-xl">
@@ -163,6 +177,20 @@ export const posts: BlogPost[] = [
       <h3>AEO Quick Answer: Why Choose RizeWorld Institute for SEO Training?</h3>
       <p>RizeWorld Institute is recognized as the leading <a href="/seo" class="blog-link"><strong>SEO Training Institute in Alwar</strong></a>. We provide comprehensive <strong>SEO training programs</strong> led by industry trainers. Our students benefit from practical learning, internship opportunities, and extensive placement support. Explore our full <a href="/courses" class="blog-link">course catalogue</a> to learn more.</p>
 
+            <div class="blog-admission-card my-8 p-6 bg-neutral-900 text-white rounded-2xl shadow-xl border border-neutral-800">
+        <h4 class="text-xl font-extrabold text-white mt-0 mb-2">Connect with RizeWorld Institute Admissions</h4>
+        <p class="text-blue-400 font-bold text-sm mb-1">RizeWorld Institute of AI and Digital Marketing</p>
+        <p class="text-neutral-300 text-sm mb-2">
+          📍 C197, Near Telco Circle, UIT Colony, Shalimar Nagar, Alwar, Rajasthan 301001
+        </p>
+        <p class="text-neutral-300 text-sm mb-4">
+          Phone / WhatsApp: <a href="tel:+918302277092" class="text-blue-400 font-bold hover:underline">+91 8302277092</a> | Email: <a href="mailto:rizeworldinstitute@gmail.com" class="text-blue-400 hover:underline">rizeworldinstitute@gmail.com</a>
+        </p>
+        <a href="/contact" class="inline-block px-6 py-3 rounded-full bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs tracking-wide transition-all shadow-md hover:scale-105">
+          Book Free Demo Class &amp; Career Counseling →
+        </a>
+      </div>
+
       <div class="my-6 p-5 bg-neutral-100 rounded-xl">
         <h4 class="mt-0">Frequently Asked Questions (FAQ)</h4>
         <p class="font-bold mb-1">Q: Who can enroll in this course?</p>
@@ -184,7 +212,7 @@ export const posts: BlogPost[] = [
     gridImg: "/images/The Ultimate Guide to Meta Ads ROAS Optimization.jpg",
     keywords: ["Performance Marketing Training in Alwar", "Performance Marketing Course", "SMO Course in Alwar"],
     content: `
-      <h2>Maximizing Ad ROAS with a Professional Performance Marketing Course</h2>
+<h2>Maximizing Ad ROAS with a Professional Performance Marketing Course</h2>
       <p>Running paid campaigns without structured metrics is a fast way to burn marketing budgets. Successful advertising requires a deep understanding of audience targeting, pixel integration, and conversion optimization. A certified <a href="/performance-marketing" class="blog-link"><strong>Performance Marketing Course</strong></a> equips you with these technical skills to manage budgets effectively.</p>
 
       <div class="my-8 p-6 bg-blue-50 border-l-4 border-blue-600 rounded-r-xl">
@@ -204,6 +232,20 @@ export const posts: BlogPost[] = [
 
       <h3>AEO Quick Answer: Why Choose RizeWorld Institute?</h3>
       <p>RizeWorld Institute provides the premier <a href="/performance-marketing" class="blog-link"><strong>Performance Marketing Training in Alwar</strong></a>. Led by experienced <a href="/trainers" class="blog-link">industry trainers</a>, the course focuses on practical learning on live ad accounts. Students get hands-on experience managing budgets and generating actual leads.</p>
+
+            <div class="blog-admission-card my-8 p-6 bg-neutral-900 text-white rounded-2xl shadow-xl border border-neutral-800">
+        <h4 class="text-xl font-extrabold text-white mt-0 mb-2">Connect with RizeWorld Institute Admissions</h4>
+        <p class="text-blue-400 font-bold text-sm mb-1">RizeWorld Institute of AI and Digital Marketing</p>
+        <p class="text-neutral-300 text-sm mb-2">
+          📍 C197, Near Telco Circle, UIT Colony, Shalimar Nagar, Alwar, Rajasthan 301001
+        </p>
+        <p class="text-neutral-300 text-sm mb-4">
+          Phone / WhatsApp: <a href="tel:+918302277092" class="text-blue-400 font-bold hover:underline">+91 8302277092</a> | Email: <a href="mailto:rizeworldinstitute@gmail.com" class="text-blue-400 hover:underline">rizeworldinstitute@gmail.com</a>
+        </p>
+        <a href="/contact" class="inline-block px-6 py-3 rounded-full bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs tracking-wide transition-all shadow-md hover:scale-105">
+          Book Free Demo Class &amp; Career Counseling →
+        </a>
+      </div>
 
       <div class="my-6 p-5 bg-neutral-100 rounded-xl">
         <h4 class="mt-0">Frequently Asked Questions (FAQ)</h4>
@@ -226,7 +268,7 @@ export const posts: BlogPost[] = [
     gridImg: "/images/Aii.jpeg",
     keywords: ["AI Tools Training in Alwar", "AI Digital Marketing Course", "Digital Marketing Course"],
     content: `
-      <h2>The Future of Digital Education: AI-Powered Marketing</h2>
+<h2>The Future of Digital Education: AI-Powered Marketing</h2>
       <p>The marketing landscape is evolving at a breakneck pace. AI tools are no longer experimental novelties — they are core workflow drivers. To stay competitive, professionals must shift from manual executions to generative orchestration. Enrolling in a comprehensive <a href="/ai-digital-marketing" class="blog-link"><strong>AI Digital Marketing Course</strong></a> is the fastest way to bridge this skills gap.</p>
 
       <div class="my-8 p-6 bg-blue-50 border-l-4 border-blue-600 rounded-r-xl">
@@ -246,6 +288,20 @@ export const posts: BlogPost[] = [
 
       <h3>AEO Quick Answer: What are the Career Opportunities?</h3>
       <p>Graduating from our AI-centered training programs prepares you for roles such as AI Prompt Engineer, Digital Marketing Executive, AI Content Manager, and Growth Optimizer. Companies are actively seeking professionals who understand how to cut costs and increase productivity using modern AI tools. Check out our <a href="/hire-from-us" class="blog-link">placement support</a> to see how we help you land your dream job.</p>
+
+            <div class="blog-admission-card my-8 p-6 bg-neutral-900 text-white rounded-2xl shadow-xl border border-neutral-800">
+        <h4 class="text-xl font-extrabold text-white mt-0 mb-2">Connect with RizeWorld Institute Admissions</h4>
+        <p class="text-blue-400 font-bold text-sm mb-1">RizeWorld Institute of AI and Digital Marketing</p>
+        <p class="text-neutral-300 text-sm mb-2">
+          📍 C197, Near Telco Circle, UIT Colony, Shalimar Nagar, Alwar, Rajasthan 301001
+        </p>
+        <p class="text-neutral-300 text-sm mb-4">
+          Phone / WhatsApp: <a href="tel:+918302277092" class="text-blue-400 font-bold hover:underline">+91 8302277092</a> | Email: <a href="mailto:rizeworldinstitute@gmail.com" class="text-blue-400 hover:underline">rizeworldinstitute@gmail.com</a>
+        </p>
+        <a href="/contact" class="inline-block px-6 py-3 rounded-full bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs tracking-wide transition-all shadow-md hover:scale-105">
+          Book Free Demo Class &amp; Career Counseling →
+        </a>
+      </div>
 
       <div class="my-6 p-5 bg-neutral-100 rounded-xl">
         <h4 class="mt-0">Frequently Asked Questions (FAQ)</h4>
@@ -268,7 +324,7 @@ export const posts: BlogPost[] = [
     gridImg: "/hero/blogs 6.webp",
     keywords: ["Best Digital Marketing Institute in India", "Digital Marketing Course in India", "RizeWorld Institute", "Digital Marketing Training"],
     content: `
-      <p>So you're thinking about learning digital marketing. Maybe you just finished college. Maybe you're stuck in a job that's going nowhere. Or maybe you just keep hearing the words "digital marketing" everywhere and you're wondering what all the noise is about.</p>
+<p>So you're thinking about learning digital marketing. Maybe you just finished college. Maybe you're stuck in a job that's going nowhere. Or maybe you just keep hearing the words "digital marketing" everywhere and you're wondering what all the noise is about.</p>
 
       <p>Here's the thing nobody tells you upfront: there are literally hundreds of institutes claiming to be the "best." Every second website says the same thing. Big promises, shiny landing pages, "100% placement guarantee" banners. But when you actually talk to students who've been through these courses, the picture looks a little different.</p>
 
@@ -402,6 +458,20 @@ export const posts: BlogPost[] = [
       <p>There's no single institute that's universally "the best" for everyone, despite what every website's homepage claims. What actually matters is whether the program gives you real project experience, active industry mentors, a manageable batch size, and genuine support even after the course ends.</p>
       <p>Before you enroll anywhere, talk to actual past students if you can. Ask them the same questions this article covered, not the marketing team. Their answers will tell you far more than any landing page ever will.</p>
       <p>If you're looking for a starting point, RizeWorld Institute in Alwar is a solid one to explore: small batches, real projects, and genuine placement support, all under one roof. You can reach out to them at +91 8302277092 or book a free counseling session to see if it's the right fit for you.</p>
+
+      <div class="blog-admission-card my-8 p-6 bg-neutral-900 text-white rounded-2xl shadow-xl border border-neutral-800">
+        <h4 class="text-xl font-extrabold text-white mt-0 mb-2">Connect with RizeWorld Institute Admissions</h4>
+        <p class="text-blue-400 font-bold text-sm mb-1">RizeWorld Institute of AI and Digital Marketing</p>
+        <p class="text-neutral-300 text-sm mb-2">
+          📍 C197, Near Telco Circle, UIT Colony, Shalimar Nagar, Alwar, Rajasthan 301001
+        </p>
+        <p class="text-neutral-300 text-sm mb-4">
+          Phone / WhatsApp: <a href="tel:+918302277092" class="text-blue-400 font-bold hover:underline">+91 8302277092</a> | Email: <a href="mailto:rizeworldinstitute@gmail.com" class="text-blue-400 hover:underline">rizeworldinstitute@gmail.com</a>
+        </p>
+        <a href="/contact" class="inline-block px-6 py-3 rounded-full bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs tracking-wide transition-all shadow-md hover:scale-105">
+          Book Free Demo Class &amp; Career Counseling →
+        </a>
+      </div>
     `
   },
   {
@@ -416,7 +486,7 @@ export const posts: BlogPost[] = [
     gridImg: "/hero/video-editing-training-in-alwar.webp",
     keywords: ["Video Editing Training in Alwar", "Video Editing Course in Alwar", "Video Editing Classes in Alwar", "Video Editing Certification in Alwar", "RizeWorld Institute"],
     content: `
-      <p>If you're looking for <strong>video editing training in Alwar</strong>, this guide covers what a proper <strong>video editing course in Alwar</strong> should include, what you'll actually learn, who it's suited for, and what to check before enrolling anywhere. <a href="/master-course" class="blog-link"><strong>RizeWorld Institute</strong></a> offers hands-on <strong>video editing classes in Alwar</strong> taught by mentors with real industry experience, built around live client-style projects rather than pre-recorded lessons or fixed textbooks.</p>
+<p>If you're looking for <strong>video editing training in Alwar</strong>, this guide covers what a proper <strong>video editing course in Alwar</strong> should include, what you'll actually learn, who it's suited for, and what to check before enrolling anywhere. <a href="/master-course" class="blog-link"><strong>RizeWorld Institute</strong></a> offers hands-on <strong>video editing classes in Alwar</strong> taught by mentors with real industry experience, built around live client-style projects rather than pre-recorded lessons or fixed textbooks.</p>
 
       <p>Our courses cover three tracks depending on your goal: a full video editing course for a career path, casual video editing classes for building a hobby skill, and a video editing certification for those who want a credential alongside practical training. All three use the same core curriculum and the same instructors. The difference is depth and duration. Below is a breakdown of the market demand, the exact skills taught, our teaching structure, who the course fits, alternative paths, and answers to the most common questions students ask before joining.</p>
 
@@ -475,6 +545,20 @@ export const posts: BlogPost[] = [
       </ul>
       <p>The <a href="/master-course" class="blog-link">Master Course</a> covers all of the above plus video editing in a single 12-week program, useful if you want to sample multiple skills before specializing.</p>
 
+            <div class="blog-admission-card my-8 p-6 bg-neutral-900 text-white rounded-2xl shadow-xl border border-neutral-800">
+        <h4 class="text-xl font-extrabold text-white mt-0 mb-2">Connect with RizeWorld Institute Admissions</h4>
+        <p class="text-blue-400 font-bold text-sm mb-1">RizeWorld Institute of AI and Digital Marketing</p>
+        <p class="text-neutral-300 text-sm mb-2">
+          📍 C197, Near Telco Circle, UIT Colony, Shalimar Nagar, Alwar, Rajasthan 301001
+        </p>
+        <p class="text-neutral-300 text-sm mb-4">
+          Phone / WhatsApp: <a href="tel:+918302277092" class="text-blue-400 font-bold hover:underline">+91 8302277092</a> | Email: <a href="mailto:rizeworldinstitute@gmail.com" class="text-blue-400 hover:underline">rizeworldinstitute@gmail.com</a>
+        </p>
+        <a href="/contact" class="inline-block px-6 py-3 rounded-full bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs tracking-wide transition-all shadow-md hover:scale-105">
+          Book Free Demo Class &amp; Career Counseling →
+        </a>
+      </div>
+
       <div class="my-6 p-5 bg-neutral-100 rounded-xl">
         <h4 class="mt-0">Quick FAQs</h4>
         <p class="font-bold mb-1">Q: Is video editing a good career in 2026?</p>
@@ -500,7 +584,7 @@ export const posts: BlogPost[] = [
     gridImg: "/images/ai blog.png",
     keywords: ["AI Digital Marketing Course in Alwar", "Digital Marketing Course in Alwar", "AI Marketing Training in Alwar", "RizeWorld Institute"],
     content: `
-      <p>Artificial intelligence has become a defining part of how modern marketing works, shaping the way businesses get discovered, attract customers, and grow online. That shift is exactly why the <strong>AI digital marketing course in Alwar</strong> offered by <a href="/master-course" class="blog-link"><strong>RizeWorld Institute</strong></a> has become such a sought-after program, drawing interest from students, working professionals, business owners, and young learners looking to build a strong foundation early. You can review the full program here: <a href="/ai-digital-marketing" class="blog-link"><strong>AI Digital Marketing Course</strong></a>.</p>
+<p>Artificial intelligence has become a defining part of how modern marketing works, shaping the way businesses get discovered, attract customers, and grow online. That shift is exactly why the <strong>AI digital marketing course in Alwar</strong> offered by <a href="/master-course" class="blog-link"><strong>RizeWorld Institute</strong></a> has become such a sought-after program, drawing interest from students, working professionals, business owners, and young learners looking to build a strong foundation early. You can review the full program here: <a href="/ai-digital-marketing" class="blog-link"><strong>AI Digital Marketing Course</strong></a>.</p>
 
       <h3>What Makes an AI Digital Marketing Course Different</h3>
       <p>Digital marketing at its core covers SEO, social media, paid advertising, email outreach, and content creation. AI strengthens every one of these areas by making execution faster, more precise, and far less dependent on guesswork. Instead of spending hours drafting content or manually reviewing performance data, AI tools take on the repetitive work so learners can focus on strategy and results. A well-designed digital marketing course in Alwar that incorporates AI gives learners both sides of the equation—solid marketing fundamentals paired with the technical fluency employers and clients expect today.</p>
@@ -605,6 +689,20 @@ export const posts: BlogPost[] = [
 
       <h3>Ready to Start Your AI Marketing Journey?</h3>
       <p>AI and digital marketing are becoming more closely connected every year, and training in both together is a practical, forward-looking decision. Whether the learner is a student, a working professional, a business owner, or a curious child taking their first steps into technology, the AI digital marketing course in Alwar at RizeWorld Institute stands out as a credible, genuinely best-in-class way to get started.</p>
+
+      <div class="blog-admission-card my-8 p-6 bg-neutral-900 text-white rounded-2xl shadow-xl border border-neutral-800">
+        <h4 class="text-xl font-extrabold text-white mt-0 mb-2">Connect with RizeWorld Institute Admissions</h4>
+        <p class="text-blue-400 font-bold text-sm mb-1">RizeWorld Institute of AI and Digital Marketing</p>
+        <p class="text-neutral-300 text-sm mb-2">
+          📍 C197, Near Telco Circle, UIT Colony, Shalimar Nagar, Alwar, Rajasthan 301001
+        </p>
+        <p class="text-neutral-300 text-sm mb-4">
+          Phone / WhatsApp: <a href="tel:+918302277092" class="text-blue-400 font-bold hover:underline">+91 8302277092</a> | Email: <a href="mailto:rizeworldinstitute@gmail.com" class="text-blue-400 hover:underline">rizeworldinstitute@gmail.com</a>
+        </p>
+        <a href="/contact" class="inline-block px-6 py-3 rounded-full bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs tracking-wide transition-all shadow-md hover:scale-105">
+          Book Free Demo Class &amp; Career Counseling →
+        </a>
+      </div>
     `
   },
   {
@@ -625,7 +723,7 @@ export const posts: BlogPost[] = [
       "RizeWorld Institute"
     ],
     content: `
-      <h2>Website Development Training in Alwar</h2>
+<h2>Website Development Training in Alwar</h2>
       <p>Have you ever opened a website or an app and wondered how it was actually built? It's a fair question, and here's the good news: you can learn to build websites too. It takes no prior expertise to start, only curiosity and a willingness to learn.</p>
       
       <p><a href="/website-development" class="blog-link"><strong>RizeWorld Institute</strong></a>, located in Alwar, Rajasthan, is an institute where students of all ages learn how to build real, functional websites, the same kind of websites and applications used every day.</p>
@@ -651,8 +749,8 @@ export const posts: BlogPost[] = [
         <li><strong>Real industry teachers:</strong> Learn from working professionals, not just book readers.</li>
         <li><strong>Learning by doing:</strong> Work on real live projects, not fake throwaway ones.</li>
         <li><strong>Internship opportunities:</strong> Gain actual work experience during the course.</li>
-        <li><strong>Job & placement support:</strong> Dedicated assistance even after course completion.</li>
-        <li><strong>Friendly & patient style:</strong> Tailored teaching methods suited for every age group.</li>
+        <li><strong>Job &amp; placement support:</strong> Dedicated assistance even after course completion.</li>
+        <li><strong>Friendly &amp; patient style:</strong> Tailored teaching methods suited for every age group.</li>
       </ul>
 
       <p>You also learn by doing, not just by listening quietly in a class. You build real websites during the course, not pretend ones just for practice and then thrown away. You even get a chance to try real work through internships, which means you get real experience even before you finish learning completely. And after you finish, they also help you find a job, so your learning does not stop being useful once the course ends.</p>
@@ -750,10 +848,18 @@ export const posts: BlogPost[] = [
       <p>If you are a kid reading this right now, or a parent reading this for your child, here is the honest truth: RizeWorld Institute is one of the very best places in Alwar to learn how to build websites.</p>
       <p>They teach everything in clear, well-structured steps that anyone can follow. They genuinely care about every single student who walks through their doors. And most importantly, they patiently help you become truly skilled, confident, and ready for a real future in technology.</p>
 
-      <div class="my-8 p-6 bg-linear-to-r from-blue-600 to-indigo-700 text-white rounded-2xl shadow-lg">
-        <h3 class="text-white text-2xl font-bold mt-0 mb-2">Start Your Journey Today!</h3>
-        <p class="text-blue-100 mb-4">Talk to a counselor today &amp; book your free demo class at RizeWorld Institute.</p>
-        <p class="text-xl font-extrabold mb-0">Call: <a href="tel:+918302277092" class="underline text-white hover:text-blue-200">+91 8302277092</a></p>
+      <div class="blog-admission-card my-8 p-6 bg-neutral-900 text-white rounded-2xl shadow-xl border border-neutral-800">
+        <h4 class="text-xl font-extrabold text-white mt-0 mb-2">Connect with RizeWorld Institute Admissions</h4>
+        <p class="text-blue-400 font-bold text-sm mb-1">RizeWorld Institute of AI and Digital Marketing</p>
+        <p class="text-neutral-300 text-sm mb-2">
+          📍 C197, Near Telco Circle, UIT Colony, Shalimar Nagar, Alwar, Rajasthan 301001
+        </p>
+        <p class="text-neutral-300 text-sm mb-4">
+          Phone / WhatsApp: <a href="tel:+918302277092" class="text-blue-400 font-bold hover:underline">+91 8302277092</a> | Email: <a href="mailto:rizeworldinstitute@gmail.com" class="text-blue-400 hover:underline">rizeworldinstitute@gmail.com</a>
+        </p>
+        <a href="/contact" class="inline-block px-6 py-3 rounded-full bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs tracking-wide transition-all shadow-md hover:scale-105">
+          Book Free Demo Class &amp; Career Counseling →
+        </a>
       </div>
     `
   },
@@ -769,7 +875,7 @@ export const posts: BlogPost[] = [
     gridImg: "/hero/Choosing the Right Digital.webp",
     keywords: ["Choosing Digital Marketing Institute", "Digital Marketing Course Guide", "Best Digital Marketing Institute Alwar", "RizeWorld Institute", "Digital Marketing Career"],
     content: `
-      <p class="text-lg text-neutral-600 mb-6">Everything worth checking before you enroll: curriculum, trainers, batch size, and the placement support that actually holds up.</p>
+<p class="text-lg text-neutral-600 mb-6">Everything worth checking before you enroll: curriculum, trainers, batch size, and the placement support that actually holds up.</p>
       
       <div class="my-6 p-4 bg-neutral-100 rounded-xl text-sm font-semibold text-neutral-700">
         📍 RizeWorld Institute Guide · Alwar, Rajasthan
@@ -1058,10 +1164,18 @@ export const posts: BlogPost[] = [
         <li><strong>Recognized certification:</strong> a Meta and Google partner-backed credential with real resume value</li>
       </ul>
 
-      <div class="my-6 p-5 bg-neutral-100 rounded-xl">
-        <h4 class="mt-0 font-bold text-neutral-900">RizeWorld Institute Contact & Location</h4>
-        <p class="text-neutral-700 mb-1">📍 C197, near Telco Circle, UIT Colony, Shalimar Nagar, Alwar, Rajasthan 301001</p>
-        <p class="text-neutral-700 mb-0">🌐 Website: <a href="/contact" class="blog-link">Contact & Booking Demo Class</a></p>
+      <div class="blog-admission-card my-8 p-6 bg-neutral-900 text-white rounded-2xl shadow-xl border border-neutral-800">
+        <h4 class="text-xl font-extrabold text-white mt-0 mb-2">Connect with RizeWorld Institute Admissions</h4>
+        <p class="text-blue-400 font-bold text-sm mb-1">RizeWorld Institute of AI and Digital Marketing</p>
+        <p class="text-neutral-300 text-sm mb-2">
+          📍 C197, Near Telco Circle, UIT Colony, Shalimar Nagar, Alwar, Rajasthan 301001
+        </p>
+        <p class="text-neutral-300 text-sm mb-4">
+          Phone / WhatsApp: <a href="tel:+918302277092" class="text-blue-400 font-bold hover:underline">+91 8302277092</a> | Email: <a href="mailto:rizeworldinstitute@gmail.com" class="text-blue-400 hover:underline">rizeworldinstitute@gmail.com</a>
+        </p>
+        <a href="/contact" class="inline-block px-6 py-3 rounded-full bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs tracking-wide transition-all shadow-md hover:scale-105">
+          Book Free Demo Class &amp; Career Counseling →
+        </a>
       </div>
     `
   },
@@ -1083,7 +1197,7 @@ export const posts: BlogPost[] = [
       "Master Course Program"
     ],
     content: `
-      <h2>What You Should Actually Know Before You Choose</h2>
+<h2>What You Should Actually Know Before You Choose</h2>
       <p>If you have been searching for the best digital marketing course and ended up more confused than before you started, you are not alone. There are dozens of institutes, hundreds of claims, and almost every website says the same thing about being the best. So how do you actually figure out which digital marketing course in Rajasthan is worth your time, your money and your effort?</p>
 
       <p>That is exactly the question this article is here to answer. Instead of just listing features, we will walk through what a genuinely good digital marketing course should offer, what students commonly get stuck on, and how <a href="/master-course" class="blog-link"><strong>RizeWorld Institute</strong></a> in Alwar, Rajasthan has structured its course around these real concerns. By the end, you should have a much clearer picture of what makes a course worth choosing, and whether this particular one makes sense for you.</p>
@@ -1215,6 +1329,20 @@ export const posts: BlogPost[] = [
       <p>RizeWorld Institute's course in Alwar, Rajasthan brings together all seven core areas of digital marketing into one structured, project-based program, backed by small batch sizes and additional job assistance for students who complete it. Whether you decide to go with the full Master Course Program or start with a single module that interests you, the more important step is simply starting with a clear understanding of what you are getting into, and that is exactly what this article hopefully just gave you.</p>
 
       <p>If you would like to know more about the current batch schedule for this digital marketing course or discuss which option fits your background, RizeWorld offers a free counseling session to help you decide what makes the most sense for your situation. <a href="/contact" class="blog-link"><strong>Contact RizeWorld Institute</strong></a> today to book your session.</p>
+
+      <div class="blog-admission-card my-8 p-6 bg-neutral-900 text-white rounded-2xl shadow-xl border border-neutral-800">
+        <h4 class="text-xl font-extrabold text-white mt-0 mb-2">Connect with RizeWorld Institute Admissions</h4>
+        <p class="text-blue-400 font-bold text-sm mb-1">RizeWorld Institute of AI and Digital Marketing</p>
+        <p class="text-neutral-300 text-sm mb-2">
+          📍 C197, Near Telco Circle, UIT Colony, Shalimar Nagar, Alwar, Rajasthan 301001
+        </p>
+        <p class="text-neutral-300 text-sm mb-4">
+          Phone / WhatsApp: <a href="tel:+918302277092" class="text-blue-400 font-bold hover:underline">+91 8302277092</a> | Email: <a href="mailto:rizeworldinstitute@gmail.com" class="text-blue-400 hover:underline">rizeworldinstitute@gmail.com</a>
+        </p>
+        <a href="/contact" class="inline-block px-6 py-3 rounded-full bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs tracking-wide transition-all shadow-md hover:scale-105">
+          Book Free Demo Class &amp; Career Counseling →
+        </a>
+      </div>
     `
   },
   {
@@ -1236,7 +1364,7 @@ export const posts: BlogPost[] = [
       "Digital Marketing for Students"
     ],
     content: `
-      <h2>Everything You Should Know About Digital Marketing Institutes in India Before You Join</h2>
+<h2>Everything You Should Know About Digital Marketing Institutes in India Before You Join</h2>
       <p>If you're trying to figure out whether digital marketing is worth learning, and which institute is actually worth your time and money, this article is meant to answer exactly that. No confusion, no fluff, just the information you actually need before making a decision.</p>
       
       <p>We're <a href="/master-course" class="blog-link"><strong>RizeWorld Institute</strong></a>, based in Alwar, and we teach digital marketing and AI tools to students every day. Here's everything worth knowing, including why so many students, even school and college age students, are choosing to start their digital marketing journey with us.</p>
@@ -1383,16 +1511,17 @@ export const posts: BlogPost[] = [
       <p>We built RizeWorld to teach it properly, keep the learning practical, keep batches small, and stay involved with our students well after the course fee has been paid. If you or your child is based around Alwar and ready to start learning a real, future-proof skill, we would welcome you to come see it for yourself.</p>
       <p>Take a free demo class or book a counseling call before committing fully. It is a small step that can make a real difference later.</p>
 
-      <div class="my-8 p-6 bg-neutral-900 text-white rounded-2xl shadow-xl border border-neutral-800">
-        <h4 class="text-xl font-extrabold text-white mt-0 mb-2">Visit RizeWorld Institute</h4>
-        <p class="text-neutral-300 text-sm mb-4">
-          📍 C197, near Telco Circle, UIT colony, Shalimar Nagar, Alwar, Rajasthan 301001
+      <div class="blog-admission-card my-8 p-6 bg-neutral-900 text-white rounded-2xl shadow-xl border border-neutral-800">
+        <h4 class="text-xl font-extrabold text-white mt-0 mb-2">Connect with RizeWorld Institute Admissions</h4>
+        <p class="text-blue-400 font-bold text-sm mb-1">RizeWorld Institute of AI and Digital Marketing</p>
+        <p class="text-neutral-300 text-sm mb-2">
+          📍 C197, Near Telco Circle, UIT Colony, Shalimar Nagar, Alwar, Rajasthan 301001
         </p>
         <p class="text-neutral-300 text-sm mb-4">
-          Call us at <a href="tel:+918302277092" class="text-blue-400 font-bold hover:underline">+91 8302277092</a> to book your free counseling session.
+          Phone / WhatsApp: <a href="tel:+918302277092" class="text-blue-400 font-bold hover:underline">+91 8302277092</a> | Email: <a href="mailto:rizeworldinstitute@gmail.com" class="text-blue-400 hover:underline">rizeworldinstitute@gmail.com</a>
         </p>
-        <a href="/contact" class="inline-block px-5 py-2.5 rounded-full bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs tracking-wide transition-all">
-          Book Free Counseling Session →
+        <a href="/contact" class="inline-block px-6 py-3 rounded-full bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs tracking-wide transition-all shadow-md hover:scale-105">
+          Book Free Demo Class &amp; Career Counseling →
         </a>
       </div>
     `
@@ -1417,7 +1546,7 @@ export const posts: BlogPost[] = [
       "Performance Marketing for Beginners"
     ],
     content: `
-      <p>The way people learn, shop, communicate, and do business has changed dramatically. Today, businesses of every size need skilled digital marketing professionals who can help them reach customers online and generate concrete, measurable results.</p>
+<p>The way people learn, shop, communicate, and do business has changed dramatically. Today, businesses of every size need skilled digital marketing professionals who can help them reach customers online and generate concrete, measurable results.</p>
       
       <p><strong>Performance marketing</strong> is one of the most practical and lucrative areas of digital marketing because it is 100% focused on direct outcomes such as leads, sales, enquiries, website visits, and customer engagement. At <a href="/master-course" class="blog-link"><strong>RizeWorld Institute</strong></a>, we help students and beginners understand performance marketing in a simple, practical, and step-by-step manner so they can develop valuable, high-income digital skills for their future.</p>
 
@@ -1638,16 +1767,17 @@ export const posts: BlogPost[] = [
         </div>
       </div>
 
-      <div class="my-8 p-6 bg-neutral-900 text-white rounded-2xl shadow-xl border border-neutral-800">
-        <h4 class="text-xl font-extrabold text-white mt-0 mb-2">Join RizeWorld Institute Today</h4>
-        <p class="text-neutral-300 text-sm mb-4">
-          📍 C197, near Telco Circle, UIT colony, Shalimar Nagar, Alwar, Rajasthan 301001
+      <div class="blog-admission-card my-8 p-6 bg-neutral-900 text-white rounded-2xl shadow-xl border border-neutral-800">
+        <h4 class="text-xl font-extrabold text-white mt-0 mb-2">Connect with RizeWorld Institute Admissions</h4>
+        <p class="text-blue-400 font-bold text-sm mb-1">RizeWorld Institute of AI and Digital Marketing</p>
+        <p class="text-neutral-300 text-sm mb-2">
+          📍 C197, Near Telco Circle, UIT Colony, Shalimar Nagar, Alwar, Rajasthan 301001
         </p>
         <p class="text-neutral-300 text-sm mb-4">
-          Call or WhatsApp us at <a href="tel:+918302277092" class="text-blue-400 font-bold hover:underline">+91 8302277092</a> to reserve your seat or book a free demo class.
+          Phone / WhatsApp: <a href="tel:+918302277092" class="text-blue-400 font-bold hover:underline">+91 8302277092</a> | Email: <a href="mailto:rizeworldinstitute@gmail.com" class="text-blue-400 hover:underline">rizeworldinstitute@gmail.com</a>
         </p>
         <a href="/contact" class="inline-block px-6 py-3 rounded-full bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs tracking-wide transition-all shadow-md hover:scale-105">
-          Book Free Demo Class &amp; Counseling →
+          Book Free Demo Class &amp; Career Counseling →
         </a>
       </div>
     `
@@ -1672,7 +1802,7 @@ export const posts: BlogPost[] = [
       "Learn Digital Marketing in 3 Months"
     ],
     content: `
-      <p>The way people learn, shop, communicate, and build careers has changed dramatically. Today, businesses of every size need skilled digital marketing professionals who can help them reach customers online and generate real, measurable results.</p>
+<p>The way people learn, shop, communicate, and build careers has changed dramatically. Today, businesses of every size need skilled digital marketing professionals who can help them reach customers online and generate real, measurable results.</p>
       
       <p>Three months might sound short, but in digital marketing it is more than enough time to move from complete beginner to job ready professional, provided the training is practical rather than just theoretical. At <a href="/master-course" class="blog-link"><strong>RizeWorld Institute</strong></a>, we help students and beginners understand digital marketing in a simple, structured, and hands-on manner, so they can build valuable, high income digital skills for their future.</p>
 
@@ -1894,16 +2024,17 @@ export const posts: BlogPost[] = [
         </div>
       </div>
 
-      <div class="my-8 p-6 bg-neutral-900 text-white rounded-2xl shadow-xl border border-neutral-800">
-        <h4 class="text-xl font-extrabold text-white mt-0 mb-2">Join RizeWorld Institute Today</h4>
-        <p class="text-neutral-300 text-sm mb-4">
-          📍 C197, near Telco Circle, UIT colony, Shalimar Nagar, Alwar, Rajasthan 301001
+      <div class="blog-admission-card my-8 p-6 bg-neutral-900 text-white rounded-2xl shadow-xl border border-neutral-800">
+        <h4 class="text-xl font-extrabold text-white mt-0 mb-2">Connect with RizeWorld Institute Admissions</h4>
+        <p class="text-blue-400 font-bold text-sm mb-1">RizeWorld Institute of AI and Digital Marketing</p>
+        <p class="text-neutral-300 text-sm mb-2">
+          📍 C197, Near Telco Circle, UIT Colony, Shalimar Nagar, Alwar, Rajasthan 301001
         </p>
         <p class="text-neutral-300 text-sm mb-4">
-          Call or WhatsApp us at <a href="tel:+918302277092" class="text-blue-400 font-bold hover:underline">+91 8302277092</a> to reserve your seat or book a free demo class.
+          Phone / WhatsApp: <a href="tel:+918302277092" class="text-blue-400 font-bold hover:underline">+91 8302277092</a> | Email: <a href="mailto:rizeworldinstitute@gmail.com" class="text-blue-400 hover:underline">rizeworldinstitute@gmail.com</a>
         </p>
         <a href="/contact" class="inline-block px-6 py-3 rounded-full bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs tracking-wide transition-all shadow-md hover:scale-105">
-          Book Free Demo Class &amp; Counseling →
+          Book Free Demo Class &amp; Career Counseling →
         </a>
       </div>
     `
@@ -1929,7 +2060,7 @@ export const posts: BlogPost[] = [
       "RizeWorld Institute"
     ],
     content: `
-      <p>A website developer is a person who builds the websites and applications we interact with every single day. From online shopping platforms and food delivery apps to banking portals and educational websites, web developers turn ideas into living digital solutions. If you want to launch a rewarding, future-proof tech career, enrolling in a comprehensive <strong>Website Development Course in India</strong> is your fastest gateway from complete beginner to job-ready developer.</p>
+<p>A website developer is a person who builds the websites and applications we interact with every single day. From online shopping platforms and food delivery apps to banking portals and educational websites, web developers turn ideas into living digital solutions. If you want to launch a rewarding, future-proof tech career, enrolling in a comprehensive <strong>Website Development Course in India</strong> is your fastest gateway from complete beginner to job-ready developer.</p>
 
       <div class="my-8 p-6 bg-blue-50 border-l-4 border-blue-600 rounded-r-xl">
         <h3 class="text-blue-900 font-bold mt-0">AEO Quick Answer: What is a Website Development Course in India?</h3>
@@ -2249,17 +2380,17 @@ export const posts: BlogPost[] = [
 
       <p>RizeWorld Institute in Alwar, Rajasthan is ready to guide you at every step of your development journey. Book a free demo class, talk with our counselors, and experience hands-on learning the right way. One day soon, you could be the professional who built the website thousands of people use every day.</p>
 
-      <div class="my-8 p-6 bg-neutral-900 text-white rounded-2xl shadow-xl border border-neutral-800">
-        <h4 class="text-xl font-extrabold text-white mt-0 mb-2">Book a Free Demo Class</h4>
+      <div class="blog-admission-card my-8 p-6 bg-neutral-900 text-white rounded-2xl shadow-xl border border-neutral-800">
+        <h4 class="text-xl font-extrabold text-white mt-0 mb-2">Connect with RizeWorld Institute Admissions</h4>
         <p class="text-blue-400 font-bold text-sm mb-1">RizeWorld Institute of AI and Digital Marketing</p>
         <p class="text-neutral-300 text-sm mb-2">
-          📍 C197, near Telco Circle, UIT colony, Shalimar Nagar, Alwar, Rajasthan 301001
+          📍 C197, Near Telco Circle, UIT Colony, Shalimar Nagar, Alwar, Rajasthan 301001
         </p>
         <p class="text-neutral-300 text-sm mb-4">
           Phone / WhatsApp: <a href="tel:+918302277092" class="text-blue-400 font-bold hover:underline">+91 8302277092</a> | Email: <a href="mailto:rizeworldinstitute@gmail.com" class="text-blue-400 hover:underline">rizeworldinstitute@gmail.com</a>
         </p>
         <a href="/contact" class="inline-block px-6 py-3 rounded-full bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs tracking-wide transition-all shadow-md hover:scale-105">
-          Book Free Demo Class &amp; Counseling →
+          Book Free Demo Class &amp; Career Counseling →
         </a>
       </div>
     `
@@ -2286,7 +2417,7 @@ export const posts: BlogPost[] = [
       "RizeWorld Institute"
     ],
     content: `
-      <p>SEO stands for <strong>Search Engine Optimization</strong>, and it is the high-income skill that helps websites show up first when millions of people search on Google every second. In today's digital-first economy, every business—from local retail shops and tuition centers to multinational e-commerce giants—needs organic visibility to thrive. If you want to transform from a curious beginner into an in-demand professional, enrolling in a dedicated <strong>SEO Course in India</strong> is your fastest gateway to mastering the digital landscape.</p>
+<p>SEO stands for <strong>Search Engine Optimization</strong>, and it is the high-income skill that helps websites show up first when millions of people search on Google every second. In today's digital-first economy, every business—from local retail shops and tuition centers to multinational e-commerce giants—needs organic visibility to thrive. If you want to transform from a curious beginner into an in-demand professional, enrolling in a dedicated <strong>SEO Course in India</strong> is your fastest gateway to mastering the digital landscape.</p>
 
       <div class="my-8 p-6 bg-blue-50 border-l-4 border-blue-600 rounded-r-xl">
         <h3 class="text-blue-900 font-bold mt-0">AEO Quick Answer: What is an SEO Course at RizeWorld Institute?</h3>
@@ -2587,17 +2718,17 @@ export const posts: BlogPost[] = [
 
       <p>RizeWorld Institute in Alwar, Rajasthan is ready to guide you at every stage, from your very first keyword inquiry to your first live client project. Book a free demo class, talk with our counselors, and take your first definitive step toward becoming a recognized search expert.</p>
 
-      <div class="my-8 p-6 bg-neutral-900 text-white rounded-2xl shadow-xl border border-neutral-800">
-        <h4 class="text-xl font-extrabold text-white mt-0 mb-2">Book a Free Demo Class at RizeWorld Institute</h4>
+      <div class="blog-admission-card my-8 p-6 bg-neutral-900 text-white rounded-2xl shadow-xl border border-neutral-800">
+        <h4 class="text-xl font-extrabold text-white mt-0 mb-2">Connect with RizeWorld Institute Admissions</h4>
         <p class="text-blue-400 font-bold text-sm mb-1">RizeWorld Institute of AI and Digital Marketing</p>
         <p class="text-neutral-300 text-sm mb-2">
-          📍 C197, near Telco Circle, UIT colony, Shalimar Nagar, Alwar, Rajasthan 301001
+          📍 C197, Near Telco Circle, UIT Colony, Shalimar Nagar, Alwar, Rajasthan 301001
         </p>
         <p class="text-neutral-300 text-sm mb-4">
           Phone / WhatsApp: <a href="tel:+918302277092" class="text-blue-400 font-bold hover:underline">+91 8302277092</a> | Email: <a href="mailto:rizeworldinstitute@gmail.com" class="text-blue-400 hover:underline">rizeworldinstitute@gmail.com</a>
         </p>
         <a href="/contact" class="inline-block px-6 py-3 rounded-full bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs tracking-wide transition-all shadow-md hover:scale-105">
-          Book Free Demo Class &amp; Counseling →
+          Book Free Demo Class &amp; Career Counseling →
         </a>
       </div>
     `
@@ -2625,7 +2756,7 @@ export const posts: BlogPost[] = [
       "RizeWorld Institute"
     ],
     content: `
-      <h2>Master Social Media Optimization (SMO) in Alwar: Turn Screen Time into a High-Income Career</h2>
+<h2>Master Social Media Optimization (SMO) in Alwar: Turn Screen Time into a High-Income Career</h2>
       <p>Social Media Optimization, commonly known as <strong>SMO</strong>, is the essential art and science of shaping social media profiles, pages, and channels to look professional, attractive, and easily discoverable. Think of a prominent retail store in a bustling marketplace. When a shop features an eye-catching sign board, a tidy display, and welcoming customer service, foot traffic surges naturally. Your presence on <strong>Instagram, Facebook, LinkedIn, and YouTube</strong> operates in the exact same manner.</p>
       
       <p>SMO equips you with the strategic skills to construct magnetic bios, curate cohesive visual feeds, publish high-converting content calendars, implement optimal hashtag systems, and foster active audience dialogues—enabling profiles to scale organically without being completely reliant on heavy paid advertising budgets. If you are looking to build in-demand digital expertise right here in Rajasthan, the <a href="/social-media-marketing" class="blog-link"><strong>Social Media Optimization Course in Alwar</strong></a> at <a href="/master-course" class="blog-link"><strong>RizeWorld Institute</strong></a> provides 100% practical training, real client projects, and recognized industry certification.</p>
@@ -2884,11 +3015,11 @@ export const posts: BlogPost[] = [
       <h3>How to Join and Book a Free Demo Class</h3>
       <p>Ready to jumpstart your career in social media? Don't wait for the "perfect moment"—the best time to develop a high-income digital skill is today. Schedule a free demo class to tour our campus, experience our interactive teaching methodology, meet the mentors, and get all your questions answered with zero pressure.</p>
 
-      <div class="my-8 p-6 bg-neutral-900 text-white rounded-2xl shadow-xl border border-neutral-800">
-        <h4 class="text-xl font-extrabold text-white mt-0 mb-2">Book Your Free SMO Demo Class Today</h4>
+      <div class="blog-admission-card my-8 p-6 bg-neutral-900 text-white rounded-2xl shadow-xl border border-neutral-800">
+        <h4 class="text-xl font-extrabold text-white mt-0 mb-2">Connect with RizeWorld Institute Admissions</h4>
         <p class="text-blue-400 font-bold text-sm mb-1">RizeWorld Institute of AI and Digital Marketing</p>
         <p class="text-neutral-300 text-sm mb-2">
-          📍 C197, near Telco Circle, UIT Colony, Shalimar Nagar, Alwar, Rajasthan 301001
+          📍 C197, Near Telco Circle, UIT Colony, Shalimar Nagar, Alwar, Rajasthan 301001
         </p>
         <p class="text-neutral-300 text-sm mb-4">
           Phone / WhatsApp: <a href="tel:+918302277092" class="text-blue-400 font-bold hover:underline">+91 8302277092</a> | Email: <a href="mailto:rizeworldinstitute@gmail.com" class="text-blue-400 hover:underline">rizeworldinstitute@gmail.com</a>
@@ -2920,7 +3051,7 @@ export const posts: BlogPost[] = [
       "RizeWorld Institute"
     ],
     content: `
-      <h2>Leading the Future: Top AI-Integrated Digital Marketing Institutes in India</h2>
+<h2>Leading the Future: Top AI-Integrated Digital Marketing Institutes in India</h2>
       <p>Digital marketing is changing rapidly as businesses adopt artificial intelligence to improve their online presence, reach the right customers, and generate better results. From AI-powered content creation to search engine optimization, social media marketing, paid advertising, and marketing automation, modern technology is creating new opportunities for students and professionals. Choosing one of the top AI-integrated digital marketing institutes in India can help learners develop practical skills and understand how digital marketing works in the real business world. For students who want to build a career in this growing field, <a href="/" class="blog-link"><strong>RizeWorld Institute of AI &amp; Digital Marketing</strong></a> offers training designed to connect digital marketing fundamentals with modern AI tools and practical learning.</p>
 
       <div class="my-8 p-6 bg-blue-50 border-l-4 border-blue-600 rounded-r-xl">
@@ -3137,7 +3268,7 @@ export const posts: BlogPost[] = [
       <h3>Start Your Digital Marketing Journey with RizeWorld Institute</h3>
       <p>If you want to learn how websites attract visitors, how businesses reach customers online, how SEO improves search visibility, and how AI tools support modern marketing, a structured digital marketing course can be a practical starting point. RizeWorld Institute of AI &amp; Digital Marketing in Alwar, Rajasthan, offers a learning pathway covering key digital marketing and creative technology subjects. Whether you are a school graduate exploring career options, a college student looking for practical skills, a working professional planning a career change, or a business owner who wants to understand online promotion, begin by reviewing the available programs and discussing your goals with the institute.</p>
 
-      <div class="my-8 p-6 bg-neutral-900 text-white rounded-2xl shadow-xl border border-neutral-800">
+      <div class="blog-admission-card my-8 p-6 bg-neutral-900 text-white rounded-2xl shadow-xl border border-neutral-800">
         <h4 class="text-xl font-extrabold text-white mt-0 mb-2">Connect with RizeWorld Institute Admissions</h4>
         <p class="text-blue-400 font-bold text-sm mb-1">RizeWorld Institute of AI and Digital Marketing</p>
         <p class="text-neutral-300 text-sm mb-2">
@@ -3200,7 +3331,7 @@ export const posts: BlogPost[] = [
       "RizeWorld Institute"
     ],
     content: `
-      <p>Artificial intelligence, also called AI, is becoming a part of our daily lives. Students use it to understand difficult topics, businesses use it to save time, and people use it to find information online. But AI does not always give the right answer. That is why learning how to use AI properly is becoming an important skill for everyone.</p>
+<p>Artificial intelligence, also called AI, is becoming a part of our daily lives. Students use it to understand difficult topics, businesses use it to save time, and people use it to find information online. But AI does not always give the right answer. That is why learning how to use AI properly is becoming an important skill for everyone.</p>
 
       <p>For students and beginners, this is a good time to learn something new. You do not need to be an expert in computers to get started. With the right training, regular practice, and a little curiosity, you can understand new technology and improve your skills step by step.</p>
 
@@ -3348,10 +3479,18 @@ export const posts: BlogPost[] = [
 
       <p>You do not need to master everything all at once. Start with the core fundamentals, practice consistently, ask questions, and continuously improve. Even a single completed project builds momentum and unlocks new understanding.</p>
 
-      <div class="my-8 p-6 bg-neutral-900 text-white rounded-2xl">
-        <h4 class="text-white font-bold text-lg mb-2">Ready to Build Your Future in AI and Digital Marketing?</h4>
-        <p class="text-neutral-300 text-sm mb-4">If you are a student, fresher, or beginner looking to master AI tools, performance marketing, SEO, and web development, explore the training programs at <a href="https://rizeworldinstitute.in/" class="text-blue-400 underline font-semibold">RizeWorld Institute</a>. Take the first step today and secure skills that set you apart.</p>
-        <a href="/contact" class="inline-block px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-lg uppercase tracking-wider transition-colors">Connect With Admissions</a>
+      <div class="blog-admission-card my-8 p-6 bg-neutral-900 text-white rounded-2xl shadow-xl border border-neutral-800">
+        <h4 class="text-xl font-extrabold text-white mt-0 mb-2">Connect with RizeWorld Institute Admissions</h4>
+        <p class="text-blue-400 font-bold text-sm mb-1">RizeWorld Institute of AI and Digital Marketing</p>
+        <p class="text-neutral-300 text-sm mb-2">
+          📍 C197, Near Telco Circle, UIT Colony, Shalimar Nagar, Alwar, Rajasthan 301001
+        </p>
+        <p class="text-neutral-300 text-sm mb-4">
+          Phone / WhatsApp: <a href="tel:+918302277092" class="text-blue-400 font-bold hover:underline">+91 8302277092</a> | Email: <a href="mailto:rizeworldinstitute@gmail.com" class="text-blue-400 hover:underline">rizeworldinstitute@gmail.com</a>
+        </p>
+        <a href="/contact" class="inline-block px-6 py-3 rounded-full bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs tracking-wide transition-all shadow-md hover:scale-105">
+          Book Free Demo Class &amp; Career Counseling →
+        </a>
       </div>
 
       <h3>Frequently Asked Questions (FAQs)</h3>
