@@ -276,7 +276,7 @@ export function StudentModal({ student, onClose, onSave }: {
           certificatePath: data.cert.publicPath,
           date: new Date().toISOString()
         };
-        const updatedAdmissions = studentAdmissions.map((adm: any) => {
+        const updatedAdmissions = localAdmissions.map((adm: any) => {
           if (adm.admissionId === admission.admissionId) {
             const certs = Array.isArray(adm.certificates) ? [...adm.certificates] : [];
             certs.push(newCert);
@@ -284,9 +284,10 @@ export function StudentModal({ student, onClose, onSave }: {
           }
           return adm;
         });
-        setStudentAdmissions(updatedAdmissions);
+        setLocalAdmissions(updatedAdmissions);
         if (student) {
           student.certificates = [...(student.certificates || []), newCert];
+          student.admissions = updatedAdmissions;
         }
       } else {
         alert(data.message || "Failed to generate certificate.");
