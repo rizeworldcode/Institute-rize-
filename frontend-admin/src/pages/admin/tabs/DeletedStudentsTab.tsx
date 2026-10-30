@@ -10,20 +10,20 @@ export function DeletedStudentsTab({
   handleRestoreStudent
 }: DeletedStudentsTabProps) {
   return (
-    <div className="max-w-[1400px] mx-auto space-y-8 animate-in fade-in duration-500">
-      <div className="bg-white border border-neutral-200 rounded-3xl overflow-hidden shadow-sm">
-        <div className="p-6 border-b border-neutral-200 bg-neutral-50/50 flex justify-between items-center">
-          <h3 className="text-xl font-bold text-neutral-900 flex items-center gap-2">
+    <div className="max-w-[1520px] mx-auto space-y-8 animate-in fade-in duration-300">
+      <div className="bg-white border border-neutral-200 rounded-[26px] overflow-hidden shadow-sm">
+        <div className="p-6 border-b border-neutral-100 flex items-center justify-between flex justify-between items-center">
+          <h3 className="text-xl font-black text-neutral-900 tracking-tight flex items-center gap-2">
             <UserMinus className="text-red-600" /> Deleted Students Overview
           </h3>
-          <span className="text-xs font-semibold px-3 py-1.5 rounded-full bg-red-100 text-red-700">
-            Total Deleted: {deletedStudents.length}
+          <span className="text-xs font-semibold px-3 py-1.5 rounded-full bg-rose-50 text-rose-700 border border-rose-200/60 font-bold">
+            Total Deleted: {deletedStudents?.length || 0}
           </span>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="bg-neutral-50 text-neutral-500 text-xs uppercase tracking-widest border-b border-neutral-100">
+              <tr className="bg-neutral-50 bg-neutral-50/70 text-neutral-400 text-xs uppercase tracking-wider font-bold border-b border-neutral-100">
                 <th className="px-4 py-3.5 font-bold">Student ID</th>
                 <th className="px-4 py-3.5 font-bold">Student Name</th>
                 <th className="px-4 py-3.5 font-bold">Phone Number</th>
@@ -37,7 +37,7 @@ export function DeletedStudentsTab({
               </tr>
             </thead>
             <tbody className="divide-y divide-neutral-100">
-              {deletedStudents.map((st: any) => {
+              {(deletedStudents || []).map((st: any) => {
                 const courses = Array.isArray(st.selected_course_name) 
                   ? st.selected_course_name.join(", ") 
                   : (st.selected_course_name || "N/A");
@@ -47,8 +47,8 @@ export function DeletedStudentsTab({
                     <td className="px-4 py-3.5 text-sm font-mono font-bold text-blue-600">{st.student_ID}</td>
                     <td className="px-4 py-3.5 text-sm">
                       <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-full bg-red-100 text-red-700 flex items-center justify-center font-bold text-xs uppercase">
-                          {st.student_name ? st.student_name.charAt(0) : "S"}
+                        <div className="w-8 h-8 rounded-full bg-rose-50 text-rose-700 border border-rose-200/60 font-bold flex items-center justify-center font-bold text-xs uppercase">
+                          {String(st?.student_name || 'S').charAt(0).toUpperCase()}
                         </div>
                         <div className="font-bold text-neutral-900 capitalize">{st.student_name}</div>
                       </div>
@@ -71,7 +71,7 @@ export function DeletedStudentsTab({
                     <td className="px-4 py-3.5 text-sm text-right">
                       <button
                         onClick={() => handleRestoreStudent(st)}
-                        className="px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-bold text-xs rounded-xl transition-colors inline-flex items-center gap-1.5 cursor-pointer border border-emerald-200"
+                        className="px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-bold text-xs rounded-full transition-colors inline-flex items-center gap-1.5 cursor-pointer border border-emerald-200"
                         title="Restore Student"
                       >
                         <RotateCcw size={14} /> Restore
@@ -80,7 +80,7 @@ export function DeletedStudentsTab({
                   </tr>
                 );
               })}
-              {deletedStudents.length === 0 && (
+              {(!deletedStudents || deletedStudents.length === 0) && (
                 <tr>
                   <td colSpan={10} className="py-20 text-center text-neutral-400 italic">
                     No deleted students found.

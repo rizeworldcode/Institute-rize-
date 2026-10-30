@@ -219,4 +219,17 @@ exports.particularStudentData = async (req, res) => {
     }
   };
 
+exports.getPaymentReminders = async (req, res) => {
+    try {
+      const data = await studentDataService.getPaymentReminders(req, res);
+      if (data.success) {
+        return res.status(200).json(data);
+      }
+      return res.status(400).json(data);
+    } catch (error) {
+      console.error("Get Payment Reminders Controller Error:", error);
+      return res.status(500).json({ success: false, message: "Internal server error" });
+    }
+  };
+
   

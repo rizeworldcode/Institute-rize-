@@ -901,7 +901,7 @@ export function StudentModal({ student, onClose, onSave }: {
     <div className="fixed inset-0 bg-neutral-900/40 backdrop-blur-md z-50 flex items-center justify-center p-4">
       <div className="bg-white border border-neutral-200 rounded-3xl w-full max-w-5xl overflow-hidden shadow-2xl flex flex-col animate-in slide-in-from-bottom-8 duration-300 max-h-[90vh]">
         <div className="p-6 border-b border-neutral-100 flex justify-between items-center bg-neutral-50 shrink-0">
-          <h3 className="font-display text-xl font-bold text-neutral-900 flex items-center gap-2">
+          <h3 className="text-xl font-black text-neutral-900 tracking-tight flex items-center gap-2">
             <div className="w-2 h-2 rounded-full bg-blue-500"></div>
             {student ? "Edit Student & Add Admission" : "Add New Student"}
           </h3>

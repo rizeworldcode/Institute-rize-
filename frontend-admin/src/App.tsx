@@ -5,6 +5,7 @@ import { useEffect } from "react";
 import AdminLogin from "./pages/admin/AdminLogin";
 import AdminForgetPassword from "./pages/admin/AdminForgetPassword";
 import AdminDashboard from "./pages/admin/AdminDashboard";
+import { ErrorBoundary } from "./components/ErrorBoundary";
 
 function ScrollToTop() {
   const { pathname } = useLocation();
@@ -17,16 +18,18 @@ function ScrollToTop() {
 function MainLayout() {
   return (
     <div className="min-h-screen bg-white overflow-x-hidden">
-      <Routes>
-        <Route path="/" element={<Navigate to="/admin/login" replace />} />
-        
-        {/* Admin Routes */}
-        <Route path="/admin/login" element={<AdminLogin />} />
-        <Route path="/admin/forget-password" element={<AdminForgetPassword />} />
-        <Route path="/admin/dashboard" element={<AdminDashboard />} />
-        <Route path="/admin/dashboard/:tab" element={<AdminDashboard />} />
-        <Route path="/admin/dashboard/:tab/:subview" element={<AdminDashboard />} />
-      </Routes>
+      <ErrorBoundary fallbackTitle="Admin Portal Display Notice">
+        <Routes>
+          <Route path="/" element={<Navigate to="/admin/login" replace />} />
+          
+          {/* Admin Routes */}
+          <Route path="/admin/login" element={<AdminLogin />} />
+          <Route path="/admin/forget-password" element={<AdminForgetPassword />} />
+          <Route path="/admin/dashboard" element={<AdminDashboard />} />
+          <Route path="/admin/dashboard/:tab" element={<AdminDashboard />} />
+          <Route path="/admin/dashboard/:tab/:subview" element={<AdminDashboard />} />
+        </Routes>
+      </ErrorBoundary>
     </div>
   );
 }

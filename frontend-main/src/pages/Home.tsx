@@ -22,16 +22,20 @@ const courses = [
 
 const videoTestimonials: { videoUrl: string; desc: string; posterUrl?: string }[] = [
   {
-
     videoUrl: "/video/video 1.mp4",
-
     desc: "\"RizeWorld transformed my career within 2 months.\""
   },
   {
-
     videoUrl: "/video/video 2.mp4",
-
     desc: "\"Hands-on projects made learning truly addictive.\""
+  },
+  {
+    videoUrl: "/video/video 3.mp4",
+    desc: "\"The practical exposure gave me immense confidence.\""
+  },
+  {
+    videoUrl: "/video/video 4.mp4",
+    desc: "\"From fundamentals to landing high-paying opportunities.\""
   }
 ];
 
@@ -482,6 +486,9 @@ export default function Home() {
         </div>
       </section>
 
+      {/* ============ VIDEO TESTIMONIALS — BloomRow Style ============ */}
+      <VideoTestimonialsSection />
+
       {/* ============ ABOUT/WHY US ============ */}
       <section className="py-24 md:py-32 bg-premium-light relative overflow-hidden">
         <div className="max-w-7xl mx-auto px-6 grid lg:grid-cols-2 gap-16 items-start">
@@ -618,10 +625,6 @@ export default function Home() {
           </Reveal>
         </div>
       </section>
-
-
-      {/* ============ VIDEO TESTIMONIALS — BloomRow Style ============ */}
-      <VideoTestimonialsSection />
 
       {/* ============ FAQ ============ */}
       <section className="py-24 md:py-32 bg-premium-light">
@@ -838,10 +841,10 @@ function VideoTestimonialsSection() {
       </div>
 
       {/* Interactive Grid */}
-      <div ref={sectionRef} className="relative z-10 px-6 md:px-16 max-w-3xl mx-auto">
+      <div ref={sectionRef} className="relative z-10 px-4 md:px-10 max-w-7xl mx-auto overflow-x-auto pb-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         <div
           ref={rowRef}
-          className="flex items-start justify-center"
+          className="flex items-start justify-center w-fit mx-auto"
           style={{ gap: gutter, minHeight: hoveredHeight + 40 }}
           onPointerLeave={() => {
             setOpen(null);

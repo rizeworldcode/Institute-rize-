@@ -82,3 +82,56 @@ export type Teacher = {
   phone: string;
   address: string;
 };
+
+export type FollowupHistoryItem = {
+  _id?: string;
+  date: string;
+  conversation: string;
+  status: string;
+  next_followup_date?: string | null;
+  taken_by?: string;
+  next_followup_by?: string;
+  followup_round?: string;
+};
+
+export type StudentLead = {
+  _id: string;
+  lead_ID: string;
+  student_name: string;
+  address?: string;
+  phone: string;
+  school_name?: string;
+  current_education?: string;
+
+  is_from_workshop: boolean;
+  workshop_school_name?: string;
+  workshop_date?: string | null;
+  source_other?: string;
+
+  demo_class_taken: boolean;
+  demo_date?: string | null;
+  interested_course?: string;
+  interest_level?: "High" | "Medium" | "Low" | "Not Interested" | "";
+  problems_faced?: string;
+  remarks?: string;
+
+  conversation_notes?: string;
+  status: "New Inquiry" | "In Follow-up" | "Demo Scheduled" | "Demo Completed" | "Converted" | "Lost";
+  next_followup_date?: string | null;
+  next_followup_by?: string;
+  followup_round?: string;
+  followup_taken_by?: string;
+  followup_history?: FollowupHistoryItem[];
+
+  created_at: string;
+  updated_at?: string;
+};
+
+export type StudentLeadStats = {
+  totalLeads: number;
+  newInquiries: number;
+  inFollowUp: number;
+  converted: number;
+  lostLeads: number;
+};
+

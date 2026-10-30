@@ -3,7 +3,7 @@ const router = express.Router();
 
 const user_auth = require("../../middleware/user_auth");
 const {
-allStudents,certificateissuedStudentsData,certificateunissuedStudentsData,pandingfeeStudentsData,clearfeeStudentsData,particularStudentData, totalEarningsDetails, referredStudentsData, getAllReferrers, updateReferrerPayment, getReferrerStudents, deleteReferrer, getDeletedReferrers, restoreReferrer, getDeletedStudents, restoreStudent
+allStudents,certificateissuedStudentsData,certificateunissuedStudentsData,pandingfeeStudentsData,clearfeeStudentsData,particularStudentData, totalEarningsDetails, referredStudentsData, getAllReferrers, updateReferrerPayment, getReferrerStudents, deleteReferrer, getDeletedReferrers, restoreReferrer, getDeletedStudents, restoreStudent, getPaymentReminders
 } = require("../controllers/studentdataGet");
 router.post("/allStudents",user_auth, allStudents);
 router.post("/certificateissuedStudentsData",user_auth, certificateissuedStudentsData);
@@ -21,5 +21,9 @@ router.post("/getDeletedStudents",user_auth, getDeletedStudents);
 router.post("/restoreStudent",user_auth, restoreStudent);
 router.post("/updateReferrerPayment",user_auth, updateReferrerPayment);
 router.post("/getReferrerStudents/:id",user_auth, getReferrerStudents);
+
+// Fee Installment Payment Reminder Routes (1 month completed with pending fee)
+router.get("/paymentReminders", user_auth, getPaymentReminders);
+router.post("/paymentReminders", user_auth, getPaymentReminders);
 
 module.exports = router;

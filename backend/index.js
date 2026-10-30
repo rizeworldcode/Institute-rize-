@@ -131,6 +131,7 @@ app.use("/", require("./src/routes/refferel/reffereValidation.js"));
 app.use("/", require("./src/routes/refferel/refferelDashboard.js"));
 app.use("/", require("./src/routes/inquiry.js"));
 app.use("/", require("./src/routes/certificate.js"));
+app.use("/", require("./src/routes/studentLead.js"));
 
 // Handle unhandled routes
 app.all('*', (req, res, next) => {

@@ -152,7 +152,7 @@ export default function AdminLogin() {
           </div>
 
           <div className="bg-white/80 backdrop-blur-xl border border-white/40 shadow-[0_20px_50px_rgba(0,0,0,0.1)] rounded-3xl p-8 md:p-10 relative overflow-hidden">
-            <h1 className="font-display text-3xl font-bold text-neutral-900 mb-2">Admin Portal</h1>
+            <h1 className="text-3xl font-black text-neutral-900 tracking-tight mb-2">Admin Portal</h1>
             <p className="text-neutral-500 mb-8">Secure login for staff and administration.</p>
 
             {error && (

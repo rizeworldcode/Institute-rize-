@@ -183,7 +183,7 @@ export default function AdminForgetPassword() {
 
             {step === 1 && (
               <div className="animate-fade-in">
-                <h1 className="font-display text-3xl font-bold text-neutral-900 mb-2">Reset Password</h1>
+                <h1 className="text-3xl font-black text-neutral-900 tracking-tight mb-2">Reset Password</h1>
                 <p className="text-neutral-500 mb-8">Enter your registered admin email to receive an OTP.</p>
 
                 <form onSubmit={handleSendOTP} className="space-y-6">
@@ -215,7 +215,7 @@ export default function AdminForgetPassword() {
 
             {step === 2 && (
               <div className="animate-fade-in">
-                <h1 className="font-display text-3xl font-bold text-neutral-900 mb-2">Verify OTP</h1>
+                <h1 className="text-3xl font-black text-neutral-900 tracking-tight mb-2">Verify OTP</h1>
                 <p className="text-neutral-500 mb-6">We sent a secure 4-digit code to <span className="font-semibold text-neutral-800">{email}</span></p>
 
                 <div className="bg-blue-50/50 border border-blue-100 rounded-xl p-4 mb-6 flex items-center justify-between">
@@ -268,7 +268,7 @@ export default function AdminForgetPassword() {
 
             {step === 3 && (
               <div className="animate-fade-in">
-                <h1 className="font-display text-3xl font-bold text-neutral-900 mb-2">New Password</h1>
+                <h1 className="text-3xl font-black text-neutral-900 tracking-tight mb-2">New Password</h1>
                 <p className="text-neutral-500 mb-8">Secure your account with a strong new password.</p>
 
                 <form onSubmit={handleResetPassword} className="space-y-5">
@@ -322,7 +322,7 @@ export default function AdminForgetPassword() {
                 <div className="w-20 h-20 bg-green-50 rounded-full flex items-center justify-center mx-auto mb-6 scale-up">
                   <CheckCircle2 size={40} className="text-[#10b981]" />
                 </div>
-                <h1 className="font-display text-3xl font-bold text-neutral-900 mb-2">Password Updated!</h1>
+                <h1 className="text-3xl font-black text-neutral-900 tracking-tight mb-2">Password Updated!</h1>
                 <p className="text-neutral-500">Your password has been successfully reset using secure hashing. Redirecting to login...</p>
               </div>
             )}

@@ -853,3 +853,126 @@ exports.restoreStudent = async (req, res) => {
         };
     }
 };
+
+exports.getPaymentReminders = async (req, res) => {
+    try {
+        const students = await student_model.find({ is_deleted: { $ne: true } }).lean();
+        const now = new Date();
+        const reminders = [];
+
+        for (const student of students) {
+            let totalFee = 0;
+            let totalPaid = 0;
+            let pendingFee = 0;
+            let courses = [];
+            const allPayments = [];
+
+            if (student.admissions && student.admissions.length > 0) {
+                student.admissions.forEach(adm => {
+                    const admTotal = Number(adm.totalFee || adm.total_fee || 0);
+                    const admPaid = Number(adm.totalPaidFee || adm.total_paid_fee || 0);
+                    const admPending = Number(adm.pendingFee || adm.pending_fee || 0);
+                    totalFee += admTotal;
+                    totalPaid += admPaid;
+                    pendingFee += (admPending > 0 ? admPending : Math.max(0, admTotal - admPaid));
+
+                    if (adm.courses && Array.isArray(adm.courses)) {
+                        courses.push(...adm.courses);
+                    } else if (adm.selected_course_name) {
+                        courses.push(adm.selected_course_name);
+                    }
+
+                    if (adm.payments && Array.isArray(adm.payments)) {
+                        adm.payments.forEach(p => {
+                            if (p && p.date) allPayments.push(p);
+                        });
+                    }
+                });
+            } else {
+                totalFee = Number(student.total_fee || 0);
+                totalPaid = Number(student.total_paid_fee || 0);
+                pendingFee = Number(student.pending_fee || (totalFee - totalPaid));
+                if (student.selected_course_name) {
+                    courses = Array.isArray(student.selected_course_name) ? student.selected_course_name : [student.selected_course_name];
+                }
+                if (student.fee && Array.isArray(student.fee)) {
+                    student.fee.forEach(p => {
+                        if (p && p.date) allPayments.push(p);
+                    });
+                }
+            }
+
+            // Only consider students with pending dues
+            if (pendingFee <= 0 || totalFee <= 0) {
+                continue;
+            }
+
+            // Sort payments newest first
+            allPayments.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+
+            let lastPaymentDate = null;
+            let lastPaymentAmount = 0;
+
+            if (allPayments.length > 0) {
+                lastPaymentDate = new Date(allPayments[0].date);
+                lastPaymentAmount = Number(allPayments[0].amount || 0);
+            } else if (student.course_start_date) {
+                lastPaymentDate = new Date(student.course_start_date);
+            } else if (student.created_at) {
+                lastPaymentDate = new Date(student.created_at);
+            }
+
+            if (!lastPaymentDate || isNaN(lastPaymentDate.getTime())) {
+                continue;
+            }
+
+            // Calculate next installment due date: 1 month after last payment (or enrollment)
+            const nextDueDate = new Date(lastPaymentDate);
+            nextDueDate.setMonth(nextDueDate.getMonth() + 1);
+
+            // Has 1 month completed?
+            if (now.getTime() >= nextDueDate.getTime()) {
+                const diffTime = now.getTime() - nextDueDate.getTime();
+                const daysOverdue = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+                const daysSincePayment = Math.floor((now.getTime() - lastPaymentDate.getTime()) / (1000 * 60 * 60 * 24));
+                const monthsCompleted = Math.max(1, Math.floor(daysSincePayment / 30));
+
+                reminders.push({
+                    id: student._id ? student._id.toString() : student.student_ID,
+                    student_ID: student.student_ID,
+                    student_name: student.student_name,
+                    phone: student.phone || "",
+                    email: student.email || "",
+                    pending_fee: pendingFee,
+                    total_fee: totalFee,
+                    total_paid_fee: totalPaid,
+                    course_name: courses.join(", ") || "Course",
+                    last_payment_date: lastPaymentDate.toISOString(),
+                    last_payment_amount: lastPaymentAmount,
+                    next_due_date: nextDueDate.toISOString(),
+                    days_overdue: daysOverdue,
+                    days_since_payment: daysSincePayment,
+                    months_completed: monthsCompleted,
+                });
+            }
+        }
+
+        // Sort by most overdue first
+        reminders.sort((a, b) => b.days_overdue - a.days_overdue);
+
+        return {
+            success: true,
+            message: "Payment reminders fetched successfully",
+            count: reminders.length,
+            data: reminders,
+        };
+    } catch (error) {
+        console.error("Error in getPaymentReminders:", error);
+        return {
+            success: false,
+            message: "Error fetching payment reminders",
+            data: [],
+            count: 0,
+        };
+    }
+};

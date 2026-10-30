@@ -38,61 +38,69 @@ export function InquiryTab() {
   }, []);
 
   return (
-    <div className="max-w-[1400px] mx-auto space-y-8 animate-in fade-in duration-500">
-      <div className="bg-white border border-neutral-200 rounded-3xl overflow-hidden shadow-sm">
-          <div className="p-6 border-b border-neutral-200 bg-neutral-50/50">
-            <h3 className="text-xl font-bold text-neutral-900">Recent Inquiries</h3>
+    <div className="max-w-[1520px] mx-auto space-y-6 animate-in fade-in duration-300">
+      <div className="bg-white border border-neutral-200/80 rounded-[26px] overflow-hidden shadow-xs">
+          <div className="p-6 border-b border-neutral-100 flex items-center justify-between">
+            <div>
+              <h3 className="text-xl font-black text-neutral-900 tracking-tight">Recent Inquiries</h3>
+              <p className="text-xs text-neutral-400 font-medium mt-0.5">Website contact and course inquiries</p>
+            </div>
+            <span className="text-xs font-bold px-3 py-1 rounded-full bg-neutral-100 text-neutral-700 border border-neutral-200/60">
+              {inquiries.length} Inquiries
+            </span>
           </div>
-          <table className="w-full text-left border-collapse">
-            <thead>
-              <tr className="bg-neutral-50 border-b border-neutral-200 text-neutral-500 text-xs uppercase tracking-wider font-semibold">
-                <th className="py-5 px-6">Name</th>
-                <th className="py-5 px-6">Phone Number</th>
-                <th className="py-5 px-6">Interested Course</th>
-                <th className="py-5 px-6">Message</th>
-                <th className="py-5 px-6">Date</th>
-                <th className="py-5 px-6">Status</th>
-                <th className="py-5 px-6 text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-neutral-100 text-sm">
-                {inquiries.map(inq => (
-                  <tr key={inq.id} className="hover:bg-neutral-50/50 transition-colors">
-                      <td className="py-4 px-6 font-semibold text-neutral-900">{inq.name}</td>
-                      <td className="py-4 px-6 text-neutral-600">{inq.phone}</td>
-                      <td className="py-4 px-6 text-neutral-700">{inq.course}</td>
-                      <td className="py-4 px-6 text-neutral-600 max-w-xs truncate cursor-pointer hover:text-blue-600" title="Click to view full message" onClick={() => setSelectedInquiry(inq)}>{inq.message || "-"}</td>
-                      <td className="py-4 px-6 text-neutral-500">{inq.date}</td>
-                      <td className="py-4 px-6">
-                        <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider border ${
-                            inq.status === "New" ? "bg-blue-100 text-blue-700 border-blue-200" :
-                            "bg-emerald-100 text-emerald-700 border-emerald-200"
-                        }`}>
-                            {inq.status}
-                        </span>
-                      </td>
-                      <td className="py-4 px-6 text-right">
-                        <div className="flex justify-end gap-2">
-                          <button 
-                            onClick={() => setSelectedInquiry(inq)}
-                            className="p-1.5 text-blue-600 hover:bg-blue-50 hover:text-blue-700 rounded-lg transition-colors cursor-pointer" 
-                            title="View Message"
-                          >
-                            <Eye size={18} />
-                          </button>
-                          <a 
-                            href={`tel:${inq.phone}`}
-                            className="p-1.5 text-emerald-600 hover:bg-emerald-50 hover:text-emerald-700 rounded-lg transition-colors cursor-pointer" 
-                            title="Call Student"
-                          >
-                            <Phone size={18} />
-                          </a>
-                        </div>
-                      </td>
-                  </tr>
-                ))}
-            </tbody>
-          </table>
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr className="bg-neutral-50/70 border-b border-neutral-100 text-neutral-400 text-xs uppercase tracking-wider font-bold">
+                  <th className="py-4 px-6">Name</th>
+                  <th className="py-4 px-6">Phone Number</th>
+                  <th className="py-4 px-6">Interested Course</th>
+                  <th className="py-4 px-6">Message</th>
+                  <th className="py-4 px-6">Date</th>
+                  <th className="py-4 px-6">Status</th>
+                  <th className="py-4 px-6 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-neutral-100 text-sm">
+                  {inquiries.map(inq => (
+                    <tr key={inq.id} className="hover:bg-neutral-50/70 transition-colors">
+                        <td className="py-4 px-6 font-bold text-neutral-900">{inq.name}</td>
+                        <td className="py-4 px-6 text-neutral-600 font-medium">{inq.phone}</td>
+                        <td className="py-4 px-6 text-neutral-800 font-semibold">{inq.course}</td>
+                        <td className="py-4 px-6 text-neutral-500 max-w-xs truncate cursor-pointer hover:text-blue-600 font-medium" title="Click to view full message" onClick={() => setSelectedInquiry(inq)}>{inq.message || "-"}</td>
+                        <td className="py-4 px-6 text-neutral-400 text-xs font-semibold">{inq.date}</td>
+                        <td className="py-4 px-6">
+                          <span className={`px-2.5 py-0.5 rounded-full text-[11px] font-bold border ${
+                              inq.status === "New" ? "bg-blue-50 text-blue-700 border-blue-200/60" :
+                              "bg-emerald-50 text-emerald-700 border-emerald-200/60"
+                          }`}>
+                              {inq.status}
+                          </span>
+                        </td>
+                        <td className="py-4 px-6 text-right">
+                          <div className="flex justify-end gap-2">
+                            <button 
+                              onClick={() => setSelectedInquiry(inq)}
+                              className="p-1.5 text-blue-600 hover:bg-blue-50 hover:text-blue-700 rounded-full transition-colors cursor-pointer" 
+                              title="View Message"
+                            >
+                              <Eye size={17} />
+                            </button>
+                            <a 
+                              href={`tel:${inq.phone}`}
+                              className="p-1.5 text-emerald-600 hover:bg-emerald-50 hover:text-emerald-700 rounded-full transition-colors cursor-pointer" 
+                              title="Call Student"
+                            >
+                              <Phone size={17} />
+                            </a>
+                          </div>
+                        </td>
+                    </tr>
+                  ))}
+              </tbody>
+            </table>
+          </div>
       </div>
 
       {/* Message Preview Modal */}

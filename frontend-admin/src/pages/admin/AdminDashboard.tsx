@@ -2,8 +2,10 @@ import { useState, useEffect, useMemo } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { 
   Users, Search, Plus, Edit2, LogOut, Shield, Menu,
-  AlertCircle, LayoutDashboard, MessagesSquare, X, ArrowLeft,
-  Award, Bell, UserCircle, Mail, IndianRupee, CheckCircle2, Activity, Trash2, UserX, UserMinus, FileText, Filter, Download
+  AlertCircle, LayoutDashboard, MessagesSquare, MessageSquare, X, ArrowLeft,
+  Award, Bell, UserCircle, Mail, IndianRupee, CheckCircle2, Activity, Trash2, UserX, UserMinus, FileText, Filter, Download, Target,
+  Phone, Calendar, Clock, AlertTriangle, ChevronRight, UserCheck, RefreshCw,
+  Zap, MoreHorizontal, ChevronDown, ArrowUpRight
 } from "lucide-react";
 
 import { Student } from "./types";
@@ -14,6 +16,7 @@ import { InquiryTab } from "./tabs/InquiryTab";
 import { ReferredByTab } from "./tabs/ReferredByTab";
 import { DeletedReferrersTab } from "./tabs/DeletedReferrersTab";
 import { DeletedStudentsTab } from "./tabs/DeletedStudentsTab";
+import { StudentLeadCrmTab } from "./tabs/StudentLeadCrmTab";
 import { ReferrerModal } from "./modals/ReferrerModal";
 import { getApiUrl, API_BASE_URL } from "../../utils/api";
 
@@ -21,8 +24,25 @@ export default function AdminDashboard() {
   const navigate = useNavigate();
   const { tab, subview } = useParams();
   
-  const activeTab = useMemo(() => tab || "dashboard", [tab]);
-  const expandedStat = useMemo(() => subview || null, [subview]);
+  const STAT_VIEWS = useMemo(() => [
+    "total-students",
+    "certificate-issued",
+    "certificate-unissued",
+    "total-earnings",
+    "total-clear-fees",
+    "total-pending-fees"
+  ], []);
+
+  const activeTab = useMemo(() => {
+    if (tab && STAT_VIEWS.includes(tab)) return "dashboard";
+    return tab || "dashboard";
+  }, [tab, STAT_VIEWS]);
+
+  const expandedStat = useMemo(() => {
+    if (subview) return subview;
+    if (tab && STAT_VIEWS.includes(tab)) return tab;
+    return null;
+  }, [tab, subview, STAT_VIEWS]);
 
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [search, setSearch] = useState("");
@@ -54,6 +74,8 @@ export default function AdminDashboard() {
   const [earningsDetailsData, setEarningsDetailsData] = useState<any[]>([]);
   const [graphData, setGraphData] = useState<any[]>([]);
   const [graphMetric, setGraphMetric] = useState<"earnings" | "students">("earnings");
+  const [hoveredBarIndex, setHoveredBarIndex] = useState<number | null>(null);
+  const [selectedTimePeriod, setSelectedTimePeriod] = useState<string>("This Month");
   const [topCourses, setTopCourses] = useState<any[]>([]);
 
   const totalPendingDuesAcrossSystem = useMemo(() => {
@@ -151,7 +173,7 @@ export default function AdminDashboard() {
       });
       const data = await res.json();
       if (data.success) {
-        setDeletedStudents(data.data);
+        setDeletedStudents(Array.isArray(data.data) ? data.data : []);
       }
     } catch (error) {
       console.error("Failed to fetch deleted students:", error);
@@ -310,11 +332,233 @@ export default function AdminDashboard() {
 
 
 
+  // Notification & Follow-up State
+  interface FollowupReminderItem {
+    id: string;
+    _id: string;
+    lead_ID?: string;
+    student_name: string;
+    phone: string;
+    interested_course?: string;
+    status: string;
+    next_followup_date: string;
+    next_followup_by: string; // "how tack that followup"
+    followup_round?: string;
+    conversation_notes?: string;
+    category: "today" | "due" | "upcoming";
+    created_at?: string;
+  }
+
+  const computeFollowupGroups = (leads: any[]) => {
+    const now = new Date();
+    const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0);
+    const endOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999);
+
+    const today: FollowupReminderItem[] = [];
+    const due: FollowupReminderItem[] = [];
+    const upcoming: FollowupReminderItem[] = [];
+
+    if (!Array.isArray(leads)) return { today, due, upcoming };
+
+    leads.forEach((l: any) => {
+      if (!l.next_followup_date || l.is_deleted || l.status === "Converted" || l.status === "Lost") {
+        return;
+      }
+      const fDate = new Date(l.next_followup_date);
+      if (isNaN(fDate.getTime())) return;
+
+      const item: FollowupReminderItem = {
+        id: l._id || l.id,
+        _id: l._id || l.id,
+        lead_ID: l.lead_ID || "",
+        student_name: l.student_name || "Unknown Student",
+        phone: l.phone || "",
+        interested_course: l.interested_course || "Course N/A",
+        status: l.status || "New Inquiry",
+        next_followup_date: l.next_followup_date,
+        next_followup_by: l.next_followup_by || l.followup_taken_by || "Staff",
+        followup_round: l.followup_round || "1st Follow-up",
+        conversation_notes: l.conversation_notes || "",
+        created_at: l.created_at || "",
+        category: fDate < startOfToday ? "due" : fDate <= endOfToday ? "today" : "upcoming",
+      };
+
+      if (item.category === "due") {
+        due.push(item);
+      } else if (item.category === "today") {
+        today.push(item);
+      } else {
+        upcoming.push(item);
+      }
+    });
+
+    due.sort((a, b) => new Date(a.next_followup_date).getTime() - new Date(b.next_followup_date).getTime());
+    today.sort((a, b) => new Date(a.next_followup_date).getTime() - new Date(b.next_followup_date).getTime());
+    upcoming.sort((a, b) => new Date(a.next_followup_date).getTime() - new Date(b.next_followup_date).getTime());
+
+    return { today, due, upcoming };
+  };
+
+  const [followupReminders, setFollowupReminders] = useState<{
+    today: FollowupReminderItem[];
+    due: FollowupReminderItem[];
+    upcoming: FollowupReminderItem[];
+  }>(() => {
+    try {
+      const cached = localStorage.getItem("rize_student_leads_cache");
+      if (cached) {
+        return computeFollowupGroups(JSON.parse(cached));
+      }
+    } catch (e) {}
+    return { today: [], due: [], upcoming: [] };
+  });
+
+  interface PaymentReminderNotification {
+    id: string;
+    student_ID: string;
+    student_name: string;
+    phone: string;
+    email: string;
+    pending_fee: number;
+    total_fee: number;
+    total_paid_fee: number;
+    course_name: string;
+    last_payment_date: string;
+    last_payment_amount: number;
+    next_due_date: string;
+    days_overdue: number;
+    days_since_payment: number;
+    months_completed: number;
+    studentObj?: Student;
+  }
+
+  const computePaymentReminders = (studentsList: Student[]): PaymentReminderNotification[] => {
+    if (!Array.isArray(studentsList)) return [];
+    const now = new Date();
+    const reminders: PaymentReminderNotification[] = [];
+
+    studentsList.forEach((student) => {
+      const pendingFee = Number(student.pendingFees || 0);
+      if (pendingFee <= 0) return;
+
+      // Collect all payments
+      const payments: { amount?: any; date?: string }[] = [];
+      if (Array.isArray(student.fee)) {
+        payments.push(...student.fee);
+      }
+      if (Array.isArray(student.admissions)) {
+        student.admissions.forEach(adm => {
+          if (Array.isArray(adm.payments)) {
+            payments.push(...adm.payments);
+          }
+        });
+      }
+
+      let lastPaymentDate: Date | null = null;
+      let lastPaymentAmount = 0;
+
+      payments.forEach(p => {
+        if (p && p.date) {
+          const pDate = new Date(p.date);
+          if (!isNaN(pDate.getTime())) {
+            if (!lastPaymentDate || pDate.getTime() > lastPaymentDate.getTime()) {
+              lastPaymentDate = pDate;
+              lastPaymentAmount = Number(p.amount) || 0;
+            }
+          }
+        }
+      });
+
+      // Fallback: If no payments recorded yet, use admission start date or student startDate
+      if (!lastPaymentDate) {
+        const sDateStr = student.startDate || student.admissions?.[0]?.startDate;
+        if (sDateStr) {
+          const sDate = new Date(sDateStr);
+          if (!isNaN(sDate.getTime())) {
+            lastPaymentDate = sDate;
+          }
+        }
+      }
+
+      if (!lastPaymentDate) return;
+
+      // Next due date is 1 month after last payment date
+      const nextDueDate = new Date(lastPaymentDate);
+      nextDueDate.setMonth(nextDueDate.getMonth() + 1);
+
+      // Overdue threshold: 1 month has completed (now >= nextDueDate)
+      if (now.getTime() >= nextDueDate.getTime()) {
+        const diffTime = now.getTime() - nextDueDate.getTime();
+        const daysOverdue = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+        const totalElapsed = now.getTime() - lastPaymentDate.getTime();
+        const daysSincePayment = Math.floor(totalElapsed / (1000 * 60 * 60 * 24));
+        const monthsCompleted = Math.max(1, Math.floor(daysSincePayment / 30));
+
+        const courseName = Array.isArray(student.course) 
+          ? student.course.join(", ") 
+          : (student.course || student.admissions?.[0]?.courses?.join(", ") || "Course");
+
+        reminders.push({
+          id: student.id,
+          student_ID: student.id,
+          student_name: student.name,
+          phone: student.phone || "",
+          email: student.email || "",
+          pending_fee: pendingFee,
+          total_fee: Number(student.totalFees || 0),
+          total_paid_fee: Number(student.paidFees || 0),
+          course_name: courseName,
+          last_payment_date: lastPaymentDate.toISOString(),
+          last_payment_amount: lastPaymentAmount,
+          next_due_date: nextDueDate.toISOString(),
+          days_overdue: daysOverdue,
+          days_since_payment: daysSincePayment,
+          months_completed: monthsCompleted,
+          studentObj: student,
+        });
+      }
+    });
+
+    reminders.sort((a, b) => b.days_overdue - a.days_overdue);
+    return reminders;
+  };
+
+  const [paymentReminders, setPaymentReminders] = useState<PaymentReminderNotification[]>([]);
+  const [notifTab, setNotifTab] = useState<"today" | "due" | "fees" | "upcoming" | "inquiries">("today");
+  const [isNotifRefreshing, setIsNotifRefreshing] = useState(false);
   const [notifications, setNotifications] = useState<any[]>([]);
 
+  // Recalculate payment reminders whenever students list changes
+  useEffect(() => {
+    if (students && students.length > 0) {
+      setPaymentReminders(computePaymentReminders(students));
+    }
+  }, [students]);
+
+  // Real-time listener for lead updates across tabs/CRM actions
+  useEffect(() => {
+    const handleLeadsUpdated = () => {
+      try {
+        const cached = localStorage.getItem("rize_student_leads_cache");
+        if (cached) {
+          setFollowupReminders(computeFollowupGroups(JSON.parse(cached)));
+        }
+      } catch (e) {}
+    };
+    window.addEventListener("rize_leads_updated", handleLeadsUpdated);
+    window.addEventListener("storage", handleLeadsUpdated);
+    return () => {
+      window.removeEventListener("rize_leads_updated", handleLeadsUpdated);
+      window.removeEventListener("storage", handleLeadsUpdated);
+    };
+  }, []);
+
   const fetchNotifications = async () => {
+    setIsNotifRefreshing(true);
+    const token = localStorage.getItem("adminAuthToken");
+
+    // 1. Fetch Inquiries
     try {
-      const token = localStorage.getItem("adminAuthToken");
       const res = await fetch(getApiUrl("/getAllInquiries"), {
         headers: { "Authorization": `Bearer ${token}` }
       });
@@ -337,6 +581,56 @@ export default function AdminDashboard() {
     } catch (error) {
       console.error("Failed to fetch notifications:", error);
     }
+
+    // 2. Fetch Followup Reminders from server
+    try {
+      const resF = await fetch(getApiUrl("/student-leads/followups/reminders"), {
+        headers: { "Authorization": `Bearer ${token}` }
+      });
+      if (resF.ok) {
+        const dataF = await resF.json();
+        if (dataF.success && dataF.data) {
+          setFollowupReminders({
+            today: dataF.data.today || [],
+            due: dataF.data.due || [],
+            upcoming: dataF.data.upcoming || [],
+          });
+        }
+      }
+    } catch (err) {
+      console.warn("Followup reminders server fetch notice:", err);
+    }
+
+    // 3. Fetch Payment Reminders from server
+    try {
+      const resP = await fetch(getApiUrl("/paymentReminders"), {
+        headers: { "Authorization": `Bearer ${token}` }
+      });
+      if (resP.ok) {
+        const dataP = await resP.json();
+        if (dataP.success && Array.isArray(dataP.data)) {
+          const enhanced = dataP.data.map((rem: any) => {
+            const found = students.find((s) => s.id === rem.student_ID || s.id === rem.id);
+            return {
+              ...rem,
+              studentObj: found || rem.studentObj,
+            };
+          });
+          setPaymentReminders(enhanced);
+        }
+      }
+    } catch (errP) {
+      console.warn("Payment reminders server fetch notice:", errP);
+    }
+
+    // Fallback: Compute from cached student leads
+    try {
+      const cached = localStorage.getItem("rize_student_leads_cache");
+      if (cached) {
+        setFollowupReminders(computeFollowupGroups(JSON.parse(cached)));
+      }
+    } catch (e) {}
+    setIsNotifRefreshing(false);
   };
 
   const markNotificationAsRead = async (id: string) => {
@@ -350,6 +644,31 @@ export default function AdminDashboard() {
     } catch (error) {
       console.error("Failed to mark notification as read:", error);
     }
+  };
+
+  const formatFollowupSchedule = (dateStr: string, category: "today" | "due" | "upcoming") => {
+    if (!dateStr) return "Date not set";
+    const d = new Date(dateStr);
+    if (isNaN(d.getTime())) return dateStr;
+
+    const timeStr = d.toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit", hour12: true });
+
+    if (category === "today") {
+      return `Today at ${timeStr}`;
+    }
+
+    const dateFormatted = d.toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" });
+    if (category === "due") {
+      const todayDate = new Date();
+      todayDate.setHours(0, 0, 0, 0);
+      const leadDate = new Date(d);
+      leadDate.setHours(0, 0, 0, 0);
+      const diffTime = todayDate.getTime() - leadDate.getTime();
+      const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
+      return diffDays > 0 ? `Overdue by ${diffDays} day${diffDays > 1 ? 's' : ''} (${dateFormatted})` : `Overdue (${dateFormatted}, ${timeStr})`;
+    }
+
+    return `${dateFormatted} at ${timeStr}`;
   };
 
   const getTimeAgo = (date: string) => {
@@ -842,7 +1161,7 @@ export default function AdminDashboard() {
       });
       const data = await res.json();
       if (data.success) {
-        setReferrers(data.data);
+        setReferrers(Array.isArray(data.data) ? data.data : []);
       }
     } catch (error) {
       console.error("Failed to fetch referrers:", error);
@@ -858,7 +1177,7 @@ export default function AdminDashboard() {
       });
       const data = await res.json();
       if (data.success) {
-        setDeletedReferrers(data.data);
+        setDeletedReferrers(Array.isArray(data.data) ? data.data : []);
       }
     } catch (error) {
       console.error("Failed to fetch deleted referrers:", error);
@@ -1090,13 +1409,13 @@ export default function AdminDashboard() {
           pendingFees: data.stats.unclear_fee_students,
           totalReferralPaid: data.stats.total_referral_paid || 0
         });
-        // Ensure graphData is always a continuous 6-month timeline on frontend
+        // Ensure graphData is always a continuous 8-month timeline on frontend
         let rawGraphData: any[] = data.graphData || [];
         const monthsShort = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
         const now = new Date();
         const formattedGraphData: any[] = [];
 
-        for (let i = 5; i >= 0; i--) {
+        for (let i = 7; i >= 0; i--) {
           const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
           const m = d.getMonth();
           const y = d.getFullYear();
@@ -1110,6 +1429,7 @@ export default function AdminDashboard() {
 
           formattedGraphData.push({
             month: monthLabel,
+            monthShort: monthsShort[m],
             newStudents: match ? Number(match.newStudents || 0) : 0,
             earnings: match ? Number(match.earnings || 0) : 0
           });
@@ -1250,494 +1570,1451 @@ export default function AdminDashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-[#f8fafc] text-neutral-900 flex relative overflow-hidden selection:bg-blue-100 font-sans">
+    <div className="min-h-screen w-full bg-[#f4f5f8] text-neutral-900 selection:bg-blue-100 font-sans flex flex-col relative overflow-x-hidden">
       
-      {/* Mobile Overlay Backdrop */}
+      {/* Mobile Slide-over Drawer Backdrop & Panel */}
       {isSidebarOpen && (
         <div 
-          className="fixed inset-0 bg-black/40 backdrop-blur-sm z-40 md:hidden"
+          className="fixed inset-0 bg-black/40 backdrop-blur-xs z-50 lg:hidden"
           onClick={() => setIsSidebarOpen(false)}
-        />
+        >
+          <div 
+            className="w-72 max-w-[85vw] bg-white h-full p-6 flex flex-col justify-between shadow-2xl animate-in slide-in-from-left duration-200"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div>
+              <div className="flex items-center justify-between pb-4 border-b border-neutral-100 mb-6">
+                <div className="flex items-center gap-2.5">
+                  <img 
+                    src="/logo/RIZE_LOGO_CROPPED.png" 
+                    alt="RizeWorld Institute" 
+                    className="h-8 w-auto object-contain" 
+                  />
+                </div>
+                <button 
+                  onClick={() => setIsSidebarOpen(false)}
+                  className="p-1.5 rounded-lg text-neutral-400 hover:text-neutral-700 hover:bg-neutral-100"
+                >
+                  <X size={18} />
+                </button>
+              </div>
+
+              <div className="space-y-1.5">
+                <button
+                  onClick={() => { navigate("/admin/dashboard/dashboard"); setIsSidebarOpen(false); }}
+                  className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all ${
+                    activeTab === "dashboard" ? "bg-[#18181b] text-white" : "text-neutral-600 hover:bg-neutral-100"
+                  }`}
+                >
+                  <LayoutDashboard size={18} /> Dashboard
+                </button>
+                <button
+                  onClick={() => { navigate("/admin/dashboard/student-crm"); setIsSidebarOpen(false); }}
+                  className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all ${
+                    activeTab === "student-crm" || activeTab === "student-leads" ? "bg-[#18181b] text-white" : "text-neutral-600 hover:bg-neutral-100"
+                  }`}
+                >
+                  <Target size={18} /> Student Leads CRM
+                </button>
+                <button
+                  onClick={() => { navigate("/admin/dashboard/inquiry"); setIsSidebarOpen(false); }}
+                  className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all ${
+                    activeTab === "inquiry" ? "bg-[#18181b] text-white" : "text-neutral-600 hover:bg-neutral-100"
+                  }`}
+                >
+                  <MessagesSquare size={18} /> Inquiries
+                </button>
+                <button
+                  onClick={() => { navigate("/admin/dashboard/referred-by"); setIsSidebarOpen(false); }}
+                  className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all ${
+                    activeTab === "referred-by" ? "bg-[#18181b] text-white" : "text-neutral-600 hover:bg-neutral-100"
+                  }`}
+                >
+                  <UserCircle size={18} /> Referred By
+                </button>
+                <button
+                  onClick={() => { navigate("/admin/dashboard/deleted-referrers"); setIsSidebarOpen(false); }}
+                  className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all ${
+                    activeTab === "deleted-referrers" ? "bg-[#18181b] text-white" : "text-neutral-600 hover:bg-neutral-100"
+                  }`}
+                >
+                  <UserX size={18} /> Deleted Referrers
+                </button>
+                <button
+                  onClick={() => { navigate("/admin/dashboard/deleted-students"); setIsSidebarOpen(false); }}
+                  className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all ${
+                    activeTab === "deleted-students" ? "bg-[#18181b] text-white" : "text-neutral-600 hover:bg-neutral-100"
+                  }`}
+                >
+                  <UserMinus size={18} /> Deleted Students
+                </button>
+              </div>
+            </div>
+
+            <div className="pt-4 border-t border-neutral-100">
+              <button 
+                onClick={() => { setIsSidebarOpen(false); setIsLogoutModalOpen(true); }}
+                className="w-full flex items-center gap-3 px-4 py-2.5 text-red-600 font-semibold hover:bg-red-50 rounded-xl transition-all"
+              >
+                <LogOut size={18} /> Logout Securely
+              </button>
+            </div>
+          </div>
+        </div>
       )}
 
-      {/* Sidebar */}
-      <aside className={`
-        w-72 bg-white border-r border-neutral-200 flex flex-col z-50
-        fixed md:static top-0 left-0 h-full
-        transform transition-transform duration-300 ease-in-out
-        ${isSidebarOpen ? 'translate-x-0 shadow-2xl' : '-translate-x-full md:translate-x-0'}
-      `}>
-        {/* Mobile Close Button */}
-        <button 
-          type="button"
-          onClick={(e) => {
-            e.stopPropagation();
-            setIsSidebarOpen(false);
-          }}
-          className="absolute top-4 right-4 md:hidden z-50 p-2 rounded-xl bg-neutral-100 hover:bg-neutral-200 text-neutral-700 transition-all cursor-pointer shadow-sm border border-neutral-200/60"
-          aria-label="Close navigation menu"
-        >
-          <X size={20} />
-        </button>
-
-        <div className="p-6 border-b border-neutral-100">
-          <div className="h-60 w-full relative flex items-center mb-2">
-             <img src="/logo/RIZE LOGO HORI PNG.png" alt="RizeWorld" className="w-full h-full object-contain object-left" />
-          </div>
-          <div className="mt-2 text-[10px] font-bold tracking-widest text-blue-600 uppercase flex items-center gap-2">
-            <Shield size={12} className="text-blue-500" /> Super Admin Portal
-          </div>
-        </div>
-
-        <div className="flex-1 py-6 px-4 space-y-2">
-          <SidebarItem icon={LayoutDashboard} label="Dashboard" active={activeTab === "dashboard"} onClick={() => { navigate("/admin/dashboard/dashboard"); setIsSidebarOpen(false); }} />
-          <SidebarItem icon={MessagesSquare} label="Inquiry" active={activeTab === "inquiry"} onClick={() => { navigate("/admin/dashboard/inquiry"); setIsSidebarOpen(false); }} />
-          <SidebarItem icon={UserCircle} label="Referred By" active={activeTab === "referred-by"} onClick={() => { navigate("/admin/dashboard/referred-by"); setIsSidebarOpen(false); }} />
-          <SidebarItem icon={UserX} label="Deleted Referrers" active={activeTab === "deleted-referrers"} onClick={() => { navigate("/admin/dashboard/deleted-referrers"); setIsSidebarOpen(false); }} />
-          <SidebarItem icon={UserMinus} label="Deleted Students" active={activeTab === "deleted-students"} onClick={() => { navigate("/admin/dashboard/deleted-students"); setIsSidebarOpen(false); }} />
-        </div>
-
-        <div className="p-6 border-t border-neutral-100">
-          <button onClick={() => setIsLogoutModalOpen(true)} className="w-full flex items-center gap-3 px-4 py-3 text-red-600 font-semibold hover:bg-red-50 hover:text-red-700 rounded-xl transition-all border border-transparent hover:border-red-100 group">
-            <LogOut size={18} className="group-hover:-translate-x-1 transition-transform" />
-            Logout Securely
-          </button>
-        </div>
-      </aside>
-
-      {/* Main Content */}
-      <main className="flex-1 flex flex-col h-screen overflow-hidden relative z-10">
-        {/* Glow Effects */}
-        <div className="absolute top-0 left-1/4 w-96 h-96 bg-blue-100/50 rounded-full blur-[120px] pointer-events-none" />
-        <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-purple-100/50 rounded-full blur-[120px] pointer-events-none" />
-        
-        <header className="h-20 bg-white/80 backdrop-blur-2xl border-b border-neutral-200 flex items-center justify-between px-4 md:px-8 sticky top-0 z-30">
-          <div className="flex items-center gap-3">
-            {/* Hamburger Menu - Mobile Only */}
+      {/* Floating Pill Top Navbar matching Mockup */}
+      <header className="sticky top-3 z-40 w-full max-w-[1520px] mx-auto px-3 sm:px-6 pt-1 mb-2">
+        <div className="bg-white rounded-2xl md:rounded-full px-4 sm:px-6 py-2.5 sm:py-3 border border-neutral-200/80 shadow-xs flex items-center justify-between gap-3 backdrop-blur-xl">
+          {/* Brand on Left */}
+          <div className="flex items-center gap-3 shrink-0">
             <button
               onClick={() => setIsSidebarOpen(true)}
-              className="md:hidden p-2 rounded-xl hover:bg-neutral-100 text-neutral-600 transition-colors"
-              aria-label="Open menu"
+              className="lg:hidden p-2 rounded-xl hover:bg-neutral-100 text-neutral-700 transition-colors cursor-pointer"
+              aria-label="Open navigation menu"
             >
-              <Menu size={22} />
+              <Menu size={20} />
             </button>
-            <h2 className="font-display text-lg md:text-2xl font-bold text-neutral-900 capitalize tracking-tight">
-              {activeTab.replace("-", " ")} Overview
-            </h2>
+            <div 
+              onClick={() => navigate("/admin/dashboard/dashboard")} 
+              className="flex items-center gap-3 cursor-pointer group py-0.5"
+            >
+              <img 
+                src="/logo/RIZE_LOGO_CROPPED.png" 
+                alt="RizeWorld Institute" 
+                className="h-9 sm:h-10 md:h-11 w-auto object-contain transition-transform group-hover:scale-[1.02]" 
+              />
+              <div className="hidden sm:flex flex-col border-l border-neutral-200/80 pl-3">
+                <span className="text-[11px] font-black tracking-wider uppercase text-neutral-800">Admin Portal</span>
+                <span className="text-[9px] font-semibold text-neutral-400">Management Suite</span>
+              </div>
+            </div>
           </div>
-          
-          <div className="flex items-center gap-4">
+
+          {/* Right Controls: Notifications, Logout, User Profile Badge */}
+          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
              <div className="relative">
                 <button 
-                  onClick={() => setIsNotificationsOpen(!isNotificationsOpen)} 
-                  className="relative p-2 text-neutral-600 hover:bg-neutral-100 rounded-full transition-colors cursor-pointer"
+                  onClick={() => {
+                    const nextOpen = !isNotificationsOpen;
+                    setIsNotificationsOpen(nextOpen);
+                    if (nextOpen) {
+                      const feeCount = paymentReminders?.length || 0;
+                      const dueCount = followupReminders?.due?.length || 0;
+                      const todayCount = followupReminders?.today?.length || 0;
+                      const upcomingCount = followupReminders?.upcoming?.length || 0;
+
+                      if (feeCount > 0 && dueCount === 0 && todayCount === 0) {
+                        setNotifTab("fees");
+                      } else if (todayCount > 0) {
+                        setNotifTab("today");
+                      } else if (dueCount > 0) {
+                        setNotifTab("due");
+                      } else if (feeCount > 0) {
+                        setNotifTab("fees");
+                      } else if (upcomingCount > 0) {
+                        setNotifTab("upcoming");
+                      } else {
+                        setNotifTab("inquiries");
+                      }
+                    }
+                  }} 
+                  className="relative p-2.5 text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100 rounded-full transition-colors cursor-pointer"
+                  title="Notifications, Follow-up Reminders & Fee Dues"
                 >
-                  <Bell size={20} />
-                  {notifications.filter(n => !n.isRead).length > 0 && (
-                    <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full animate-pulse border border-white"></span>
-                  )}
+                  <Bell size={21} />
+                  {(() => {
+                    const unreadInq = (notifications || []).filter(n => !n?.isRead).length;
+                    const dueCount = followupReminders?.due?.length || 0;
+                    const todayCount = followupReminders?.today?.length || 0;
+                    const feeCount = paymentReminders?.length || 0;
+                    const totalUrgent = dueCount + todayCount + feeCount + unreadInq;
+
+                    if (totalUrgent === 0) return null;
+
+                    return (
+                      <span className={`absolute top-0.5 right-0.5 min-w-[20px] h-[20px] px-1 text-[11px] font-black text-white rounded-full flex items-center justify-center border-2 border-white shadow-sm animate-pulse ${
+                        (feeCount > 0 || dueCount > 0) ? "bg-red-600" : todayCount > 0 ? "bg-amber-500" : "bg-blue-600"
+                      }`}>
+                        {totalUrgent > 99 ? "99+" : totalUrgent}
+                      </span>
+                    );
+                  })()}
                 </button>
                 
                 {isNotificationsOpen && (
-                  <div className="absolute top-full right-0 mt-2 w-80 bg-white border border-neutral-200 shadow-xl rounded-2xl overflow-hidden z-50 animate-in fade-in slide-in-from-top-2">
-                     <div className="p-4 border-b border-neutral-100 flex justify-between items-center bg-neutral-50/50">
-                        <h3 className="font-bold text-neutral-900">Notifications</h3>
-                        <span className="text-xs font-semibold bg-blue-100 text-blue-600 px-2 py-0.5 rounded-full">
-                          {notifications.filter(n => !n.isRead).length} New
-                        </span>
-                     </div>
-                     <div className="max-h-[300px] overflow-y-auto">
-                        {notifications.length > 0 ? (
-                          notifications.map((notif) => (
-                            <div 
-                               key={notif.id}
-                               onClick={() => {
-                                  setIsNotificationsOpen(false);
-                                  setSelectedNotification({
-                                     ...notif,
-                                     content: `Course: ${notif.course}\nPhone: ${notif.phone}\n\nMessage: ${notif.content}`
-                                  });
-                                  if (!notif.isRead) markNotificationAsRead(notif.id);
-                               }}
-                               className={`p-4 border-b border-neutral-50 hover:bg-neutral-50 cursor-pointer transition-colors flex gap-3 ${!notif.isRead ? 'bg-blue-50/30' : ''}`}
-                            >
-                               <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 mt-0.5 ${!notif.isRead ? 'bg-blue-100 text-blue-600' : 'bg-neutral-100 text-neutral-400'}`}>
-                                  <Mail size={14} />
-                               </div>
-                               <div>
-                                  <div className="text-sm font-bold text-neutral-900">{notif.title}</div>
-                                  <div className="text-xs text-neutral-500 mt-1 line-clamp-2">{notif.sender} is interested in {notif.course}.</div>
-                                  <div className="text-[10px] text-neutral-400 font-semibold mt-2">{getTimeAgo(notif.date)}</div>
-                                </div>
-                            </div>
-                          ))
-                        ) : (
-                          <div className="p-8 text-center text-neutral-400 text-sm">
-                            No new notifications
+                  <>
+                    {/* Backdrop to close when clicking outside */}
+                    <div 
+                      className="fixed inset-0 z-40 bg-neutral-900/20 backdrop-blur-[1px]"
+                      onClick={() => setIsNotificationsOpen(false)}
+                    />
+
+                    <div className="absolute top-full right-0 mt-3 w-[94vw] sm:w-[620px] md:w-[680px] max-w-[96vw] bg-white border border-neutral-200/90 shadow-2xl rounded-[28px] overflow-hidden z-50 animate-in fade-in slide-in-from-top-2 flex flex-col">
+                      
+                      {/* Modern Header */}
+                      <div className="p-4 sm:p-5 border-b border-neutral-100 flex items-center justify-between bg-neutral-50/60">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center font-bold shadow-2xs border border-blue-100/60">
+                            <Bell size={18} />
                           </div>
+                          <div>
+                            <h3 className="font-black text-neutral-900 text-sm sm:text-base tracking-tight">Notifications & Reminders</h3>
+                            <p className="text-xs text-neutral-400 font-medium">Follow-ups, Fee dues & course inquiries</p>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-1.5 flex-wrap justify-end">
+                          {(paymentReminders?.length || 0) > 0 && (
+                            <button
+                              onClick={() => setNotifTab("fees")}
+                              className={`text-xs font-black px-3 py-1 rounded-full border transition-all cursor-pointer flex items-center gap-1 ${
+                                notifTab === "fees"
+                                  ? "bg-red-600 text-white border-red-600 shadow-xs"
+                                  : "bg-red-50 text-red-700 border-red-200/70 hover:bg-red-100"
+                              }`}
+                              title="Click to view Fee Due Notifications"
+                            >
+                              <IndianRupee size={12} className="stroke-[3]" />
+                              {paymentReminders?.length || 0} Fee Due
+                            </button>
+                          )}
+                          {(followupReminders?.due?.length || 0) > 0 && (
+                            <button
+                              onClick={() => setNotifTab("due")}
+                              className={`text-xs font-black px-3 py-1 rounded-full border transition-all cursor-pointer flex items-center gap-1 ${
+                                notifTab === "due"
+                                  ? "bg-rose-600 text-white border-rose-600 shadow-xs"
+                                  : "bg-rose-50 text-rose-700 border-rose-200/70 hover:bg-rose-100"
+                              }`}
+                              title="Click to view Overdue Follow-ups"
+                            >
+                              <AlertTriangle size={12} />
+                              {followupReminders?.due?.length || 0} Due
+                            </button>
+                          )}
+                          {(followupReminders?.today?.length || 0) > 0 && (
+                            <button
+                              onClick={() => setNotifTab("today")}
+                              className={`text-xs font-black px-3 py-1 rounded-full border transition-all cursor-pointer flex items-center gap-1 ${
+                                notifTab === "today"
+                                  ? "bg-amber-600 text-white border-amber-600 shadow-xs"
+                                  : "bg-amber-50 text-amber-800 border-amber-200/70 hover:bg-amber-100"
+                              }`}
+                              title="Click to view Today's Follow-ups"
+                            >
+                              <Clock size={12} />
+                              {followupReminders?.today?.length || 0} Today
+                            </button>
+                          )}
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              fetchNotifications();
+                            }}
+                            title="Refresh notifications"
+                            className="p-2 text-neutral-400 hover:text-neutral-700 hover:bg-neutral-100 rounded-full transition-colors cursor-pointer"
+                          >
+                            <RefreshCw size={15} className={isNotifRefreshing ? "animate-spin text-blue-600" : ""} />
+                          </button>
+                          <button
+                            onClick={() => setIsNotificationsOpen(false)}
+                            title="Close"
+                            className="p-2 text-neutral-400 hover:text-neutral-700 hover:bg-neutral-100 rounded-full transition-colors cursor-pointer"
+                          >
+                            <X size={16} />
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Segmented Filter Pills Tab Bar */}
+                      <div className="grid grid-cols-5 gap-1.5 p-2 bg-neutral-100/80 border-b border-neutral-200/60 text-xs font-bold">
+                        {/* TODAY TAB */}
+                        <button
+                          onClick={() => setNotifTab("today")}
+                          className={`py-2 px-1 rounded-xl text-center transition-all flex flex-col items-center justify-center gap-1 cursor-pointer ${
+                            notifTab === "today"
+                              ? "bg-white text-amber-900 shadow-xs font-black"
+                              : "text-neutral-600 hover:text-neutral-900 hover:bg-white/50"
+                          }`}
+                        >
+                          <span className="flex items-center gap-1 text-[11px] font-bold">
+                            <Clock size={13} className={notifTab === "today" ? "text-amber-600" : "text-neutral-400"} />
+                            Today
+                          </span>
+                          <span className={`text-[10px] font-black px-2 py-0.5 rounded-full ${
+                            (followupReminders?.today?.length || 0) > 0 ? "bg-amber-100 text-amber-900" : "bg-neutral-200/60 text-neutral-500"
+                          }`}>
+                            {followupReminders?.today?.length || 0}
+                          </span>
+                        </button>
+
+                        {/* DUE TAB */}
+                        <button
+                          onClick={() => setNotifTab("due")}
+                          className={`py-2 px-1 rounded-xl text-center transition-all flex flex-col items-center justify-center gap-1 cursor-pointer ${
+                            notifTab === "due"
+                              ? "bg-white text-rose-800 shadow-xs font-black"
+                              : "text-neutral-600 hover:text-neutral-900 hover:bg-white/50"
+                          }`}
+                        >
+                          <span className="flex items-center gap-1 text-[11px] font-bold">
+                            <AlertTriangle size={13} className={notifTab === "due" ? "text-rose-600" : "text-neutral-400"} />
+                            Due
+                          </span>
+                          <span className={`text-[10px] font-black px-2 py-0.5 rounded-full ${
+                            (followupReminders?.due?.length || 0) > 0 ? "bg-rose-100 text-rose-800 animate-pulse" : "bg-neutral-200/60 text-neutral-500"
+                          }`}>
+                            {followupReminders?.due?.length || 0}
+                          </span>
+                        </button>
+
+                        {/* FEE DUES TAB */}
+                        <button
+                          onClick={() => setNotifTab("fees")}
+                          className={`py-2 px-1 rounded-xl text-center transition-all flex flex-col items-center justify-center gap-1 cursor-pointer ${
+                            notifTab === "fees"
+                              ? "bg-white text-red-700 shadow-xs font-black"
+                              : "text-neutral-600 hover:text-neutral-900 hover:bg-white/50"
+                          }`}
+                        >
+                          <span className="flex items-center gap-1 text-[11px] font-bold">
+                            <IndianRupee size={13} className={notifTab === "fees" ? "text-red-600" : "text-neutral-400"} />
+                            Fee Due
+                          </span>
+                          <span className={`text-[10px] font-black px-2 py-0.5 rounded-full ${
+                            (paymentReminders?.length || 0) > 0 ? "bg-red-100 text-red-700 font-extrabold animate-pulse" : "bg-neutral-200/60 text-neutral-500"
+                          }`}>
+                            {paymentReminders?.length || 0}
+                          </span>
+                        </button>
+
+                        {/* UPCOMING TAB */}
+                        <button
+                          onClick={() => setNotifTab("upcoming")}
+                          className={`py-2 px-1 rounded-xl text-center transition-all flex flex-col items-center justify-center gap-1 cursor-pointer ${
+                            notifTab === "upcoming"
+                              ? "bg-white text-blue-700 shadow-xs font-black"
+                              : "text-neutral-600 hover:text-neutral-900 hover:bg-white/50"
+                          }`}
+                        >
+                          <span className="flex items-center gap-1 text-[11px] font-bold">
+                            <Calendar size={13} className={notifTab === "upcoming" ? "text-blue-600" : "text-neutral-400"} />
+                            Upcoming
+                          </span>
+                          <span className={`text-[10px] font-black px-2 py-0.5 rounded-full ${
+                            (followupReminders?.upcoming?.length || 0) > 0 ? "bg-blue-100 text-blue-800" : "bg-neutral-200/60 text-neutral-500"
+                          }`}>
+                            {followupReminders?.upcoming?.length || 0}
+                          </span>
+                        </button>
+
+                        {/* INQUIRIES TAB */}
+                        <button
+                          onClick={() => setNotifTab("inquiries")}
+                          className={`py-2 px-1 rounded-xl text-center transition-all flex flex-col items-center justify-center gap-1 cursor-pointer ${
+                            notifTab === "inquiries"
+                              ? "bg-white text-neutral-900 shadow-xs font-black"
+                              : "text-neutral-600 hover:text-neutral-900 hover:bg-white/50"
+                          }`}
+                        >
+                          <span className="flex items-center gap-1 text-[11px] font-bold">
+                            <Mail size={13} className={notifTab === "inquiries" ? "text-neutral-700" : "text-neutral-400"} />
+                            Inquiries
+                          </span>
+                          <span className={`text-[10px] font-black px-2 py-0.5 rounded-full ${
+                            (notifications || []).filter(n => !n?.isRead).length > 0 ? "bg-blue-100 text-blue-800" : "bg-neutral-200/60 text-neutral-500"
+                          }`}>
+                            {(notifications || []).filter(n => !n?.isRead).length}
+                          </span>
+                        </button>
+                      </div>
+
+                      {/* Content Area with Beautiful Cards */}
+                      <div className="max-h-[540px] overflow-y-auto p-3 sm:p-4 space-y-3 bg-neutral-50/40">
+                        {/* FOLLOW-UP TABS (TODAY, DUE, UPCOMING) */}
+                        {(notifTab === "today" || notifTab === "due" || notifTab === "upcoming") && (() => {
+                          const items = (followupReminders && Array.isArray(followupReminders[notifTab])) ? followupReminders[notifTab] : [];
+                          if (!items || items.length === 0) {
+                            return (
+                              <div className="py-12 px-6 text-center bg-white rounded-2xl border border-neutral-200/70 shadow-2xs">
+                                <div className={`w-14 h-14 mx-auto rounded-2xl flex items-center justify-center mb-3.5 shadow-2xs ${
+                                  notifTab === "due" ? "bg-emerald-50 text-emerald-600 border border-emerald-100" :
+                                  notifTab === "today" ? "bg-amber-50 text-amber-600 border border-amber-100" : "bg-blue-50 text-blue-600 border border-blue-100"
+                                }`}>
+                                  {notifTab === "due" ? <CheckCircle2 size={26} /> : notifTab === "today" ? <Clock size={26} /> : <Calendar size={26} />}
+                                </div>
+                                <h4 className="font-black text-neutral-900 text-sm sm:text-base">
+                                  {notifTab === "due" ? "No Overdue Follow-ups 🎉" :
+                                   notifTab === "today" ? "No Follow-ups For Today" :
+                                   "No Upcoming Follow-ups"}
+                                </h4>
+                                <p className="text-xs text-neutral-400 mt-1 max-w-xs mx-auto font-medium">
+                                  {notifTab === "due" ? "Great job! All student follow-up schedules are currently up to date." :
+                                   notifTab === "today" ? "No students are scheduled for follow-up today." :
+                                   "No future follow-up dates scheduled yet."}
+                                </p>
+                              </div>
+                            );
+                          }
+
+                          return items.map((item, idx) => {
+                            const cleanPhone = String(item?.phone || "").replace(/\D/g, "");
+                            const studentName = String(item?.student_name || "Student");
+                            const studentInitial = studentName.charAt(0).toUpperCase() || "S";
+                            const leadId = item?.lead_ID || "";
+                            const followupRound = item?.followup_round || item?.status || "";
+                            const followupBy = item?.next_followup_by || "Staff";
+                            const course = item?.interested_course || "Course N/A";
+                            const notes = item?.conversation_notes || "";
+                            const dateStr = item?.next_followup_date || "";
+                            const category = item?.category || (notifTab as "today" | "due" | "upcoming");
+
+                            return (
+                              <div
+                                key={item?.id || item?._id || idx}
+                                className={`bg-white rounded-2xl p-4 sm:p-5 border transition-all duration-200 shadow-2xs hover:shadow-sm ${
+                                  category === "due"
+                                    ? "border-rose-200/90 border-l-[5px] border-l-rose-500 hover:border-rose-300"
+                                    : category === "today"
+                                    ? "border-amber-200/90 border-l-[5px] border-l-amber-500 hover:border-amber-300"
+                                    : "border-neutral-200/90 border-l-[5px] border-l-blue-500 hover:border-blue-300"
+                                }`}
+                              >
+                                {/* Header Row: Student Avatar + Name + Category Status Badge */}
+                                <div className="flex items-start justify-between gap-3">
+                                  <div className="flex items-center gap-3 min-w-0">
+                                    <div className={`w-10 h-10 rounded-full flex items-center justify-center font-black text-xs text-white shrink-0 shadow-2xs ${
+                                      category === "due" ? "bg-gradient-to-tr from-rose-600 to-pink-500" :
+                                      category === "today" ? "bg-gradient-to-tr from-amber-600 to-orange-500" :
+                                      "bg-gradient-to-tr from-blue-600 to-indigo-600"
+                                    }`}>
+                                      {studentInitial}
+                                    </div>
+                                    <div className="min-w-0">
+                                      <div className="flex items-center gap-2 flex-wrap">
+                                        <span className="font-black text-neutral-900 text-sm sm:text-base leading-tight">
+                                          {studentName}
+                                        </span>
+                                        {leadId && (
+                                          <span className="text-[11px] font-mono font-bold text-neutral-500 bg-neutral-100 px-2 py-0.5 rounded-full shrink-0">
+                                            {leadId}
+                                          </span>
+                                        )}
+                                      </div>
+                                      <div className="flex items-center gap-2 text-xs text-neutral-500 mt-1">
+                                        <span className="inline-flex items-center gap-1 font-semibold text-neutral-700">
+                                          <Phone size={12} className="text-neutral-400" />
+                                          {cleanPhone || "N/A"}
+                                        </span>
+                                      </div>
+                                    </div>
+                                  </div>
+
+                                  <span className={`text-[11px] font-black px-3 py-1 rounded-full shrink-0 flex items-center gap-1 ${
+                                    category === "due"
+                                      ? "bg-rose-100 text-rose-800 border border-rose-200"
+                                      : category === "today"
+                                      ? "bg-amber-100 text-amber-900 border border-amber-200"
+                                      : "bg-blue-50 text-blue-700 border border-blue-200"
+                                  }`}>
+                                    {category === "due" && <AlertTriangle size={12} />}
+                                    {category === "today" && <Clock size={12} />}
+                                    {category === "upcoming" && <Calendar size={12} />}
+                                    {category === "due" ? "Overdue" : category === "today" ? "Today" : "Upcoming"}
+                                  </span>
+                                </div>
+
+                                {/* Detail Chips Row */}
+                                <div className="flex items-center flex-wrap gap-2 text-xs text-neutral-600 mt-3.5">
+                                  {/* Follow-up taken by */}
+                                  <div className="inline-flex items-center gap-1.5 bg-neutral-100/80 px-2.5 py-1 rounded-xl text-neutral-700 font-semibold border border-neutral-200/50">
+                                    <UserCheck size={13} className="text-blue-600 shrink-0" />
+                                    <span>Follow-up by: <strong className="text-neutral-900 font-bold">{followupBy}</strong></span>
+                                  </div>
+
+                                  {/* Course */}
+                                  {course && course !== "Course N/A" && (
+                                    <span className="inline-flex items-center gap-1 bg-neutral-100/80 px-2.5 py-1 rounded-xl text-neutral-700 font-semibold border border-neutral-200/50 truncate max-w-[220px]">
+                                      🎓 {course}
+                                    </span>
+                                  )}
+
+                                  {/* Followup Round */}
+                                  {followupRound && (
+                                    <span className="text-[11px] font-bold text-purple-700 bg-purple-50 px-2.5 py-1 rounded-xl border border-purple-200/70">
+                                      {followupRound}
+                                    </span>
+                                  )}
+
+                                  {/* Scheduled Date/Time */}
+                                  <span className={`inline-flex items-center gap-1 text-[11px] font-bold px-2.5 py-1 rounded-xl ${
+                                    category === "due" ? "text-rose-700 bg-rose-50 border border-rose-200/60" :
+                                    category === "today" ? "text-amber-800 bg-amber-50 border border-amber-200/60" :
+                                    "text-blue-700 bg-blue-50 border border-blue-200/60"
+                                  }`}>
+                                    <Clock size={12} />
+                                    {formatFollowupSchedule(dateStr, category)}
+                                  </span>
+                                </div>
+
+                                {/* Conversation Notes */}
+                                {notes && (
+                                  <div className="text-xs text-neutral-700 italic bg-neutral-50/80 border border-neutral-200/60 rounded-xl px-3 py-2 mt-3 flex items-start gap-2">
+                                    <MessageSquare size={13} className="text-neutral-400 shrink-0 mt-0.5" />
+                                    <span className="line-clamp-2 font-medium">"{notes}"</span>
+                                  </div>
+                                )}
+
+                                {/* Action Buttons Footer */}
+                                <div className="flex items-center justify-between pt-3 mt-3 border-t border-neutral-100" onClick={(e) => e.stopPropagation()}>
+                                  <div className="flex items-center gap-2">
+                                    {cleanPhone && (
+                                      <>
+                                        <a
+                                          href={`tel:${cleanPhone}`}
+                                          className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-neutral-700 bg-neutral-100 hover:bg-neutral-200 rounded-full transition-colors cursor-pointer"
+                                          title="Call student"
+                                        >
+                                          <Phone size={12} className="text-blue-600" />
+                                          <span>Call</span>
+                                        </a>
+                                        <a
+                                          href={`https://wa.me/91${cleanPhone.slice(-10)}?text=${encodeURIComponent(`Hello ${studentName}, this is regarding your inquiry at RizeWorld Institute.`)}`}
+                                          target="_blank"
+                                          rel="noreferrer"
+                                          className="inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-bold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 rounded-full transition-colors border border-emerald-200/70 cursor-pointer"
+                                          title="Chat on WhatsApp"
+                                        >
+                                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                                          <span>WhatsApp</span>
+                                        </a>
+                                      </>
+                                    )}
+                                  </div>
+                                  <button
+                                    onClick={() => {
+                                      setIsNotificationsOpen(false);
+                                      navigate(`/admin/dashboard/student-crm?search=${encodeURIComponent(studentName)}`);
+                                    }}
+                                    className="inline-flex items-center gap-1.5 text-xs font-bold text-blue-600 hover:text-white hover:bg-blue-600 bg-blue-50 px-3 py-1.5 rounded-full transition-all cursor-pointer border border-blue-200/60"
+                                  >
+                                    <span>Open Lead CRM</span>
+                                    <ChevronRight size={13} />
+                                  </button>
+                                </div>
+                              </div>
+                            );
+                          });
+                        })()}
+
+                        {/* FEE DUES TAB */}
+                        {notifTab === "fees" && (() => {
+                          const pReminders = Array.isArray(paymentReminders) ? paymentReminders : [];
+                          if (pReminders.length === 0) {
+                            return (
+                              <div className="py-12 px-6 text-center bg-white rounded-2xl border border-neutral-200/70 shadow-2xs">
+                                <div className="w-14 h-14 mx-auto rounded-2xl bg-emerald-50 text-emerald-600 border border-emerald-100 flex items-center justify-center mb-3.5 shadow-2xs">
+                                  <CheckCircle2 size={26} />
+                                </div>
+                                <h4 className="font-black text-neutral-900 text-sm sm:text-base">All Fees Are Up to Date 🎉</h4>
+                                <p className="text-xs text-neutral-400 mt-1 max-w-xs mx-auto font-medium">
+                                  No students have pending installment fees overdue past 1 month.
+                                </p>
+                              </div>
+                            );
+                          }
+
+                          return pReminders.map((item, idx) => {
+                            const cleanPhone = String(item?.phone || "").replace(/\D/g, "");
+                            const studentName = String(item?.student_name || "Student");
+                            const studentInitial = studentName.charAt(0).toUpperCase() || "S";
+                            const studentId = item?.student_ID || "";
+                            const studentObj = item?.studentObj || (Array.isArray(students) ? students.find(s => s.id === item?.student_ID || s.id === item?.id) : null);
+                            const pendingFee = Number(item?.pending_fee) || 0;
+                            const monthsCompleted = Number(item?.months_completed) || 1;
+                            const daysOverdue = Number(item?.days_overdue) || 0;
+                            const courseName = item?.course_name || "Course";
+                            const lastPaidDateFormatted = item?.last_payment_date
+                              ? new Date(item.last_payment_date).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })
+                              : "";
+
+                            return (
+                              <div
+                                key={item?.id || studentId || idx}
+                                className="bg-white rounded-2xl p-4 sm:p-5 border border-red-200/90 border-l-[5px] border-l-red-600 shadow-2xs hover:shadow-sm transition-all duration-200"
+                              >
+                                <div className="flex items-start justify-between gap-3">
+                                  <div className="flex items-center gap-3 min-w-0">
+                                    <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-red-600 to-rose-500 flex items-center justify-center font-black text-xs text-white shrink-0 shadow-2xs">
+                                      {studentInitial}
+                                    </div>
+                                    <div className="min-w-0">
+                                      <div className="flex items-center gap-2 flex-wrap">
+                                        <span className="font-black text-neutral-900 text-sm sm:text-base leading-tight">
+                                          {studentName}
+                                        </span>
+                                        {studentId && (
+                                          <span className="text-[11px] font-mono font-bold text-neutral-500 bg-neutral-100 px-2 py-0.5 rounded-full shrink-0">
+                                            {studentId}
+                                          </span>
+                                        )}
+                                      </div>
+                                      <div className="flex items-center gap-2 text-xs text-neutral-500 mt-1">
+                                        <span className="inline-flex items-center gap-1 font-semibold text-neutral-700">
+                                          <Phone size={12} className="text-neutral-400" />
+                                          {cleanPhone || "N/A"}
+                                        </span>
+                                      </div>
+                                    </div>
+                                  </div>
+
+                                  <span className="text-xs sm:text-[13px] font-black px-3.5 py-1.5 rounded-full bg-red-100 text-red-700 border border-red-200 shrink-0 flex items-center gap-1 shadow-2xs">
+                                    <IndianRupee size={13} className="stroke-[3]" />
+                                    {pendingFee.toLocaleString("en-IN")} Due
+                                  </span>
+                                </div>
+
+                                <div className="flex items-center flex-wrap gap-2 text-xs text-neutral-600 mt-3.5">
+                                  <span className="text-xs font-bold text-rose-700 bg-rose-50 px-2.5 py-1 rounded-xl border border-rose-200/70 flex items-center gap-1.5">
+                                    <AlertTriangle size={13} className="text-rose-600 shrink-0" />
+                                    {monthsCompleted} Month{monthsCompleted > 1 ? "s" : ""} Completed ({daysOverdue} days overdue)
+                                  </span>
+
+                                  {courseName && (
+                                    <span className="inline-flex items-center gap-1 bg-neutral-100/80 px-2.5 py-1 rounded-xl text-neutral-700 font-semibold border border-neutral-200/50">
+                                      🎓 {courseName}
+                                    </span>
+                                  )}
+                                </div>
+
+                                {lastPaidDateFormatted && (
+                                  <div className="text-xs text-neutral-500 font-medium mt-2.5 bg-neutral-50/80 px-3 py-1.5 rounded-xl border border-neutral-100">
+                                    Last paid installment: <strong className="text-neutral-900 font-bold">₹{Number(item?.last_payment_amount || 0).toLocaleString("en-IN")}</strong> on {lastPaidDateFormatted}
+                                  </div>
+                                )}
+
+                                <div className="flex items-center justify-between pt-3 mt-3 border-t border-neutral-100" onClick={(e) => e.stopPropagation()}>
+                                  <div className="flex items-center gap-2">
+                                    {cleanPhone && (
+                                      <>
+                                        <a
+                                          href={`tel:${cleanPhone}`}
+                                          className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-neutral-700 bg-neutral-100 hover:bg-neutral-200 rounded-full transition-colors cursor-pointer"
+                                          title="Call student"
+                                        >
+                                          <Phone size={12} className="text-blue-600" />
+                                          <span>Call</span>
+                                        </a>
+                                        <a
+                                          href={`https://wa.me/91${cleanPhone.slice(-10)}?text=${encodeURIComponent(
+                                            `Hello ${studentName}, this is a gentle reminder from RizeWorld Institute regarding your pending fee installment of ₹${pendingFee.toLocaleString("en-IN")}. Kindly clear your pending fee dues at your earliest convenience. Thank you!`
+                                          )}`}
+                                          target="_blank"
+                                          rel="noreferrer"
+                                          className="inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-bold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 rounded-full transition-colors border border-emerald-200/70 cursor-pointer"
+                                          title="Send WhatsApp Payment Reminder"
+                                        >
+                                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                                          <span>WhatsApp</span>
+                                        </a>
+                                      </>
+                                    )}
+                                  </div>
+
+                                  <div className="flex items-center gap-2">
+                                    {studentObj && (
+                                      <button
+                                        onClick={() => {
+                                          setIsNotificationsOpen(false);
+                                          setInvoicingStudent({ student: studentObj });
+                                        }}
+                                        className="inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-full shadow-xs transition-colors cursor-pointer"
+                                        title="Collect Fee / Generate Receipt"
+                                      >
+                                        <FileText size={13} />
+                                        <span>Collect Fee</span>
+                                      </button>
+                                    )}
+                                    <button
+                                      onClick={() => {
+                                        setIsNotificationsOpen(false);
+                                        if (studentObj) {
+                                          setViewingStudent(studentObj);
+                                        } else {
+                                          navigate(`/admin/dashboard?search=${encodeURIComponent(studentName)}`);
+                                        }
+                                      }}
+                                      className="inline-flex items-center gap-1 text-xs font-bold text-neutral-700 hover:text-neutral-900 bg-neutral-100 hover:bg-neutral-200 px-3 py-1.5 rounded-full transition-colors cursor-pointer"
+                                    >
+                                      <span>Details</span>
+                                      <ChevronRight size={13} />
+                                    </button>
+                                  </div>
+                                </div>
+                              </div>
+                            );
+                          });
+                        })()}
+
+                        {/* INQUIRIES TAB */}
+                        {notifTab === "inquiries" && (
+                          (notifications || []).length > 0 ? (
+                            notifications.map((notif, idx) => (
+                              <div 
+                                 key={notif?.id || idx}
+                                 onClick={() => {
+                                    setIsNotificationsOpen(false);
+                                    setSelectedNotification({
+                                       ...notif,
+                                       content: `Course: ${notif?.course || "N/A"}\nPhone: ${notif?.phone || "N/A"}\n\nMessage: ${notif?.content || ""}`
+                                    });
+                                    if (!notif?.isRead && notif?.id) markNotificationAsRead(notif.id);
+                                 }}
+                                 className={`bg-white rounded-2xl p-4 sm:p-5 border transition-all duration-200 shadow-2xs hover:shadow-sm cursor-pointer ${
+                                   !notif?.isRead ? 'border-blue-200/90 border-l-[5px] border-l-blue-600 bg-blue-50/20' : 'border-neutral-200/80 hover:border-neutral-300'
+                                 }`}
+                              >
+                                 <div className="flex items-start gap-3">
+                                   <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 font-bold text-xs ${
+                                     !notif?.isRead ? 'bg-gradient-to-tr from-blue-600 to-indigo-600 text-white shadow-2xs' : 'bg-neutral-100 text-neutral-500'
+                                   }`}>
+                                      <Mail size={16} />
+                                   </div>
+                                   <div className="flex-1 min-w-0">
+                                      <div className="flex items-center justify-between gap-1">
+                                        <div className="text-sm sm:text-base font-black text-neutral-900 truncate">{notif?.title || "Inquiry"}</div>
+                                        {!notif?.isRead && (
+                                          <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-blue-100 text-blue-700 shrink-0">New</span>
+                                        )}
+                                      </div>
+                                      <div className="text-xs text-neutral-600 mt-1 line-clamp-2 font-medium">
+                                        {notif?.sender || "Prospect"} is interested in <strong className="text-neutral-900">{notif?.course || "Course"}</strong>
+                                      </div>
+                                      <div className="text-[11px] text-neutral-400 font-semibold mt-2">{getTimeAgo(notif?.date)}</div>
+                                   </div>
+                                 </div>
+                              </div>
+                            ))
+                          ) : (
+                            <div className="py-12 px-6 text-center bg-white rounded-2xl border border-neutral-200/70 shadow-2xs">
+                              <div className="w-14 h-14 mx-auto rounded-2xl bg-neutral-100 text-neutral-400 flex items-center justify-center mb-3.5 shadow-2xs">
+                                <Mail size={24} />
+                              </div>
+                              <h4 className="font-black text-neutral-900 text-sm">No Website Inquiries</h4>
+                              <p className="text-xs text-neutral-400 mt-1 font-medium">Course inquiries from website forms will appear here.</p>
+                            </div>
+                          )
                         )}
-                     </div>
-                  </div>
+                      </div>
+
+                      {/* Dropdown Footer */}
+                      <div className="p-4 border-t border-neutral-100 bg-neutral-50/80 flex items-center justify-between">
+                        <span className="text-xs text-neutral-500 font-semibold">
+                          {((followupReminders?.today?.length || 0) + (followupReminders?.due?.length || 0) + (followupReminders?.upcoming?.length || 0))} follow-ups • {(paymentReminders?.length || 0)} fee dues
+                        </span>
+                        <div className="flex items-center gap-2.5">
+                          {(paymentReminders?.length || 0) > 0 && (
+                            <button
+                              onClick={() => {
+                                setIsNotificationsOpen(false);
+                                navigate("/admin/dashboard/total-pending-fees");
+                              }}
+                              className="text-xs font-bold text-red-600 hover:text-red-800 transition-colors cursor-pointer bg-red-50 hover:bg-red-100 px-3 py-1.5 rounded-full border border-red-200/60"
+                            >
+                              Pending Fees
+                            </button>
+                          )}
+                          <button
+                            onClick={() => {
+                              setIsNotificationsOpen(false);
+                              navigate("/admin/dashboard/student-crm");
+                            }}
+                            className="text-xs font-bold text-blue-600 hover:text-white hover:bg-blue-600 bg-blue-50 px-3.5 py-1.5 rounded-full transition-all flex items-center gap-1 cursor-pointer border border-blue-200/60"
+                          >
+                            <span>CRM Leads</span>
+                            <ChevronRight size={13} />
+                          </button>
+                        </div>
+                      </div>
+
+                    </div>
+                  </>
                 )}
              </div>
+              {/* Logout Button */}              {/* Logout Button */}
+              <button
+                onClick={() => setIsLogoutModalOpen(true)}
+                className="p-2 text-neutral-400 hover:text-red-600 hover:bg-red-50 rounded-full transition-colors cursor-pointer"
+                title="Logout Securely"
+              >
+                <LogOut size={18} />
+              </button>
 
+              {/* Admin Profile Chip (matches mockup) */}
+              <div className="flex items-center gap-2.5 pl-2 sm:pl-3 border-l border-neutral-200">
+                <div className="w-8 h-8 rounded-full bg-linear-to-tr from-blue-600 to-indigo-600 text-white font-bold text-xs flex items-center justify-center shadow-2xs">
+                  SA
+                </div>
+                <div className="hidden sm:block text-left">
+                  <div className="text-xs font-bold text-neutral-900 leading-tight">Super Admin</div>
+                  <div className="text-[10px] text-neutral-400 font-medium">admin@rizeworld.in</div>
+                </div>
+              </div>
+
+            </div>
           </div>
         </header>
 
-        <div className="flex-1 overflow-y-auto p-4 md:p-8 scrollbar-thin scrollbar-thumb-neutral-200 scrollbar-track-transparent">
+        {/* Main Canvas Content Area */}
+        <main className="flex-1 w-full max-w-[1520px] mx-auto px-3 sm:px-6 py-2 pb-28 sm:pb-32 space-y-6">
+          <div className="w-full space-y-6">
           
           {isInitialLoading ? (
-            <div className="max-w-[1400px] mx-auto space-y-8 animate-pulse">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
+            <div className="w-full space-y-6 animate-pulse">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
                 {[...Array(6)].map((_, i) => (
-                  <div key={i} className="h-28 bg-neutral-200/60 rounded-3xl" />
+                  <div key={i} className="h-36 bg-neutral-200/60 rounded-3xl" />
                 ))}
               </div>
-              <div className="h-64 bg-neutral-200/60 rounded-3xl" />
+              <div className="h-72 bg-neutral-200/60 rounded-3xl" />
             </div>
           ) : (
             <>
           {activeTab === "dashboard" && !expandedStat && (
-            <div className="max-w-[1400px] mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+            <div className="w-full space-y-6 animate-in fade-in duration-300">
               
-              {/* Stats Row */}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
-                <StatCard title="Total Students" value={stats.totalStudents} icon={Users} color="blue" onClick={() => navigate("/admin/dashboard/dashboard/total-students")} />
-                <StatCard title="Certificate Issued" value={stats.certificatesIssued} icon={Award} color="green" onClick={() => navigate("/admin/dashboard/dashboard/certificate-issued")} />
-                <StatCard title="Certificate Unissued" value={stats.unissuedCertificates} icon={AlertCircle} color="orange" onClick={() => navigate("/admin/dashboard/dashboard/certificate-unissued")} />
-                <StatCard title="Total Earnings" value={`₹${stats.totalEarnings.toLocaleString()}`} icon={IndianRupee} color="purple" onClick={() => navigate("/admin/dashboard/dashboard/total-earnings")} />
-                <StatCard title="Total Clear Fees" value={stats.totalClearFees} icon={CheckCircle2} color="cyan" onClick={() => navigate("/admin/dashboard/dashboard/total-clear-fees")} />
-                <StatCard title="Pending Fees" value={stats.pendingFees} icon={AlertCircle} color="red" onClick={() => navigate("/admin/dashboard/dashboard/total-pending-fees")} />
-              </div>
-
-              {/* Middle Section: Graph & Top Courses */}
-              <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-                
-                {/* Graph Area */}
-                <div className="lg:col-span-3 bg-white border border-neutral-200 rounded-3xl p-6 relative group hover:border-neutral-300 transition-colors shadow-sm">
-                   <div className="flex flex-wrap justify-between items-center gap-4 mb-6">
-                     <div>
-                       <h3 className="text-lg font-bold text-neutral-900 flex items-center gap-2">
-                         <Activity className="text-blue-600" size={20} /> Revenue & Enrollment Analytics
-                       </h3>
-                       <p className="text-xs text-neutral-500">Monthly overview of student growth & earnings</p>
-                     </div>
-                     <div className="flex items-center gap-1.5 bg-neutral-100 p-1 rounded-xl text-xs font-semibold">
-                       <button
-                         onClick={() => setGraphMetric("earnings")}
-                         className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer ${
-                           graphMetric === "earnings" ? "bg-white text-blue-600 shadow-sm font-bold" : "text-neutral-600 hover:text-neutral-900"
-                         }`}
-                       >
-                         Earnings (₹)
-                       </button>
-                       <button
-                         onClick={() => setGraphMetric("students")}
-                         className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer ${
-                           graphMetric === "students" ? "bg-white text-blue-600 shadow-sm font-bold" : "text-neutral-600 hover:text-neutral-900"
-                         }`}
-                       >
-                         Enrollments
-                       </button>
-                     </div>
-                   </div>
-                   
-                   {/* Custom SVG Line Graph */}
-                   <div className="h-[250px] w-full relative mt-4">
-                      {graphData.length > 0 ? (
-                        <>
-                          {/* Background Grid Lines */}
-                          <svg className="absolute inset-0 w-full h-full overflow-visible" preserveAspectRatio="none" viewBox="0 0 100 100">
-                             {[0, 25, 50, 75, 100].map((yVal) => (
-                               <line key={`h-${yVal}`} x1="0" y1={yVal} x2="100" y2={yVal} stroke="rgba(0,0,0,0.04)" strokeWidth="1" vectorEffect="non-scaling-stroke" />
-                             ))}
-                             {graphData.map((_, i) => {
-                               const x = 3 + (i / (graphData.length - 1 || 1)) * 94;
-                               return (
-                                 <line key={`v-${i}`} x1={x} y1="0" x2={x} y2="100" stroke="rgba(0,0,0,0.04)" strokeWidth="1" vectorEffect="non-scaling-stroke" />
-                               );
-                             })}
-                          </svg>
-
-                          {/* SVG Area & Line Path */}
-                          <svg 
-                             className="absolute inset-0 w-full h-full overflow-visible" 
-                             preserveAspectRatio="none" 
-                             viewBox="0 0 100 100"
-                          >
-                             <defs>
-                               <linearGradient id="chartGradient" x1="0" y1="0" x2="0" y2="1">
-                                 <stop offset="0%" stopColor="#3b82f6" stopOpacity="0.35" />
-                                 <stop offset="100%" stopColor="#3b82f6" stopOpacity="0.0" />
-                               </linearGradient>
-                             </defs>
-                             {(() => {
-                               const values = graphData.map(d => graphMetric === "earnings" ? Number(d.earnings) : Number(d.newStudents));
-                               const maxVal = Math.max(...values, graphMetric === "earnings" ? 1000 : 5);
-                               
-                               const pts = graphData.map((d, i) => {
-                                 const val = graphMetric === "earnings" ? Number(d.earnings) : Number(d.newStudents);
-                                 return {
-                                   x: 3 + (i / (graphData.length - 1 || 1)) * 94,
-                                   y: 90 - (val / (maxVal || 1)) * 75
-                                 };
-                               });
-                               
-                               if (pts.length === 0) return null;
-
-                               let linePath = `M ${pts[0].x},${pts[0].y}`;
-                               for (let i = 1; i < pts.length; i++) {
-                                 const p = pts[i-1];
-                                 const c = pts[i];
-                                 linePath += ` C ${p.x + (c.x - p.x) / 2},${p.y} ${c.x - (c.x - p.x) / 2},${c.y} ${c.x},${c.y}`;
-                               }
-
-                               const areaPath = `${linePath} L ${pts[pts.length - 1].x},95 L ${pts[0].x},95 Z`;
-
-                               return (
-                                 <g>
-                                   <path d={areaPath} fill="url(#chartGradient)" />
-                                   <path 
-                                     d={linePath} 
-                                     fill="none" 
-                                     stroke="#3b82f6" 
-                                     strokeWidth="3.5" 
-                                     vectorEffect="non-scaling-stroke" 
-                                     strokeLinecap="round" 
-                                     strokeLinejoin="round" 
-                                   />
-                                 </g>
-                               );
-                             })()}
-                          </svg>
-
-                          {/* Data Point Dots & Boundary-Safe Tooltips */}
-                          {(() => {
-                             const values = graphData.map(d => graphMetric === "earnings" ? Number(d.earnings) : Number(d.newStudents));
-                             const maxVal = Math.max(...values, graphMetric === "earnings" ? 1000 : 5);
-                             return graphData.map((d, i) => {
-                               const val = graphMetric === "earnings" ? Number(d.earnings) : Number(d.newStudents);
-                               const x = 3 + (i / (graphData.length - 1 || 1)) * 94;
-                               const y = 90 - (val / (maxVal || 1)) * 75;
-                               const displayMonth = (d.month && !d.month.includes("undefined")) ? d.month : "Month";
-
-                               // Determine tooltip positioning to avoid screen edge clipping
-                               let tooltipPosClass = "left-1/2 -translate-x-1/2";
-                               let arrowPosClass = "left-1/2 -translate-x-1/2";
-                               if (i === 0) {
-                                 tooltipPosClass = "left-0 translate-x-0";
-                                 arrowPosClass = "left-3 translate-x-0";
-                               } else if (i === graphData.length - 1) {
-                                 tooltipPosClass = "right-0 left-auto translate-x-0";
-                                 arrowPosClass = "right-3 left-auto translate-x-0";
-                               }
-
-                               return (
-                                 <div key={`dot-wrapper-${i}`} className="absolute group/dot" style={{ left: `${x}%`, top: `${y}%` }}>
-                                   <div className="w-4 h-4 bg-blue-600 border-2 border-white rounded-full shadow-md hover:scale-150 transition-all cursor-pointer -translate-x-1/2 -translate-y-1/2" />
-                                   
-                                   {/* Tooltip */}
-                                   <div className={`absolute bottom-full mb-3 ${tooltipPosClass} bg-neutral-900 text-white text-[11px] font-semibold px-3 py-2 rounded-xl opacity-0 group-hover/dot:opacity-100 transition-all duration-200 z-50 pointer-events-none whitespace-nowrap shadow-2xl`}>
-                                      <div className="text-blue-400 font-bold mb-0.5">{displayMonth}</div>
-                                      <div>Earnings: ₹{Number(d.earnings).toLocaleString()}</div>
-                                      <div className="text-neutral-300">New Students: {d.newStudents}</div>
-                                      <div className={`absolute -bottom-1 ${arrowPosClass} w-2 h-2 bg-neutral-900 rotate-45`}></div>
-                                   </div>
-                                 </div>
-                               );
-                             });
-                          })()}
-                        </>
-                      ) : (
-                        <div className="absolute inset-0 flex items-center justify-center text-neutral-400 text-sm italic">
-                          No growth data available yet.
-                        </div>
-                      )}
-                   </div>
-                   <div className="relative h-6 w-full mt-4 text-[11px] font-bold text-neutral-500">
-                     {graphData.length > 0 ? (
-                       graphData.map((d, i) => {
-                         const x = 3 + (i / (graphData.length - 1 || 1)) * 94;
-                         const displayMonth = (d.month && !d.month.includes("undefined")) ? d.month : "";
-                         
-                         let labelAlignClass = "-translate-x-1/2";
-                         if (i === 0) labelAlignClass = "translate-x-0";
-                         if (i === graphData.length - 1) labelAlignClass = "-translate-x-full";
-
-                         return (
-                           <span 
-                             key={i} 
-                             className={`absolute ${labelAlignClass} whitespace-nowrap text-neutral-600 font-bold text-[11px]`} 
-                             style={{ left: `${x}%` }}
-                           >
-                             {displayMonth}
-                           </span>
-                         );
-                       })
-                     ) : (
-                       <span className="text-neutral-400">No Data</span>
-                     )}
-                   </div>
+              {/* Header Action Row matching mockup */}
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pt-1">
+                <div>
+                  <h1 className="text-2xl sm:text-3xl font-extrabold text-neutral-900 tracking-tight">
+                    Dashboard Overview
+                  </h1>
+                  <p className="text-xs sm:text-sm text-neutral-500 font-medium mt-1">
+                    Your institute growth summary and real-time student activity
+                  </p>
                 </div>
 
-                {/* Top Courses */}
-                <div className="bg-white border border-neutral-200 rounded-3xl p-6 shadow-sm flex flex-col">
-                   <div className="mb-6">
-                     <h3 className="text-lg font-bold text-neutral-900">Top Courses</h3>
-                   </div>
+                <div className="flex items-center gap-2.5 flex-wrap">
+                  {/* Period Dropdown */}
+                  <div className="relative">
+                    <select
+                      value={selectedTimePeriod}
+                      onChange={(e) => setSelectedTimePeriod(e.target.value)}
+                      className="appearance-none bg-white border border-neutral-200/90 rounded-full pl-4 pr-8 py-2 text-xs sm:text-sm font-semibold text-neutral-700 hover:border-neutral-300 focus:outline-none cursor-pointer shadow-2xs"
+                    >
+                      <option value="This Month">This Month</option>
+                      <option value="Last 3 Months">Last 3 Months</option>
+                      <option value="Last 6 Months">Last 6 Months</option>
+                      <option value="This Year">This Year</option>
+                    </select>
+                    <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400 pointer-events-none" />
+                  </div>
 
-                   {/* Stripe Chart */}
-                   <div className="flex gap-[2px] w-full h-8 mb-8">
-                      {topCourses.length > 0 ? (
-                        topCourses.map((course, i) => {
-                          const colors = ["bg-emerald-500", "bg-indigo-600", "bg-cyan-500"];
-                          const total = topCourses.reduce((acc, c) => acc + c.count, 0);
-                          const percentage = (course.count / total) * 100;
-                          const stripes = Math.round((percentage / 100) * 45);
+                  {/* Export Pill Button */}
+                  <button
+                    onClick={() => {
+                      const rows = [
+                        ["ID", "Name", "Course", "Duration", "Total Fees", "Pending Fees", "Status"],
+                        ...filteredStudents.map(s => [s.id, s.name, Array.isArray(s.course) ? s.course.join("; ") : s.course, s.duration, s.totalFees, s.pendingFees, s.feesStatus])
+                      ];
+                      const csvContent = "data:text/csv;charset=utf-8," + rows.map(e => e.join(",")).join("\n");
+                      const encodedUri = encodeURI(csvContent);
+                      const link = document.createElement("a");
+                      link.setAttribute("href", encodedUri);
+                      link.setAttribute("download", `students_export_${new Date().toISOString().slice(0, 10)}.csv`);
+                      document.body.appendChild(link);
+                      link.click();
+                      document.body.removeChild(link);
+                    }}
+                    className="inline-flex items-center gap-1.5 bg-white border border-neutral-200/90 hover:border-neutral-300 text-neutral-700 px-4 py-2 rounded-full text-xs sm:text-sm font-semibold transition-all shadow-2xs cursor-pointer hover:bg-neutral-50"
+                  >
+                    <Download size={14} />
+                    <span>Export</span>
+                  </button>
+
+                  {/* Add Student Primary Pill Button */}
+                  <button
+                    onClick={() => {
+                      setEditingStudent(null);
+                      setIsStudentModalOpen(true);
+                    }}
+                    className="inline-flex items-center gap-1.5 bg-[#2563eb] hover:bg-blue-700 text-white px-5 py-2 rounded-full text-xs sm:text-sm font-semibold transition-all shadow-xs cursor-pointer hover:shadow-md"
+                  >
+                    <Plus size={16} />
+                    <span>Add Student</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* KPI Stat Cards Row (3-3 Pairs: Top = Students, Earnings, Pending; Bottom = Clear, Issued, Unissued) */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                {/* 1. Total Students */}
+                <StatCard 
+                  isPrimary={true}
+                  title="Total Students" 
+                  value={stats.totalStudents} 
+                  icon={Users} 
+                  badgeText="Active"
+                  badgeTrend="up"
+                  subtitle={`Active enrolled: ${stats.totalStudents}`}
+                  onClick={() => navigate("/admin/dashboard/dashboard/total-students")} 
+                />
+
+                {/* 2. Total Earnings */}
+                <StatCard 
+                  title="Total Earnings" 
+                  value={`₹${stats.totalEarnings.toLocaleString()}`} 
+                  icon={IndianRupee} 
+                  color="purple" 
+                  badgeText="Revenue"
+                  badgeTrend="up"
+                  subtitle="Total fee collected"
+                  onClick={() => navigate("/admin/dashboard/dashboard/total-earnings")} 
+                />
+
+                {/* 3. Total Pending Fees */}
+                <StatCard 
+                  title="Pending Fees" 
+                  value={stats.pendingFees} 
+                  icon={AlertCircle} 
+                  color="red" 
+                  badgeText={`${stats.pendingFees} Dues`}
+                  badgeTrend="down"
+                  subtitle="Pending installments"
+                  onClick={() => navigate("/admin/dashboard/dashboard/total-pending-fees")} 
+                />
+
+                {/* 4. Total Clear Fees */}
+                <StatCard 
+                  title="Total Clear Fees" 
+                  value={stats.totalClearFees} 
+                  icon={CheckCircle2} 
+                  color="cyan" 
+                  badgeText={`${stats.totalStudents > 0 ? ((stats.totalClearFees / stats.totalStudents) * 100).toFixed(0) : 0}%`}
+                  badgeTrend="up"
+                  subtitle="Fully paid students"
+                  onClick={() => navigate("/admin/dashboard/dashboard/total-clear-fees")} 
+                />
+
+                {/* 5. Certificate Issued */}
+                <StatCard 
+                  title="Certificate Issued" 
+                  value={stats.certificatesIssued} 
+                  icon={Award} 
+                  color="green" 
+                  badgeText="Issued"
+                  badgeTrend="up"
+                  subtitle="Completed courses"
+                  onClick={() => navigate("/admin/dashboard/dashboard/certificate-issued")} 
+                />
+
+                {/* 6. Certificate Unissued */}
+                <StatCard 
+                  title="Certificate Unissued" 
+                  value={stats.unissuedCertificates} 
+                  icon={AlertCircle} 
+                  color="orange" 
+                  badgeText="Pending"
+                  badgeTrend="neutral"
+                  subtitle="Awaiting issue"
+                  onClick={() => navigate("/admin/dashboard/dashboard/certificate-unissued")} 
+                />
+              </div>
+
+              {/* Middle Section: Performance Overview (Dual-Layer Bar Chart) & Sales Overview (Speedometer) */}
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
+                
+                {/* Performance Overview (lg:col-span-8) - Matches height of Sales Overview */}
+                <div className="lg:col-span-8 bg-white rounded-[26px] p-6 sm:p-7 border border-neutral-200/80 shadow-xs flex flex-col justify-between">
+                  <div className="flex flex-wrap justify-between items-center gap-4 mb-2">
+                    <div>
+                      <h3 className="text-lg font-black text-neutral-900 tracking-tight">Performance Overview</h3>
+                      <p className="text-xs text-neutral-400 font-medium">Monthly student growth & collection activity</p>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      <div className="flex items-center bg-neutral-100/80 p-1 rounded-full text-xs font-semibold border border-neutral-200/50">
+                        <button
+                          onClick={() => setGraphMetric("earnings")}
+                          className={`px-3 py-1 rounded-full transition-all cursor-pointer ${
+                            graphMetric === "earnings" ? "bg-white text-blue-600 shadow-xs font-bold" : "text-neutral-500 hover:text-neutral-900"
+                          }`}
+                        >
+                          Earnings (₹)
+                        </button>
+                        <button
+                          onClick={() => setGraphMetric("students")}
+                          className={`px-3 py-1 rounded-full transition-all cursor-pointer ${
+                            graphMetric === "students" ? "bg-white text-blue-600 shadow-xs font-bold" : "text-neutral-500 hover:text-neutral-900"
+                          }`}
+                        >
+                          Enrollments
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                   
+                  {/* Dual-layer Rounded Pill Bar Graph */}
+                  <div className="h-[250px] w-full relative mt-3 flex flex-col justify-between">
+                    {graphData.length > 0 ? (
+                      <>
+                        <svg 
+                          className="w-full h-[210px] overflow-visible" 
+                          viewBox="0 0 800 210"
+                          preserveAspectRatio="none"
+                        >
+                          <defs>
+                            <pattern 
+                              id="diagonalBlueStripes" 
+                              width="8" 
+                              height="8" 
+                              patternTransform="rotate(45 0 0)" 
+                              patternUnits="userSpaceOnUse"
+                            >
+                              <rect width="8" height="8" fill="#3b82f6" />
+                              <line x1="0" y1="0" x2="0" y2="8" stroke="#93c5fd" strokeWidth="3" />
+                            </pattern>
+                          </defs>
+
+                          {/* Dotted horizontal Y-axis gridlines */}
+                          {(() => {
+                            const yTicks = [
+                              { label: graphMetric === "earnings" ? "40k" : "40", y: 20 },
+                              { label: graphMetric === "earnings" ? "30k" : "30", y: 55 },
+                              { label: graphMetric === "earnings" ? "20k" : "20", y: 90 },
+                              { label: graphMetric === "earnings" ? "10k" : "10", y: 125 },
+                              { label: graphMetric === "earnings" ? "5k" : "5",   y: 155 },
+                              { label: "0k",                                      y: 185 },
+                            ];
+
+                            return yTicks.map((tick, idx) => {
+                              return (
+                                <g key={idx}>
+                                  <text 
+                                    x="32" 
+                                    y={tick.y + 4} 
+                                    textAnchor="end" 
+                                    className="text-[11px] font-semibold fill-neutral-400 select-none"
+                                  >
+                                    {tick.label}
+                                  </text>
+                                  <line 
+                                    x1="45" 
+                                    y1={tick.y} 
+                                    x2="780" 
+                                    y2={tick.y} 
+                                    stroke="#f1f3f6" 
+                                    strokeWidth="1.5" 
+                                    strokeDasharray="4 4" 
+                                  />
+                                </g>
+                              );
+                            });
+                          })()}
+
+                          {/* Dual-layer Bars */}
+                          {(() => {
+                            const values = graphData.map(d => graphMetric === "earnings" ? Number(d.earnings) : Number(d.newStudents));
+                            const maxVal = Math.max(...values, graphMetric === "earnings" ? 40000 : 20);
+                            const totalBars = graphData.length;
+                            const chartStart = 70;
+                            const chartWidth = 710;
+                            const step = chartWidth / totalBars;
+                            const barWidth = 44;
+                            const barRadius = 22;
+                            const trackHeight = 165;
+                            const trackY = 20;
+                            const bottomY = trackY + trackHeight;
+
+                            return graphData.map((d, i) => {
+                              const val = graphMetric === "earnings" ? Number(d.earnings) : Number(d.newStudents);
+                              const x = chartStart + i * step + (step - barWidth) / 2;
+                              
+                              let barHeight = val > 0 ? Math.max(24, (val / (maxVal || 1)) * (trackHeight - 8)) : 14;
+                              if (barHeight > trackHeight) barHeight = trackHeight;
+                              const barY = bottomY - barHeight;
+
+                              const isHighlighted = hoveredBarIndex !== null ? hoveredBarIndex === i : (i === 3 || (totalBars < 4 && i === totalBars - 1));
+
+                              return (
+                                <g 
+                                  key={i} 
+                                  className="cursor-pointer group"
+                                  onMouseEnter={() => setHoveredBarIndex(i)}
+                                  onMouseLeave={() => setHoveredBarIndex(null)}
+                                >
+                                  {/* Background soft gray capsule track */}
+                                  <rect 
+                                    x={x} 
+                                    y={trackY} 
+                                    width={barWidth} 
+                                    height={trackHeight} 
+                                    rx={barRadius} 
+                                    fill="#f1f3f6" 
+                                    className="transition-colors group-hover:fill-neutral-200/70"
+                                  />
+
+                                  {/* Foreground data capsule pill */}
+                                  <rect 
+                                    x={x} 
+                                    y={barY} 
+                                    width={barWidth} 
+                                    height={barHeight} 
+                                    rx={barRadius} 
+                                    fill={isHighlighted ? "url(#diagonalBlueStripes)" : "#cbd5e1"} 
+                                    className="transition-all duration-300"
+                                  />
+
+                                  {/* Highlighted indicator dot on top */}
+                                  {isHighlighted && (
+                                    <circle 
+                                      cx={x + barWidth / 2} 
+                                      cy={barY} 
+                                      r="4.5" 
+                                      fill="#2563eb" 
+                                      stroke="#ffffff" 
+                                      strokeWidth="2" 
+                                    />
+                                  )}
+                                </g>
+                              );
+                            });
+                          })()}
+                        </svg>
+
+                        {/* Floating Tooltip Card above highlighted bar */}
+                        {(() => {
+                          const totalBars = graphData.length;
+                          const activeIdx = hoveredBarIndex !== null ? hoveredBarIndex : (totalBars > 3 ? 3 : totalBars - 1);
+                          const activeItem = graphData[activeIdx];
+                          if (!activeItem) return null;
+
+                          const values = graphData.map(d => graphMetric === "earnings" ? Number(d.earnings) : Number(d.newStudents));
+                          const maxVal = Math.max(...values, graphMetric === "earnings" ? 40000 : 20);
+                          const val = graphMetric === "earnings" ? Number(activeItem.earnings) : Number(activeItem.newStudents);
                           
-                          return [...Array(stripes)].map((_, j) => (
-                            <div 
-                              key={`stripe-${i}-${j}`} 
-                              className={`flex-1 rounded-full ${colors[i % colors.length]}`} 
-                            />
-                          ));
-                        })
-                      ) : (
-                        [...Array(45)].map((_, i) => (
-                           <div key={`stripe-empty-${i}`} className="flex-1 rounded-full bg-neutral-100" />
-                        ))
-                      )}
-                   </div>
+                          const leftPct = ((70 + activeIdx * (710 / totalBars) + (710 / totalBars) / 2) / 800) * 100;
+                          
+                          const trackHeight = 165;
+                          const bottomY = 185;
+                          let barHeight = val > 0 ? Math.max(24, (val / (maxVal || 1)) * (trackHeight - 8)) : 14;
+                          if (barHeight > trackHeight) barHeight = trackHeight;
+                          const barY = bottomY - barHeight;
+                          const topPct = (barY / 210) * 100;
 
-                   {/* List */}
-                   <div className="flex flex-col">
-                      {topCourses.length > 0 ? (
-                        topCourses.map((course, i) => {
-                          const colors = ["bg-emerald-500", "bg-indigo-600", "bg-cyan-500"];
                           return (
-                            <div key={`course-${i}`} className={`flex items-center justify-between py-3 ${i < topCourses.length - 1 ? 'border-b border-neutral-100' : ''}`}>
-                               <div className="flex items-start gap-3">
-                                  <div className={`w-3 h-3 rounded-sm ${colors[i % colors.length]} mt-1 shrink-0`}></div>
-                                  <div>
-                                     <div className="text-sm font-bold text-neutral-900">{course._id || "Unknown"}</div>
-                                     <div className="text-[10px] text-neutral-400 font-semibold mt-0.5">{course.count} Students</div>
+                            <div 
+                              className="absolute z-20 pointer-events-none transition-all duration-200"
+                              style={{
+                                left: `${leftPct}%`,
+                                top: `${topPct}%`,
+                                transform: "translate(-50%, -115%)"
+                              }}
+                            >
+                              <div className="bg-white rounded-2xl p-3.5 shadow-xl border border-neutral-150 min-w-[155px] text-left">
+                                <div className="text-xs font-bold text-neutral-900 mb-2">{activeItem.month || "Month"}</div>
+                                <div className="space-y-1.5">
+                                  <div className="flex items-center justify-between gap-3 text-[11px] font-medium text-neutral-500">
+                                    <span className="flex items-center gap-1.5">
+                                      <span className="w-2 h-2 rounded-full bg-neutral-300"></span> Total Sales
+                                    </span>
+                                    <span className="font-bold text-neutral-900">{activeItem.newStudents || 0}</span>
                                   </div>
-                               </div>
+                                  <div className="flex items-center justify-between gap-3 text-[11px] font-medium text-neutral-500">
+                                    <span className="flex items-center gap-1.5">
+                                      <span className="w-2 h-2 rounded-full bg-blue-600"></span> Total Revenue
+                                    </span>
+                                    <span className="font-bold text-neutral-900">₹{Number(activeItem.earnings || 0).toLocaleString()}</span>
+                                  </div>
+                                </div>
+                              </div>
                             </div>
                           );
-                        })
-                      ) : (
-                        <div className="text-center py-4 text-neutral-400 text-xs italic">
-                          No course data available.
+                        })()}
+
+                        {/* Month Labels along X-Axis */}
+                        <div className="relative h-6 w-full flex justify-between pl-12 pr-4 text-xs font-semibold text-neutral-500">
+                          {graphData.map((d, i) => {
+                            const displayLabel = d.monthShort || d.month?.split(" ")[0] || `M${i+1}`;
+                            const isHighlighted = hoveredBarIndex !== null ? hoveredBarIndex === i : (i === 3 || (graphData.length < 4 && i === graphData.length - 1));
+                            return (
+                              <div 
+                                key={i} 
+                                className={`flex-1 text-center transition-colors cursor-pointer ${
+                                  isHighlighted ? "text-neutral-900 font-bold" : "text-neutral-400 hover:text-neutral-700"
+                                }`}
+                                onMouseEnter={() => setHoveredBarIndex(i)}
+                                onMouseLeave={() => setHoveredBarIndex(null)}
+                              >
+                                {displayLabel}
+                              </div>
+                            );
+                          })}
                         </div>
-                      )}
-                   </div>
+                      </>
+                    ) : (
+                      <div className="h-full flex items-center justify-center text-neutral-400 text-sm italic">
+                        No growth data available yet.
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Sales Overview / Fee Recovery (Speedometer) - lg:col-span-4 matches Performance Overview height */}
+                <div className="lg:col-span-4 bg-white rounded-[26px] p-6 sm:p-7 border border-neutral-200/80 shadow-xs flex flex-col justify-between">
+                  <div className="flex items-center justify-between mb-2">
+                    <div>
+                      <h3 className="text-lg font-black text-neutral-900 tracking-tight">Sales Overview</h3>
+                      <p className="text-xs text-neutral-400 font-medium">Institute fee collection rate</p>
+                    </div>
+                    <button 
+                      type="button" 
+                      className="p-1.5 text-neutral-400 hover:text-neutral-700 hover:bg-neutral-100 rounded-lg transition-colors cursor-pointer"
+                      title="More options"
+                    >
+                      <MoreHorizontal size={18} />
+                    </button>
+                  </div>
+
+                  {/* Radial Speedometer Gauge */}
+                  <div className="my-auto py-2">
+                    <RadialSpeedometerGauge 
+                      percentage={stats.totalStudents > 0 ? (stats.totalClearFees / stats.totalStudents) * 100 : 70.8} 
+                    />
+                  </div>
+
+                  {/* 2 Bottom Stat Pill Boxes matching mockup */}
+                  <div className="grid grid-cols-2 gap-3 mt-2">
+                    {/* Box 1: Clear Fee Students / Number of Sales */}
+                    <div className="bg-neutral-50/80 rounded-2xl p-3.5 border border-neutral-200/60">
+                      <div className="text-[11px] font-semibold text-neutral-400">Clear Fee Students</div>
+                      <div className="flex items-baseline justify-between mt-1.5">
+                        <span className="text-lg font-black text-neutral-900">{stats.totalClearFees}</span>
+                        <span className="inline-flex items-center gap-0.5 text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 border border-amber-200/60">
+                          ↑ {stats.totalStudents > 0 ? ((stats.totalClearFees / stats.totalStudents) * 100).toFixed(0) : 0}%
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Box 2: Total Revenue */}
+                    <div className="bg-neutral-50/80 rounded-2xl p-3.5 border border-neutral-200/60">
+                      <div className="text-[11px] font-semibold text-neutral-400">Total Revenue</div>
+                      <div className="flex items-baseline justify-between mt-1.5">
+                        <span className="text-lg font-black text-neutral-900">
+                          ₹{stats.totalEarnings >= 1000 ? `${(stats.totalEarnings / 1000).toFixed(1)}k` : stats.totalEarnings}
+                        </span>
+                        <span className="inline-flex items-center gap-0.5 text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 border border-blue-200/60">
+                          Active
+                        </span>
+                      </div>
+                    </div>
+                  </div>
                 </div>
 
               </div>
 
-              {/* Student Management Table */}
-              <div className="bg-white border border-neutral-200 rounded-3xl overflow-hidden shadow-sm relative">
-                {/* Table Header */}
-                <div className="p-6 border-b border-neutral-200 flex flex-col md:flex-row md:items-center justify-between gap-4 bg-neutral-50/50">
-                  <div className="flex flex-col md:flex-row gap-4 items-center flex-1">
-                    <div className="relative max-w-sm w-full">
-                      <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-neutral-400" />
+              {/* Full Width Top Courses Card - Covering both Performance Overview & Sales Overview */}
+              <div className="bg-white rounded-[26px] p-6 sm:p-7 border border-neutral-200/80 shadow-xs">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+                  <div>
+                    <h3 className="text-lg font-black text-neutral-900 tracking-tight">Top Courses</h3>
+                    <p className="text-xs text-neutral-400 font-medium">Real-time student enrollment distribution across programs</p>
+                  </div>
+                  <span className="text-xs font-bold px-3.5 py-1.5 rounded-full bg-neutral-100 text-neutral-700 shrink-0 self-start sm:self-auto border border-neutral-200/60">
+                    {topCourses.reduce((acc, c) => acc + (c.count || 0), 0)} Enrolled • {topCourses.length} Programs
+                  </span>
+                </div>
+
+                {/* Multi-segmented Stripes Progress Bar */}
+                <div className="flex gap-1 w-full h-3 mb-5 rounded-full overflow-hidden bg-neutral-100 p-0.5">
+                  {topCourses.length > 0 ? (
+                    topCourses.map((course, i) => {
+                      const colors = [
+                        "bg-blue-600",
+                        "bg-indigo-500",
+                        "bg-sky-400",
+                        "bg-emerald-500",
+                        "bg-violet-500",
+                        "bg-amber-500",
+                        "bg-rose-500"
+                      ];
+                      const total = topCourses.reduce((acc, c) => acc + c.count, 0) || 1;
+                      const percentage = (course.count / total) * 100;
+                      return (
+                        <div 
+                          key={i} 
+                          className={`${colors[i % colors.length]} h-full rounded-full transition-all`}
+                          style={{ width: `${Math.max(4, percentage)}%` }}
+                          title={`${course._id}: ${course.count} students (${percentage.toFixed(1)}%)`}
+                        />
+                      );
+                    })
+                  ) : (
+                    <div className="w-full bg-neutral-200 h-full rounded-full" />
+                  )}
+                </div>
+
+                {/* Responsive Grid of Course Items across full width */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3.5">
+                  {topCourses.length > 0 ? (
+                    topCourses.map((course, i) => {
+                      const dotColors = [
+                        "bg-blue-600",
+                        "bg-indigo-500",
+                        "bg-sky-400",
+                        "bg-emerald-500",
+                        "bg-violet-500",
+                        "bg-amber-500",
+                        "bg-rose-500"
+                      ];
+                      const total = topCourses.reduce((acc, c) => acc + c.count, 0) || 1;
+                      const percentage = ((course.count / total) * 100).toFixed(0);
+                      return (
+                        <div 
+                          key={i} 
+                          className="flex items-center justify-between p-3.5 rounded-2xl bg-neutral-50/70 border border-neutral-200/50 hover:bg-neutral-100/60 transition-colors"
+                        >
+                          <div className="flex items-center gap-2.5 min-w-0 pr-2">
+                            <span className={`w-2.5 h-2.5 rounded-full shrink-0 ${dotColors[i % dotColors.length]}`}></span>
+                            <span className="font-bold text-xs text-neutral-800 truncate" title={course._id || "Course"}>
+                              {course._id || "Course"}
+                            </span>
+                          </div>
+                          <div className="text-right shrink-0">
+                            <span className="text-xs font-black text-neutral-900">{course.count}</span>
+                            <span className="text-[11px] font-semibold text-neutral-400 ml-1">({percentage}%)</span>
+                          </div>
+                        </div>
+                      );
+                    })
+                  ) : (
+                    <div className="col-span-full py-4 text-center text-xs text-neutral-400 font-medium">
+                      No enrolled course data available yet
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Student Management Table (Recent Orders styling matching mockup) */}
+              <div className="bg-white rounded-[26px] p-6 sm:p-7 border border-neutral-200/80 shadow-xs">
+                {/* Table Header Controls */}
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-6 border-b border-neutral-100">
+                  <div className="flex items-center gap-3">
+                    <h3 className="text-lg font-black text-neutral-900 tracking-tight">Recent Students</h3>
+                    <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-neutral-100 text-neutral-600">
+                      {filteredStudents.length} total
+                    </span>
+                  </div>
+
+                  <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+                    {/* Pill Search Bar */}
+                    <div className="relative">
+                      <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-neutral-400" />
                       <input
                         type="text"
                         placeholder="Search students..."
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
-                        className="w-full pl-11 pr-4 py-2.5 rounded-xl bg-white border border-neutral-200 focus:border-blue-500 focus:ring-1 focus:ring-blue-500/50 focus:outline-none transition-all text-sm text-neutral-900 placeholder-neutral-400"
+                        className="w-full sm:w-64 pl-10 pr-4 py-2 rounded-full bg-neutral-50/80 border border-neutral-200/80 focus:bg-white focus:border-blue-500 focus:outline-none transition-all text-xs font-medium text-neutral-900 placeholder-neutral-400 shadow-2xs"
                       />
                     </div>
-                    <select 
-                      value={statusFilter} 
-                      onChange={(e: any) => setStatusFilter(e.target.value)}
-                      className="px-4 py-2.5 rounded-xl bg-white border border-neutral-200 text-sm text-neutral-700 focus:border-blue-500 focus:outline-none w-full md:w-48 appearance-none cursor-pointer"
+
+                    {/* Pill Status Filter */}
+                    <div className="relative">
+                      <select 
+                        value={statusFilter} 
+                        onChange={(e: any) => setStatusFilter(e.target.value)}
+                        className="appearance-none bg-neutral-50/80 border border-neutral-200/80 rounded-full pl-4 pr-8 py-2 text-xs font-semibold text-neutral-700 hover:border-neutral-300 focus:outline-none cursor-pointer shadow-2xs"
+                      >
+                        <option value="All">All Status</option>
+                        <option value="Clear">Clear Fees</option>
+                        <option value="Pending">Pending Fees</option>
+                      </select>
+                      <ChevronDown size={13} className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400 pointer-events-none" />
+                    </div>
+
+                    {/* Add Student Pill */}
+                    <button 
+                      onClick={() => {
+                        setEditingStudent(null);
+                        setIsStudentModalOpen(true);
+                      }}
+                      className="inline-flex items-center justify-center gap-1.5 px-4 py-2 bg-[#2563eb] hover:bg-blue-700 text-white font-semibold rounded-full text-xs transition-all shadow-xs cursor-pointer hover:shadow"
                     >
-                      <option value="All">All Status</option>
-                      <option value="Clear">Clear Fees</option>
-                      <option value="Pending">Pending Fees</option>
-                    </select>
+                      <Plus size={15} /> Add Student
+                    </button>
                   </div>
-                  <button 
-                    onClick={() => {
-                      setEditingStudent(null);
-                      setIsStudentModalOpen(true);
-                    }}
-                    className="flex items-center justify-center gap-2 px-6 py-2.5 bg-linear-to-r from-blue-600 to-indigo-600 text-white font-semibold rounded-xl hover:shadow-[0_0_20px_rgba(79,70,229,0.3)] transition-all shrink-0 text-sm hover:-translate-y-0.5"
-                  >
-                    <Plus size={18} /> Add Student
-                  </button>
                 </div>
 
-                {/* Table Data */}
+                {/* Clean Minimalist Table */}
                 <div className="overflow-x-auto min-h-[300px]">
                   <table className="w-full text-left border-collapse">
                     <thead>
-                      <tr className="bg-neutral-50 border-b border-neutral-200 text-neutral-500 text-xs uppercase tracking-wider font-semibold">
-                        <th className="py-5 px-6 text-sm">ID</th>
-                        <th className="py-5 px-6 text-sm">Student Name</th>
-                        <th className="py-5 px-6 text-sm">Course</th>
-                        <th className="py-5 px-6 text-sm">Duration</th>
-                        <th className="py-5 px-6 text-sm">Total Fee</th>
-                        <th className="py-5 px-6 text-sm">Pending Fee</th>
-                        <th className="py-5 px-6 text-sm">Status</th>
-                        <th className="py-5 px-6 text-right text-sm">Action</th>
+                      <tr className="border-b border-neutral-100 text-neutral-400 text-[11px] uppercase tracking-wider font-bold">
+                        <th className="py-4 px-4 font-semibold">ID</th>
+                        <th className="py-4 px-4 font-semibold">Student Name</th>
+                        <th className="py-4 px-4 font-semibold">Course</th>
+                        <th className="py-4 px-4 font-semibold">Duration</th>
+                        <th className="py-4 px-4 font-semibold">Total Fee</th>
+                        <th className="py-4 px-4 font-semibold">Pending Fee</th>
+                        <th className="py-4 px-4 font-semibold">Status</th>
+                        <th className="py-4 px-4 text-right font-semibold">Action</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-neutral-100 text-sm">
+                    <tbody className="divide-y divide-neutral-100/70 text-xs font-medium">
                       {filteredStudents.length > 0 ? (
                         filteredStudents.map((s) => (
-                          <tr key={s.id} className="hover:bg-neutral-50/50 transition-colors group">
-                            <td className="py-4 px-6 font-mono text-neutral-500">{s.id}</td>
-                            <td className="py-4 px-6 font-semibold text-neutral-900 flex items-center gap-3">
-                               <div className="w-8 h-8 rounded-full bg-linear-to-tr from-blue-100 to-purple-100 text-blue-700 flex items-center justify-center text-xs font-bold shadow-sm border border-blue-200">
-                                 {s.name.charAt(0).toUpperCase()}
-                               </div>
-                               {s.name}
+                          <tr key={s.id} className="hover:bg-neutral-50/70 transition-colors group">
+                            <td className="py-4 px-4 font-mono text-neutral-500 font-semibold">{s.id}</td>
+                            <td className="py-4 px-4 font-bold text-neutral-900">
+                              <div className="flex items-center gap-2.5">
+                                <div className="w-8 h-8 rounded-full bg-linear-to-tr from-blue-100 to-indigo-100 text-blue-700 flex items-center justify-center text-xs font-bold shadow-2xs border border-blue-200/50">
+                                  {s.name.charAt(0).toUpperCase()}
+                                </div>
+                                <span>{s.name}</span>
+                              </div>
                             </td>
-                            <td className="py-4 px-6 text-neutral-600">{Array.isArray(s.course) ? s.course.join(", ") : s.course || "N/A"}</td>
-                            <td className="py-4 px-6 text-neutral-600">{s.duration || "N/A"}</td>
-                            <td className="py-4 px-6 text-neutral-700">₹{s.totalFees || 0}</td>
-                            <td className="py-4 px-6 text-neutral-700">₹{s.pendingFees || 0}</td>
-                            <td className="py-4 px-6">
+                            <td className="py-4 px-4 text-neutral-600">{Array.isArray(s.course) ? s.course.join(", ") : s.course || "N/A"}</td>
+                            <td className="py-4 px-4 text-neutral-500">{s.duration || "N/A"}</td>
+                            <td className="py-4 px-4 text-neutral-800 font-semibold">₹{s.totalFees || 0}</td>
+                            <td className="py-4 px-4 text-neutral-800 font-semibold">₹{s.pendingFees || 0}</td>
+                            <td className="py-4 px-4">
                               <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider border ${
-                                s.feesStatus === "Clear" ? "bg-green-100 text-green-700 border-green-200" :
-                                s.feesStatus === "Pending" ? "bg-red-100 text-red-700 border-red-200" :
-                                "bg-orange-100 text-orange-700 border-orange-200"
+                                s.feesStatus === "Clear" ? "bg-emerald-50 text-emerald-700 border-emerald-200" :
+                                s.feesStatus === "Pending" ? "bg-rose-50 text-rose-700 border-rose-200" :
+                                "bg-amber-50 text-amber-700 border-amber-200"
                               }`}>
-                                <div className={`w-1.5 h-1.5 rounded-full ${s.feesStatus === "Clear" ? "bg-green-500" : s.feesStatus === "Pending" ? "bg-red-500" : "bg-orange-500"}`} />
+                                <span className={`w-1.5 h-1.5 rounded-full ${s.feesStatus === "Clear" ? "bg-emerald-500" : s.feesStatus === "Pending" ? "bg-rose-500" : "bg-amber-500"}`} />
                                 {s.feesStatus}
                               </span>
                             </td>
-                            <td className="py-4 px-6">
-                              <div className="flex items-center justify-end gap-2">
+                            <td className="py-4 px-4">
+                              <div className="flex items-center justify-end gap-1.5">
                                 <button 
                                   onClick={() => setInvoicingStudent({ student: s })}
-                                  className="p-2 text-[#FF5A36] hover:bg-orange-50 rounded-lg transition-all cursor-pointer"
+                                  className="p-1.5 text-[#FF5A36] hover:bg-orange-50 rounded-lg transition-all cursor-pointer"
                                   title="Fee Bill / Invoice"
                                 >
-                                  <FileText size={16} />
+                                  <FileText size={15} />
                                 </button>
                                 <button 
                                   onClick={() => { setEditingStudent(s); setIsStudentModalOpen(true); }}
-                                  className="p-2 text-purple-600 hover:bg-purple-50 rounded-lg transition-all"
+                                  className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-lg transition-all cursor-pointer"
                                   title="Edit Student"
                                 >
-                                  <Edit2 size={16} />
+                                  <Edit2 size={15} />
                                 </button>
                                 <button 
                                   onClick={() => handleDeleteStudent(s.id, s.name)}
-                                  className="p-2 text-red-600 hover:bg-red-50 hover:text-red-700 rounded-lg transition-all"
+                                  className="p-1.5 text-rose-600 hover:bg-rose-50 rounded-lg transition-all cursor-pointer"
                                   title="Delete Student"
                                 >
-                                  <Trash2 size={16} />
+                                  <Trash2 size={15} />
                                 </button>
                                 <button 
                                   onClick={() => setViewingStudent(s)}
-                                  className="px-3 py-1.5 text-xs font-semibold bg-white hover:bg-neutral-50 text-neutral-700 rounded-lg border border-neutral-200 shadow-sm transition-all ml-1 cursor-pointer"
+                                  className="px-2.5 py-1 text-xs font-semibold bg-white hover:bg-neutral-100 text-neutral-700 rounded-lg border border-neutral-200 shadow-2xs transition-all ml-1 cursor-pointer"
                                 >
                                   Details
                                 </button>
@@ -1748,7 +3025,7 @@ export default function AdminDashboard() {
                                     className="p-1.5 text-emerald-600 hover:bg-emerald-50 rounded-lg border border-emerald-200 transition-all ml-1 cursor-pointer disabled:opacity-50"
                                     title="Download Certificate"
                                   >
-                                    <Award size={16} />
+                                    <Award size={15} />
                                   </button>
                                 )}
                               </div>
@@ -1757,10 +3034,10 @@ export default function AdminDashboard() {
                         ))
                       ) : (
                         <tr>
-                          <td colSpan={8} className="py-20 text-center">
+                          <td colSpan={8} className="py-16 text-center">
                             <div className="flex flex-col items-center justify-center text-neutral-400">
-                               <Users size={48} className="mb-4 opacity-20" />
-                               <p>No students found matching your criteria.</p>
+                              <Users size={40} className="mb-3 opacity-25" />
+                              <p className="text-sm font-medium">No students found matching your criteria.</p>
                             </div>
                           </td>
                         </tr>
@@ -1774,14 +3051,14 @@ export default function AdminDashboard() {
           )}
 
           {activeTab === "dashboard" && expandedStat && (
-             <div className="max-w-[1400px] mx-auto animate-in fade-in slide-in-from-right-8 duration-500">
-                <button onClick={() => navigate("/admin/dashboard/dashboard")} className="mb-6 flex items-center gap-2 text-neutral-500 hover:text-neutral-900 font-semibold transition-colors cursor-pointer bg-white px-4 py-2 rounded-xl border border-neutral-200 shadow-sm hover:shadow">
+             <div className="max-w-[1520px] mx-auto animate-in fade-in duration-300 space-y-6">
+                <button onClick={() => navigate("/admin/dashboard/dashboard")} className="flex items-center gap-2 text-neutral-600 hover:text-neutral-900 font-bold transition-all cursor-pointer bg-white px-4 py-2 rounded-full border border-neutral-200/80 shadow-xs hover:border-neutral-300 text-xs">
                    <ArrowLeft size={16} /> Back to Dashboard
                 </button>
-                <div className="bg-white rounded-3xl p-8 border border-neutral-200 shadow-sm min-h-[600px] flex flex-col">
+                <div className="bg-white rounded-[26px] p-6 sm:p-8 border border-neutral-200/80 shadow-xs min-h-[600px] flex flex-col">
                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
-                       <h2 className="text-2xl font-bold text-neutral-900 capitalize flex items-center gap-3">
-                          <div className="w-10 h-10 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center">
+                       <h2 className="text-2xl sm:text-3xl font-black text-neutral-900 tracking-tight capitalize flex items-center gap-3">
+                          <div className="w-10 h-10 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center shadow-2xs border border-blue-100/60">
                              <LayoutDashboard size={20} />
                           </div>
                           {expandedStat.replace(/-/g, ' ')} Details
@@ -2350,7 +3627,7 @@ export default function AdminDashboard() {
                        </div>
                     )}
 
-                   <div className="flex-1 border border-neutral-200 rounded-2xl overflow-hidden bg-white shadow-sm overflow-x-auto">
+                   <div className="flex-1 border border-neutral-200/80 rounded-[22px] overflow-hidden bg-white shadow-2xs overflow-x-auto">
                       {(() => {
                          if (expandedStat === "total-students") {
                             const filteredStudents = allStudentsData
@@ -2375,7 +3652,7 @@ export default function AdminDashboard() {
 
                             return (
                                <table className="w-full text-left border-collapse text-sm">
-                                  <thead className="bg-neutral-50 border-b border-neutral-200">
+                                  <thead className="bg-neutral-50/70 border-b border-neutral-100">
                                      <tr>
                                         <th className="px-3 py-3 text-xs font-bold text-neutral-500 uppercase tracking-wider">ID</th>
                                         <th className="px-3 py-3 text-xs font-bold text-neutral-500 uppercase tracking-wider">Student Name</th>
@@ -2465,7 +3742,7 @@ export default function AdminDashboard() {
                          if (expandedStat === "certificate-issued") {
                             return (
                                <table className="w-full text-left border-collapse text-sm">
-                                  <thead className="bg-neutral-50 border-b border-neutral-200">
+                                  <thead className="bg-neutral-50/70 border-b border-neutral-100">
                                      <tr>
                                         <th className="px-3 py-3 text-xs font-bold text-neutral-500 uppercase tracking-wider">Student ID</th>
                                         <th className="px-3 py-3 text-xs font-bold text-neutral-500 uppercase tracking-wider">Student Name</th>
@@ -2546,7 +3823,7 @@ export default function AdminDashboard() {
                          if (expandedStat === "certificate-unissued") {
                             return (
                                <table className="w-full text-left border-collapse text-sm">
-                                  <thead className="bg-neutral-50 border-b border-neutral-200">
+                                  <thead className="bg-neutral-50/70 border-b border-neutral-100">
                                      <tr>
                                         <th className="px-3 py-3 text-xs font-bold text-neutral-500 uppercase tracking-wider">ID</th>
                                         <th className="px-3 py-3 text-xs font-bold text-neutral-500 uppercase tracking-wider">Student Name</th>
@@ -2621,7 +3898,7 @@ export default function AdminDashboard() {
 
                                 return (
                                    <table className="w-full text-left border-collapse text-sm">
-                                      <thead className="bg-neutral-50 border-b border-neutral-200">
+                                      <thead className="bg-neutral-50/70 border-b border-neutral-100">
                                          <tr>
                                             <th className="px-3 py-3 text-xs font-bold text-neutral-500 uppercase tracking-wider">ID</th>
                                             <th className="px-3 py-3 text-xs font-bold text-neutral-500 uppercase tracking-wider">Student Name</th>
@@ -2713,7 +3990,7 @@ export default function AdminDashboard() {
 
                                 return (
                                    <table className="w-full text-left border-collapse text-sm">
-                                      <thead className="bg-neutral-50 border-b border-neutral-200">
+                                      <thead className="bg-neutral-50/70 border-b border-neutral-100">
                                          <tr>
                                             <th className="px-3 py-3 text-xs font-bold text-neutral-500 uppercase tracking-wider">ID</th>
                                             <th className="px-3 py-3 text-xs font-bold text-neutral-500 uppercase tracking-wider">Student Name</th>
@@ -2799,7 +4076,7 @@ export default function AdminDashboard() {
 
                              return (
                                 <table className="w-full text-left border-collapse text-sm">
-                                   <thead className="bg-neutral-50 border-b border-neutral-200">
+                                   <thead className="bg-neutral-50/70 border-b border-neutral-100">
                                       <tr>
                                          <th className="px-3 py-3 text-xs font-bold text-neutral-500 uppercase tracking-wider">TXN ID</th>
                                          <th className="px-3 py-3 text-xs font-bold text-neutral-500 uppercase tracking-wider">Student Name</th>
@@ -2863,7 +4140,7 @@ export default function AdminDashboard() {
 
                             return (
                                <table className="w-full text-left border-collapse text-sm">
-                                  <thead className="bg-neutral-50 border-b border-neutral-200">
+                                  <thead className="bg-neutral-50/70 border-b border-neutral-100">
                                      <tr>
                                         <th className="px-3 py-3 text-xs font-bold text-neutral-500 uppercase tracking-wider">ID</th>
                                         <th className="px-3 py-3 text-xs font-bold text-neutral-500 uppercase tracking-wider">Student Name</th>
@@ -2932,7 +4209,7 @@ export default function AdminDashboard() {
 
                             return (
                                <table className="w-full text-left border-collapse text-sm">
-                                  <thead className="bg-neutral-50 border-b border-neutral-200">
+                                  <thead className="bg-neutral-50/70 border-b border-neutral-100">
                                      <tr>
                                         <th className="px-3 py-3 text-xs font-bold text-neutral-500 uppercase tracking-wider">ID</th>
                                         <th className="px-3 py-3 text-xs font-bold text-neutral-500 uppercase tracking-wider">Student Name</th>
@@ -3034,6 +4311,11 @@ export default function AdminDashboard() {
                 deletedStudents={deletedStudents}
                 handleRestoreStudent={handleRestoreStudent}
              />
+          )}
+
+          {/* STUDENT LEADS CRM PAGE */}
+          {(activeTab === "student-crm" || activeTab === "student-leads") && (
+             <StudentLeadCrmTab />
           )}
             </>
           )}
@@ -3153,6 +4435,74 @@ export default function AdminDashboard() {
          </div>
       )}
 
+      {/* Floating Bottom Center Navigation Dock with Authentic Neumorphism Effect */}
+      <nav 
+        aria-label="Main Navigation Dock"
+        className="fixed bottom-5 sm:bottom-6 left-1/2 -translate-x-1/2 z-40 max-w-[96vw] animate-in fade-in slide-in-from-bottom-4 duration-300 pointer-events-auto"
+      >
+        <div className="neumorphism-dock p-1.5 sm:p-2 flex items-center gap-1 sm:gap-1.5 overflow-x-auto no-scrollbar max-w-full">
+          <button
+            onClick={() => navigate("/admin/dashboard/dashboard")}
+            className={`px-4 sm:px-5 py-2 rounded-full text-xs sm:text-[13px] whitespace-nowrap transition-all cursor-pointer ${
+              activeTab === "dashboard"
+                ? "neumorphism-dock-active font-black"
+                : "neumorphism-dock-inactive font-bold"
+            }`}
+          >
+            Dashboard
+          </button>
+          <button
+            onClick={() => navigate("/admin/dashboard/student-crm")}
+            className={`px-4 sm:px-5 py-2 rounded-full text-xs sm:text-[13px] whitespace-nowrap transition-all cursor-pointer ${
+              activeTab === "student-crm" || activeTab === "student-leads"
+                ? "neumorphism-dock-active font-black"
+                : "neumorphism-dock-inactive font-bold"
+            }`}
+          >
+            Student Leads CRM
+          </button>
+          <button
+            onClick={() => navigate("/admin/dashboard/inquiry")}
+            className={`px-4 sm:px-5 py-2 rounded-full text-xs sm:text-[13px] whitespace-nowrap transition-all cursor-pointer ${
+              activeTab === "inquiry"
+                ? "neumorphism-dock-active font-black"
+                : "neumorphism-dock-inactive font-bold"
+            }`}
+          >
+            Inquiries
+          </button>
+          <button
+            onClick={() => navigate("/admin/dashboard/referred-by")}
+            className={`px-4 sm:px-5 py-2 rounded-full text-xs sm:text-[13px] whitespace-nowrap transition-all cursor-pointer ${
+              activeTab === "referred-by"
+                ? "neumorphism-dock-active font-black"
+                : "neumorphism-dock-inactive font-semibold"
+            }`}
+          >
+            Referred By
+          </button>
+          <button
+            onClick={() => navigate("/admin/dashboard/deleted-referrers")}
+            className={`px-4 sm:px-5 py-2 rounded-full text-xs sm:text-[13px] whitespace-nowrap transition-all cursor-pointer ${
+              activeTab === "deleted-referrers"
+                ? "neumorphism-dock-active font-black"
+                : "neumorphism-dock-inactive font-semibold"
+            }`}
+          >
+            Deleted Referrers
+          </button>
+          <button
+            onClick={() => navigate("/admin/dashboard/deleted-students")}
+            className={`px-4 sm:px-5 py-2 rounded-full text-xs sm:text-[13px] whitespace-nowrap transition-all cursor-pointer ${
+              activeTab === "deleted-students"
+                ? "neumorphism-dock-active font-black"
+                : "neumorphism-dock-inactive font-semibold"
+            }`}
+          >
+            Deleted Students
+          </button>
+        </div>
+      </nav>
     </div>
   );
 }
@@ -3173,36 +4523,150 @@ function SidebarItem({ icon: Icon, label, active, onClick }: any) {
   );
 }
 
-function StatCard({ title, value, icon: Icon, color, onClick }: any) {
-  const colorMap: any = {
-    blue: "bg-white text-blue-700 border-blue-100 shadow-sm icon-blue",
-    green: "bg-white text-emerald-700 border-emerald-100 shadow-sm icon-emerald",
-    orange: "bg-white text-orange-700 border-orange-100 shadow-sm icon-orange",
-    purple: "bg-white text-purple-700 border-purple-100 shadow-sm icon-purple",
-    cyan: "bg-white text-cyan-700 border-cyan-100 shadow-sm icon-cyan",
-    red: "bg-white text-red-700 border-red-100 shadow-sm icon-red",
+function StatCard({ 
+  title, 
+  value, 
+  icon: Icon, 
+  color = "blue", 
+  onClick,
+  isPrimary = false,
+  badgeText = "",
+  badgeTrend = "up",
+  subtitle = ""
+}: any) {
+  if (isPrimary) {
+    return (
+      <div 
+        onClick={onClick} 
+        className="cursor-pointer bg-gradient-to-br from-[#1d4ed8] via-[#2563eb] to-[#3b82f6] text-white rounded-[26px] p-6 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-300 relative overflow-hidden group flex flex-col justify-between min-h-[165px]"
+      >
+        <div className="flex items-center justify-between mb-2">
+          <span className="text-xs font-semibold text-blue-100 uppercase tracking-wider">{title}</span>
+          <div className="w-10 h-10 rounded-full bg-white text-blue-600 flex items-center justify-center shadow-xs">
+            <Icon size={20} />
+          </div>
+        </div>
+        <div className="my-auto">
+          <div className="flex items-baseline gap-2.5">
+            <span className="text-3xl md:text-4xl font-black text-white tracking-tight">{value}</span>
+            {badgeText && (
+              <span className="inline-flex items-center gap-0.5 text-[11px] font-bold px-2 py-0.5 rounded-full bg-white/20 text-white backdrop-blur-xs">
+                {badgeTrend === "up" ? "↑" : badgeTrend === "down" ? "↓" : ""} {badgeText}
+              </span>
+            )}
+          </div>
+        </div>
+        <div className="text-xs text-blue-100 font-medium opacity-90">
+          {subtitle || "Active enrolled"}
+        </div>
+      </div>
+    );
+  }
+
+  const iconColors: Record<string, string> = {
+    blue: "bg-blue-50 text-blue-600",
+    green: "bg-emerald-50 text-emerald-600",
+    orange: "bg-orange-50 text-orange-600",
+    purple: "bg-purple-50 text-purple-600",
+    cyan: "bg-cyan-50 text-cyan-600",
+    red: "bg-rose-50 text-rose-600",
+    dark: "bg-neutral-900 text-white"
   };
-  
-  const iconColors: any = {
-     blue: "text-blue-600 bg-blue-100",
-     green: "text-emerald-600 bg-emerald-100",
-     orange: "text-orange-600 bg-orange-100",
-     purple: "text-purple-600 bg-purple-100",
-     cyan: "text-cyan-600 bg-cyan-100",
-     red: "text-red-600 bg-red-100",
+
+  const badgeColors: Record<string, string> = {
+    up: "bg-blue-50 text-blue-700 border border-blue-200/60",
+    down: "bg-rose-50 text-rose-700 border border-rose-200/60",
+    neutral: "bg-neutral-100 text-neutral-600 border border-neutral-200/60"
   };
 
   return (
-    <div onClick={onClick} className={`cursor-pointer border rounded-3xl p-6 flex flex-col justify-between relative overflow-hidden group hover:-translate-y-1 transition-transform duration-300 ${colorMap[color].split(" icon-")[0]}`}>
-      <div className="absolute -right-6 -top-6 w-24 h-24 bg-white/50 rounded-full blur-2xl group-hover:bg-white transition-colors"></div>
-      <div className="flex justify-between items-start mb-4">
-         <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shadow-sm ${iconColors[color]}`}>
-           <Icon size={24} />
-         </div>
+    <div 
+      onClick={onClick} 
+      className="cursor-pointer bg-white rounded-[26px] p-6 border border-neutral-200/80 shadow-xs hover:border-neutral-300 hover:shadow-sm hover:-translate-y-1 transition-all duration-300 relative overflow-hidden group flex flex-col justify-between min-h-[165px]"
+    >
+      <div className="flex items-center justify-between mb-2">
+        <span className="text-xs font-semibold text-neutral-500 uppercase tracking-wider">{title}</span>
+        <div className={`w-10 h-10 rounded-full flex items-center justify-center shadow-2xs ${iconColors[color] || "bg-neutral-100 text-neutral-700"}`}>
+          <Icon size={19} />
+        </div>
       </div>
-      <div>
-        <div className="font-display text-3xl font-black text-neutral-900 mb-1 tracking-tight">{value}</div>
-        <div className="text-xs font-bold uppercase tracking-wider opacity-80">{title}</div>
+      <div className="my-auto">
+        <div className="flex items-baseline gap-2.5 flex-wrap">
+          <span className="text-2xl md:text-3xl font-black text-neutral-900 tracking-tight">{value}</span>
+          {badgeText && (
+            <span className={`inline-flex items-center gap-0.5 text-[11px] font-bold px-2 py-0.5 rounded-full ${badgeColors[badgeTrend] || badgeColors.neutral}`}>
+              {badgeTrend === "up" ? "↑" : badgeTrend === "down" ? "↓" : ""} {badgeText}
+            </span>
+          )}
+        </div>
+      </div>
+      <div className="text-xs text-neutral-400 font-medium">
+        {subtitle || "Current status"}
+      </div>
+    </div>
+  );
+}
+
+function RadialSpeedometerGauge({ percentage }: { percentage: number }) {
+  const totalSegments = 18;
+  const pct = Math.min(100, Math.max(0, percentage));
+  const filledSegments = Math.round((pct / 100) * totalSegments);
+
+  const cx = 110;
+  const cy = 110;
+  const innerR = 64;
+  const outerR = 96;
+
+  const colors = [
+    "#1e40af", "#1d4ed8", "#2563eb", "#2563eb", "#3b82f6", 
+    "#3b82f6", "#60a5fa", "#60a5fa", "#93c5fd", "#93c5fd", 
+    "#bfdbfe", "#bfdbfe", "#c7d2fe", "#dbeafe", "#e0e7ff",
+    "#ede9fe", "#f3e8ff", "#fae8ff"
+  ];
+
+  const segments = [];
+  for (let i = 0; i < totalSegments; i++) {
+    const angleStep = 180 / totalSegments;
+    const startDeg = 180 - i * angleStep;
+    const endDeg = startDeg - (angleStep - 2.5);
+
+    const startRad = (startDeg * Math.PI) / 180;
+    const endRad = (endDeg * Math.PI) / 180;
+
+    const x1 = cx + innerR * Math.cos(startRad);
+    const y1 = cy - innerR * Math.sin(startRad);
+    const x2 = cx + outerR * Math.cos(startRad);
+    const y2 = cy - outerR * Math.sin(startRad);
+
+    const x3 = cx + outerR * Math.cos(endRad);
+    const y3 = cy - outerR * Math.sin(endRad);
+    const x4 = cx + innerR * Math.cos(endRad);
+    const y4 = cy - innerR * Math.sin(endRad);
+
+    const d = `M ${x1} ${y1} L ${x2} ${y2} A ${outerR} ${outerR} 0 0 1 ${x3} ${y3} L ${x4} ${y4} A ${innerR} ${innerR} 0 0 0 ${x1} ${y1} Z`;
+
+    segments.push(
+      <path 
+        key={i} 
+        d={d} 
+        fill={i < filledSegments ? (colors[i] || "#2563eb") : "#f1f3f6"} 
+        className="transition-all duration-300"
+      />
+    );
+  }
+
+  return (
+    <div className="relative w-full max-w-[240px] mx-auto flex items-center justify-center my-2">
+      <svg viewBox="0 0 220 120" className="w-full overflow-visible">
+        {segments}
+      </svg>
+      <div className="absolute bottom-0 left-0 right-0 text-center flex flex-col items-center justify-center">
+        <span className="text-3xl font-extrabold text-neutral-900 tracking-tight leading-none">
+          {pct.toFixed(1)}%
+        </span>
+        <span className="text-[11px] font-semibold text-neutral-400 mt-1">
+          Fee Recovery
+        </span>
       </div>
     </div>
   );
