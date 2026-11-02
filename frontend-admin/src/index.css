@@ -25,7 +25,7 @@
   --color-rize-green-soft: #85c28d;
   --color-rize-green-deep: #1e4a24;
   --color-rize-blue-soft: #9db5de;
-  
+
   --color-blue-500: #4168b2;
   --color-blue-600: #2d4c88;
   --color-orange-500: #ed5923;
@@ -84,7 +84,11 @@ body {
 }
 
 @media (max-width: 768px) {
-  .cursor-dot, .cursor-ring { display: none; }
+
+  .cursor-dot,
+  .cursor-ring {
+    display: none;
+  }
 }
 
 /* Glassmorphism */
@@ -152,36 +156,77 @@ body {
 
 /* Animations */
 @keyframes float {
-  0%, 100% { transform: translateY(0px); }
-  50% { transform: translateY(-20px); }
+
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+
+  50% {
+    transform: translateY(-20px);
+  }
 }
 
 @keyframes float-slow {
-  0%, 100% { transform: translateY(0px) rotate(0deg); }
-  50% { transform: translateY(-30px) rotate(3deg); }
+
+  0%,
+  100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+
+  50% {
+    transform: translateY(-30px) rotate(3deg);
+  }
 }
 
 @keyframes pulse-glow {
-  0%, 100% { box-shadow: 0 0 20px rgba(59, 130, 246, 0.3); }
-  50% { box-shadow: 0 0 40px rgba(59, 130, 246, 0.6); }
+
+  0%,
+  100% {
+    box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
+  }
+
+  50% {
+    box-shadow: 0 0 40px rgba(59, 130, 246, 0.6);
+  }
 }
 
 @keyframes shimmer {
-  0% { background-position: -200% 0; }
-  100% { background-position: 200% 0; }
+  0% {
+    background-position: -200% 0;
+  }
+
+  100% {
+    background-position: 200% 0;
+  }
 }
 
 @keyframes gradient-shift {
-  0%, 100% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
+
+  0%,
+  100% {
+    background-position: 0% 50%;
+  }
+
+  50% {
+    background-position: 100% 50%;
+  }
 }
 
-.animate-float { animation: float 6s ease-in-out infinite; }
-.animate-float-slow { animation: float-slow 8s ease-in-out infinite; }
-.animate-pulse-glow { animation: pulse-glow 3s ease-in-out infinite; }
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+
+.animate-float-slow {
+  animation: float-slow 8s ease-in-out infinite;
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 3s ease-in-out infinite;
+}
 
 .shimmer {
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
   background-size: 200% 100%;
   animation: shimmer 3s infinite;
 }
@@ -203,21 +248,48 @@ body {
 }
 
 /* Scrollbar */
-::-webkit-scrollbar { width: 8px; }
-::-webkit-scrollbar-track { background: #f5f5f5; }
-::-webkit-scrollbar-thumb { background: linear-gradient(#4168b2, #ed5923); border-radius: 4px; }
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f5f5f5;
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(#4168b2, #ed5923);
+  border-radius: 4px;
+}
 
 /* Reveal animations base */
-.reveal-up { opacity: 0; transform: translateY(60px); }
-.reveal-fade { opacity: 0; }
-.reveal-blur { opacity: 0; filter: blur(20px); }
+.reveal-up {
+  opacity: 0;
+  transform: translateY(60px);
+}
+
+.reveal-fade {
+  opacity: 0;
+}
+
+.reveal-blur {
+  opacity: 0;
+  filter: blur(20px);
+}
 
 /* Marquee */
 @keyframes marquee {
-  0% { transform: translateX(0); }
-  100% { transform: translateX(-50%); }
+  0% {
+    transform: translateX(0);
+  }
+
+  100% {
+    transform: translateX(-50%);
+  }
 }
-.animate-marquee { animation: marquee 40s linear infinite; }
+
+.animate-marquee {
+  animation: marquee 40s linear infinite;
+}
 
 /* Premium shadow */
 .shadow-luxury {
@@ -237,6 +309,7 @@ body {
   position: relative;
   overflow: hidden;
 }
+
 .btn-shine::before {
   content: "";
   position: absolute;
@@ -244,21 +317,24 @@ body {
   left: -100%;
   width: 100%;
   height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
   transition: left 0.6s;
 }
-.btn-shine:hover::before { left: 100%; }
+
+.btn-shine:hover::before {
+  left: 100%;
+}
 
 /* Grid pattern */
 .bg-grid {
-  background-image: 
-    linear-gradient(rgba(0,0,0,0.03) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(0,0,0,0.03) 1px, transparent 1px);
+  background-image:
+    linear-gradient(rgba(0, 0, 0, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 0, 0, 0.03) 1px, transparent 1px);
   background-size: 60px 60px;
 }
 
 .bg-dots {
-  background-image: radial-gradient(circle, rgba(0,0,0,0.08) 1px, transparent 1px);
+  background-image: radial-gradient(circle, rgba(0, 0, 0, 0.08) 1px, transparent 1px);
   background-size: 24px 24px;
 }
 
@@ -321,44 +397,49 @@ body {
   border-radius: 9999px;
 }
 
-/* Floating Bottom Neumorphism Navigation Bar */
+/* Floating Bottom Black Transparent Glass Navigation Bar with Neumorphism Effect */
 .neumorphism-dock {
-  background: #f1f3f6;
+  background: rgba(0, 0, 0, 0.58);
+  backdrop-filter: blur(20px) saturate(190%);
+  -webkit-backdrop-filter: blur(20px) saturate(190%);
   border-radius: 9999px;
-  border: 1px solid rgba(255, 255, 255, 0.9);
-  box-shadow: 
-    8px 10px 24px rgba(166, 175, 195, 0.5),
-    -8px -10px 24px rgba(255, 255, 255, 0.95),
-    inset 1px 1px 2px rgba(255, 255, 255, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  box-shadow:
+    0 24px 48px -8px rgba(0, 0, 0, 0.65),
+    0 8px 20px -4px rgba(0, 0, 0, 0.45),
+    -4px -4px 14px 0 rgba(255, 255, 255, 0.22),
+    inset 1.5px 1.5px 2px 0 rgba(255, 255, 255, 0.35),
+    inset -1.5px -1.5px 2px 0 rgba(0, 0, 0, 0.7);
 }
 
 .neumorphism-dock-active {
-  background: #18181b;
-  color: #ffffff !important;
-  box-shadow: 
-    0 4px 14px rgba(0, 0, 0, 0.3),
-    inset 0 1px 1px rgba(255, 255, 255, 0.2);
+  background: #ffffff;
+  color: #000000 !important;
+  box-shadow:
+    0 4px 18px rgba(0, 0, 0, 0.45),
+    0 2px 6px rgba(255, 255, 255, 0.2),
+    inset 0 1px 1px rgba(255, 255, 255, 0.95);
 }
 
 .neumorphism-dock-inactive {
-  color: #52525b;
+  color: rgba(255, 255, 255, 0.85);
+  font-weight: 700;
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .neumorphism-dock-inactive:hover {
-  color: #09090b;
-  background: rgba(255, 255, 255, 0.75);
-  box-shadow: 
-    3px 3px 6px rgba(166, 175, 195, 0.35),
-    -3px -3px 6px rgba(255, 255, 255, 0.9);
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.14);
+  box-shadow:
+    inset 1px 1px 2px rgba(255, 255, 255, 0.2),
+    inset -1px -1px 2px rgba(0, 0, 0, 0.6);
 }
 
 .no-scrollbar::-webkit-scrollbar {
   display: none;
 }
+
 .no-scrollbar {
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
-
-

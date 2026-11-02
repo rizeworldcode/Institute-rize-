@@ -33,6 +33,11 @@ const FollowupHistorySchema = new mongoose.Schema({
     default: "1st Follow-up",
     trim: true,
   },
+  call_outcome: {
+    type: String,
+    enum: ["Connected", "Yes for Demo", "Told Later", "No", "Not Connected", ""],
+    default: "",
+  },
 }, { _id: true });
 
 const StudentLeadSchema = new mongoose.Schema({
@@ -124,6 +129,11 @@ const StudentLeadSchema = new mongoose.Schema({
     type: String,
     default: "",
     trim: true,
+  },
+  call_outcome: {
+    type: String,
+    enum: ["Connected", "Yes for Demo", "Told Later", "No", "Not Connected", ""],
+    default: "",
   },
   status: {
     type: String,

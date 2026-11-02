@@ -116,6 +116,7 @@ export type StudentLead = {
   remarks?: string;
 
   conversation_notes?: string;
+  call_outcome?: "Connected" | "Yes for Demo" | "Told Later" | "No" | "Not Connected" | "";
   status: "New Inquiry" | "In Follow-up" | "Demo Scheduled" | "Demo Completed" | "Converted" | "Lost";
   next_followup_date?: string | null;
   next_followup_by?: string;
@@ -133,5 +134,11 @@ export type StudentLeadStats = {
   inFollowUp: number;
   converted: number;
   lostLeads: number;
+  totalCalls?: number;
+  totalConnected?: number;
+  totalNotConnected?: number;
+  yesForDemo?: number;
+  noLeads?: number;
+  toldLater?: number;
 };
 

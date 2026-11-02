@@ -13,7 +13,7 @@ const alwarDetails = {
   phone: "+91 8302277092",
   email: "rizeworldinstitute@gmail.com",
   hours: "Mon-Sat 9:00 AM - 7:00 PM",
-  img: "/images/about-hero.jpg",
+  img: "/images/rizeworld-institute-alwar-campus.webp",
   features: ["AI Lab", "Design Studio", "Video Lab", "Library", "Cafe"],
   batches: "8 active batches",
 };
@@ -44,11 +44,30 @@ export default function AlwarLocation() {
     {
       "@context": "https://schema.org",
       "@type": "EducationalOrganization",
-      "name": "RizeWorld Institute of AI & Digital Marketing - Alwar Flagship Campus",
-      "image": "https://rizeworldinstitute.in/images/about-hero.jpg",
       "@id": "https://rizeworldinstitute.in/location/alwar/#organization",
+      "name": "RizeWorld Institute of AI & Digital Marketing - Alwar Flagship Campus",
+      "legalName": "Rizeworld Digital Marketing Private Limited",
       "url": "https://rizeworldinstitute.in/location/alwar",
+      "logo": {
+        "@type": "ImageObject",
+        "@id": "https://rizeworldinstitute.in/#logo",
+        "url": "https://rizeworldinstitute.in/logo/rizeworld-institute-logo.png",
+        "width": 1080,
+        "height": 1080,
+        "caption": "RizeWorld Institute of AI & Digital Marketing Official Logo"
+      },
+      "image": {
+        "@type": "ImageObject",
+        "@id": "https://rizeworldinstitute.in/location/alwar/#primaryimage",
+        "url": "https://rizeworldinstitute.in/images/rizeworld-institute-alwar-campus.webp",
+        "contentUrl": "https://rizeworldinstitute.in/images/rizeworld-institute-alwar-campus.webp",
+        "caption": "RizeWorld Institute of AI and Digital Marketing Alwar Campus",
+        "representativeOfPage": true,
+        "width": 1200,
+        "height": 800
+      },
       "telephone": "+91 8302277092",
+      "email": "rizeworldinstitute@gmail.com",
       "address": {
         "@type": "PostalAddress",
         "streetAddress": "C197, near Telco Circle, UIT colony, Shalimar Nagar",
@@ -74,7 +93,11 @@ export default function AlwarLocation() {
         ],
         "opens": "09:00",
         "closes": "19:00"
-      }
+      },
+      "sameAs": [
+        "https://www.instagram.com/rizeworldinstitute",
+        "https://www.linkedin.com/company/rizeworld-institute/"
+      ]
     },
     {
       "@context": "https://schema.org",
@@ -121,8 +144,8 @@ export default function AlwarLocation() {
       "url": "https://rizeworldinstitute.in/location/alwar",
       "telephone": "+91-8302277092",
       "email": "rizeworldinstitute@gmail.com",
-      "image": "https://rizeworldinstitute.in/images/rize.png",
-      "logo": "https://rizeworldinstitute.in/logo/RIZE%20LOGO%20HORI%20PNG.png",
+      "image": "https://rizeworldinstitute.in/images/rizeworld-institute-alwar-campus.webp",
+      "logo": "https://rizeworldinstitute.in/logo/rizeworld-institute-logo.png",
       "priceRange": "₹₹",
       "currenciesAccepted": "INR",
       "address": {
@@ -158,6 +181,8 @@ export default function AlwarLocation() {
         title="Best Digital Marketing Institute in Alwar | Digital Marketing Coaching"
         description="Enroll in the Professional Digital Marketing Institute in Alwar at RizeWorld Institute. Get a premium Digital Marketing Certification in Alwar with placements."
         canonicalPath="/location/alwar"
+        ogImage="https://rizeworldinstitute.in/images/rizeworld-institute-alwar-campus.webp"
+        ogImageAlt="RizeWorld Institute of AI and Digital Marketing Alwar Campus"
         schemas={schemas}
       />
       {/* Breadcrumbs */}
@@ -294,9 +319,35 @@ export default function AlwarLocation() {
           </div>
 
           {/* Map and Image */}
-          <div className="lg:col-span-5 space-y-10">
+          <div className="lg:col-span-5 space-y-8">
+            {/* Verified Official Campus Image */}
             <Reveal>
-              <div className="rounded-3xl overflow-hidden border border-white/10 aspect-video lg:aspect-square bg-neutral-900 relative">
+              <div className="rounded-3xl overflow-hidden border border-white/10 bg-neutral-900 shadow-luxury group">
+                <div className="relative aspect-4/3 overflow-hidden">
+                  <img
+                    src="/images/rizeworld-institute-alwar-campus.webp"
+                    alt="RizeWorld Institute of AI and Digital Marketing Alwar Campus building and classroom facility"
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                    loading="eager"
+                    width="1200"
+                    height="800"
+                  />
+                  <div className="absolute inset-0 bg-linear-to-t from-black/80 via-transparent to-transparent pointer-events-none" />
+                  <div className="absolute bottom-4 left-4 right-4">
+                    <span className="text-[10px] uppercase font-bold text-orange-500 tracking-wider bg-black/60 px-2.5 py-1 rounded-full border border-orange-500/30">
+                      Official Alwar Campus
+                    </span>
+                    <p className="text-sm font-semibold text-white mt-1.5 drop-shadow-md">
+                      RizeWorld Institute — Shalimar Nagar, Alwar
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </Reveal>
+
+            {/* Interactive Campus Location Map */}
+            <Reveal>
+              <div className="rounded-3xl overflow-hidden border border-white/10 aspect-video lg:aspect-square bg-neutral-900 relative shadow-luxury">
                 {/* Fallback image style or interactive map iframe */}
                 <iframe
                   title="RizeWorld Institute Alwar Map"
@@ -307,12 +358,10 @@ export default function AlwarLocation() {
                   allowFullScreen
                   loading="lazy"
                   referrerPolicy="strict-origin-when-cross-origin"
-                  className="w-full h-full min-h-[350px]"
+                  className="w-full h-full min-h-[300px]"
                 ></iframe>
               </div>
             </Reveal>
-
-
           </div>
         </div>
       </section>

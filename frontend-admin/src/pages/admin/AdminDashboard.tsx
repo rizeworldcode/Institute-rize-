@@ -5,7 +5,7 @@ import {
   AlertCircle, LayoutDashboard, MessagesSquare, MessageSquare, X, ArrowLeft,
   Award, Bell, UserCircle, Mail, IndianRupee, CheckCircle2, Activity, Trash2, UserX, UserMinus, FileText, Filter, Download, Target,
   Phone, Calendar, Clock, AlertTriangle, ChevronRight, UserCheck, RefreshCw,
-  Zap, MoreHorizontal, ChevronDown, ArrowUpRight
+  MoreHorizontal, ChevronDown
 } from "lucide-react";
 
 import { Student } from "./types";
@@ -75,8 +75,20 @@ export default function AdminDashboard() {
   const [graphData, setGraphData] = useState<any[]>([]);
   const [graphMetric, setGraphMetric] = useState<"earnings" | "students">("earnings");
   const [hoveredBarIndex, setHoveredBarIndex] = useState<number | null>(null);
-  const [selectedTimePeriod, setSelectedTimePeriod] = useState<string>("This Month");
   const [topCourses, setTopCourses] = useState<any[]>([]);
+  const [adminEmail, setAdminEmail] = useState<string>(() => {
+    return localStorage.getItem("adminEmail") || "admin@rizeworld.com";
+  });
+  const [adminName, setAdminName] = useState<string>(() => {
+    return localStorage.getItem("adminName") || "Super Admin";
+  });
+
+  const adminInitials = useMemo(() => {
+    if (!adminName) return "SA";
+    const parts = adminName.trim().split(" ");
+    if (parts.length >= 2) return `${parts[0][0]}${parts[1][0]}`.toUpperCase();
+    return adminName.slice(0, 2).toUpperCase();
+  }, [adminName]);
 
   const totalPendingDuesAcrossSystem = useMemo(() => {
     if (pendingFeeStudentsData.length > 0) {
@@ -112,15 +124,45 @@ export default function AdminDashboard() {
     };
   }, [clearFeeStudentsData]);
 
+  const totalClearFeesAmount = useMemo(() => {
+    if (clearFeeStudentsData.length > 0) {
+      return clearFeeStudentsData.reduce((acc, curr) => acc + (Number(curr.paidFees) || 0), 0);
+    }
+    const list = allStudentsData.length > 0 ? allStudentsData : students;
+    const clearList = list.filter(s => Number(s.pendingFees || 0) <= 0);
+    return clearList.reduce((acc, curr) => acc + (Number(curr.paidFees) || 0), 0);
+  }, [clearFeeStudentsData, allStudentsData, students]);
+
+  const totalClearStudentsCount = useMemo(() => {
+    return stats.totalClearFees || clearFeeStudentsData.length || (
+      (allStudentsData.length > 0 ? allStudentsData : students).filter(s => Number(s.pendingFees || 0) <= 0).length
+    ) || 0;
+  }, [stats.totalClearFees, clearFeeStudentsData, allStudentsData, students]);
+
   const totalEarningsSummary = useMemo(() => {
-    const totalReceived = earningsDetailsData.reduce((acc, curr) => acc + Number(curr.amount || 0), 0);
+    const totalReceived = earningsDetailsData.length > 0 
+      ? earningsDetailsData.reduce((acc, curr) => acc + Number(curr.amount || 0), 0)
+      : (stats.totalEarnings || 0);
     return {
       count: earningsDetailsData.length,
       totalReceived,
       totalPending: totalPendingDuesAcrossSystem,
       totalExpected: totalReceived + totalPendingDuesAcrossSystem
     };
-  }, [earningsDetailsData, totalPendingDuesAcrossSystem]);
+  }, [earningsDetailsData, totalPendingDuesAcrossSystem, stats.totalEarnings]);
+
+  const totalReceivedEarning = useMemo(() => {
+    return stats.totalEarnings || totalEarningsSummary.totalReceived || 0;
+  }, [stats.totalEarnings, totalEarningsSummary.totalReceived]);
+
+  const totalExpectedEarning = useMemo(() => {
+    return Math.max(
+      totalStudentsSummary.totalBilled || 0,
+      totalEarningsSummary.totalExpected || 0,
+      totalReceivedEarning + totalPendingDuesAcrossSystem,
+      totalReceivedEarning
+    );
+  }, [totalStudentsSummary.totalBilled, totalEarningsSummary.totalExpected, totalReceivedEarning, totalPendingDuesAcrossSystem]);
 
   const [isSetAmountModalOpen, setIsSetAmountModalOpen] = useState(false);
   const [globalReferralAmount, setGlobalReferralAmount] = useState<number | string>("");
@@ -1409,6 +1451,14 @@ export default function AdminDashboard() {
           pendingFees: data.stats.unclear_fee_students,
           totalReferralPaid: data.stats.total_referral_paid || 0
         });
+        if (data.adminEmail) {
+          setAdminEmail(data.adminEmail);
+          localStorage.setItem("adminEmail", data.adminEmail);
+        }
+        if (data.adminName) {
+          setAdminName(data.adminName);
+          localStorage.setItem("adminName", data.adminName);
+        }
         // Ensure graphData is always a continuous 8-month timeline on frontend
         let rawGraphData: any[] = data.graphData || [];
         const monthsShort = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
@@ -1486,7 +1536,14 @@ export default function AdminDashboard() {
       return;
     }
     
-    Promise.all([fetchDashboardData(), fetchNotifications()]).finally(() => {
+    Promise.all([
+      fetchDashboardData(), 
+      fetchNotifications(),
+      fetchAllStudents(),
+      fetchPendingFeeStudents(),
+      fetchClearFeeStudents(),
+      fetchEarningsDetails()
+    ]).finally(() => {
       setIsInitialLoading(false);
     });
     
@@ -1579,11 +1636,11 @@ export default function AdminDashboard() {
           onClick={() => setIsSidebarOpen(false)}
         >
           <div 
-            className="w-72 max-w-[85vw] bg-white h-full p-6 flex flex-col justify-between shadow-2xl animate-in slide-in-from-left duration-200"
+            className="w-72 max-w-[85vw] bg-white h-full p-5 sm:p-6 flex flex-col justify-between shadow-2xl animate-in slide-in-from-left duration-200 overflow-y-auto"
             onClick={(e) => e.stopPropagation()}
           >
             <div>
-              <div className="flex items-center justify-between pb-4 border-b border-neutral-100 mb-6">
+              <div className="flex items-center justify-between pb-4 border-b border-neutral-100 mb-5">
                 <div className="flex items-center gap-2.5">
                   <img 
                     src="/logo/RIZE_LOGO_CROPPED.png" 
@@ -1593,57 +1650,73 @@ export default function AdminDashboard() {
                 </div>
                 <button 
                   onClick={() => setIsSidebarOpen(false)}
-                  className="p-1.5 rounded-lg text-neutral-400 hover:text-neutral-700 hover:bg-neutral-100"
+                  className="p-1.5 rounded-lg text-neutral-400 hover:text-neutral-700 hover:bg-neutral-100 cursor-pointer"
+                  aria-label="Close navigation menu"
                 >
                   <X size={18} />
+                </button>
+              </div>
+
+              {/* Primary Action Button: + Add Student on Mobile */}
+              <div className="mb-4">
+                <button
+                  onClick={() => {
+                    setEditingStudent(null);
+                    setIsStudentModalOpen(true);
+                    setIsSidebarOpen(false);
+                  }}
+                  className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold text-sm shadow-md shadow-blue-500/20 hover:from-blue-700 hover:to-indigo-700 active:scale-[0.98] transition-all cursor-pointer"
+                >
+                  <Plus size={18} className="stroke-[2.5]" />
+                  <span>+ Add Student</span>
                 </button>
               </div>
 
               <div className="space-y-1.5">
                 <button
                   onClick={() => { navigate("/admin/dashboard/dashboard"); setIsSidebarOpen(false); }}
-                  className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all ${
-                    activeTab === "dashboard" ? "bg-[#18181b] text-white" : "text-neutral-600 hover:bg-neutral-100"
+                  className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all cursor-pointer ${
+                    activeTab === "dashboard" ? "bg-[#18181b] text-white shadow-xs" : "text-neutral-600 hover:bg-neutral-100"
                   }`}
                 >
                   <LayoutDashboard size={18} /> Dashboard
                 </button>
                 <button
                   onClick={() => { navigate("/admin/dashboard/student-crm"); setIsSidebarOpen(false); }}
-                  className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all ${
-                    activeTab === "student-crm" || activeTab === "student-leads" ? "bg-[#18181b] text-white" : "text-neutral-600 hover:bg-neutral-100"
+                  className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all cursor-pointer ${
+                    activeTab === "student-crm" || activeTab === "student-leads" ? "bg-[#18181b] text-white shadow-xs" : "text-neutral-600 hover:bg-neutral-100"
                   }`}
                 >
                   <Target size={18} /> Student Leads CRM
                 </button>
                 <button
                   onClick={() => { navigate("/admin/dashboard/inquiry"); setIsSidebarOpen(false); }}
-                  className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all ${
-                    activeTab === "inquiry" ? "bg-[#18181b] text-white" : "text-neutral-600 hover:bg-neutral-100"
+                  className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all cursor-pointer ${
+                    activeTab === "inquiry" ? "bg-[#18181b] text-white shadow-xs" : "text-neutral-600 hover:bg-neutral-100"
                   }`}
                 >
                   <MessagesSquare size={18} /> Inquiries
                 </button>
                 <button
                   onClick={() => { navigate("/admin/dashboard/referred-by"); setIsSidebarOpen(false); }}
-                  className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all ${
-                    activeTab === "referred-by" ? "bg-[#18181b] text-white" : "text-neutral-600 hover:bg-neutral-100"
+                  className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all cursor-pointer ${
+                    activeTab === "referred-by" ? "bg-[#18181b] text-white shadow-xs" : "text-neutral-600 hover:bg-neutral-100"
                   }`}
                 >
                   <UserCircle size={18} /> Referred By
                 </button>
                 <button
                   onClick={() => { navigate("/admin/dashboard/deleted-referrers"); setIsSidebarOpen(false); }}
-                  className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all ${
-                    activeTab === "deleted-referrers" ? "bg-[#18181b] text-white" : "text-neutral-600 hover:bg-neutral-100"
+                  className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all cursor-pointer ${
+                    activeTab === "deleted-referrers" ? "bg-[#18181b] text-white shadow-xs" : "text-neutral-600 hover:bg-neutral-100"
                   }`}
                 >
                   <UserX size={18} /> Deleted Referrers
                 </button>
                 <button
                   onClick={() => { navigate("/admin/dashboard/deleted-students"); setIsSidebarOpen(false); }}
-                  className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all ${
-                    activeTab === "deleted-students" ? "bg-[#18181b] text-white" : "text-neutral-600 hover:bg-neutral-100"
+                  className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all cursor-pointer ${
+                    activeTab === "deleted-students" ? "bg-[#18181b] text-white shadow-xs" : "text-neutral-600 hover:bg-neutral-100"
                   }`}
                 >
                   <UserMinus size={18} /> Deleted Students
@@ -1651,10 +1724,21 @@ export default function AdminDashboard() {
               </div>
             </div>
 
-            <div className="pt-4 border-t border-neutral-100">
+            <div className="pt-4 border-t border-neutral-100 mt-6 space-y-3">
+              {/* Profile Details in Drawer */}
+              <div className="flex items-center gap-3 px-2 py-1 bg-neutral-50 rounded-xl p-2.5 border border-neutral-100">
+                <div className="w-9 h-9 rounded-full bg-linear-to-tr from-blue-600 to-indigo-600 text-white font-bold text-xs flex items-center justify-center shadow-xs shrink-0">
+                  {adminInitials}
+                </div>
+                <div className="text-left overflow-hidden min-w-0 flex-1">
+                  <div className="text-xs font-bold text-neutral-900 leading-tight truncate">{adminName}</div>
+                  <div className="text-[11px] text-neutral-400 font-medium truncate">{adminEmail}</div>
+                </div>
+              </div>
+
               <button 
                 onClick={() => { setIsSidebarOpen(false); setIsLogoutModalOpen(true); }}
-                className="w-full flex items-center gap-3 px-4 py-2.5 text-red-600 font-semibold hover:bg-red-50 rounded-xl transition-all"
+                className="w-full flex items-center gap-3 px-4 py-2.5 text-red-600 font-semibold hover:bg-red-50 rounded-xl transition-all cursor-pointer"
               >
                 <LogOut size={18} /> Logout Securely
               </button>
@@ -1664,35 +1748,35 @@ export default function AdminDashboard() {
       )}
 
       {/* Floating Pill Top Navbar matching Mockup */}
-      <header className="sticky top-3 z-40 w-full max-w-[1520px] mx-auto px-3 sm:px-6 pt-1 mb-2">
-        <div className="bg-white rounded-2xl md:rounded-full px-4 sm:px-6 py-2.5 sm:py-3 border border-neutral-200/80 shadow-xs flex items-center justify-between gap-3 backdrop-blur-xl">
+      <header className="sticky top-2 sm:top-3 z-40 w-full max-w-[1520px] mx-auto px-2 sm:px-6 pt-1 mb-3 sm:mb-6">
+        <div className="bg-white rounded-2xl md:rounded-full px-2.5 sm:px-6 py-1.5 sm:py-3 border border-neutral-200/80 shadow-xs flex items-center justify-between gap-1.5 sm:gap-3 backdrop-blur-xl">
           {/* Brand on Left */}
-          <div className="flex items-center gap-3 shrink-0">
+          <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
             <button
               onClick={() => setIsSidebarOpen(true)}
-              className="lg:hidden p-2 rounded-xl hover:bg-neutral-100 text-neutral-700 transition-colors cursor-pointer"
+              className="lg:hidden p-1.5 sm:p-2 rounded-xl hover:bg-neutral-100 text-neutral-700 transition-colors cursor-pointer"
               aria-label="Open navigation menu"
             >
-              <Menu size={20} />
+              <Menu size={18} className="sm:w-5 sm:h-5" />
             </button>
             <div 
               onClick={() => navigate("/admin/dashboard/dashboard")} 
-              className="flex items-center gap-3 cursor-pointer group py-0.5"
+              className="flex items-center gap-2 sm:gap-3 cursor-pointer group py-0.5"
             >
               <img 
                 src="/logo/RIZE_LOGO_CROPPED.png" 
                 alt="RizeWorld Institute" 
-                className="h-9 sm:h-10 md:h-11 w-auto object-contain transition-transform group-hover:scale-[1.02]" 
+                className="h-7 sm:h-10 md:h-11 w-auto max-w-[105px] sm:max-w-none object-contain transition-transform group-hover:scale-[1.02]" 
               />
               <div className="hidden sm:flex flex-col border-l border-neutral-200/80 pl-3">
-                <span className="text-[11px] font-black tracking-wider uppercase text-neutral-800">Admin Portal</span>
-                <span className="text-[9px] font-semibold text-neutral-400">Management Suite</span>
+                <span className="text-[13px] font-black tracking-tight text-neutral-900 leading-tight">RizeWorld</span>
+                <span className="text-[10px] font-medium text-neutral-400">Institute Portal</span>
               </div>
             </div>
           </div>
 
           {/* Right Controls: Notifications, Logout, User Profile Badge */}
-          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+          <div className="flex items-center gap-1 sm:gap-2.5 shrink-0">
              <div className="relative">
                 <button 
                   onClick={() => {
@@ -1719,10 +1803,10 @@ export default function AdminDashboard() {
                       }
                     }
                   }} 
-                  className="relative p-2.5 text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100 rounded-full transition-colors cursor-pointer"
+                  className="relative p-1.5 sm:p-2.5 text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100 rounded-full transition-colors cursor-pointer"
                   title="Notifications, Follow-up Reminders & Fee Dues"
                 >
-                  <Bell size={21} />
+                  <Bell size={18} className="sm:w-[21px] sm:h-[21px]" />
                   {(() => {
                     const unreadInq = (notifications || []).filter(n => !n?.isRead).length;
                     const dueCount = followupReminders?.due?.length || 0;
@@ -1733,7 +1817,7 @@ export default function AdminDashboard() {
                     if (totalUrgent === 0) return null;
 
                     return (
-                      <span className={`absolute top-0.5 right-0.5 min-w-[20px] h-[20px] px-1 text-[11px] font-black text-white rounded-full flex items-center justify-center border-2 border-white shadow-sm animate-pulse ${
+                      <span className={`absolute top-0 right-0 sm:top-0.5 sm:right-0.5 min-w-[17px] h-[17px] sm:min-w-[20px] sm:h-[20px] px-0.5 sm:px-1 text-[10px] sm:text-[11px] font-black text-white rounded-full flex items-center justify-center border-2 border-white shadow-sm animate-pulse ${
                         (feeCount > 0 || dueCount > 0) ? "bg-red-600" : todayCount > 0 ? "bg-amber-500" : "bg-blue-600"
                       }`}>
                         {totalUrgent > 99 ? "99+" : totalUrgent}
@@ -1750,7 +1834,7 @@ export default function AdminDashboard() {
                       onClick={() => setIsNotificationsOpen(false)}
                     />
 
-                    <div className="absolute top-full right-0 mt-3 w-[94vw] sm:w-[620px] md:w-[680px] max-w-[96vw] bg-white border border-neutral-200/90 shadow-2xl rounded-[28px] overflow-hidden z-50 animate-in fade-in slide-in-from-top-2 flex flex-col">
+                    <div className="fixed sm:absolute top-14 sm:top-full left-2 right-2 sm:left-auto sm:right-0 mt-2 sm:mt-3 w-auto sm:w-[620px] md:w-[680px] max-w-[96vw] bg-white border border-neutral-200/90 shadow-2xl rounded-[22px] sm:rounded-[28px] overflow-hidden z-50 animate-in fade-in slide-in-from-top-2 flex flex-col">
                       
                       {/* Modern Header */}
                       <div className="p-4 sm:p-5 border-b border-neutral-100 flex items-center justify-between bg-neutral-50/60">
@@ -2342,23 +2426,27 @@ export default function AdminDashboard() {
                   </>
                 )}
              </div>
-              {/* Logout Button */}              {/* Logout Button */}
+              {/* Logout Button */}
               <button
                 onClick={() => setIsLogoutModalOpen(true)}
-                className="p-2 text-neutral-400 hover:text-red-600 hover:bg-red-50 rounded-full transition-colors cursor-pointer"
+                className="p-1.5 sm:p-2 text-neutral-400 hover:text-red-600 hover:bg-red-50 rounded-full transition-colors cursor-pointer"
                 title="Logout Securely"
               >
-                <LogOut size={18} />
+                <LogOut size={16} className="sm:w-[18px] sm:h-[18px]" />
               </button>
 
-              {/* Admin Profile Chip (matches mockup) */}
-              <div className="flex items-center gap-2.5 pl-2 sm:pl-3 border-l border-neutral-200">
-                <div className="w-8 h-8 rounded-full bg-linear-to-tr from-blue-600 to-indigo-600 text-white font-bold text-xs flex items-center justify-center shadow-2xs">
-                  SA
+              {/* Admin Profile Chip (Real Admin ID) */}
+              <div 
+                onClick={() => setIsSidebarOpen(true)}
+                className="flex items-center gap-1.5 sm:gap-2.5 pl-1.5 sm:pl-3 border-l border-neutral-200 cursor-pointer"
+                title="View Admin Profile & Navigation"
+              >
+                <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-linear-to-tr from-blue-600 to-indigo-600 text-white font-bold text-[10px] sm:text-xs flex items-center justify-center shadow-2xs shrink-0">
+                  {adminInitials}
                 </div>
                 <div className="hidden sm:block text-left">
-                  <div className="text-xs font-bold text-neutral-900 leading-tight">Super Admin</div>
-                  <div className="text-[10px] text-neutral-400 font-medium">admin@rizeworld.in</div>
+                  <div className="text-xs font-bold text-neutral-900 leading-tight">{adminName}</div>
+                  <div className="text-[10px] text-neutral-400 font-medium">{adminEmail}</div>
                 </div>
               </div>
 
@@ -2367,7 +2455,7 @@ export default function AdminDashboard() {
         </header>
 
         {/* Main Canvas Content Area */}
-        <main className="flex-1 w-full max-w-[1520px] mx-auto px-3 sm:px-6 py-2 pb-28 sm:pb-32 space-y-6">
+        <main className="flex-1 w-full max-w-[1520px] mx-auto px-3 sm:px-6 pt-4 sm:pt-6 pb-10 lg:pb-48 space-y-6">
           <div className="w-full space-y-6">
           
           {isInitialLoading ? (
@@ -2384,69 +2472,6 @@ export default function AdminDashboard() {
           {activeTab === "dashboard" && !expandedStat && (
             <div className="w-full space-y-6 animate-in fade-in duration-300">
               
-              {/* Header Action Row matching mockup */}
-              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pt-1">
-                <div>
-                  <h1 className="text-2xl sm:text-3xl font-extrabold text-neutral-900 tracking-tight">
-                    Dashboard Overview
-                  </h1>
-                  <p className="text-xs sm:text-sm text-neutral-500 font-medium mt-1">
-                    Your institute growth summary and real-time student activity
-                  </p>
-                </div>
-
-                <div className="flex items-center gap-2.5 flex-wrap">
-                  {/* Period Dropdown */}
-                  <div className="relative">
-                    <select
-                      value={selectedTimePeriod}
-                      onChange={(e) => setSelectedTimePeriod(e.target.value)}
-                      className="appearance-none bg-white border border-neutral-200/90 rounded-full pl-4 pr-8 py-2 text-xs sm:text-sm font-semibold text-neutral-700 hover:border-neutral-300 focus:outline-none cursor-pointer shadow-2xs"
-                    >
-                      <option value="This Month">This Month</option>
-                      <option value="Last 3 Months">Last 3 Months</option>
-                      <option value="Last 6 Months">Last 6 Months</option>
-                      <option value="This Year">This Year</option>
-                    </select>
-                    <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400 pointer-events-none" />
-                  </div>
-
-                  {/* Export Pill Button */}
-                  <button
-                    onClick={() => {
-                      const rows = [
-                        ["ID", "Name", "Course", "Duration", "Total Fees", "Pending Fees", "Status"],
-                        ...filteredStudents.map(s => [s.id, s.name, Array.isArray(s.course) ? s.course.join("; ") : s.course, s.duration, s.totalFees, s.pendingFees, s.feesStatus])
-                      ];
-                      const csvContent = "data:text/csv;charset=utf-8," + rows.map(e => e.join(",")).join("\n");
-                      const encodedUri = encodeURI(csvContent);
-                      const link = document.createElement("a");
-                      link.setAttribute("href", encodedUri);
-                      link.setAttribute("download", `students_export_${new Date().toISOString().slice(0, 10)}.csv`);
-                      document.body.appendChild(link);
-                      link.click();
-                      document.body.removeChild(link);
-                    }}
-                    className="inline-flex items-center gap-1.5 bg-white border border-neutral-200/90 hover:border-neutral-300 text-neutral-700 px-4 py-2 rounded-full text-xs sm:text-sm font-semibold transition-all shadow-2xs cursor-pointer hover:bg-neutral-50"
-                  >
-                    <Download size={14} />
-                    <span>Export</span>
-                  </button>
-
-                  {/* Add Student Primary Pill Button */}
-                  <button
-                    onClick={() => {
-                      setEditingStudent(null);
-                      setIsStudentModalOpen(true);
-                    }}
-                    className="inline-flex items-center gap-1.5 bg-[#2563eb] hover:bg-blue-700 text-white px-5 py-2 rounded-full text-xs sm:text-sm font-semibold transition-all shadow-xs cursor-pointer hover:shadow-md"
-                  >
-                    <Plus size={16} />
-                    <span>Add Student</span>
-                  </button>
-                </div>
-              </div>
-
               {/* KPI Stat Cards Row (3-3 Pairs: Top = Students, Earnings, Pending; Bottom = Clear, Issued, Unissued) */}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
                 {/* 1. Total Students */}
@@ -2461,41 +2486,134 @@ export default function AdminDashboard() {
                   onClick={() => navigate("/admin/dashboard/dashboard/total-students")} 
                 />
 
-                {/* 2. Total Earnings */}
-                <StatCard 
-                  title="Total Earnings" 
-                  value={`₹${stats.totalEarnings.toLocaleString()}`} 
-                  icon={IndianRupee} 
-                  color="purple" 
-                  badgeText="Revenue"
-                  badgeTrend="up"
-                  subtitle="Total fee collected"
+                {/* 2. Total Earnings (Dual: Expected on Left, Received on Right) */}
+                <div 
                   onClick={() => navigate("/admin/dashboard/dashboard/total-earnings")} 
-                />
+                  className="cursor-pointer bg-white rounded-[26px] p-6 border border-neutral-200/80 shadow-xs hover:border-neutral-300 hover:shadow-sm hover:-translate-y-1 transition-all duration-300 relative overflow-hidden group flex flex-col justify-between min-h-[165px]"
+                >
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-xs font-semibold text-neutral-500 uppercase tracking-wider">Total Earnings</span>
+                    <div className="w-10 h-10 rounded-full flex items-center justify-center bg-purple-50 text-purple-600 shadow-2xs">
+                      <IndianRupee size={19} />
+                    </div>
+                  </div>
 
-                {/* 3. Total Pending Fees */}
-                <StatCard 
-                  title="Pending Fees" 
-                  value={stats.pendingFees} 
-                  icon={AlertCircle} 
-                  color="red" 
-                  badgeText={`${stats.pendingFees} Dues`}
-                  badgeTrend="down"
-                  subtitle="Pending installments"
+                  <div className="my-auto py-1">
+                    <div className="grid grid-cols-2 divide-x divide-neutral-200/80 gap-3 sm:gap-4">
+                      {/* Left Side: Expected */}
+                      <div className="pr-2">
+                        <div className="text-[11px] font-semibold text-neutral-500 uppercase tracking-wider mb-1">
+                          Total Expected
+                        </div>
+                        <div className="text-xl sm:text-2xl font-black text-neutral-900 tracking-tight">
+                          ₹{totalExpectedEarning.toLocaleString('en-IN')}
+                        </div>
+                      </div>
+
+                      {/* Right Side: Received */}
+                      <div className="pl-3 sm:pl-4">
+                        <div className="text-[11px] font-semibold text-emerald-600 uppercase tracking-wider mb-1">
+                          Total Received
+                        </div>
+                        <div className="flex items-baseline gap-2 flex-wrap">
+                          <span className="text-xl sm:text-2xl font-black text-emerald-600 tracking-tight">
+                            ₹{totalReceivedEarning.toLocaleString('en-IN')}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="text-xs text-neutral-400 font-medium">
+                    Total fee collected
+                  </div>
+                </div>
+
+                {/* 3. Total Pending Fees (Dual: Pending Amount on Left, Total Students on Right) */}
+                <div 
                   onClick={() => navigate("/admin/dashboard/dashboard/total-pending-fees")} 
-                />
+                  className="cursor-pointer bg-white rounded-[26px] p-6 border border-neutral-200/80 shadow-xs hover:border-neutral-300 hover:shadow-sm hover:-translate-y-1 transition-all duration-300 relative overflow-hidden group flex flex-col justify-between min-h-[165px]"
+                >
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-xs font-semibold text-neutral-500 uppercase tracking-wider">Pending Fees</span>
+                    <div className="w-10 h-10 rounded-full flex items-center justify-center bg-rose-50 text-rose-600 shadow-2xs">
+                      <AlertCircle size={19} />
+                    </div>
+                  </div>
 
-                {/* 4. Total Clear Fees */}
-                <StatCard 
-                  title="Total Clear Fees" 
-                  value={stats.totalClearFees} 
-                  icon={CheckCircle2} 
-                  color="cyan" 
-                  badgeText={`${stats.totalStudents > 0 ? ((stats.totalClearFees / stats.totalStudents) * 100).toFixed(0) : 0}%`}
-                  badgeTrend="up"
-                  subtitle="Fully paid students"
+                  <div className="my-auto py-1">
+                    <div className="grid grid-cols-2 divide-x divide-neutral-200/80 gap-3 sm:gap-4">
+                      {/* Left Side: Pending Amount */}
+                      <div className="pr-2">
+                        <div className="text-[11px] font-semibold text-rose-600 uppercase tracking-wider mb-1">
+                          Pending Amount
+                        </div>
+                        <div className="text-xl sm:text-2xl font-black text-rose-600 tracking-tight">
+                          ₹{totalPendingDuesAcrossSystem.toLocaleString('en-IN')}
+                        </div>
+                      </div>
+
+                      {/* Right Side: Total Students */}
+                      <div className="pl-3 sm:pl-4">
+                        <div className="text-[11px] font-semibold text-neutral-500 uppercase tracking-wider mb-1">
+                          Total Students
+                        </div>
+                        <div className="flex items-baseline gap-2 flex-wrap">
+                          <span className="text-xl sm:text-2xl font-black text-neutral-900 tracking-tight">
+                            {stats.pendingFees || totalStudentsSummary.pendingCount || 0}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="text-xs text-neutral-400 font-medium">
+                    Pending installments
+                  </div>
+                </div>
+
+                {/* 4. Total Clear Fees (Dual: Cleared Amount on Left, Total Students on Right) */}
+                <div 
                   onClick={() => navigate("/admin/dashboard/dashboard/total-clear-fees")} 
-                />
+                  className="cursor-pointer bg-white rounded-[26px] p-6 border border-neutral-200/80 shadow-xs hover:border-neutral-300 hover:shadow-sm hover:-translate-y-1 transition-all duration-300 relative overflow-hidden group flex flex-col justify-between min-h-[165px]"
+                >
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-xs font-semibold text-neutral-500 uppercase tracking-wider">Total Clear Fees</span>
+                    <div className="w-10 h-10 rounded-full flex items-center justify-center bg-cyan-50 text-cyan-600 shadow-2xs">
+                      <CheckCircle2 size={19} />
+                    </div>
+                  </div>
+
+                  <div className="my-auto py-1">
+                    <div className="grid grid-cols-2 divide-x divide-neutral-200/80 gap-3 sm:gap-4">
+                      {/* Left Side: Cleared Amount */}
+                      <div className="pr-2">
+                        <div className="text-[11px] font-semibold text-cyan-700 uppercase tracking-wider mb-1">
+                          Cleared Amount
+                        </div>
+                        <div className="text-xl sm:text-2xl font-black text-cyan-700 tracking-tight">
+                          ₹{totalClearFeesAmount.toLocaleString('en-IN')}
+                        </div>
+                      </div>
+
+                      {/* Right Side: Total Students */}
+                      <div className="pl-3 sm:pl-4">
+                        <div className="text-[11px] font-semibold text-neutral-500 uppercase tracking-wider mb-1">
+                          Total Students
+                        </div>
+                        <div className="flex items-baseline gap-2 flex-wrap">
+                          <span className="text-xl sm:text-2xl font-black text-neutral-900 tracking-tight">
+                            {totalClearStudentsCount}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="text-xs text-neutral-400 font-medium">
+                    Fully paid students
+                  </div>
+                </div>
 
                 {/* 5. Certificate Issued */}
                 <StatCard 
@@ -2855,8 +2973,8 @@ export default function AdminDashboard() {
                   )}
                 </div>
 
-                {/* Responsive Grid of Course Items across full width */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3.5">
+                {/* Responsive Grid of Course Items - Centered 3 Balanced Columns */}
+                <div className={`grid gap-3.5 sm:gap-4 ${topCourses.length === 1 ? 'grid-cols-1 max-w-md mx-auto' : topCourses.length === 2 ? 'grid-cols-1 sm:grid-cols-2 max-w-2xl mx-auto' : 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3'}`}>
                   {topCourses.length > 0 ? (
                     topCourses.map((course, i) => {
                       const dotColors = [
@@ -4438,24 +4556,38 @@ export default function AdminDashboard() {
       {/* Floating Bottom Center Navigation Dock with Authentic Neumorphism Effect */}
       <nav 
         aria-label="Main Navigation Dock"
-        className="fixed bottom-5 sm:bottom-6 left-1/2 -translate-x-1/2 z-40 max-w-[96vw] animate-in fade-in slide-in-from-bottom-4 duration-300 pointer-events-auto"
+        className="hidden lg:block fixed bottom-8 sm:bottom-10 md:bottom-12 lg:bottom-14 left-1/2 -translate-x-1/2 z-40 max-w-[96vw] animate-in fade-in slide-in-from-bottom-4 duration-300 pointer-events-auto"
       >
-        <div className="neumorphism-dock p-1.5 sm:p-2 flex items-center gap-1 sm:gap-1.5 overflow-x-auto no-scrollbar max-w-full">
+        <div className="neumorphism-dock px-3 sm:px-4 py-2.5 sm:py-3 min-h-[72px] sm:min-h-[78px] md:min-h-[82px] flex items-center gap-2 sm:gap-2.5 overflow-x-auto no-scrollbar max-w-full">
           <button
             onClick={() => navigate("/admin/dashboard/dashboard")}
-            className={`px-4 sm:px-5 py-2 rounded-full text-xs sm:text-[13px] whitespace-nowrap transition-all cursor-pointer ${
+            className={`px-6 sm:px-7 md:px-8 py-3.5 sm:py-4 rounded-full text-xs sm:text-sm md:text-[15px] whitespace-nowrap transition-all cursor-pointer ${
               activeTab === "dashboard"
-                ? "neumorphism-dock-active font-black"
+                ? "neumorphism-dock-active font-black tracking-tight"
                 : "neumorphism-dock-inactive font-bold"
             }`}
           >
             Dashboard
           </button>
+
+          {/* Add Student Action in Bottom Dock (matches other dock buttons) */}
+          <button
+            onClick={() => {
+              setEditingStudent(null);
+              setIsStudentModalOpen(true);
+            }}
+            className="flex items-center gap-1.5 px-6 sm:px-7 md:px-8 py-3.5 sm:py-4 rounded-full text-xs sm:text-sm md:text-[15px] whitespace-nowrap transition-all cursor-pointer neumorphism-dock-inactive font-bold shrink-0"
+            title="Add New Student"
+          >
+            <Plus size={16} className="stroke-[2.5]" />
+            <span>Add Student</span>
+          </button>
+
           <button
             onClick={() => navigate("/admin/dashboard/student-crm")}
-            className={`px-4 sm:px-5 py-2 rounded-full text-xs sm:text-[13px] whitespace-nowrap transition-all cursor-pointer ${
+            className={`px-6 sm:px-7 md:px-8 py-3.5 sm:py-4 rounded-full text-xs sm:text-sm md:text-[15px] whitespace-nowrap transition-all cursor-pointer ${
               activeTab === "student-crm" || activeTab === "student-leads"
-                ? "neumorphism-dock-active font-black"
+                ? "neumorphism-dock-active font-black tracking-tight"
                 : "neumorphism-dock-inactive font-bold"
             }`}
           >
@@ -4463,9 +4595,9 @@ export default function AdminDashboard() {
           </button>
           <button
             onClick={() => navigate("/admin/dashboard/inquiry")}
-            className={`px-4 sm:px-5 py-2 rounded-full text-xs sm:text-[13px] whitespace-nowrap transition-all cursor-pointer ${
+            className={`px-6 sm:px-7 md:px-8 py-3.5 sm:py-4 rounded-full text-xs sm:text-sm md:text-[15px] whitespace-nowrap transition-all cursor-pointer ${
               activeTab === "inquiry"
-                ? "neumorphism-dock-active font-black"
+                ? "neumorphism-dock-active font-black tracking-tight"
                 : "neumorphism-dock-inactive font-bold"
             }`}
           >
@@ -4473,9 +4605,9 @@ export default function AdminDashboard() {
           </button>
           <button
             onClick={() => navigate("/admin/dashboard/referred-by")}
-            className={`px-4 sm:px-5 py-2 rounded-full text-xs sm:text-[13px] whitespace-nowrap transition-all cursor-pointer ${
+            className={`px-6 sm:px-7 md:px-8 py-3.5 sm:py-4 rounded-full text-xs sm:text-sm md:text-[15px] whitespace-nowrap transition-all cursor-pointer ${
               activeTab === "referred-by"
-                ? "neumorphism-dock-active font-black"
+                ? "neumorphism-dock-active font-black tracking-tight"
                 : "neumorphism-dock-inactive font-semibold"
             }`}
           >
@@ -4483,9 +4615,9 @@ export default function AdminDashboard() {
           </button>
           <button
             onClick={() => navigate("/admin/dashboard/deleted-referrers")}
-            className={`px-4 sm:px-5 py-2 rounded-full text-xs sm:text-[13px] whitespace-nowrap transition-all cursor-pointer ${
+            className={`px-6 sm:px-7 md:px-8 py-3.5 sm:py-4 rounded-full text-xs sm:text-sm md:text-[15px] whitespace-nowrap transition-all cursor-pointer ${
               activeTab === "deleted-referrers"
-                ? "neumorphism-dock-active font-black"
+                ? "neumorphism-dock-active font-black tracking-tight"
                 : "neumorphism-dock-inactive font-semibold"
             }`}
           >
@@ -4493,9 +4625,9 @@ export default function AdminDashboard() {
           </button>
           <button
             onClick={() => navigate("/admin/dashboard/deleted-students")}
-            className={`px-4 sm:px-5 py-2 rounded-full text-xs sm:text-[13px] whitespace-nowrap transition-all cursor-pointer ${
+            className={`px-6 sm:px-7 md:px-8 py-3.5 sm:py-4 rounded-full text-xs sm:text-sm md:text-[15px] whitespace-nowrap transition-all cursor-pointer ${
               activeTab === "deleted-students"
-                ? "neumorphism-dock-active font-black"
+                ? "neumorphism-dock-active font-black tracking-tight"
                 : "neumorphism-dock-inactive font-semibold"
             }`}
           >
@@ -4508,20 +4640,6 @@ export default function AdminDashboard() {
 }
 
 // Subcomponents
-
-function SidebarItem({ icon: Icon, label, active, onClick }: any) {
-  return (
-    <button 
-      onClick={onClick}
-      className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-semibold transition-all group border ${
-        active ? "bg-blue-50 text-blue-700 border-blue-100 shadow-sm" : "text-neutral-500 border-transparent hover:bg-neutral-50 hover:text-neutral-900"
-      }`}
-    >
-      <Icon size={20} className={active ? "text-blue-600" : "group-hover:text-neutral-500 transition-colors"} />
-      {label}
-    </button>
-  );
-}
 
 function StatCard({ 
   title, 

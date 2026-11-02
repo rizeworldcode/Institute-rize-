@@ -382,6 +382,8 @@ exports.admin_dashboardGet = async (req, res) => {
             top_courses,
             graphData,
             referrel_amount: adminConfig ? adminConfig.referrel_amount : 0,
+            adminEmail: adminConfig?.email || process.env.ADMIN_EMAIL || 'admin@rizeworld.com',
+            adminName: 'Super Admin',
             studentsWithCertificates
         };
 

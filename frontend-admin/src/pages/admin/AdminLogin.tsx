@@ -111,6 +111,7 @@ export default function AdminLogin() {
         // Store the token and update auth state
         localStorage.setItem("adminAuthToken", data.token);
         localStorage.setItem("adminAuthTime", Date.now().toString());
+        if (email) localStorage.setItem("adminEmail", email.trim().toLowerCase());
         setAttempts(0);
         navigate("/admin/dashboard");
       } else {

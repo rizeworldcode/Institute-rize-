@@ -40,6 +40,7 @@ export function StudentLeadModal({ isOpen, onClose, onSave, lead }: StudentLeadM
   // Section 4: Current Followup Section
   const [conversationNotes, setConversationNotes] = useState("");
   const [newConversation, setNewConversation] = useState("");
+  const [callOutcome, setCallOutcome] = useState<StudentLead["call_outcome"]>("");
   const [status, setStatus] = useState<StudentLead["status"]>("New Inquiry");
   const [nextFollowupDate, setNextFollowupDate] = useState("");
   const [followupTakenBy, setFollowupTakenBy] = useState("");
@@ -73,6 +74,7 @@ export function StudentLeadModal({ isOpen, onClose, onSave, lead }: StudentLeadM
 
       setConversationNotes(lead.conversation_notes || "");
       setNewConversation("");
+      setCallOutcome(lead.call_outcome || "");
       setStatus(lead.status || "New Inquiry");
       
       if (lead.next_followup_date) {
@@ -121,6 +123,7 @@ export function StudentLeadModal({ isOpen, onClose, onSave, lead }: StudentLeadM
 
       setConversationNotes("");
       setNewConversation("");
+      setCallOutcome("");
       setStatus("New Inquiry");
       setNextFollowupDate("");
       setFollowupRound("1st Follow-up");
@@ -181,6 +184,7 @@ export function StudentLeadModal({ isOpen, onClose, onSave, lead }: StudentLeadM
         remarks: remarks.trim(),
 
         status,
+        call_outcome: callOutcome,
         next_followup_date: nextFollowupDate ? new Date(nextFollowupDate).toISOString() : null,
         next_followup_by: nextFollowupBy.trim(),
         followup_round: followupRound,
@@ -642,6 +646,51 @@ export function StudentLeadModal({ isOpen, onClose, onSave, lead }: StudentLeadM
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* Call Outcome / Student Response */}
+              <div className="md:col-span-2">
+                <label className="block text-xs font-semibold text-neutral-700 mb-1.5">
+                  Call Outcome / Response (Telecalling Result)
+                </label>
+                <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
+                  {[
+                    { key: "Yes for Demo", label: "✨ Yes for Demo", color: "text-indigo-700 bg-indigo-50 border-indigo-300 ring-indigo-200" },
+                    { key: "Connected", label: "📞 Connected", color: "text-emerald-700 bg-emerald-50 border-emerald-300 ring-emerald-200" },
+                    { key: "Told Later", label: "⏳ Told Later", color: "text-purple-700 bg-purple-50 border-purple-300 ring-purple-200" },
+                    { key: "No", label: "❌ No / Dropped", color: "text-rose-700 bg-rose-50 border-rose-300 ring-rose-200" },
+                    { key: "Not Connected", label: "📵 Not Connected", color: "text-amber-700 bg-amber-50 border-amber-300 ring-amber-200" }
+                  ].map((item) => {
+                    const isSelected = callOutcome === item.key;
+                    return (
+                      <button
+                        type="button"
+                        key={item.key}
+                        onClick={() => {
+                          const newOutcome = isSelected ? "" : (item.key as any);
+                          setCallOutcome(newOutcome);
+                          if (newOutcome === "Yes for Demo") {
+                            setStatus("Demo Scheduled");
+                          } else if (newOutcome === "No") {
+                            setStatus("Lost");
+                            setInterestLevel("Not Interested");
+                          } else if (newOutcome === "Told Later") {
+                            if (status === "New Inquiry") setStatus("In Follow-up");
+                          } else if (newOutcome === "Connected") {
+                            if (status === "New Inquiry") setStatus("In Follow-up");
+                          }
+                        }}
+                        className={`py-2 px-3 rounded-xl text-xs font-semibold border flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
+                          isSelected
+                            ? `${item.color} font-bold ring-2`
+                            : "bg-white text-neutral-600 border-neutral-200 hover:border-neutral-300"
+                        }`}
+                      >
+                        {item.label}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
               {/* Status */}
               <div>
                 <label className="block text-xs font-semibold text-neutral-700 mb-1.5">

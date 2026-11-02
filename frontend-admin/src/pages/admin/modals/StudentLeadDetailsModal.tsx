@@ -1,7 +1,7 @@
 import { 
-  X, User, Phone, MapPin, School, GraduationCap, 
+  X, User,
   Calendar, BookOpen, AlertCircle, MessageSquare, 
-  Clock, CheckCircle2, Flame, Award, Building, 
+  Flame, Building, 
   PhoneCall, MessageCircle, Edit2, Copy, Check
 } from "lucide-react";
 import { useState } from "react";
@@ -281,10 +281,14 @@ export function StudentLeadDetailsModal({ lead, onClose, onEdit }: StudentLeadDe
               </span>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs bg-purple-50/40 p-3.5 rounded-xl border border-purple-100">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs bg-purple-50/40 p-3.5 rounded-xl border border-purple-100">
               <div>
                 <span className="text-neutral-500 block">Lead Status:</span>
                 <span className="font-bold text-neutral-800 text-sm">{lead.status}</span>
+              </div>
+              <div>
+                <span className="text-neutral-500 block">Call Response:</span>
+                <span className="font-bold text-indigo-700 text-sm">{lead.call_outcome || "Connected"}</span>
               </div>
               <div>
                 <span className="text-neutral-500 block">Follow-up Taken By:</span>

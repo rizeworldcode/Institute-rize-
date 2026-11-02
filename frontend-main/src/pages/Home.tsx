@@ -36,6 +36,10 @@ const videoTestimonials: { videoUrl: string; desc: string; posterUrl?: string }[
   {
     videoUrl: "/video/video 4.mp4",
     desc: "\"From fundamentals to landing high-paying opportunities.\""
+  },
+  {
+    videoUrl: "/video/video 5.mp4",
+    desc: "\"Practical real-world mentorship that accelerated my growth.\""
   }
 ];
 
@@ -182,15 +186,27 @@ export default function Home() {
       "@id": "https://rizeworldinstitute.in/#educationalorganization",
       "name": "RizeWorld Institute of AI & Digital Marketing",
       "alternateName": "RizeWorld Institute",
+      "legalName": "Rizeworld Digital Marketing Private Limited",
       "description": "Premium AI and Digital Marketing training institute in Alwar, Rajasthan offering comprehensive courses in SEO, SMO, Performance Marketing, Graphic Design, Video Editing, Website Development, and AI Tools.",
       "url": "https://rizeworldinstitute.in/",
       "logo": {
         "@type": "ImageObject",
-        "url": "https://rizeworldinstitute.in/logo/RIZE%20LOGO%20HORI%20PNG.png",
-        "width": 200,
-        "height": 60
+        "@id": "https://rizeworldinstitute.in/#logo",
+        "url": "https://rizeworldinstitute.in/logo/rizeworld-institute-logo.png",
+        "width": 1080,
+        "height": 1080,
+        "caption": "RizeWorld Institute of AI & Digital Marketing Official Logo"
       },
-      "image": "https://rizeworldinstitute.in/images/rize.png",
+      "image": {
+        "@type": "ImageObject",
+        "@id": "https://rizeworldinstitute.in/#primaryimage",
+        "url": "https://rizeworldinstitute.in/images/rizeworld-institute-alwar-campus.webp",
+        "contentUrl": "https://rizeworldinstitute.in/images/rizeworld-institute-alwar-campus.webp",
+        "caption": "RizeWorld Institute of AI and Digital Marketing Campus",
+        "representativeOfPage": true,
+        "width": 1200,
+        "height": 800
+      },
       "telephone": "+91-8302277092",
       "email": "rizeworldinstitute@gmail.com",
       "foundingDate": "2023",
@@ -228,7 +244,7 @@ export default function Home() {
       "name": "RizeWorld Institute",
       "alternateName": "RizeWorld Institute",
       "url": "https://rizeworldinstitute.in/",
-      "logo": "https://rizeworldinstitute.in/logo/RIZE%20LOGO%20HORI%20PNG.png",
+      "logo": "https://rizeworldinstitute.in/logo/rizeworld-institute-logo.png",
       "contactPoint": {
         "@type": "ContactPoint",
         "telephone": "+91-8302277092",
@@ -250,8 +266,8 @@ export default function Home() {
       "url": "https://rizeworldinstitute.in/",
       "telephone": "+91-8302277092",
       "email": "rizeworldinstitute@gmail.com",
-      "image": "https://rizeworldinstitute.in/images/rize.png",
-      "logo": "https://rizeworldinstitute.in/logo/RIZE%20LOGO%20HORI%20PNG.png",
+      "image": "https://rizeworldinstitute.in/images/rizeworld-institute-alwar-campus.webp",
+      "logo": "https://rizeworldinstitute.in/logo/rizeworld-institute-logo.png",
       "priceRange": "₹₹",
       "currenciesAccepted": "INR",
       "paymentAccepted": "Cash, Credit Card, UPI, Bank Transfer",
@@ -794,13 +810,13 @@ function VideoTestimonialsSection() {
     return () => io.disconnect();
   }, []);
 
-  const gutter = 20;
+  const gutter = 16;
   const unhoveredHeight = 280;
   const hoveredHeight = 440;
 
-  const baseSeat = 240;
-  const openWidth = 340;
-  const shrunk = 180;
+  const baseSeat = 210;
+  const openWidth = 330;
+  const shrunk = 170;
 
   const easeTransition = { duration: 0.65, ease: [0.19, 1, 0.22, 1] };
   const fadeTransition = { duration: 0.4, ease: [0.19, 1, 0.22, 1] };

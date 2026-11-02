@@ -34,11 +34,12 @@ exports.createLead = async (data) => {
     const lead_ID = await generateNextLeadId();
 
     const history = [];
-    if (data.conversation_notes || data.status) {
+    if (data.conversation_notes || data.status || data.call_outcome) {
       history.push({
         date: new Date(),
         conversation: data.conversation_notes || "Lead created",
         status: data.status || "New Inquiry",
+        call_outcome: data.call_outcome || "",
         next_followup_date: data.next_followup_date || null,
         taken_by: data.followup_taken_by || "Admin",
         next_followup_by: data.next_followup_by || "",
@@ -67,6 +68,7 @@ exports.createLead = async (data) => {
       remarks: data.remarks || "",
 
       conversation_notes: data.conversation_notes || "",
+      call_outcome: data.call_outcome || "",
       status: data.status || "New Inquiry",
       next_followup_date: data.next_followup_date ? new Date(data.next_followup_date) : null,
       next_followup_by: data.next_followup_by || "",
@@ -145,7 +147,20 @@ exports.getLeadStats = async () => {
   try {
     const baseFilter = { is_deleted: false };
 
-    const [totalLeads, newInquiries, inFollowUp, demoScheduled, demoCompleted, converted, lostLeads] = await Promise.all([
+    const [
+      totalLeads, 
+      newInquiries, 
+      inFollowUp, 
+      demoScheduled, 
+      demoCompleted, 
+      converted, 
+      lostLeads,
+      explicitYesForDemo,
+      explicitToldLater,
+      explicitNo,
+      explicitNotConnected,
+      explicitConnected
+    ] = await Promise.all([
       StudentLead.countDocuments(baseFilter),
       StudentLead.countDocuments({ ...baseFilter, status: "New Inquiry" }),
       StudentLead.countDocuments({ ...baseFilter, status: "In Follow-up" }),
@@ -153,7 +168,60 @@ exports.getLeadStats = async () => {
       StudentLead.countDocuments({ ...baseFilter, status: "Demo Completed" }),
       StudentLead.countDocuments({ ...baseFilter, status: "Converted" }),
       StudentLead.countDocuments({ ...baseFilter, status: "Lost" }),
+
+      // Telecalling response stats
+      StudentLead.countDocuments({
+        ...baseFilter,
+        $or: [
+          { call_outcome: "Yes for Demo" },
+          { status: { $in: ["Demo Scheduled", "Demo Completed"] } },
+          { demo_class_taken: true }
+        ]
+      }),
+      StudentLead.countDocuments({
+        ...baseFilter,
+        $or: [
+          { call_outcome: "Told Later" },
+          { next_followup_date: { $ne: null }, status: "In Follow-up" }
+        ]
+      }),
+      StudentLead.countDocuments({
+        ...baseFilter,
+        $or: [
+          { call_outcome: "No" },
+          { interest_level: "Not Interested" },
+          { status: "Lost" }
+        ]
+      }),
+      StudentLead.countDocuments({
+        ...baseFilter,
+        call_outcome: "Not Connected"
+      }),
+      StudentLead.countDocuments({
+        ...baseFilter,
+        $or: [
+          { call_outcome: { $in: ["Connected", "Yes for Demo", "Told Later"] } },
+          { status: { $in: ["In Follow-up", "Demo Scheduled", "Demo Completed", "Converted"] } }
+        ]
+      }),
     ]);
+
+    // Aggregate total calls across all leads
+    const callAgg = await StudentLead.aggregate([
+      { $match: baseFilter },
+      {
+        $project: {
+          calls: {
+            $max: [
+              1,
+              { $size: { $ifNull: ["$followup_history", []] } }
+            ]
+          }
+        }
+      },
+      { $group: { _id: null, totalCalls: { $sum: "$calls" } } }
+    ]);
+    const totalCalls = (callAgg[0] && callAgg[0].totalCalls) || totalLeads;
 
     return {
       success: true,
@@ -163,6 +231,12 @@ exports.getLeadStats = async () => {
         inFollowUp: inFollowUp + demoScheduled + demoCompleted,
         converted,
         lostLeads,
+        totalCalls,
+        totalConnected: explicitConnected,
+        totalNotConnected: explicitNotConnected,
+        yesForDemo: explicitYesForDemo,
+        noLeads: explicitNo,
+        toldLater: explicitToldLater,
       },
     };
   } catch (error) {
@@ -200,6 +274,7 @@ exports.updateLead = async (id, data) => {
         date: new Date(),
         conversation: data.new_conversation.trim(),
         status: data.status || lead.status,
+        call_outcome: data.call_outcome || lead.call_outcome || "",
         next_followup_date: data.next_followup_date ? new Date(data.next_followup_date) : lead.next_followup_date,
         taken_by: data.followup_taken_by || lead.followup_taken_by || "Admin",
         next_followup_by: data.next_followup_by || lead.next_followup_by || "",
@@ -213,6 +288,7 @@ exports.updateLead = async (id, data) => {
           date: new Date(),
           conversation: data.conversation_notes.trim(),
           status: data.status || lead.status,
+          call_outcome: data.call_outcome || lead.call_outcome || "",
           next_followup_date: data.next_followup_date ? new Date(data.next_followup_date) : lead.next_followup_date,
           taken_by: data.followup_taken_by || lead.followup_taken_by || "Admin",
           next_followup_by: data.next_followup_by || lead.next_followup_by || "",
@@ -221,6 +297,8 @@ exports.updateLead = async (id, data) => {
       }
       lead.conversation_notes = data.conversation_notes;
     }
+
+    if (data.call_outcome !== undefined) lead.call_outcome = data.call_outcome;
 
     // Update section 1: student details
     if (data.student_name !== undefined) lead.student_name = data.student_name;
