@@ -166,10 +166,6 @@ exports.getLeadStats = async () => {
       const history = Array.isArray(lead.followup_history) ? lead.followup_history : [];
       const latestCall = history.length > 0 ? history[history.length - 1] : null;
 
-      // Calls count
-      const callsCount = Math.max(1, history.length);
-      totalCalls += callsCount;
-
       // Status
       const status = lead.status || latestCall?.status || "New Inquiry";
       if (status === "New Inquiry") newInquiries++;
@@ -177,7 +173,11 @@ exports.getLeadStats = async () => {
       else if (status === "Lost") lostLeads++;
       else inFollowUp++; // In Follow-up, Demo Scheduled, Demo Completed
 
-      // Outcome & follow-up info
+      // Total calls count across history
+      const callsCount = Math.max(history.length, lead.conversation_notes || lead.call_outcome ? 1 : 0);
+      totalCalls += callsCount;
+
+      // Outcome & follow-up info based on LATEST call
       const outcome = latestCall?.call_outcome || lead.call_outcome || "";
       const notes = (latestCall?.conversation || lead.conversation_notes || "").toLowerCase();
       const interest = lead.interest_level;
@@ -188,8 +188,12 @@ exports.getLeadStats = async () => {
       const isNotConnected = !isDemo && !isNo && (outcome === "Not Connected" || (!outcome && (
         notes.includes("not connect") || notes.includes("not receive") || notes.includes("did not pick") || notes.includes("didn't pick") || notes.includes("switched off") || notes.includes("ringing") || notes.includes("unanswered")
       )));
-      const isToldLater = !isDemo && !isNo && !isNotConnected && (outcome === "Told Later" || notes.includes("later") || notes.includes("kal") || notes.includes("baad me") || notes.includes("busy") || notes.includes("call back") || Boolean(lead.next_followup_date && status === "In Follow-up"));
-      const isConnected = !isNo && !isNotConnected && (outcome === "Connected" || isDemo || isToldLater || status === "In Follow-up" || status === "Converted" || status === "Demo Scheduled" || status === "Demo Completed");
+      const isToldLater = !isDemo && !isNo && !isNotConnected && (
+        outcome === "Told Later" || notes.includes("later") || notes.includes("kal") || notes.includes("baad me") || notes.includes("busy") || notes.includes("call back") || Boolean((latestCall?.next_followup_date || lead.next_followup_date) && status === "In Follow-up")
+      );
+      const isConnected = !isNo && !isNotConnected && (
+        outcome === "Connected" || isDemo || isToldLater || status === "In Follow-up" || status === "Converted"
+      );
 
       if (isDemo) explicitYesForDemo++;
       if (isNo) explicitNo++;

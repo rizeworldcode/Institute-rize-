@@ -55,6 +55,10 @@ export function StudentLeadCrmTab() {
   const [sourceFilter, setSourceFilter] = useState("All Sources");
   const [callResponseFilter, setCallResponseFilter] = useState("All");
 
+  // Date-wise Filter State
+  const [dateFilterMode, setDateFilterMode] = useState<"all" | "today" | "yesterday" | "7days" | "custom">("all");
+  const [customDate, setCustomDate] = useState<string>("");
+
   useEffect(() => {
     const q = searchParams.get("search");
     if (q !== null && q !== search) {
@@ -154,25 +158,6 @@ export function StudentLeadCrmTab() {
     fetchLeads();
     fetchStats();
   }, [fetchLeads, fetchStats]);
-
-  const displayStats = useMemo(() => {
-    if (leads.length > 0) {
-      return {
-        totalLeads: leads.length,
-        newInquiries: leads.filter(l => l.status === "New Inquiry").length,
-        inFollowUp: leads.filter(l => l.status === "In Follow-up" || l.status === "Demo Scheduled" || l.status === "Demo Completed").length,
-        converted: leads.filter(l => l.status === "Converted").length,
-        lostLeads: leads.filter(l => l.status === "Lost").length,
-      };
-    }
-    return {
-      totalLeads: stats.totalLeads || 0,
-      newInquiries: stats.newInquiries || 0,
-      inFollowUp: stats.inFollowUp || 0,
-      converted: stats.converted || 0,
-      lostLeads: stats.lostLeads || 0,
-    };
-  }, [stats, leads]);
 
   const handleCopy = (text: string, id: string) => {
     navigator.clipboard.writeText(text);
@@ -338,28 +323,188 @@ export function StudentLeadCrmTab() {
     }
   };
 
-  // Helper to extract the LATEST call outcome, status, notes, and activity timestamp for a lead
-  const getLeadLatestCallInfo = (lead: StudentLead) => {
+  // Helper to convert any date string/timestamp to YYYY-MM-DD in local time
+  const toLocalDateKey = (dStr?: string | Date | null): string => {
+    if (!dStr) return "";
+    try {
+      const d = new Date(dStr);
+      if (isNaN(d.getTime())) return "";
+      const year = d.getFullYear();
+      const month = String(d.getMonth() + 1).padStart(2, "0");
+      const day = String(d.getDate()).padStart(2, "0");
+      return `${year}-${month}-${day}`;
+    } catch {
+      return "";
+    }
+  };
+
+  const isDateMatching = (
+    dateStr: string | Date | undefined | null,
+    mode: "all" | "today" | "yesterday" | "7days" | "custom",
+    targetDate: string
+  ): boolean => {
+    if (mode === "all") return true;
+    if (!dateStr) return false;
+
+    const itemDateKey = toLocalDateKey(dateStr);
+    if (!itemDateKey) return false;
+
+    const today = new Date();
+    const todayKey = toLocalDateKey(today);
+
+    if (mode === "today") {
+      return itemDateKey === todayKey;
+    }
+
+    if (mode === "yesterday") {
+      const yesterday = new Date(today);
+      yesterday.setDate(yesterday.getDate() - 1);
+      return itemDateKey === toLocalDateKey(yesterday);
+    }
+
+    if (mode === "7days") {
+      const d = new Date(dateStr);
+      const diffMs = today.getTime() - d.getTime();
+      const diffDays = diffMs / (1000 * 60 * 60 * 24);
+      return diffDays >= -1 && diffDays <= 7;
+    }
+
+    if (mode === "custom") {
+      return Boolean(targetDate && itemDateKey === targetDate);
+    }
+
+    return true;
+  };
+
+  // Get specific calls matching date filter for a lead (or all calls if mode === "all")
+  const getLeadCallsForDateFilter = (
+    lead: StudentLead,
+    mode: "all" | "today" | "yesterday" | "7days" | "custom",
+    targetDate: string
+  ): any[] => {
+    const calls: any[] = [];
+    if (Array.isArray(lead.followup_history) && lead.followup_history.length > 0) {
+      lead.followup_history.forEach((histItem) => {
+        if (isDateMatching(histItem.date, mode, targetDate)) {
+          calls.push(histItem);
+        }
+      });
+    } else if (lead.conversation_notes || lead.call_outcome || (lead.status && lead.status !== "New Inquiry")) {
+      // Single call recorded at lead registration
+      if (isDateMatching(lead.created_at, mode, targetDate)) {
+        calls.push({
+          date: lead.created_at,
+          call_outcome: lead.call_outcome || "",
+          status: lead.status || "New Inquiry",
+          conversation: lead.conversation_notes || "",
+          taken_by: lead.followup_taken_by || "Counselor",
+          demo_date: lead.demo_date,
+          next_followup_date: lead.next_followup_date,
+        });
+      }
+    }
+
+    return calls;
+  };
+
+  // Friendly label for currently selected date filter
+  const dateLabel = useMemo(() => {
+    if (dateFilterMode === "today") return "Today";
+    if (dateFilterMode === "yesterday") return "Yesterday";
+    if (dateFilterMode === "7days") return "Last 7 Days";
+    if (dateFilterMode === "custom" && customDate) {
+      try {
+        const parts = customDate.split("-");
+        if (parts.length === 3) {
+          const d = new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]));
+          return d.toLocaleDateString(undefined, { day: "numeric", month: "short", year: "numeric" });
+        }
+        return customDate;
+      } catch {
+        return customDate;
+      }
+    }
+    return "";
+  }, [dateFilterMode, customDate]);
+
+  // Top 5 Summary Cards Stats (Aware of date filter when active)
+  const displayStats = useMemo(() => {
+    const targetLeads = dateFilterMode !== "all"
+      ? leads.filter((l) => {
+          const calls = getLeadCallsForDateFilter(l, dateFilterMode, customDate);
+          const isCreated = isDateMatching(l.created_at, dateFilterMode, customDate);
+          return calls.length > 0 || isCreated;
+        })
+      : leads;
+
+    if (targetLeads.length > 0) {
+      return {
+        totalLeads: targetLeads.length,
+        newInquiries: targetLeads.filter(l => l.status === "New Inquiry").length,
+        inFollowUp: targetLeads.filter(l => l.status === "In Follow-up" || l.status === "Demo Scheduled" || l.status === "Demo Completed").length,
+        converted: targetLeads.filter(l => l.status === "Converted").length,
+        lostLeads: targetLeads.filter(l => l.status === "Lost").length,
+      };
+    }
+    return {
+      totalLeads: dateFilterMode !== "all" ? 0 : (stats.totalLeads || 0),
+      newInquiries: dateFilterMode !== "all" ? 0 : (stats.newInquiries || 0),
+      inFollowUp: dateFilterMode !== "all" ? 0 : (stats.inFollowUp || 0),
+      converted: dateFilterMode !== "all" ? 0 : (stats.converted || 0),
+      lostLeads: dateFilterMode !== "all" ? 0 : (stats.lostLeads || 0),
+    };
+  }, [stats, leads, dateFilterMode, customDate]);
+
+  // Helper to extract the LATEST call outcome, status, notes, and activity timestamp for a lead (scoped to date filter if active)
+  const getLeadLatestCallInfo = (
+    lead: StudentLead,
+    mode: "all" | "today" | "yesterday" | "7days" | "custom" = "all",
+    targetDate: string = ""
+  ) => {
     const history = Array.isArray(lead.followup_history) && lead.followup_history.length > 0
       ? lead.followup_history
       : [];
-    const latestCall = history.length > 0 ? history[history.length - 1] : null;
+
+    let matchingCalls = history;
+    if (mode !== "all") {
+      matchingCalls = history.filter((h) => isDateMatching(h.date, mode, targetDate));
+    }
+
+    let latestCall: any = null;
+    if (matchingCalls.length > 0) {
+      latestCall = matchingCalls[matchingCalls.length - 1];
+    } else if (isDateMatching(lead.created_at, mode, targetDate)) {
+      if (lead.conversation_notes || lead.call_outcome || (lead.status && lead.status !== "New Inquiry")) {
+        latestCall = {
+          date: lead.created_at,
+          call_outcome: lead.call_outcome || "",
+          status: lead.status || "New Inquiry",
+          conversation: lead.conversation_notes || "",
+          demo_date: lead.demo_date,
+          next_followup_date: lead.next_followup_date,
+        };
+      }
+    }
+
+    if (!latestCall && mode !== "all") {
+      return null;
+    }
 
     // Latest outcome: check latest call in history first, then root lead.call_outcome
-    const latestOutcome = latestCall?.call_outcome || lead.call_outcome || "";
+    const latestOutcome = latestCall?.call_outcome || (mode === "all" ? lead.call_outcome : "") || "";
 
-    // Latest status: root lead.status takes precedence if set, otherwise latest call status
-    const latestStatus: string = (lead.status || latestCall?.status || "New Inquiry") as string;
+    // Latest status: root lead.status takes precedence if set in all mode, otherwise latest call status
+    const latestStatus: string = (mode === "all" ? (lead.status || latestCall?.status) : (latestCall?.status || lead.status)) || "New Inquiry";
 
     // Notes: latest call conversation notes or root conversation_notes
-    const latestNotes = (latestCall?.conversation || lead.conversation_notes || "").toLowerCase();
+    const latestNotes = (latestCall?.conversation || (mode === "all" ? lead.conversation_notes : "") || "").toLowerCase();
 
     // Interest level
     const interest = lead.interest_level;
 
     // Has scheduled or attended demo
-    const hasDemo = Boolean(latestCall?.demo_date || lead.demo_date);
-    const isDemo = latestOutcome === "Yes for Demo" || latestStatus === "Demo Scheduled" || latestStatus === "Demo Completed" || lead.demo_class_taken || hasDemo;
+    const hasDemo = Boolean(latestCall?.demo_date || (mode === "all" ? lead.demo_date : null));
+    const isDemo = latestOutcome === "Yes for Demo" || latestStatus === "Demo Scheduled" || latestStatus === "Demo Completed" || (mode === "all" && lead.demo_class_taken) || hasDemo;
 
     // Dropped / Lost / Refused
     const isNo = latestOutcome === "No" || interest === "Not Interested" || latestStatus === "Lost" || latestNotes.includes("not interest") || latestNotes.includes("refused") || latestNotes.includes("nahi karna");
@@ -371,7 +516,7 @@ export function StudentLeadCrmTab() {
 
     // Told Later / Callback / Busy schedule (student answered and said they are busy)
     const isToldLater = !isDemo && !isNo && !isNotConnected && (
-      latestOutcome === "Told Later" || latestNotes.includes("later") || latestNotes.includes("kal") || latestNotes.includes("baad me") || latestNotes.includes("busy") || latestNotes.includes("call back") || Boolean((latestCall?.next_followup_date || lead.next_followup_date) && latestStatus === "In Follow-up")
+      latestOutcome === "Told Later" || latestNotes.includes("later") || latestNotes.includes("kal") || latestNotes.includes("baad me") || latestNotes.includes("busy") || latestNotes.includes("call back") || Boolean((latestCall?.next_followup_date || (mode === "all" ? lead.next_followup_date : null)) && latestStatus === "In Follow-up")
     );
 
     // Connected: Spoke with counselor (Demo, Told Later, or explicit Connected or active follow-up/converted)
@@ -385,6 +530,7 @@ export function StudentLeadCrmTab() {
     ).getTime();
 
     return {
+      latestCall,
       latestOutcome,
       latestStatus,
       latestNotes,
@@ -416,7 +562,7 @@ export function StudentLeadCrmTab() {
     return 1;
   };
 
-  // Filtered Leads (Filtered and Sorted by Latest Activity Date)
+  // Filtered Leads (Filtered by Search, Status, Source, Call Response, Date, and Sorted by Latest Activity Date)
   const filteredLeads = useMemo(() => {
     const list = leads.filter((lead) => {
       // Search
@@ -448,9 +594,17 @@ export function StudentLeadCrmTab() {
         if (lead.is_from_workshop) return false;
       }
 
-      // Call Response Filter: 100% synchronized with getLeadLatestCallInfo
+      // Date Filter & Latest Call Response Filter
+      const info = getLeadLatestCallInfo(lead, dateFilterMode, customDate);
+      const isCreatedOnDate = isDateMatching(lead.created_at, dateFilterMode, customDate);
+
+      if (dateFilterMode !== "all") {
+        if (!info && !isCreatedOnDate) return false;
+      }
+
+      // Match Call Response filter using the exact same latest follow-up outcome
       if (callResponseFilter !== "All") {
-        const info = getLeadLatestCallInfo(lead);
+        if (!info) return false;
         if (callResponseFilter === "Yes for Demo" && !info.isDemo) return false;
         if (callResponseFilter === "No" && !info.isNo) return false;
         if (callResponseFilter === "Told Later" && !info.isToldLater) return false;
@@ -463,13 +617,13 @@ export function StudentLeadCrmTab() {
 
     // Sort by latest call / follow-up activity date (newest updates first)
     return list.sort((a, b) => {
-      const timeA = getLeadLatestCallInfo(a).latestActivityTime;
-      const timeB = getLeadLatestCallInfo(b).latestActivityTime;
+      const timeA = getLeadLatestCallInfo(a)?.latestActivityTime || 0;
+      const timeB = getLeadLatestCallInfo(b)?.latestActivityTime || 0;
       return timeB - timeA;
     });
-  }, [leads, search, statusFilter, sourceFilter, callResponseFilter]);
+  }, [leads, search, statusFilter, sourceFilter, callResponseFilter, dateFilterMode, customDate]);
 
-  // Compute Call & Demo Performance Stats directly from current leads using latest follow-up info
+  // Compute Call & Demo Performance Stats directly from current leads using latest follow-up
   const callStats = useMemo(() => {
     let totalCalls = 0;
     let connected = 0;
@@ -479,33 +633,41 @@ export function StudentLeadCrmTab() {
     let toldLater = 0;
 
     leads.forEach((lead) => {
-      const leadCalls = getLeadTotalCalls(lead);
-      totalCalls += leadCalls;
+      // 1. Total dials/calls made
+      const history = Array.isArray(lead.followup_history) ? lead.followup_history : [];
+      if (dateFilterMode === "all") {
+        totalCalls += Math.max(history.length, lead.conversation_notes || lead.call_outcome ? 1 : 0);
+      } else {
+        const dateCalls = history.filter((h) => isDateMatching(h.date, dateFilterMode, customDate));
+        totalCalls += dateCalls.length;
+      }
 
-      const info = getLeadLatestCallInfo(lead);
-
-      if (info.isDemo) yesForDemo++;
-      if (info.isNo) noLeads++;
-      if (info.isToldLater) toldLater++;
-      if (info.isNotConnected) notConnected++;
-      if (info.isConnected) connected++;
+      // 2. Count each lead according to their LATEST follow-up/call outcome
+      const info = getLeadLatestCallInfo(lead, dateFilterMode, customDate);
+      if (info) {
+        if (info.isDemo) yesForDemo++;
+        if (info.isNo) noLeads++;
+        if (info.isToldLater) toldLater++;
+        if (info.isNotConnected) notConnected++;
+        if (info.isConnected) connected++;
+      }
     });
 
     return {
-      totalCalls: Math.max(totalCalls, leads.length),
+      totalCalls: dateFilterMode !== "all" ? totalCalls : Math.max(totalCalls, leads.length),
       connected,
       notConnected,
       yesForDemo,
       noLeads,
       toldLater,
     };
-  }, [leads]);
+  }, [leads, dateFilterMode, customDate]);
 
   // Format Call Outcome Badge for table based on LATEST call status
   const renderCallOutcomeBadge = (lead: StudentLead) => {
     const info = getLeadLatestCallInfo(lead);
 
-    if (info.isDemo) {
+    if (info?.isDemo) {
       return (
         <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-200/60 shadow-2xs whitespace-nowrap shrink-0">
           <CalendarCheck size={11} className="text-indigo-600 shrink-0" />
@@ -513,7 +675,7 @@ export function StudentLeadCrmTab() {
         </span>
       );
     }
-    if (info.isNo) {
+    if (info?.isNo) {
       return (
         <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-rose-50 text-rose-700 border border-rose-200/60 shadow-2xs whitespace-nowrap shrink-0">
           <XCircle size={11} className="text-rose-600 shrink-0" />
@@ -521,7 +683,7 @@ export function StudentLeadCrmTab() {
         </span>
       );
     }
-    if (info.isToldLater) {
+    if (info?.isToldLater) {
       return (
         <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-purple-50 text-purple-700 border border-purple-200/60 shadow-2xs whitespace-nowrap shrink-0">
           <Clock size={11} className="text-purple-600 shrink-0" />
@@ -529,7 +691,7 @@ export function StudentLeadCrmTab() {
         </span>
       );
     }
-    if (info.isNotConnected) {
+    if (info?.isNotConnected) {
       return (
         <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-50 text-amber-700 border border-amber-200/60 shadow-2xs whitespace-nowrap shrink-0">
           <PhoneOff size={11} className="text-amber-600 shrink-0" />
@@ -664,7 +826,7 @@ export function StudentLeadCrmTab() {
             </div>
           </div>
           <div className="text-[11px] sm:text-xs text-blue-100 font-medium opacity-90 truncate">
-            All registered inquiries
+            {dateLabel ? `Active leads on ${dateLabel}` : "All registered inquiries"}
           </div>
         </div>
 
@@ -683,7 +845,9 @@ export function StudentLeadCrmTab() {
               </span>
             </div>
           </div>
-          <div className="text-[11px] sm:text-xs text-neutral-400 font-medium truncate">Fresh prospects</div>
+          <div className="text-[11px] sm:text-xs text-neutral-400 font-medium truncate">
+            {dateLabel ? `New on ${dateLabel}` : "Fresh prospects"}
+          </div>
         </div>
 
         {/* 3. In Follow-up */}
@@ -701,7 +865,9 @@ export function StudentLeadCrmTab() {
               </span>
             </div>
           </div>
-          <div className="text-[11px] sm:text-xs text-neutral-400 font-medium truncate">Active engagement</div>
+          <div className="text-[11px] sm:text-xs text-neutral-400 font-medium truncate">
+            {dateLabel ? `In follow-up on ${dateLabel}` : "Active engagement"}
+          </div>
         </div>
 
         {/* 4. Converted */}
@@ -719,7 +885,9 @@ export function StudentLeadCrmTab() {
               </span>
             </div>
           </div>
-          <div className="text-[11px] sm:text-xs text-neutral-400 font-medium truncate">Enrolled students</div>
+          <div className="text-[11px] sm:text-xs text-neutral-400 font-medium truncate">
+            {dateLabel ? `Converted on ${dateLabel}` : "Enrolled students"}
+          </div>
         </div>
 
         {/* 5. Lost Leads */}
@@ -737,22 +905,129 @@ export function StudentLeadCrmTab() {
               </span>
             </div>
           </div>
-          <div className="text-[11px] sm:text-xs text-neutral-400 font-medium truncate">Dropped inquiries</div>
+          <div className="text-[11px] sm:text-xs text-neutral-400 font-medium truncate">
+            {dateLabel ? `Dropped on ${dateLabel}` : "Dropped inquiries"}
+          </div>
         </div>
       </div>
 
       {/* Calling & Demo Telecalling Performance Cards (Horizontal Swipe on Mobile, 6 Grid on Desktop) */}
       <div className="space-y-2.5 sm:space-y-3">
-        <div className="flex items-center justify-between px-1">
-          <div className="flex items-center gap-1.5 sm:gap-2">
-            <PhoneCall size={15} className="text-blue-600" />
-            <h3 className="text-[11px] sm:text-xs font-black uppercase tracking-wider text-neutral-800">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 px-1 pb-1">
+          <div className="flex items-center gap-2 flex-wrap">
+            <div className="w-7 h-7 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center shadow-2xs">
+              <PhoneCall size={15} />
+            </div>
+            <h3 className="text-xs sm:text-sm font-black uppercase tracking-wider text-neutral-900">
               Calling & Demo Response Performance
             </h3>
+            {dateLabel && (
+              <span className="text-[10px] font-black px-2.5 py-0.5 rounded-full bg-blue-100 text-blue-800 border border-blue-200 shadow-2xs flex items-center gap-1">
+                <Calendar size={11} className="text-blue-600" />
+                {dateLabel}
+              </span>
+            )}
           </div>
-          <span className="text-[10px] sm:text-[11px] font-semibold text-neutral-400">
-            Tap card to filter
-          </span>
+
+          {/* Date-wise Quick Filter Toolbar */}
+          <div className="flex items-center gap-1.5 flex-wrap">
+            <button
+              type="button"
+              onClick={() => {
+                setDateFilterMode("all");
+                setCustomDate("");
+              }}
+              className={`px-2.5 py-1 rounded-full text-[11px] font-bold transition-all cursor-pointer shadow-2xs ${
+                dateFilterMode === "all"
+                  ? "bg-neutral-900 text-white"
+                  : "bg-neutral-100 text-neutral-600 hover:bg-neutral-200 border border-neutral-200/60"
+              }`}
+            >
+              All Time
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                const todayStr = toLocalDateKey(new Date());
+                setDateFilterMode("today");
+                setCustomDate(todayStr);
+              }}
+              className={`px-2.5 py-1 rounded-full text-[11px] font-bold transition-all cursor-pointer shadow-2xs ${
+                dateFilterMode === "today"
+                  ? "bg-blue-600 text-white"
+                  : "bg-blue-50 text-blue-700 hover:bg-blue-100 border border-blue-200/60"
+              }`}
+            >
+              Today
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                const y = new Date();
+                y.setDate(y.getDate() - 1);
+                setDateFilterMode("yesterday");
+                setCustomDate(toLocalDateKey(y));
+              }}
+              className={`px-2.5 py-1 rounded-full text-[11px] font-bold transition-all cursor-pointer shadow-2xs ${
+                dateFilterMode === "yesterday"
+                  ? "bg-purple-600 text-white"
+                  : "bg-purple-50 text-purple-700 hover:bg-purple-100 border border-purple-200/60"
+              }`}
+            >
+              Yesterday
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setDateFilterMode("7days");
+                setCustomDate("");
+              }}
+              className={`px-2.5 py-1 rounded-full text-[11px] font-bold transition-all cursor-pointer shadow-2xs ${
+                dateFilterMode === "7days"
+                  ? "bg-indigo-600 text-white"
+                  : "bg-indigo-50 text-indigo-700 hover:bg-indigo-100 border border-indigo-200/60"
+              }`}
+            >
+              Last 7 Days
+            </button>
+
+            {/* Specific Date Picker */}
+            <div className="relative inline-flex items-center">
+              <input
+                type="date"
+                value={customDate}
+                onChange={(e) => {
+                  if (e.target.value) {
+                    setDateFilterMode("custom");
+                    setCustomDate(e.target.value);
+                  } else {
+                    setDateFilterMode("all");
+                    setCustomDate("");
+                  }
+                }}
+                className={`text-[11px] font-semibold pl-2 pr-1.5 py-1 rounded-full border transition-all cursor-pointer focus:outline-none shadow-2xs ${
+                  dateFilterMode === "custom"
+                    ? "bg-amber-50 text-amber-900 border-amber-300 ring-2 ring-amber-200 font-bold"
+                    : "bg-neutral-50 text-neutral-700 border-neutral-200/80 hover:border-neutral-300"
+                }`}
+                title="Select a specific date to view calls made on that date"
+              />
+            </div>
+
+            {dateFilterMode !== "all" && (
+              <button
+                type="button"
+                onClick={() => {
+                  setDateFilterMode("all");
+                  setCustomDate("");
+                }}
+                className="text-[10px] font-bold text-rose-600 hover:text-rose-800 bg-rose-50 hover:bg-rose-100 px-2 py-1 rounded-full border border-rose-200 transition-all cursor-pointer flex items-center gap-0.5 shadow-2xs"
+                title="Reset date filter"
+              >
+                <X size={11} /> Clear Date
+              </button>
+            )}
+          </div>
         </div>
 
         <div className="flex overflow-x-auto no-scrollbar gap-2.5 sm:gap-3.5 pb-1 -mx-2 px-2 sm:mx-0 sm:px-0 sm:grid sm:grid-cols-3 lg:grid-cols-6 snap-x">
@@ -774,7 +1049,9 @@ export function StudentLeadCrmTab() {
                 {callStats.totalCalls}
               </span>
             </div>
-            <div className="text-[10px] sm:text-xs text-neutral-400 font-medium truncate">All dials made</div>
+            <div className="text-[10px] sm:text-xs text-neutral-400 font-medium truncate">
+              {dateLabel ? `Dials on ${dateLabel}` : "All dials made"}
+            </div>
           </div>
 
           {/* 2. Total Connected */}
@@ -795,7 +1072,9 @@ export function StudentLeadCrmTab() {
                 {callStats.connected}
               </span>
             </div>
-            <div className="text-[10px] sm:text-xs text-neutral-400 font-medium truncate">Connected calls</div>
+            <div className="text-[10px] sm:text-xs text-neutral-400 font-medium truncate">
+              {dateLabel ? `Connected on ${dateLabel}` : "Connected calls"}
+            </div>
           </div>
 
           {/* 3. Total Not Connected */}
@@ -816,7 +1095,9 @@ export function StudentLeadCrmTab() {
                 {callStats.notConnected}
               </span>
             </div>
-            <div className="text-[10px] sm:text-xs text-neutral-400 font-medium truncate">Unanswered / busy</div>
+            <div className="text-[10px] sm:text-xs text-neutral-400 font-medium truncate">
+              {dateLabel ? `Unanswered on ${dateLabel}` : "Unanswered / busy"}
+            </div>
           </div>
 
           {/* 4. Yes for Demo */}
@@ -837,7 +1118,9 @@ export function StudentLeadCrmTab() {
                 {callStats.yesForDemo}
               </span>
             </div>
-            <div className="text-[10px] sm:text-xs text-neutral-400 font-medium truncate">Demo booked</div>
+            <div className="text-[10px] sm:text-xs text-neutral-400 font-medium truncate">
+              {dateLabel ? `Demos on ${dateLabel}` : "Demo booked"}
+            </div>
           </div>
 
           {/* 5. Told Later */}
@@ -858,7 +1141,9 @@ export function StudentLeadCrmTab() {
                 {callStats.toldLater}
               </span>
             </div>
-            <div className="text-[10px] sm:text-xs text-neutral-400 font-medium truncate">Callback later</div>
+            <div className="text-[10px] sm:text-xs text-neutral-400 font-medium truncate">
+              {dateLabel ? `Callbacks on ${dateLabel}` : "Callback later"}
+            </div>
           </div>
 
           {/* 6. No (Not Interested / Dropped) */}
@@ -879,7 +1164,9 @@ export function StudentLeadCrmTab() {
                 {callStats.noLeads}
               </span>
             </div>
-            <div className="text-[10px] sm:text-xs text-neutral-400 font-medium truncate">Not interested</div>
+            <div className="text-[10px] sm:text-xs text-neutral-400 font-medium truncate">
+              {dateLabel ? `Dropped on ${dateLabel}` : "Not interested"}
+            </div>
           </div>
         </div>
       </div>
@@ -888,24 +1175,31 @@ export function StudentLeadCrmTab() {
       <div className="bg-white rounded-2xl sm:rounded-[26px] p-3.5 sm:p-6 md:p-7 border border-neutral-200/80 shadow-xs">
         {/* Table Header Controls */}
         <div className="flex flex-col gap-3 pb-4 sm:pb-6 border-b border-neutral-100">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2.5">
+          <div className="flex items-center justify-between flex-wrap gap-2">
+            <div className="flex items-center gap-2.5 flex-wrap">
               <h3 className="text-base sm:text-lg font-black text-neutral-900 tracking-tight">Student Leads Directory</h3>
               <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-neutral-100 text-neutral-600 border border-neutral-200/60">
                 {filteredLeads.length} total
               </span>
+              {dateLabel && (
+                <span className="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-blue-50 text-blue-700 border border-blue-200/60 flex items-center gap-1 shadow-2xs">
+                  <Calendar size={12} className="text-blue-600" /> {dateLabel}
+                </span>
+              )}
             </div>
-            {(callResponseFilter !== "All" || statusFilter !== "All Statuses" || sourceFilter !== "All Sources" || search) && (
+            {(callResponseFilter !== "All" || statusFilter !== "All Statuses" || sourceFilter !== "All Sources" || search || dateFilterMode !== "all") && (
               <button
                 onClick={() => {
                   setCallResponseFilter("All");
                   setStatusFilter("All Statuses");
                   setSourceFilter("All Sources");
                   setSearch("");
+                  setDateFilterMode("all");
+                  setCustomDate("");
                   searchParams.delete("search");
                   setSearchParams(searchParams, { replace: true });
                 }}
-                className="text-[11px] font-bold text-blue-600 hover:text-blue-800 bg-blue-50 hover:bg-blue-100 px-2.5 py-1 rounded-full transition-all cursor-pointer"
+                className="text-[11px] font-bold text-blue-600 hover:text-blue-800 bg-blue-50 hover:bg-blue-100 px-2.5 py-1 rounded-full transition-all cursor-pointer shadow-2xs"
               >
                 Reset Filters
               </button>
@@ -943,8 +1237,8 @@ export function StudentLeadCrmTab() {
               )}
             </div>
 
-            {/* Filter Dropdowns (Clean 3-col on Mobile, Row on Desktop) */}
-            <div className="grid grid-cols-3 gap-1.5 sm:flex sm:items-center sm:gap-2">
+            {/* Filter Dropdowns (Clean on Mobile, Row on Desktop) */}
+            <div className="grid grid-cols-3 sm:flex sm:items-center gap-1.5 sm:gap-2">
               {/* Pill Call Response Filter */}
               <div className="relative flex-1">
                 <select
@@ -995,6 +1289,29 @@ export function StudentLeadCrmTab() {
                   <option value="Other">🌐 Other</option>
                 </select>
                 <ChevronDown size={11} className="absolute right-2 top-1/2 -translate-y-1/2 text-neutral-400 pointer-events-none" />
+              </div>
+
+              {/* Date Filter Input in Table Row */}
+              <div className="relative col-span-3 sm:col-span-1">
+                <input
+                  type="date"
+                  value={customDate}
+                  onChange={(e) => {
+                    if (e.target.value) {
+                      setDateFilterMode("custom");
+                      setCustomDate(e.target.value);
+                    } else {
+                      setDateFilterMode("all");
+                      setCustomDate("");
+                    }
+                  }}
+                  className={`w-full appearance-none rounded-full px-3 py-2 text-[11px] sm:text-xs font-semibold focus:outline-none cursor-pointer shadow-2xs border transition-all ${
+                    dateFilterMode !== "all"
+                      ? "bg-blue-50 text-blue-900 border-blue-300 ring-2 ring-blue-100 font-bold"
+                      : "bg-neutral-50/80 text-neutral-600 border-neutral-200/80 hover:border-neutral-300"
+                  }`}
+                  title="Filter leads by specific date"
+                />
               </div>
             </div>
           </div>
