@@ -18,6 +18,10 @@ const FollowupHistorySchema = new mongoose.Schema({
     type: Date,
     default: null,
   },
+  demo_date: {
+    type: Date,
+    default: null,
+  },
   taken_by: {
     type: String,
     default: "",

@@ -2,7 +2,7 @@ import {
   X, User,
   Calendar, BookOpen, AlertCircle, MessageSquare, 
   Flame, Building, 
-  PhoneCall, MessageCircle, Edit2, Copy, Check
+  PhoneCall, MessageCircle, Edit2, Copy, Check, CalendarCheck
 } from "lucide-react";
 import { useState } from "react";
 import { StudentLead } from "../types";
@@ -215,58 +215,98 @@ export function StudentLeadDetailsModal({ lead, onClose, onEdit }: StudentLeadDe
               <BookOpen size={15} className="text-emerald-600" />
               Demo Class & Course Interests
             </div>
-            {lead.demo_class_taken ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
-                <div>
-                  <span className="text-xs text-neutral-400 block font-medium">Demo Class Status</span>
+
+            {/* Scheduled Demo Banner if Demo Scheduled or demo_date exists without demo taken */}
+            {!lead.demo_class_taken && (lead.status === "Demo Scheduled" || lead.demo_date) && (
+              <div className="p-4 rounded-2xl bg-gradient-to-br from-amber-50 via-orange-50/60 to-amber-50 border-2 border-amber-300 space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-black text-amber-950 flex items-center gap-1.5 uppercase tracking-wide">
+                    <CalendarCheck size={16} className="text-amber-600" />
+                    Scheduled Demo Class
+                  </span>
+                  <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-amber-200/90 text-amber-900 border border-amber-300">
+                    Upcoming Demo
+                  </span>
+                </div>
+                <div className="text-base font-black text-neutral-900 flex items-center gap-2">
+                  <Calendar size={16} className="text-amber-600" />
+                  <span>
+                    {lead.demo_date ? new Date(lead.demo_date).toLocaleString("en-US", {
+                      dateStyle: "medium",
+                      timeStyle: "short",
+                    }) : "Demo date pending"}
+                  </span>
+                </div>
+                {lead.interested_course && (
+                  <div className="text-xs text-amber-900 font-semibold pt-1 border-t border-amber-200/80">
+                    Demo Course Subject: <span className="font-bold text-neutral-900">{lead.interested_course}</span>
+                  </div>
+                )}
+              </div>
+            )}
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
+              <div>
+                <span className="text-xs text-neutral-400 block font-medium">Demo Class Status</span>
+                {lead.demo_class_taken ? (
                   <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold mt-1 bg-emerald-50 text-emerald-700 border border-emerald-200">
                     ✅ Demo Class Taken
                   </span>
-                </div>
-                <div>
-                  <span className="text-xs text-neutral-400 block font-medium">Interested Course</span>
-                  <span className="font-bold text-neutral-900">{lead.interested_course || "—"}</span>
-                </div>
-                {lead.demo_date && (
-                  <div>
-                    <span className="text-xs text-neutral-400 block font-medium">Date of Demo Class</span>
-                    <span className="font-semibold text-neutral-800">
-                      {new Date(lead.demo_date).toLocaleDateString()}
-                    </span>
-                  </div>
+                ) : lead.status === "Demo Scheduled" ? (
+                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold mt-1 bg-amber-50 text-amber-800 border border-amber-200 font-mono">
+                    🟠 Demo Scheduled
+                  </span>
+                ) : (
+                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold mt-1 bg-neutral-100 text-neutral-600">
+                    ⏳ No Demo Class Taken Yet
+                  </span>
                 )}
+              </div>
+
+              <div>
+                <span className="text-xs text-neutral-400 block font-medium">Interested Course</span>
+                <span className="font-bold text-neutral-900">{lead.interested_course || "—"}</span>
+              </div>
+
+              {lead.demo_date && (
                 <div>
-                  <span className="text-xs text-neutral-400 block font-medium">Level of Interest</span>
-                  <span className="font-bold text-neutral-900 flex items-center gap-1.5 mt-0.5">
-                    {lead.interest_level === "High" && <Flame size={15} className="text-rose-500" />}
-                    {lead.interest_level || "Medium"}
+                  <span className="text-xs text-neutral-400 block font-medium">
+                    {lead.demo_class_taken ? "Date of Attended Demo" : "Scheduled Demo Date & Time"}
+                  </span>
+                  <span className="font-bold text-amber-800">
+                    {new Date(lead.demo_date).toLocaleString("en-US", {
+                      dateStyle: "medium",
+                      timeStyle: "short",
+                    })}
                   </span>
                 </div>
+              )}
 
-                {lead.problems_faced && (
-                  <div className="sm:col-span-2 p-3 rounded-xl bg-amber-50/60 border border-amber-200/80">
-                    <span className="text-xs font-bold text-amber-800 flex items-center gap-1 mb-1">
-                      <AlertCircle size={13} />
-                      Reported Problem / Concerns:
-                    </span>
-                    <p className="text-xs text-amber-900 whitespace-pre-wrap">{lead.problems_faced}</p>
-                  </div>
-                )}
-
-                {lead.remarks && (
-                  <div className="sm:col-span-2 p-3 rounded-xl bg-neutral-50 border border-neutral-200">
-                    <span className="text-xs font-bold text-neutral-700 block mb-1">Remarks & Feedback:</span>
-                    <p className="text-xs text-neutral-800 whitespace-pre-wrap">{lead.remarks}</p>
-                  </div>
-                )}
-              </div>
-            ) : (
-              <div className="flex items-center gap-2 text-xs font-semibold text-neutral-500 py-1">
-                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-neutral-100 text-neutral-600">
-                  ⏳ No Demo Class Taken Yet
+              <div>
+                <span className="text-xs text-neutral-400 block font-medium">Level of Interest</span>
+                <span className="font-bold text-neutral-900 flex items-center gap-1.5 mt-0.5">
+                  {lead.interest_level === "High" && <Flame size={15} className="text-rose-500" />}
+                  {lead.interest_level || "Medium"}
                 </span>
               </div>
-            )}
+
+              {lead.problems_faced && (
+                <div className="sm:col-span-2 p-3 rounded-xl bg-amber-50/60 border border-amber-200/80">
+                  <span className="text-xs font-bold text-amber-800 flex items-center gap-1 mb-1">
+                    <AlertCircle size={13} />
+                    Reported Problem / Concerns:
+                  </span>
+                  <p className="text-xs text-amber-900 whitespace-pre-wrap">{lead.problems_faced}</p>
+                </div>
+              )}
+
+              {lead.remarks && (
+                <div className="sm:col-span-2 p-3 rounded-xl bg-neutral-50 border border-neutral-200">
+                  <span className="text-xs font-bold text-neutral-700 block mb-1">Remarks & Feedback:</span>
+                  <p className="text-xs text-neutral-800 whitespace-pre-wrap">{lead.remarks}</p>
+                </div>
+              )}
+            </div>
           </div>
 
           {/* Section 4: Current Follow-up */}

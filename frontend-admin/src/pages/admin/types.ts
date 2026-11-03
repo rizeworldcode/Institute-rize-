@@ -89,6 +89,8 @@ export type FollowupHistoryItem = {
   conversation: string;
   status: string;
   next_followup_date?: string | null;
+  demo_date?: string | null;
+  call_outcome?: string;
   taken_by?: string;
   next_followup_by?: string;
   followup_round?: string;

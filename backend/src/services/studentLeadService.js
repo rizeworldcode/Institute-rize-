@@ -34,13 +34,14 @@ exports.createLead = async (data) => {
     const lead_ID = await generateNextLeadId();
 
     const history = [];
-    if (data.conversation_notes || data.status || data.call_outcome) {
+    if (data.conversation_notes || data.status || data.call_outcome || data.demo_date) {
       history.push({
         date: new Date(),
-        conversation: data.conversation_notes || "Lead created",
+        conversation: data.conversation_notes || (data.status === "Demo Scheduled" ? "Demo Scheduled" : "Lead created"),
         status: data.status || "New Inquiry",
-        call_outcome: data.call_outcome || "",
+        call_outcome: data.call_outcome || (data.status === "Demo Scheduled" ? "Yes for Demo" : ""),
         next_followup_date: data.next_followup_date || null,
+        demo_date: data.demo_date ? new Date(data.demo_date) : null,
         taken_by: data.followup_taken_by || "Admin",
         next_followup_by: data.next_followup_by || "",
         followup_round: data.followup_round || "1st Follow-up",
@@ -276,6 +277,7 @@ exports.updateLead = async (id, data) => {
         status: data.status || lead.status,
         call_outcome: data.call_outcome || lead.call_outcome || "",
         next_followup_date: data.next_followup_date ? new Date(data.next_followup_date) : lead.next_followup_date,
+        demo_date: data.demo_date ? new Date(data.demo_date) : (lead.demo_date || null),
         taken_by: data.followup_taken_by || lead.followup_taken_by || "Admin",
         next_followup_by: data.next_followup_by || lead.next_followup_by || "",
         followup_round: data.followup_round || lead.followup_round || "1st Follow-up",
@@ -290,6 +292,7 @@ exports.updateLead = async (id, data) => {
           status: data.status || lead.status,
           call_outcome: data.call_outcome || lead.call_outcome || "",
           next_followup_date: data.next_followup_date ? new Date(data.next_followup_date) : lead.next_followup_date,
+          demo_date: data.demo_date ? new Date(data.demo_date) : (lead.demo_date || null),
           taken_by: data.followup_taken_by || lead.followup_taken_by || "Admin",
           next_followup_by: data.next_followup_by || lead.next_followup_by || "",
           followup_round: data.followup_round || lead.followup_round || "1st Follow-up",
@@ -362,7 +365,9 @@ exports.addFollowupNote = async (id, data) => {
       date: new Date(),
       conversation: data.conversation || data.conversation_notes || "",
       status: data.status || lead.status,
+      call_outcome: data.call_outcome || lead.call_outcome || "",
       next_followup_date: data.next_followup_date ? new Date(data.next_followup_date) : null,
+      demo_date: data.demo_date ? new Date(data.demo_date) : (lead.demo_date || null),
       taken_by: data.taken_by || data.followup_taken_by || "Admin",
       next_followup_by: data.next_followup_by || lead.next_followup_by || "",
       followup_round: data.followup_round || lead.followup_round || "1st Follow-up",
@@ -374,6 +379,12 @@ exports.addFollowupNote = async (id, data) => {
     }
     if (data.status) {
       lead.status = data.status;
+    }
+    if (data.call_outcome !== undefined) {
+      lead.call_outcome = data.call_outcome;
+    }
+    if (data.demo_date !== undefined) {
+      lead.demo_date = data.demo_date ? new Date(data.demo_date) : null;
     }
     if (data.next_followup_date !== undefined) {
       lead.next_followup_date = data.next_followup_date ? new Date(data.next_followup_date) : null;

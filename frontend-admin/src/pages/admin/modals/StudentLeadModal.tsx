@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { 
   X, User, Phone, MapPin, School, GraduationCap, 
   Calendar, BookOpen, AlertCircle, MessageSquare, 
-  Clock, CheckCircle2, Flame, Award, Building, Sparkles, Plus, History
+  Clock, CheckCircle2, Flame, Award, Building, Sparkles, Plus, History, CalendarCheck
 } from "lucide-react";
 import { StudentLead } from "../types";
 
@@ -65,8 +65,19 @@ export function StudentLeadModal({ isOpen, onClose, onSave, lead }: StudentLeadM
       setWorkshopDate(lead.workshop_date ? lead.workshop_date.split("T")[0] : "");
       setSourceOther(lead.source_other || "Direct Walk-in");
 
+      const formatForDateTime = (dStr?: string | null) => {
+        if (!dStr) return "";
+        try {
+          const d = new Date(dStr);
+          if (isNaN(d.getTime())) return "";
+          return new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+        } catch {
+          return "";
+        }
+      };
+
       setDemoClassTaken(Boolean(lead.demo_class_taken));
-      setDemoDate(lead.demo_date ? lead.demo_date.split("T")[0] : "");
+      setDemoDate(formatForDateTime(lead.demo_date));
       setInterestedCourse(lead.interested_course || "");
       setInterestLevel(lead.interest_level || "Medium");
       setProblemsFaced(lead.problems_faced || "");
@@ -159,6 +170,10 @@ export function StudentLeadModal({ isOpen, onClose, onSave, lead }: StudentLeadM
       setErrorMsg("Phone number is required.");
       return;
     }
+    if (status === "Demo Scheduled" && !demoDate.trim()) {
+      setErrorMsg("Please select the Scheduled Date & Time of Demo Class.");
+      return;
+    }
 
     setIsSubmitting(true);
     setErrorMsg("");
@@ -177,7 +192,7 @@ export function StudentLeadModal({ isOpen, onClose, onSave, lead }: StudentLeadM
         source_other: !isFromWorkshop ? sourceOther.trim() : "Workshop",
 
         demo_class_taken: demoClassTaken,
-        demo_date: demoClassTaken && demoDate ? demoDate : null,
+        demo_date: demoDate ? new Date(demoDate).toISOString() : null,
         interested_course: interestedCourse.trim(),
         interest_level: interestLevel,
         problems_faced: problemsFaced.trim(),
@@ -492,19 +507,24 @@ export function StudentLeadModal({ isOpen, onClose, onSave, lead }: StudentLeadM
               <div className="w-7 h-7 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center text-xs font-bold">3</div>
               <h3 className="text-base font-bold text-neutral-900 flex items-center gap-2">
                 <BookOpen size={18} className="text-emerald-600" />
-                Demo Class Section (If Taken)
+                Demo Class & Course Interests
               </h3>
             </div>
 
             {/* Demo class taken toggle */}
             <div className="space-y-3">
               <label className="block text-xs font-semibold text-neutral-700">
-                Has the student attended / taken a Demo Class?
+                Has the student already attended / taken a Demo Class?
               </label>
               <div className="grid grid-cols-2 gap-3 max-w-md">
                 <button
                   type="button"
-                  onClick={() => setDemoClassTaken(true)}
+                  onClick={() => {
+                    setDemoClassTaken(true);
+                    if (status !== "Demo Scheduled" && status !== "Demo Completed" && status !== "Converted") {
+                      setStatus("Demo Completed");
+                    }
+                  }}
                   className={`py-3 px-4 rounded-xl text-sm font-semibold border flex items-center justify-center gap-2 transition-all cursor-pointer ${
                     demoClassTaken 
                       ? "bg-emerald-600 text-white border-emerald-600 shadow-sm" 
@@ -524,115 +544,115 @@ export function StudentLeadModal({ isOpen, onClose, onSave, lead }: StudentLeadM
                   }`}
                 >
                   <Clock size={16} />
-                  No Demo Yet / Pending
+                  No Demo Yet / Scheduled
                 </button>
               </div>
             </div>
 
-            {/* Demo Class Details - Only shown when "Yes, Demo Taken" is selected */}
+            {/* If Demo Taken: Date of Attended Demo Class */}
             {demoClassTaken && (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-3 border-t border-neutral-200 animate-in fade-in duration-200">
-                {/* Date of Joined Demo Class */}
-                <div>
-                  <label className="block text-xs font-semibold text-neutral-700 mb-1.5">
-                    Date of Joined Demo Class <span className="text-emerald-600 font-bold">•</span>
-                  </label>
-                  <div className="relative">
-                    <Calendar size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-neutral-400" />
-                    <input
-                      type="date"
-                      value={demoDate}
-                      onChange={(e) => setDemoDate(e.target.value)}
-                      className="w-full pl-10 pr-4 py-2.5 text-sm bg-white border border-neutral-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-600 transition-all font-medium text-neutral-900"
-                    />
-                  </div>
-                </div>
-
-                {/* Interested Course Name */}
-                <div>
-                  <label className="block text-xs font-semibold text-neutral-700 mb-1.5">
-                    Interested Course Name
-                  </label>
-                  <div className="relative">
-                    <BookOpen size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-neutral-400" />
-                    <input
-                      list="course-list"
-                      type="text"
-                      value={interestedCourse}
-                      onChange={(e) => setInterestedCourse(e.target.value)}
-                      placeholder="e.g. Full Stack Web Development"
-                      className="w-full pl-10 pr-4 py-2.5 text-sm bg-white border border-neutral-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-600 transition-all font-medium text-neutral-900"
-                    />
-                    <datalist id="course-list">
-                      {courseSuggestions.map((c) => (
-                        <option key={c} value={c} />
-                      ))}
-                    </datalist>
-                  </div>
-                </div>
-
-                {/* Level of Interest */}
-                <div className="md:col-span-2">
-                  <label className="block text-xs font-semibold text-neutral-700 mb-1.5">
-                    Level of Interest
-                  </label>
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                    {(["High", "Medium", "Low", "Not Interested"] as const).map((lvl) => {
-                      const isSelected = interestLevel === lvl;
-                      return (
-                        <button
-                          type="button"
-                          key={lvl}
-                          onClick={() => setInterestLevel(lvl)}
-                          className={`py-2 px-3 rounded-xl text-xs font-semibold border flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
-                            isSelected
-                              ? lvl === "High"
-                                ? "bg-rose-50 text-rose-700 border-rose-300 font-bold ring-2 ring-rose-200"
-                                : lvl === "Medium"
-                                ? "bg-amber-50 text-amber-700 border-amber-300 font-bold ring-2 ring-amber-200"
-                                : lvl === "Low"
-                                ? "bg-blue-50 text-blue-700 border-blue-300 font-bold ring-2 ring-blue-200"
-                                : "bg-neutral-100 text-neutral-700 border-neutral-300 font-bold ring-2 ring-neutral-200"
-                              : "bg-white text-neutral-600 border-neutral-200 hover:border-neutral-300"
-                          }`}
-                        >
-                          {lvl === "High" && <Flame size={14} className="text-rose-600" />}
-                          {lvl}
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-
-                {/* Problem if any (Textarea) */}
-                <div>
-                  <label className="block text-xs font-semibold text-neutral-700 mb-1.5">
-                    Problem / Concerns (If any)
-                  </label>
-                  <textarea
-                    rows={3}
-                    value={problemsFaced}
-                    onChange={(e) => setProblemsFaced(e.target.value)}
-                    placeholder="e.g. Fees issue, distance/travel problem, batch timings, laptop unavailability..."
-                    className="w-full p-3 text-sm bg-white border border-neutral-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-600 transition-all font-medium text-neutral-900 placeholder:text-neutral-400 resize-none"
-                  />
-                </div>
-
-                {/* Remarks (Textarea) */}
-                <div>
-                  <label className="block text-xs font-semibold text-neutral-700 mb-1.5">
-                    Remarks / Teacher Feedback
-                  </label>
-                  <textarea
-                    rows={3}
-                    value={remarks}
-                    onChange={(e) => setRemarks(e.target.value)}
-                    placeholder="General remarks, attitude, learning readiness, parents' view..."
-                    className="w-full p-3 text-sm bg-white border border-neutral-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-600 transition-all font-medium text-neutral-900 placeholder:text-neutral-400 resize-none"
+              <div className="pt-2 animate-in fade-in duration-200">
+                <label className="block text-xs font-semibold text-neutral-700 mb-1.5">
+                  Date & Time of Attended Demo Class <span className="text-emerald-600 font-bold">•</span>
+                </label>
+                <div className="relative max-w-md">
+                  <Calendar size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-neutral-400 pointer-events-none" />
+                  <input
+                    type="datetime-local"
+                    value={demoDate}
+                    onChange={(e) => setDemoDate(e.target.value)}
+                    className="w-full pl-10 pr-4 py-2.5 text-sm bg-white border border-neutral-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-600 transition-all font-medium text-neutral-900"
                   />
                 </div>
               </div>
             )}
+
+            {/* Course Interest & Background Info - Always accessible */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-3 border-t border-neutral-200">
+              {/* Interested Course Name */}
+              <div>
+                <label className="block text-xs font-semibold text-neutral-700 mb-1.5">
+                  Interested Course Name
+                </label>
+                <div className="relative">
+                  <BookOpen size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-neutral-400 pointer-events-none" />
+                  <input
+                    list="course-list"
+                    type="text"
+                    value={interestedCourse}
+                    onChange={(e) => setInterestedCourse(e.target.value)}
+                    placeholder="e.g. Full Stack Web Development"
+                    className="w-full pl-10 pr-4 py-2.5 text-sm bg-white border border-neutral-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-600 transition-all font-medium text-neutral-900"
+                  />
+                  <datalist id="course-list">
+                    {courseSuggestions.map((c) => (
+                      <option key={c} value={c} />
+                    ))}
+                  </datalist>
+                </div>
+              </div>
+
+              {/* Level of Interest */}
+              <div className="md:col-span-2">
+                <label className="block text-xs font-semibold text-neutral-700 mb-1.5">
+                  Level of Interest
+                </label>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                  {(["High", "Medium", "Low", "Not Interested"] as const).map((lvl) => {
+                    const isSelected = interestLevel === lvl;
+                    return (
+                      <button
+                        type="button"
+                        key={lvl}
+                        onClick={() => setInterestLevel(lvl)}
+                        className={`py-2 px-3 rounded-xl text-xs font-semibold border flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
+                          isSelected
+                            ? lvl === "High"
+                              ? "bg-rose-50 text-rose-700 border-rose-300 font-bold ring-2 ring-rose-200"
+                              : lvl === "Medium"
+                              ? "bg-amber-50 text-amber-700 border-amber-300 font-bold ring-2 ring-amber-200"
+                              : lvl === "Low"
+                              ? "bg-blue-50 text-blue-700 border-blue-300 font-bold ring-2 ring-blue-200"
+                              : "bg-neutral-100 text-neutral-700 border-neutral-300 font-bold ring-2 ring-neutral-200"
+                            : "bg-white text-neutral-600 border-neutral-200 hover:border-neutral-300"
+                        }`}
+                      >
+                        {lvl === "High" && <Flame size={14} className="text-rose-600" />}
+                        {lvl}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Problem if any (Textarea) */}
+              <div>
+                <label className="block text-xs font-semibold text-neutral-700 mb-1.5">
+                  Problem / Concerns (If any)
+                </label>
+                <textarea
+                  rows={3}
+                  value={problemsFaced}
+                  onChange={(e) => setProblemsFaced(e.target.value)}
+                  placeholder="e.g. Fees issue, distance/travel problem, batch timings, laptop unavailability..."
+                  className="w-full p-3 text-sm bg-white border border-neutral-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-600 transition-all font-medium text-neutral-900 placeholder:text-neutral-400 resize-none"
+                />
+              </div>
+
+              {/* Remarks (Textarea) */}
+              <div>
+                <label className="block text-xs font-semibold text-neutral-700 mb-1.5">
+                  Remarks / Teacher Feedback
+                </label>
+                <textarea
+                  rows={3}
+                  value={remarks}
+                  onChange={(e) => setRemarks(e.target.value)}
+                  placeholder="General remarks, attitude, learning readiness, parents' view..."
+                  className="w-full p-3 text-sm bg-white border border-neutral-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-600 transition-all font-medium text-neutral-900 placeholder:text-neutral-400 resize-none"
+                />
+              </div>
+            </div>
           </div>
 
           {/* SECTION 4: Current Followup Section */}
@@ -698,7 +718,13 @@ export function StudentLeadModal({ isOpen, onClose, onSave, lead }: StudentLeadM
                 </label>
                 <select
                   value={status}
-                  onChange={(e) => setStatus(e.target.value as any)}
+                  onChange={(e) => {
+                    const newStatus = e.target.value as any;
+                    setStatus(newStatus);
+                    if (newStatus === "Demo Scheduled" && (!callOutcome || callOutcome === "Connected")) {
+                      setCallOutcome("Yes for Demo");
+                    }
+                  }}
                   className="w-full px-4 py-2.5 text-sm bg-white border border-neutral-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-600 transition-all font-semibold text-neutral-900 cursor-pointer"
                 >
                   <option value="New Inquiry">🔵 New Inquiry</option>
@@ -726,6 +752,101 @@ export function StudentLeadModal({ isOpen, onClose, onSave, lead }: StudentLeadM
                   />
                 </div>
               </div>
+
+              {/* CONDITIONAL DYNAMIC DEMO CLASS SCHEDULE CARD */}
+              {(status === "Demo Scheduled" || callOutcome === "Yes for Demo") && (
+                <div className="md:col-span-2 p-4 bg-gradient-to-br from-amber-50 via-orange-50/70 to-amber-50 border-2 border-amber-300 rounded-2xl space-y-3 animate-in fade-in slide-in-from-top-2 duration-300 shadow-xs">
+                  <div className="flex flex-wrap items-center justify-between gap-2 pb-2 border-b border-amber-200/90">
+                    <div className="flex items-center gap-2">
+                      <div className="w-8 h-8 rounded-xl bg-amber-500 text-white flex items-center justify-center shadow-xs">
+                        <CalendarCheck size={17} />
+                      </div>
+                      <div>
+                        <span className="text-xs font-black text-amber-950 uppercase tracking-wide flex items-center gap-1.5">
+                          Scheduled Date & Time of Demo Class <span className="text-rose-600 font-black text-sm">*</span>
+                        </span>
+                        <p className="text-[11px] text-amber-800 font-medium">
+                          Select the exact demo date & batch timing for this student
+                        </p>
+                      </div>
+                    </div>
+                    <span className="text-[11px] font-bold text-amber-900 bg-amber-200/90 px-2.5 py-0.5 rounded-full border border-amber-300 shadow-2xs">
+                      🟠 Demo Scheduled
+                    </span>
+                  </div>
+
+                  {/* Demo Date & Time Input */}
+                  <div className="pt-1">
+                    <label className="block text-[11px] font-bold text-amber-950 mb-1.5 flex items-center gap-1">
+                      <Calendar size={13} className="text-amber-700" />
+                      Demo Class Date & Time <span className="text-rose-600">*</span>
+                    </label>
+                    <div className="relative">
+                      <Calendar size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-amber-600 pointer-events-none" />
+                      <input
+                        type="datetime-local"
+                        value={demoDate}
+                        onChange={(e) => setDemoDate(e.target.value)}
+                        className="w-full pl-10 pr-4 py-2.5 text-xs sm:text-sm bg-white border-2 border-amber-300 rounded-xl font-bold text-neutral-900 focus:outline-none focus:ring-2 focus:ring-amber-500/30 focus:border-amber-600 shadow-2xs transition-all cursor-pointer"
+                        required={status === "Demo Scheduled"}
+                      />
+                    </div>
+                  </div>
+
+                  {/* 1-Click Fast Presets */}
+                  <div className="flex flex-wrap items-center gap-1.5 pt-1">
+                    <span className="text-[10px] font-extrabold text-amber-900 uppercase tracking-wider mr-1">
+                      Quick Select:
+                    </span>
+                    {[
+                      {
+                        label: "Today 4:00 PM",
+                        getVal: () => {
+                          const d = new Date();
+                          d.setHours(16, 0, 0, 0);
+                          return new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+                        }
+                      },
+                      {
+                        label: "Tomorrow 11:00 AM",
+                        getVal: () => {
+                          const d = new Date();
+                          d.setDate(d.getDate() + 1);
+                          d.setHours(11, 0, 0, 0);
+                          return new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+                        }
+                      },
+                      {
+                        label: "Tomorrow 4:00 PM",
+                        getVal: () => {
+                          const d = new Date();
+                          d.setDate(d.getDate() + 1);
+                          d.setHours(16, 0, 0, 0);
+                          return new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+                        }
+                      },
+                      {
+                        label: "Day After 11:00 AM",
+                        getVal: () => {
+                          const d = new Date();
+                          d.setDate(d.getDate() + 2);
+                          d.setHours(11, 0, 0, 0);
+                          return new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+                        }
+                      },
+                    ].map((btn) => (
+                      <button
+                        type="button"
+                        key={btn.label}
+                        onClick={() => setDemoDate(btn.getVal())}
+                        className="px-2.5 py-1 text-[11px] font-bold rounded-lg bg-white text-amber-900 border border-amber-300 hover:border-amber-500 hover:bg-amber-100/60 transition-all cursor-pointer shadow-2xs active:scale-95"
+                      >
+                        {btn.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
 
               {/* Message Area Conversation (Textarea) */}
               <div className="md:col-span-2">

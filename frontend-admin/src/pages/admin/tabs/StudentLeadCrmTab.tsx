@@ -212,16 +212,19 @@ export function StudentLeadCrmTab() {
         problems_faced: formData.problems_faced || "",
         remarks: formData.remarks || "",
         conversation_notes: formData.conversation_notes || "",
+        call_outcome: formData.call_outcome || "",
         status: formData.status || "New Inquiry",
         next_followup_date: formData.next_followup_date || null,
         next_followup_by: formData.next_followup_by || "",
         followup_round: formData.followup_round || "1st Follow-up",
         followup_taken_by: formData.followup_taken_by || "",
-        followup_history: formData.conversation_notes ? [{
+        followup_history: (formData.conversation_notes || formData.status === "Demo Scheduled") ? [{
           date: new Date().toISOString(),
-          conversation: formData.conversation_notes,
+          conversation: formData.conversation_notes || (formData.status === "Demo Scheduled" ? "Demo Scheduled" : "Lead created"),
           status: formData.status || "New Inquiry",
+          call_outcome: formData.call_outcome || (formData.status === "Demo Scheduled" ? "Yes for Demo" : ""),
           next_followup_date: formData.next_followup_date || null,
+          demo_date: formData.demo_date || null,
           taken_by: formData.followup_taken_by || "Admin",
           next_followup_by: formData.next_followup_by || "",
           followup_round: formData.followup_round || "1st Follow-up"
@@ -1026,6 +1029,16 @@ export function StudentLeadCrmTab() {
                       </div>
                     </div>
 
+                    {/* Scheduled Demo Badge on Mobile */}
+                    {lead.demo_date && (lead.status === "Demo Scheduled" || lead.call_outcome === "Yes for Demo") && (
+                      <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200 text-amber-900 text-[11px] font-bold">
+                        <CalendarCheck size={12} className="text-amber-600 shrink-0" />
+                        <span className="truncate">
+                          Demo: {new Date(lead.demo_date).toLocaleString([], { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}
+                        </span>
+                      </div>
+                    )}
+
                     {/* Quick Call & WhatsApp Action Row */}
                     {cleanPhone ? (
                       <div className="grid grid-cols-2 gap-2 pt-2 border-t border-neutral-100">
@@ -1226,6 +1239,12 @@ export function StudentLeadCrmTab() {
                         <div className="flex flex-col gap-1 items-start">
                           {renderStatusBadge(lead.status)}
                           {renderCallOutcomeBadge(lead)}
+                          {lead.demo_date && (lead.status === "Demo Scheduled" || lead.call_outcome === "Yes for Demo") && (
+                            <div className="inline-flex items-center gap-1 text-[10px] font-bold text-amber-800 bg-amber-50 px-2 py-0.5 rounded-md border border-amber-200 shadow-2xs mt-0.5 whitespace-nowrap">
+                              <CalendarCheck size={11} className="text-amber-600 shrink-0" />
+                              <span>Demo: {new Date(lead.demo_date).toLocaleString([], { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}</span>
+                            </div>
+                          )}
                         </div>
                       </td>
 
