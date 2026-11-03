@@ -156,13 +156,21 @@ export function StudentLeadCrmTab() {
   }, [fetchLeads, fetchStats]);
 
   const displayStats = useMemo(() => {
-    if (stats.totalLeads > 0) return stats;
+    if (leads.length > 0) {
+      return {
+        totalLeads: leads.length,
+        newInquiries: leads.filter(l => l.status === "New Inquiry").length,
+        inFollowUp: leads.filter(l => l.status === "In Follow-up" || l.status === "Demo Scheduled" || l.status === "Demo Completed").length,
+        converted: leads.filter(l => l.status === "Converted").length,
+        lostLeads: leads.filter(l => l.status === "Lost").length,
+      };
+    }
     return {
-      totalLeads: leads.length,
-      newInquiries: leads.filter(l => l.status === "New Inquiry").length,
-      inFollowUp: leads.filter(l => l.status === "In Follow-up" || l.status === "Demo Scheduled" || l.status === "Demo Completed").length,
-      converted: leads.filter(l => l.status === "Converted").length,
-      lostLeads: leads.filter(l => l.status === "Lost").length,
+      totalLeads: stats.totalLeads || 0,
+      newInquiries: stats.newInquiries || 0,
+      inFollowUp: stats.inFollowUp || 0,
+      converted: stats.converted || 0,
+      lostLeads: stats.lostLeads || 0,
     };
   }, [stats, leads]);
 
@@ -181,9 +189,25 @@ export function StudentLeadCrmTab() {
     // Optimistically update local state immediately so user sees their lead with 0ms delay
     let updatedLead: StudentLead;
     if (isEdit) {
+      const newNote = (formData as any).new_conversation || formData.conversation_notes;
+      const historyItem = newNote || formData.call_outcome || formData.status ? [{
+        _id: `hist-${Date.now()}`,
+        date: new Date().toISOString(),
+        conversation: newNote || (formData.call_outcome ? `Call response: ${formData.call_outcome}` : `Follow-up updated: Status set to ${formData.status || selectedLeadForEdit!.status}`),
+        status: formData.status || selectedLeadForEdit!.status,
+        call_outcome: formData.call_outcome || selectedLeadForEdit!.call_outcome || "",
+        next_followup_date: formData.next_followup_date || null,
+        demo_date: formData.demo_date || null,
+        taken_by: formData.followup_taken_by || selectedLeadForEdit!.followup_taken_by || "Admin",
+        next_followup_by: formData.next_followup_by || "",
+        followup_round: formData.followup_round || "Follow-up",
+      }] : [];
+
       updatedLead = {
         ...selectedLeadForEdit!,
         ...formData,
+        conversation_notes: newNote || selectedLeadForEdit!.conversation_notes || "",
+        followup_history: [...(selectedLeadForEdit!.followup_history || []), ...historyItem],
         updated_at: new Date().toISOString(),
       } as StudentLead;
       setLeads((prev) => {
@@ -191,6 +215,9 @@ export function StudentLeadCrmTab() {
         saveLeadsToCacheAndNotify(next);
         return next;
       });
+      if (selectedLeadForDetails && selectedLeadForDetails._id === updatedLead._id) {
+        setSelectedLeadForDetails(updatedLead);
+      }
     } else {
       const nextSeq = 1001 + leads.length;
       updatedLead = {
@@ -271,6 +298,12 @@ export function StudentLeadCrmTab() {
           saveLeadsToCacheAndNotify(next);
           return next;
         });
+        setSelectedLeadForDetails((prev) => {
+          if (prev && (prev._id === updatedLead._id || prev._id === serverLead._id)) {
+            return serverLead;
+          }
+          return prev;
+        });
         fetchStats();
       } else {
         console.warn("Backend response notice:", data.message || "Saved locally");
@@ -305,9 +338,87 @@ export function StudentLeadCrmTab() {
     }
   };
 
-  // Filtered Leads
+  // Helper to extract the LATEST call outcome, status, notes, and activity timestamp for a lead
+  const getLeadLatestCallInfo = (lead: StudentLead) => {
+    const history = Array.isArray(lead.followup_history) && lead.followup_history.length > 0
+      ? lead.followup_history
+      : [];
+    const latestCall = history.length > 0 ? history[history.length - 1] : null;
+
+    // Latest outcome: check latest call in history first, then root lead.call_outcome
+    const latestOutcome = latestCall?.call_outcome || lead.call_outcome || "";
+
+    // Latest status: root lead.status takes precedence if set, otherwise latest call status
+    const latestStatus: string = (lead.status || latestCall?.status || "New Inquiry") as string;
+
+    // Notes: latest call conversation notes or root conversation_notes
+    const latestNotes = (latestCall?.conversation || lead.conversation_notes || "").toLowerCase();
+
+    // Interest level
+    const interest = lead.interest_level;
+
+    // Has scheduled or attended demo
+    const hasDemo = Boolean(latestCall?.demo_date || lead.demo_date);
+    const isDemo = latestOutcome === "Yes for Demo" || latestStatus === "Demo Scheduled" || latestStatus === "Demo Completed" || lead.demo_class_taken || hasDemo;
+
+    // Dropped / Lost / Refused
+    const isNo = latestOutcome === "No" || interest === "Not Interested" || latestStatus === "Lost" || latestNotes.includes("not interest") || latestNotes.includes("refused") || latestNotes.includes("nahi karna");
+
+    // Not Connected (strictly unanswered)
+    const isNotConnected = !isDemo && !isNo && (latestOutcome === "Not Connected" || (!latestOutcome && (
+      latestNotes.includes("not connect") || latestNotes.includes("not receive") || latestNotes.includes("did not pick") || latestNotes.includes("didn't pick") || latestNotes.includes("switched off") || latestNotes.includes("ringing") || latestNotes.includes("unanswered")
+    )));
+
+    // Told Later / Callback / Busy schedule (student answered and said they are busy)
+    const isToldLater = !isDemo && !isNo && !isNotConnected && (
+      latestOutcome === "Told Later" || latestNotes.includes("later") || latestNotes.includes("kal") || latestNotes.includes("baad me") || latestNotes.includes("busy") || latestNotes.includes("call back") || Boolean((latestCall?.next_followup_date || lead.next_followup_date) && latestStatus === "In Follow-up")
+    );
+
+    // Connected: Spoke with counselor (Demo, Told Later, or explicit Connected or active follow-up/converted)
+    const isConnected = !isNo && !isNotConnected && (
+      latestOutcome === "Connected" || isDemo || isToldLater || latestStatus === "In Follow-up" || latestStatus === "Converted"
+    );
+
+    // Activity timestamp for sorting by latest follow-up / call activity
+    const latestActivityTime = new Date(
+      latestCall?.date || lead.updated_at || lead.created_at || Date.now()
+    ).getTime();
+
+    return {
+      latestOutcome,
+      latestStatus,
+      latestNotes,
+      isDemo,
+      isNo,
+      isNotConnected,
+      isToldLater,
+      isConnected,
+      latestActivityTime,
+    };
+  };
+
+  // Helper to accurately compute total calls made for a lead
+  const getLeadTotalCalls = (lead: StudentLead): number => {
+    const histLen = Array.isArray(lead.followup_history) ? lead.followup_history.length : 0;
+    if (histLen >= 2) return histLen;
+    if (histLen === 1 && lead.followup_history?.[0]) {
+      const first = lead.followup_history[0];
+      const hasOutcomeDiff = Boolean(lead.call_outcome && lead.call_outcome !== first.call_outcome);
+      const hasStatusDiff = Boolean(lead.status && lead.status !== "New Inquiry" && lead.status !== first.status);
+      const hasTimeDiff = Boolean(lead.updated_at && lead.created_at && (new Date(lead.updated_at).getTime() - new Date(lead.created_at).getTime() > 60000));
+      const hasStaff = Boolean(lead.followup_taken_by && (!first.taken_by || lead.followup_taken_by !== first.taken_by));
+      if (hasOutcomeDiff || (hasStatusDiff && hasTimeDiff) || (hasOutcomeDiff && hasStaff)) {
+        return 2;
+      }
+      return 1;
+    }
+    if (lead.conversation_notes || lead.call_outcome || (lead.status && lead.status !== "New Inquiry")) return 1;
+    return 1;
+  };
+
+  // Filtered Leads (Filtered and Sorted by Latest Activity Date)
   const filteredLeads = useMemo(() => {
-    return leads.filter((lead) => {
+    const list = leads.filter((lead) => {
       // Search
       if (search.trim() !== "") {
         const query = search.toLowerCase();
@@ -337,37 +448,28 @@ export function StudentLeadCrmTab() {
         if (lead.is_from_workshop) return false;
       }
 
-      // Call Response Filter
+      // Call Response Filter: 100% synchronized with getLeadLatestCallInfo
       if (callResponseFilter !== "All") {
-        const outcome = lead.call_outcome;
-        const status = lead.status;
-        const notes = (lead.conversation_notes || "").toLowerCase();
-        const interest = lead.interest_level;
-
-        if (callResponseFilter === "Yes for Demo") {
-          const match = outcome === "Yes for Demo" || status === "Demo Scheduled" || status === "Demo Completed" || lead.demo_class_taken;
-          if (!match) return false;
-        } else if (callResponseFilter === "No") {
-          const match = outcome === "No" || interest === "Not Interested" || status === "Lost" || notes.includes("not interest") || notes.includes("nahi karna") || notes.includes("refused");
-          if (!match) return false;
-        } else if (callResponseFilter === "Told Later") {
-          const match = outcome === "Told Later" || (!outcome && (notes.includes("later") || notes.includes("kal") || notes.includes("baad me") || notes.includes("busy") || notes.includes("call back") || (lead.next_followup_date && status === "In Follow-up")));
-          if (!match) return false;
-        } else if (callResponseFilter === "Not Connected") {
-          const match = outcome === "Not Connected" || (!outcome && (notes.includes("not connect") || notes.includes("not receive") || notes.includes("did not pick") || notes.includes("switched off") || notes.includes("busy") || notes.includes("ringing")));
-          if (!match) return false;
-        } else if (callResponseFilter === "Connected") {
-          const notConn = outcome === "Not Connected" || (!outcome && (notes.includes("not connect") || notes.includes("not receive") || notes.includes("did not pick") || notes.includes("switched off") || notes.includes("ringing")));
-          const match = !notConn && (outcome === "Connected" || outcome === "Yes for Demo" || outcome === "Told Later" || outcome === "No" || status !== "New Inquiry");
-          if (!match) return false;
-        }
+        const info = getLeadLatestCallInfo(lead);
+        if (callResponseFilter === "Yes for Demo" && !info.isDemo) return false;
+        if (callResponseFilter === "No" && !info.isNo) return false;
+        if (callResponseFilter === "Told Later" && !info.isToldLater) return false;
+        if (callResponseFilter === "Not Connected" && !info.isNotConnected) return false;
+        if (callResponseFilter === "Connected" && !info.isConnected) return false;
       }
 
       return true;
     });
+
+    // Sort by latest call / follow-up activity date (newest updates first)
+    return list.sort((a, b) => {
+      const timeA = getLeadLatestCallInfo(a).latestActivityTime;
+      const timeB = getLeadLatestCallInfo(b).latestActivityTime;
+      return timeB - timeA;
+    });
   }, [leads, search, statusFilter, sourceFilter, callResponseFilter]);
 
-  // Compute Call & Demo Performance Stats
+  // Compute Call & Demo Performance Stats directly from current leads using latest follow-up info
   const callStats = useMemo(() => {
     let totalCalls = 0;
     let connected = 0;
@@ -377,55 +479,33 @@ export function StudentLeadCrmTab() {
     let toldLater = 0;
 
     leads.forEach((lead) => {
-      const historyCalls = Array.isArray(lead.followup_history) ? lead.followup_history.length : 0;
-      const leadCalls = Math.max(historyCalls, lead.conversation_notes || lead.call_outcome || (lead.status !== "New Inquiry") ? 1 : 0);
+      const leadCalls = getLeadTotalCalls(lead);
       totalCalls += leadCalls;
 
-      const outcome = lead.call_outcome;
-      const status = lead.status;
-      const notes = (lead.conversation_notes || "").toLowerCase();
-      const interest = lead.interest_level;
+      const info = getLeadLatestCallInfo(lead);
 
-      // Yes for Demo
-      const isYesForDemo = outcome === "Yes for Demo" || status === "Demo Scheduled" || status === "Demo Completed" || lead.demo_class_taken;
-
-      // No / Not Interested
-      const isNo = outcome === "No" || interest === "Not Interested" || status === "Lost" || notes.includes("not interest") || notes.includes("nahi karna") || notes.includes("refused");
-
-      // Told Later
-      const isToldLater = outcome === "Told Later" || (!isYesForDemo && !isNo && (notes.includes("later") || notes.includes("kal") || notes.includes("baad me") || notes.includes("busy") || notes.includes("call back") || (lead.next_followup_date && status === "In Follow-up")));
-
-      // Not Connected
-      const isNotConnected = outcome === "Not Connected" || (!isYesForDemo && !isNo && !isToldLater && (notes.includes("not connect") || notes.includes("not receive") || notes.includes("did not pick") || notes.includes("switched off") || notes.includes("ringing")));
-
-      // Connected
-      const isConnected = outcome === "Connected" || isYesForDemo || isToldLater || isNo || status === "In Follow-up" || status === "Converted";
-
-      if (isYesForDemo) yesForDemo++;
-      if (isNo) noLeads++;
-      if (isToldLater) toldLater++;
-      if (isNotConnected) notConnected++;
-      if (isConnected && !isNotConnected) connected++;
+      if (info.isDemo) yesForDemo++;
+      if (info.isNo) noLeads++;
+      if (info.isToldLater) toldLater++;
+      if (info.isNotConnected) notConnected++;
+      if (info.isConnected) connected++;
     });
 
     return {
-      totalCalls: stats.totalCalls || Math.max(totalCalls, leads.length),
-      connected: stats.totalConnected || connected,
-      notConnected: stats.totalNotConnected || notConnected,
-      yesForDemo: stats.yesForDemo || yesForDemo,
-      noLeads: stats.noLeads || noLeads,
-      toldLater: stats.toldLater || toldLater,
+      totalCalls: Math.max(totalCalls, leads.length),
+      connected,
+      notConnected,
+      yesForDemo,
+      noLeads,
+      toldLater,
     };
-  }, [leads, stats]);
+  }, [leads]);
 
-  // Format Call Outcome Badge for table
+  // Format Call Outcome Badge for table based on LATEST call status
   const renderCallOutcomeBadge = (lead: StudentLead) => {
-    const outcome = lead.call_outcome;
-    const status = lead.status;
-    const notes = (lead.conversation_notes || "").toLowerCase();
-    const interest = lead.interest_level;
+    const info = getLeadLatestCallInfo(lead);
 
-    if (outcome === "Yes for Demo" || status === "Demo Scheduled" || status === "Demo Completed" || lead.demo_class_taken) {
+    if (info.isDemo) {
       return (
         <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-200/60 shadow-2xs whitespace-nowrap shrink-0">
           <CalendarCheck size={11} className="text-indigo-600 shrink-0" />
@@ -433,7 +513,7 @@ export function StudentLeadCrmTab() {
         </span>
       );
     }
-    if (outcome === "No" || interest === "Not Interested" || status === "Lost" || notes.includes("not interest") || notes.includes("refused")) {
+    if (info.isNo) {
       return (
         <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-rose-50 text-rose-700 border border-rose-200/60 shadow-2xs whitespace-nowrap shrink-0">
           <XCircle size={11} className="text-rose-600 shrink-0" />
@@ -441,7 +521,7 @@ export function StudentLeadCrmTab() {
         </span>
       );
     }
-    if (outcome === "Told Later" || notes.includes("later") || notes.includes("kal") || notes.includes("busy") || notes.includes("call back") || (lead.next_followup_date && status === "In Follow-up")) {
+    if (info.isToldLater) {
       return (
         <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-purple-50 text-purple-700 border border-purple-200/60 shadow-2xs whitespace-nowrap shrink-0">
           <Clock size={11} className="text-purple-600 shrink-0" />
@@ -449,7 +529,7 @@ export function StudentLeadCrmTab() {
         </span>
       );
     }
-    if (outcome === "Not Connected" || notes.includes("not connect") || notes.includes("did not pick") || notes.includes("switched off")) {
+    if (info.isNotConnected) {
       return (
         <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-50 text-amber-700 border border-amber-200/60 shadow-2xs whitespace-nowrap shrink-0">
           <PhoneOff size={11} className="text-amber-600 shrink-0" />
@@ -878,7 +958,7 @@ export function StudentLeadCrmTab() {
                   <option value="Connected">📞 Connected</option>
                   <option value="Told Later">⏳ Later</option>
                   <option value="No">❌ Dropped</option>
-                  <option value="Not Connected">📵 Busy</option>
+                  <option value="Not Connected">📵 Not Connected</option>
                 </select>
                 <ChevronDown size={11} className="absolute right-2 top-1/2 -translate-y-1/2 text-neutral-400 pointer-events-none" />
               </div>
@@ -998,6 +1078,9 @@ export function StudentLeadCrmTab() {
                         </button>
                         <span className="text-[10px] text-neutral-400 font-sans font-normal whitespace-nowrap">
                           ({createdDate})
+                        </span>
+                        <span className="text-[10px] text-purple-700 bg-purple-50 font-bold px-1.5 py-0.5 rounded border border-purple-200">
+                          {getLeadTotalCalls(lead)} {getLeadTotalCalls(lead) === 1 ? "call" : "calls"}
                         </span>
                       </div>
                       <div className="shrink-0">
@@ -1256,13 +1339,16 @@ export function StudentLeadCrmTab() {
                           <Calendar size={13} className={`shrink-0 ${isFollowupDue ? "text-amber-600" : "text-neutral-400"}`} />
                           <span>{formattedFollowup}</span>
                         </div>
-                        {lead.followup_round && (
-                          <div className="mt-1">
+                        <div className="mt-1 flex items-center gap-1.5 flex-wrap">
+                          {lead.followup_round && (
                             <span className="text-[10px] font-bold text-purple-700 bg-purple-50 px-2 py-0.5 rounded-full border border-purple-200/60 shadow-2xs">
                               {lead.followup_round}
                             </span>
-                          </div>
-                        )}
+                          )}
+                          <span className="text-[10px] font-bold text-neutral-600 bg-neutral-100 px-1.5 py-0.5 rounded-full border border-neutral-200 shadow-2xs">
+                            {getLeadTotalCalls(lead)} {getLeadTotalCalls(lead) === 1 ? "call" : "calls"}
+                          </span>
+                        </div>
                       </td>
 
                       {/* FOLLOW-UP BY */}
@@ -1348,6 +1434,14 @@ export function StudentLeadCrmTab() {
         onEdit={(lead) => {
           setSelectedLeadForEdit(lead);
           setIsFormModalOpen(true);
+        }}
+        onLeadUpdated={(updated) => {
+          setSelectedLeadForDetails(updated);
+          setLeads((prev) => {
+            const next = prev.map((l) => (l._id === updated._id ? updated : l));
+            saveLeadsToCacheAndNotify(next);
+            return next;
+          });
         }}
       />
     </div>

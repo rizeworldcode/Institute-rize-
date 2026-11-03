@@ -3,8 +3,93 @@ import { UserCircle, X, Banknote, IndianRupee, Wallet, CreditCard, CheckCircle2,
 import { StudentInvoiceModal } from "./StudentInvoiceModal";
 import { API_BASE_URL, getApiUrl } from "../../../utils/api";
 
+const getOrdinal = (n: number) => {
+   const s = ["th", "st", "nd", "rd"];
+   const v = n % 100;
+   return s[(v - 20) % 10] || s[v] || s[0];
+};
+
 export function StudentDetailsModal({ student, onClose, onDelete }: any) {
-   const [paymentTab, setPaymentTab] = useState<"one-time" | "installment">("one-time");
+   // Extract and normalize all payments from student.fee and student.admissions
+   const allPayments = useMemo(() => {
+      const list: {
+         id?: string;
+         amount: number;
+         paymentMethod: string;
+         payment_method: string;
+         utrNumber: string;
+         utr_Number: string;
+         date: string;
+      }[] = [];
+
+      // 1. From student.admissions
+      if (Array.isArray(student?.admissions) && student.admissions.length > 0) {
+         student.admissions.forEach((adm: any) => {
+            if (Array.isArray(adm?.payments) && adm.payments.length > 0) {
+               adm.payments.forEach((p: any) => {
+                  if (p && (Number(p.amount) > 0 || p.date)) {
+                     const amt = Number(p.amount) || 0;
+                     const utr = String(p.utrNumber || p.utr_Number || "").trim();
+                     const meth = p.paymentMethod || p.payment_method || (utr ? "Online" : "Cash");
+                     list.push({
+                        id: p._id || p.id,
+                        amount: amt,
+                        paymentMethod: meth,
+                        payment_method: meth,
+                        utrNumber: utr,
+                        utr_Number: utr,
+                        date: p.date ? new Date(p.date).toISOString() : new Date().toISOString()
+                     });
+                  }
+               });
+            }
+         });
+      }
+
+      // 2. Also check student.fee (root fee array)
+      if (Array.isArray(student?.fee) && student.fee.length > 0) {
+         student.fee.forEach((f: any) => {
+            if (f && (Number(f.amount) > 0 || f.date)) {
+               const amt = Number(f.amount) || 0;
+               const utr = String(f.utr_Number || f.utrNumber || "").trim();
+               const dateStr = f.date ? new Date(f.date).toISOString().split('T')[0] : "";
+
+               const alreadyExists = list.some(existing => {
+                  const exUtr = existing.utrNumber.trim();
+                  if (utr && exUtr && utr.toLowerCase() === exUtr.toLowerCase()) return true;
+                  const exDateStr = existing.date ? new Date(existing.date).toISOString().split('T')[0] : "";
+                  return existing.amount === amt && exDateStr === dateStr;
+               });
+
+               if (!alreadyExists) {
+                  const meth = f.payment_method || f.paymentMethod || (utr ? "Online" : "Cash");
+                  list.push({
+                     id: f._id || f.id,
+                     amount: amt,
+                     paymentMethod: meth,
+                     payment_method: meth,
+                     utrNumber: utr,
+                     utr_Number: utr,
+                     date: f.date ? new Date(f.date).toISOString() : new Date().toISOString()
+                  });
+               }
+            }
+         });
+      }
+
+      // Sort chronologically
+      list.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+      return list;
+   }, [student]);
+
+   // Choose appropriate initial tab: default to "installment" if installment count > 1 or multiple payments recorded
+   const initialTab = useMemo<"one-time" | "installment">(() => {
+      const instCount = Number(student?.feesInstallment) || 0;
+      if (instCount > 1 || allPayments.length > 1) return "installment";
+      return "one-time";
+   }, [student?.feesInstallment, allPayments.length]);
+
+   const [paymentTab, setPaymentTab] = useState<"one-time" | "installment">(initialTab);
    const [invoiceModalState, setInvoiceModalState] = useState<{ isOpen: boolean; paymentIndex?: number }>({ isOpen: false });
    const [downloadingCert, setDownloadingCert] = useState(false);
    const [previewModalOpen, setPreviewModalOpen] = useState(false);
@@ -241,45 +326,88 @@ export function StudentDetailsModal({ student, onClose, onDelete }: any) {
                   <div className="flex-1 overflow-y-auto pr-2 max-h-[400px] scrollbar-thin scrollbar-thumb-neutral-200">
                      {paymentTab === "one-time" && (
                         <div className="space-y-4">
-                           {student.fee && student.fee.length > 0 && Number(student.fee[0].amount) > 0 ? (
-                              <div className="bg-neutral-50 border border-neutral-100 rounded-2xl p-5 hover:border-blue-200 transition-colors">
-                                 <div className="flex items-center justify-between mb-4">
-                                    <div className="flex items-center gap-3">
-                                       <div className="w-10 h-10 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center">
-                                          <CheckCircle2 size={20} />
+                           {allPayments.length > 0 ? (
+                              allPayments.length === 1 ? (
+                                 <div className="bg-neutral-50 border border-neutral-100 rounded-2xl p-5 hover:border-blue-200 transition-colors">
+                                    <div className="flex items-center justify-between mb-4">
+                                       <div className="flex items-center gap-3">
+                                          <div className="w-10 h-10 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center">
+                                             <CheckCircle2 size={20} />
+                                          </div>
+                                          <div>
+                                             <div className="font-bold text-neutral-900">Total Payment</div>
+                                             <div className="text-xs text-neutral-500">Status: {paid >= total && total > 0 ? "Clear" : "Pending"}</div>
+                                          </div>
+                                       </div>
+                                       <div className="text-right">
+                                          <div className="font-bold text-neutral-900 text-lg">₹{paid.toLocaleString()}</div>
+                                          <div className="text-xs text-green-600 font-semibold bg-green-100 px-2 py-0.5 rounded-md inline-block">Success</div>
+                                       </div>
+                                    </div>
+                                    <div className="grid grid-cols-2 gap-4 text-sm bg-white p-4 rounded-xl border border-neutral-100">
+                                       <div>
+                                          <div className="text-neutral-500 text-xs mb-1">Payment Date</div>
+                                          <div className="font-semibold text-neutral-900 flex items-center gap-1">
+                                             <Calendar size={14} className="text-neutral-400" /> 
+                                             {allPayments[0].date ? new Date(allPayments[0].date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : "N/A"}
+                                          </div>
                                        </div>
                                        <div>
-                                          <div className="font-bold text-neutral-900">Total Payment</div>
-                                          <div className="text-xs text-neutral-500">Status: {paid >= total && total > 0 ? "Clear" : "Pending"}</div>
+                                          <div className="text-neutral-500 text-xs mb-1">Mode / UTR</div>
+                                          <div className="font-mono font-semibold text-neutral-900 truncate" title={allPayments[0].utr_Number || allPayments[0].payment_method || 'Cash'}>
+                                             {allPayments[0].utr_Number ? `${allPayments[0].payment_method || 'Online'} (${allPayments[0].utr_Number})` : (allPayments[0].payment_method || 'Cash')}
+                                          </div>
                                        </div>
                                     </div>
-                                    <div className="text-right">
-                                       <div className="font-bold text-neutral-900 text-lg">₹{paid.toLocaleString()}</div>
-                                       <div className="text-xs text-green-600 font-semibold bg-green-100 px-2 py-0.5 rounded-md inline-block">Success</div>
-                                    </div>
+                                    <button
+                                       onClick={() => setInvoiceModalState({ isOpen: true, paymentIndex: 0 })}
+                                       className="mt-3 w-full flex items-center justify-center gap-1.5 py-2 px-3 bg-white hover:bg-neutral-50 text-[#FF5A36] border border-[#FF5A36]/30 hover:border-[#FF5A36] rounded-xl text-xs font-bold transition-all cursor-pointer shadow-2xs"
+                                    >
+                                       <FileText size={14} /> View / Print Fee Bill
+                                    </button>
                                  </div>
-                                 <div className="grid grid-cols-2 gap-4 text-sm bg-white p-4 rounded-xl border border-neutral-100">
-                                    <div>
-                                       <div className="text-neutral-500 text-xs mb-1">Last Payment Date</div>
-                                       <div className="font-semibold text-neutral-900 flex items-center gap-1">
-                                          <Calendar size={14} className="text-neutral-400" /> 
-                                          {student.fee[student.fee.length - 1]?.date ? new Date(student.fee[student.fee.length - 1].date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : "N/A"}
-                                       </div>
+                              ) : (
+                                 <div className="space-y-3">
+                                    <div className="bg-blue-50 border border-blue-100 rounded-xl px-4 py-2.5 flex items-center justify-between text-xs text-blue-900">
+                                       <span className="font-semibold">{allPayments.length} Payment Records Found</span>
+                                       <span className="font-bold">Total Paid: ₹{paid.toLocaleString()}</span>
                                     </div>
-                                    <div>
-                                       <div className="text-neutral-500 text-xs mb-1">Latest UTR / Ref</div>
-                                       <div className="font-mono font-semibold text-neutral-900 truncate">
-                                          {student.fee[student.fee.length - 1]?.utr_Number || 'Cash'}
+                                    {allPayments.map((pmt, idx) => (
+                                       <div key={idx} className="bg-neutral-50 border border-neutral-100 rounded-2xl p-4 hover:border-blue-200 transition-colors">
+                                          <div className="flex items-center justify-between mb-3">
+                                             <div className="flex items-center gap-3">
+                                                <div className="w-8 h-8 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center font-bold text-xs">
+                                                   #{idx + 1}
+                                                </div>
+                                                <div>
+                                                   <div className="font-bold text-neutral-900 text-sm">Payment Record #{idx + 1}</div>
+                                                   <div className="text-xs text-neutral-500 flex items-center gap-1">
+                                                      <Calendar size={11} className="text-neutral-400" />
+                                                      {pmt.date ? new Date(pmt.date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : "N/A"}
+                                                   </div>
+                                                </div>
+                                             </div>
+                                             <div className="text-right">
+                                                <div className="font-bold text-neutral-900 text-base">₹{Number(pmt.amount).toLocaleString()}</div>
+                                                <div className="text-[10px] text-green-600 font-semibold bg-green-100 px-2 py-0.5 rounded-md inline-block">Success</div>
+                                             </div>
+                                          </div>
+                                          <div className="flex justify-between items-center text-xs bg-white px-3 py-2 rounded-xl border border-neutral-100 mb-2.5">
+                                             <span className="text-neutral-500 font-medium">{pmt.utr_Number ? "UTR No:" : "Payment Mode:"}</span>
+                                             <span className="font-mono font-semibold text-neutral-900 truncate max-w-[180px]">
+                                                {pmt.utr_Number ? `${pmt.payment_method || 'Online'} (${pmt.utr_Number})` : (pmt.payment_method || 'Cash')}
+                                             </span>
+                                          </div>
+                                          <button
+                                             onClick={() => setInvoiceModalState({ isOpen: true, paymentIndex: idx })}
+                                             className="w-full flex items-center justify-center gap-1.5 py-1.5 px-3 bg-white hover:bg-neutral-50 text-[#FF5A36] border border-[#FF5A36]/30 hover:border-[#FF5A36] rounded-xl text-xs font-bold transition-all cursor-pointer shadow-2xs"
+                                          >
+                                             <FileText size={13} /> View / Print Bill #{idx + 1}
+                                          </button>
                                        </div>
-                                    </div>
+                                    ))}
                                  </div>
-                                 <button
-                                    onClick={() => setInvoiceModalState({ isOpen: true, paymentIndex: student.fee.length - 1 })}
-                                    className="mt-3 w-full flex items-center justify-center gap-1.5 py-2 px-3 bg-white hover:bg-neutral-50 text-[#FF5A36] border border-[#FF5A36]/30 hover:border-[#FF5A36] rounded-xl text-xs font-bold transition-all cursor-pointer shadow-2xs"
-                                 >
-                                    <FileText size={14} /> View / Print Fee Bill
-                                 </button>
-                              </div>
+                              )
                            ) : paid > 0 ? (
                               <div className="bg-neutral-50 border border-neutral-100 rounded-2xl p-5 hover:border-blue-200 transition-colors">
                                  <div className="flex items-center justify-between">
@@ -310,17 +438,28 @@ export function StudentDetailsModal({ student, onClose, onDelete }: any) {
                      {paymentTab === "installment" && (
                         <div className="space-y-6 relative before:absolute before:inset-0 before:ml-5 before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-linear-to-b before:from-transparent before:via-neutral-200 before:to-transparent pt-2 pb-8">
                            {(() => {
-                              const numInstallments = Number(student.feesInstallment) || 1;
+                              const recordedCount = allPayments.length;
+                              const configuredCount = Number(student.feesInstallment) || 0;
+                              const pendingBalance = Math.max(0, total - paid);
+                              // Show all recorded payments, plus any awaited installments if configuredCount > recordedCount OR if there is pending fee remaining
+                              const numInstallments = Math.max(
+                                 configuredCount,
+                                 recordedCount + (pendingBalance > 0 && configuredCount <= recordedCount ? 1 : 0),
+                                 1
+                              );
                               const rows = [];
                               
                               for (let i = 0; i < numInstallments; i++) {
-                                 const payment = student.fee && student.fee[i];
+                                 const payment = allPayments[i];
                                  const isPaid = !!payment;
+                                 const pendingShare = pendingBalance > 0 
+                                    ? Math.round(pendingBalance / Math.max(1, numInstallments - recordedCount))
+                                    : 0;
                                  
                                  rows.push(
                                     <div key={i} className="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group">
                                        <div className={`flex items-center justify-center w-10 h-10 rounded-full border-4 border-white shadow-sm shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 z-10 ${
-                                          isPaid ? 'bg-blue-500 text-white' : 'bg-neutral-200 text-neutral-500'
+                                          isPaid ? 'bg-blue-500 text-white font-bold' : 'bg-neutral-200 text-neutral-500 font-semibold'
                                        }`}>
                                           {i + 1}
                                        </div>
@@ -328,9 +467,9 @@ export function StudentDetailsModal({ student, onClose, onDelete }: any) {
                                           isPaid ? 'border-neutral-200 hover:border-blue-300' : 'border-neutral-100 opacity-70'
                                        }`}>
                                           <div className="flex justify-between items-start mb-3">
-                                             <div className="font-bold text-neutral-900">{i + 1}{i === 0 ? 'st' : i === 1 ? 'nd' : i === 2 ? 'rd' : 'th'} Installment</div>
+                                             <div className="font-bold text-neutral-900">{i + 1}{getOrdinal(i + 1)} Installment</div>
                                              <div className={`${isPaid ? 'text-blue-600' : 'text-neutral-500'} font-bold text-lg`}>
-                                                ₹{isPaid ? Number(payment.amount).toLocaleString() : (total / numInstallments).toLocaleString(undefined, {maximumFractionDigits: 0})}
+                                                ₹{isPaid ? Number(payment.amount).toLocaleString('en-IN') : pendingShare.toLocaleString('en-IN')}
                                              </div>
                                           </div>
                                           <div className="text-xs text-neutral-500 flex flex-col gap-1.5">
@@ -344,9 +483,9 @@ export function StudentDetailsModal({ student, onClose, onDelete }: any) {
                                                 </span>
                                              </div>
                                              <div className="flex justify-between items-center px-1">
-                                                <span>UTR No:</span>
-                                                <span className={`font-mono font-semibold ${isPaid ? 'text-neutral-900' : 'text-neutral-400'}`}>
-                                                   {isPaid ? (payment.utr_Number || 'Cash') : '---'}
+                                                <span>{isPaid && payment?.utr_Number ? "UTR No:" : "Mode:"}</span>
+                                                <span className={`font-mono font-semibold ${isPaid ? 'text-neutral-900' : 'text-neutral-400'} truncate max-w-[150px]`} title={isPaid ? (payment.utr_Number || payment.payment_method || 'Cash') : '---'}>
+                                                   {isPaid ? (payment.utr_Number ? payment.utr_Number : (payment.payment_method || 'Cash')) : '---'}
                                                 </span>
                                              </div>
                                           </div>
@@ -630,7 +769,10 @@ export function StudentDetailsModal({ student, onClose, onDelete }: any) {
 
          {invoiceModalState.isOpen && (
             <StudentInvoiceModal 
-               student={student}
+               student={{
+                  ...student,
+                  fee: allPayments as any
+               }}
                initialPaymentIndex={invoiceModalState.paymentIndex}
                onClose={() => setInvoiceModalState({ isOpen: false })}
             />

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { 
   X, User, Phone, MapPin, School, GraduationCap, 
   Calendar, BookOpen, AlertCircle, MessageSquare, 
@@ -51,6 +51,43 @@ export function StudentLeadModal({ isOpen, onClose, onSave, lead }: StudentLeadM
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
+
+  const effectiveHistory = useMemo(() => {
+    if (!lead) return [];
+    const list = Array.isArray(lead.followup_history) ? [...lead.followup_history] : [];
+    if (list.length === 0 && (lead.conversation_notes || lead.call_outcome || (lead.status && lead.status !== "New Inquiry"))) {
+      list.push({
+        _id: "initial-log",
+        date: lead.created_at || new Date().toISOString(),
+        conversation: lead.conversation_notes || "Initial lead inquiry registered",
+        status: lead.status || "New Inquiry",
+        call_outcome: lead.call_outcome || "Connected",
+        taken_by: lead.followup_taken_by || "Counselor",
+        followup_round: lead.followup_round || "1st Follow-up",
+      });
+    }
+    if (list.length === 1 && lead.followup_history?.[0]) {
+      const first = lead.followup_history[0];
+      const hasOutcomeDiff = Boolean(lead.call_outcome && lead.call_outcome !== first.call_outcome);
+      const hasStatusDiff = Boolean(lead.status && lead.status !== "New Inquiry" && lead.status !== first.status);
+      const hasTimeDiff = Boolean(lead.updated_at && lead.created_at && (new Date(lead.updated_at).getTime() - new Date(lead.created_at).getTime() > 60000));
+      const hasStaff = Boolean(lead.followup_taken_by && (!first.taken_by || lead.followup_taken_by !== first.taken_by));
+      if (hasOutcomeDiff || (hasStatusDiff && hasTimeDiff) || (hasOutcomeDiff && hasStaff)) {
+        list.push({
+          _id: "call-2-synth",
+          date: lead.updated_at || new Date().toISOString(),
+          conversation: (lead.conversation_notes && lead.conversation_notes !== first.conversation)
+            ? lead.conversation_notes
+            : `Call response: ${lead.call_outcome || "Follow-up call attended"}`,
+          status: lead.status || "In Follow-up",
+          call_outcome: lead.call_outcome || "Not Connected",
+          taken_by: lead.followup_taken_by || "Counselor",
+          followup_round: lead.followup_round || "2nd Follow-up",
+        });
+      }
+    }
+    return list;
+  }, [lead]);
 
   useEffect(() => {
     if (lead) {
@@ -850,43 +887,77 @@ export function StudentLeadModal({ isOpen, onClose, onSave, lead }: StudentLeadM
 
               {/* Message Area Conversation (Textarea) */}
               <div className="md:col-span-2">
-                <label className="block text-xs font-semibold text-neutral-700 mb-1.5">
-                  {isEditing ? "Record New Conversation Notes / Call Summary" : "Conversation / Call Notes"}
+                <label className="block text-xs font-bold text-neutral-700 mb-1.5 flex items-center justify-between">
+                  <span className="flex items-center gap-1.5">
+                    <MessageSquare size={14} className="text-purple-600" />
+                    {isEditing ? "New Call Discussion / क्या बात हुई? (Call Notes)" : "Call Conversation Notes / Summary (क्या बात हुई)"}
+                  </span>
+                  {isEditing && (
+                    <span className="text-[10px] text-purple-700 font-bold bg-purple-50 px-2 py-0.5 rounded-md border border-purple-200">
+                      Adds New Call Record
+                    </span>
+                  )}
                 </label>
                 <textarea
                   rows={3}
                   value={isEditing ? newConversation : conversationNotes}
                   onChange={(e) => isEditing ? setNewConversation(e.target.value) : setConversationNotes(e.target.value)}
-                  placeholder="Record summary of discussion with student or parents..."
-                  className="w-full p-3.5 text-sm bg-white border border-neutral-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-600 transition-all font-medium text-neutral-900 placeholder:text-neutral-400 resize-none"
+                  placeholder={isEditing ? "Write notes of this call (e.g. Student se baat hui, fees structure explain kiya, kal demo class attend karega...)" : "Record summary of discussion with student or parents..."}
+                  className="w-full p-3.5 text-sm bg-white border border-neutral-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-600 transition-all font-medium text-neutral-900 placeholder:text-neutral-400 resize-none shadow-2xs"
                 />
               </div>
 
               {/* If editing and has previous conversation notes or history, display them nicely */}
-              {isEditing && lead?.followup_history && lead.followup_history.length > 0 && (
-                <div className="md:col-span-2 pt-3 border-t border-neutral-200">
-                  <div className="flex items-center gap-2 mb-3 text-xs font-bold text-neutral-700 uppercase tracking-wider">
-                    <History size={14} className="text-purple-600" />
-                    Previous Follow-up History ({lead.followup_history.length})
+              {isEditing && effectiveHistory.length > 0 && (
+                <div className="md:col-span-2 pt-3 border-t border-neutral-200 space-y-2">
+                  <div className="flex items-center justify-between text-xs font-bold text-neutral-700 uppercase tracking-wider">
+                    <span className="flex items-center gap-1.5">
+                      <History size={14} className="text-purple-600" />
+                      Previous Call Records & Notes ({effectiveHistory.length} Calls)
+                    </span>
+                    <span className="text-[10px] text-purple-700 font-bold bg-purple-50 px-2 py-0.5 rounded-md border border-purple-200">
+                      {effectiveHistory.length} Calls Logged
+                    </span>
                   </div>
-                  <div className="space-y-2 max-h-48 overflow-y-auto pr-1 scrollbar-thin">
-                    {lead.followup_history.slice().reverse().map((item, idx) => (
-                      <div key={item._id || idx} className="p-3 bg-white border border-neutral-200 rounded-xl text-xs space-y-1">
-                        <div className="flex items-center justify-between text-neutral-500">
-                          <span className="font-semibold text-neutral-800">
-                            👤 {item.taken_by || "Staff"}
-                          </span>
-                          <span>{new Date(item.date).toLocaleString()}</span>
+                  <div className="space-y-2.5 max-h-56 overflow-y-auto pr-1 scrollbar-thin">
+                    {effectiveHistory.slice().reverse().map((item, idx) => {
+                      const callNum = effectiveHistory.length - idx;
+                      return (
+                        <div key={item._id || idx} className="p-3 bg-white border border-neutral-200 rounded-xl text-xs space-y-1.5 shadow-2xs">
+                          <div className="flex items-center justify-between text-neutral-500">
+                            <div className="flex items-center gap-1.5">
+                              <span className="px-1.5 py-0.5 rounded bg-purple-100 text-purple-800 font-black text-[10px]">
+                                Call #{callNum}
+                              </span>
+                              <span className="font-bold text-neutral-800">
+                                👤 {item.taken_by || "Staff"}
+                              </span>
+                              {item.call_outcome && (
+                                <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded border ${
+                                  item.call_outcome === "Not Connected"
+                                    ? "bg-amber-50 text-amber-800 border-amber-200"
+                                    : "bg-indigo-50 text-indigo-700 border-indigo-200/60"
+                                }`}>
+                                  {item.call_outcome === "Not Connected" ? "📵 Not Connected" : item.call_outcome}
+                                </span>
+                              )}
+                            </div>
+                            <span className="text-[11px]">{new Date(item.date).toLocaleString([], { dateStyle: "medium", timeStyle: "short" })}</span>
+                          </div>
+                          <div className="p-2 bg-neutral-50 rounded-lg text-neutral-800 text-xs font-medium border border-neutral-100 whitespace-pre-wrap">
+                            {item.conversation || "(No conversation details recorded)"}
+                          </div>
+                          <div className="flex items-center gap-3 text-[11px] text-neutral-500">
+                            <span className="px-1.5 py-0.5 rounded bg-neutral-100 font-semibold text-neutral-700">
+                              Status: {item.status}
+                            </span>
+                            {item.next_followup_date && (
+                              <span className="text-amber-700 font-medium">Next: {new Date(item.next_followup_date).toLocaleString([], { dateStyle: "medium", timeStyle: "short" })}</span>
+                            )}
+                          </div>
                         </div>
-                        <p className="text-neutral-700 text-sm">{item.conversation || "(No message)"}</p>
-                        <div className="flex items-center gap-3 pt-1 text-[11px] text-neutral-500">
-                          <span className="px-1.5 py-0.5 rounded bg-neutral-100 font-semibold">{item.status}</span>
-                          {item.next_followup_date && (
-                            <span>Next: {new Date(item.next_followup_date).toLocaleString()}</span>
-                          )}
-                        </div>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 </div>
               )}

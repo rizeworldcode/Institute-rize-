@@ -23,31 +23,60 @@ export function StudentInvoiceModal({ student, onClose, initialPaymentIndex }: S
     if (student.admissions && student.admissions.length > 0) {
       student.admissions.forEach(adm => {
         if (adm.payments && adm.payments.length > 0) {
-          adm.payments.forEach((p, idx) => {
-            list.push({
-              amount: Number(p.amount) || 0,
-              paymentMethod: p.paymentMethod || "Cash",
-              utrNumber: p.utrNumber || "",
-              date: p.date || new Date().toISOString(),
-              installmentNumber: idx + 1
-            });
+          adm.payments.forEach((p) => {
+            if (p && (Number(p.amount) > 0 || p.date)) {
+              const amt = Number(p.amount) || 0;
+              const utr = (p.utrNumber || (p as any).utr_Number || "").trim();
+              const meth = p.paymentMethod || (p as any).payment_method || (utr ? "Online" : "Cash");
+              list.push({
+                amount: amt,
+                paymentMethod: meth,
+                utrNumber: utr,
+                date: p.date ? new Date(p.date).toISOString() : new Date().toISOString(),
+                installmentNumber: 0
+              });
+            }
           });
         }
       });
     }
 
-    // Fallback to student.fee
-    if (list.length === 0 && student.fee && student.fee.length > 0) {
-      student.fee.forEach((f, idx) => {
-        list.push({
-          amount: Number(f.amount) || 0,
-          paymentMethod: f.payment_method || "Cash",
-          utrNumber: f.utr_Number || "",
-          date: f.date || new Date().toISOString(),
-          installmentNumber: idx + 1
-        });
+    // Also check student.fee
+    if (student.fee && student.fee.length > 0) {
+      student.fee.forEach((f: any) => {
+        if (f && (Number(f.amount) > 0 || f.date)) {
+          const amt = Number(f.amount) || 0;
+          const utr = (f.utr_Number || f.utrNumber || "").trim();
+          const dateStr = f.date ? new Date(f.date).toISOString().split('T')[0] : "";
+
+          const alreadyExists = list.some(existing => {
+            const exUtr = (existing.utrNumber || "").trim();
+            if (utr && exUtr && utr.toLowerCase() === exUtr.toLowerCase()) return true;
+            const exDateStr = existing.date ? new Date(existing.date).toISOString().split('T')[0] : "";
+            return existing.amount === amt && exDateStr === dateStr;
+          });
+
+          if (!alreadyExists) {
+            const meth = f.payment_method || f.paymentMethod || (utr ? "Online" : "Cash");
+            list.push({
+              amount: amt,
+              paymentMethod: meth,
+              utrNumber: utr,
+              date: f.date ? new Date(f.date).toISOString() : new Date().toISOString(),
+              installmentNumber: 0
+            });
+          }
+        }
       });
     }
+
+    // Sort chronologically
+    list.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+
+    // Assign installment numbers
+    list.forEach((item, idx) => {
+      item.installmentNumber = idx + 1;
+    });
 
     // If still no payment records but paidFees > 0, generate one virtual payment
     if (list.length === 0 && Number(student.paidFees) > 0) {

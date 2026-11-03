@@ -148,91 +148,67 @@ exports.getLeadStats = async () => {
   try {
     const baseFilter = { is_deleted: false };
 
-    const [
-      totalLeads, 
-      newInquiries, 
-      inFollowUp, 
-      demoScheduled, 
-      demoCompleted, 
-      converted, 
-      lostLeads,
-      explicitYesForDemo,
-      explicitToldLater,
-      explicitNo,
-      explicitNotConnected,
-      explicitConnected
-    ] = await Promise.all([
-      StudentLead.countDocuments(baseFilter),
-      StudentLead.countDocuments({ ...baseFilter, status: "New Inquiry" }),
-      StudentLead.countDocuments({ ...baseFilter, status: "In Follow-up" }),
-      StudentLead.countDocuments({ ...baseFilter, status: "Demo Scheduled" }),
-      StudentLead.countDocuments({ ...baseFilter, status: "Demo Completed" }),
-      StudentLead.countDocuments({ ...baseFilter, status: "Converted" }),
-      StudentLead.countDocuments({ ...baseFilter, status: "Lost" }),
+    const leads = await StudentLead.find(baseFilter).lean();
 
-      // Telecalling response stats
-      StudentLead.countDocuments({
-        ...baseFilter,
-        $or: [
-          { call_outcome: "Yes for Demo" },
-          { status: { $in: ["Demo Scheduled", "Demo Completed"] } },
-          { demo_class_taken: true }
-        ]
-      }),
-      StudentLead.countDocuments({
-        ...baseFilter,
-        $or: [
-          { call_outcome: "Told Later" },
-          { next_followup_date: { $ne: null }, status: "In Follow-up" }
-        ]
-      }),
-      StudentLead.countDocuments({
-        ...baseFilter,
-        $or: [
-          { call_outcome: "No" },
-          { interest_level: "Not Interested" },
-          { status: "Lost" }
-        ]
-      }),
-      StudentLead.countDocuments({
-        ...baseFilter,
-        call_outcome: "Not Connected"
-      }),
-      StudentLead.countDocuments({
-        ...baseFilter,
-        $or: [
-          { call_outcome: { $in: ["Connected", "Yes for Demo", "Told Later"] } },
-          { status: { $in: ["In Follow-up", "Demo Scheduled", "Demo Completed", "Converted"] } }
-        ]
-      }),
-    ]);
+    let newInquiries = 0;
+    let inFollowUp = 0;
+    let converted = 0;
+    let lostLeads = 0;
 
-    // Aggregate total calls across all leads
-    const callAgg = await StudentLead.aggregate([
-      { $match: baseFilter },
-      {
-        $project: {
-          calls: {
-            $max: [
-              1,
-              { $size: { $ifNull: ["$followup_history", []] } }
-            ]
-          }
-        }
-      },
-      { $group: { _id: null, totalCalls: { $sum: "$calls" } } }
-    ]);
-    const totalCalls = (callAgg[0] && callAgg[0].totalCalls) || totalLeads;
+    let totalCalls = 0;
+    let explicitConnected = 0;
+    let explicitNotConnected = 0;
+    let explicitYesForDemo = 0;
+    let explicitNo = 0;
+    let explicitToldLater = 0;
+
+    leads.forEach((lead) => {
+      const history = Array.isArray(lead.followup_history) ? lead.followup_history : [];
+      const latestCall = history.length > 0 ? history[history.length - 1] : null;
+
+      // Calls count
+      const callsCount = Math.max(1, history.length);
+      totalCalls += callsCount;
+
+      // Status
+      const status = lead.status || latestCall?.status || "New Inquiry";
+      if (status === "New Inquiry") newInquiries++;
+      else if (status === "Converted") converted++;
+      else if (status === "Lost") lostLeads++;
+      else inFollowUp++; // In Follow-up, Demo Scheduled, Demo Completed
+
+      // Outcome & follow-up info
+      const outcome = latestCall?.call_outcome || lead.call_outcome || "";
+      const notes = (latestCall?.conversation || lead.conversation_notes || "").toLowerCase();
+      const interest = lead.interest_level;
+      const hasDemo = Boolean(latestCall?.demo_date || lead.demo_date);
+
+      const isDemo = outcome === "Yes for Demo" || status === "Demo Scheduled" || status === "Demo Completed" || lead.demo_class_taken || hasDemo;
+      const isNo = outcome === "No" || interest === "Not Interested" || status === "Lost" || notes.includes("not interest") || notes.includes("refused") || notes.includes("nahi karna");
+      const isNotConnected = !isDemo && !isNo && (outcome === "Not Connected" || (!outcome && (
+        notes.includes("not connect") || notes.includes("not receive") || notes.includes("did not pick") || notes.includes("didn't pick") || notes.includes("switched off") || notes.includes("ringing") || notes.includes("unanswered")
+      )));
+      const isToldLater = !isDemo && !isNo && !isNotConnected && (outcome === "Told Later" || notes.includes("later") || notes.includes("kal") || notes.includes("baad me") || notes.includes("busy") || notes.includes("call back") || Boolean(lead.next_followup_date && status === "In Follow-up"));
+      const isConnected = !isNo && !isNotConnected && (outcome === "Connected" || isDemo || isToldLater || status === "In Follow-up" || status === "Converted" || status === "Demo Scheduled" || status === "Demo Completed");
+
+      if (isDemo) explicitYesForDemo++;
+      if (isNo) explicitNo++;
+      if (isToldLater) explicitToldLater++;
+      if (isNotConnected) explicitNotConnected++;
+      if (isConnected) explicitConnected++;
+    });
+
+    const totalCallsCount = Math.max(totalCalls, leads.length);
 
     return {
       success: true,
       stats: {
-        totalLeads,
+        totalLeads: leads.length,
         newInquiries,
-        inFollowUp: inFollowUp + demoScheduled + demoCompleted,
+        inFollowUp,
         converted,
         lostLeads,
-        totalCalls,
+        totalCalls: totalCallsCount,
         totalConnected: explicitConnected,
         totalNotConnected: explicitNotConnected,
         yesForDemo: explicitYesForDemo,
@@ -269,8 +245,20 @@ exports.updateLead = async (id, data) => {
       return { success: false, message: "Lead not found" };
     }
 
-    // Check if new follow-up conversation was provided
-    if (data.new_conversation && data.new_conversation.trim() !== "") {
+    // Check if new follow-up conversation was provided or status/call response changed
+    const hasStatusChanged = data.status && data.status !== lead.status;
+    const hasOutcomeChanged = data.call_outcome && data.call_outcome !== lead.call_outcome;
+    const hasNewConv = Boolean(data.new_conversation && data.new_conversation.trim() !== "");
+    const hasConvChanged = Boolean(data.conversation_notes !== undefined && data.conversation_notes !== lead.conversation_notes && data.conversation_notes.trim() !== "");
+    const hasNextDateChanged = Boolean(data.next_followup_date && (
+      !lead.next_followup_date || new Date(data.next_followup_date).getTime() !== new Date(lead.next_followup_date).getTime()
+    ));
+    const hasDemoDateChanged = Boolean(data.demo_date && (
+      !lead.demo_date || new Date(data.demo_date).getTime() !== new Date(lead.demo_date).getTime()
+    ));
+    const isExplicitCall = Boolean(data.log_call || data.is_call || (data.call_outcome && data.call_outcome.trim() !== ""));
+
+    if (hasNewConv) {
       lead.followup_history.push({
         date: new Date(),
         conversation: data.new_conversation.trim(),
@@ -278,27 +266,40 @@ exports.updateLead = async (id, data) => {
         call_outcome: data.call_outcome || lead.call_outcome || "",
         next_followup_date: data.next_followup_date ? new Date(data.next_followup_date) : lead.next_followup_date,
         demo_date: data.demo_date ? new Date(data.demo_date) : (lead.demo_date || null),
-        taken_by: data.followup_taken_by || lead.followup_taken_by || "Admin",
+        taken_by: data.followup_taken_by || lead.followup_taken_by || "Counselor",
         next_followup_by: data.next_followup_by || lead.next_followup_by || "",
-        followup_round: data.followup_round || lead.followup_round || "1st Follow-up",
+        followup_round: data.followup_round || `${(lead.followup_history.length || 0) + 1}th Follow-up`,
       });
       lead.conversation_notes = data.new_conversation.trim();
-    } else if (data.conversation_notes !== undefined) {
-      // Check if conversation notes changed
-      if (data.conversation_notes !== lead.conversation_notes && data.conversation_notes.trim() !== "") {
-        lead.followup_history.push({
-          date: new Date(),
-          conversation: data.conversation_notes.trim(),
-          status: data.status || lead.status,
-          call_outcome: data.call_outcome || lead.call_outcome || "",
-          next_followup_date: data.next_followup_date ? new Date(data.next_followup_date) : lead.next_followup_date,
-          demo_date: data.demo_date ? new Date(data.demo_date) : (lead.demo_date || null),
-          taken_by: data.followup_taken_by || lead.followup_taken_by || "Admin",
-          next_followup_by: data.next_followup_by || lead.next_followup_by || "",
-          followup_round: data.followup_round || lead.followup_round || "1st Follow-up",
-        });
-      }
+    } else if (hasConvChanged) {
+      lead.followup_history.push({
+        date: new Date(),
+        conversation: data.conversation_notes.trim(),
+        status: data.status || lead.status,
+        call_outcome: data.call_outcome || lead.call_outcome || "",
+        next_followup_date: data.next_followup_date ? new Date(data.next_followup_date) : lead.next_followup_date,
+        demo_date: data.demo_date ? new Date(data.demo_date) : (lead.demo_date || null),
+        taken_by: data.followup_taken_by || lead.followup_taken_by || "Counselor",
+        next_followup_by: data.next_followup_by || lead.next_followup_by || "",
+        followup_round: data.followup_round || `${(lead.followup_history.length || 0) + 1}th Follow-up`,
+      });
       lead.conversation_notes = data.conversation_notes;
+    } else if (isExplicitCall || hasStatusChanged || hasOutcomeChanged || hasNextDateChanged || hasDemoDateChanged) {
+      const summaryMsg = data.call_outcome
+        ? `Call outcome recorded: ${data.call_outcome}${data.status ? ` (Status: ${data.status})` : ""}`
+        : `Follow-up updated: Status set to ${data.status || lead.status}`;
+
+      lead.followup_history.push({
+        date: new Date(),
+        conversation: summaryMsg,
+        status: data.status || lead.status,
+        call_outcome: data.call_outcome || lead.call_outcome || "",
+        next_followup_date: data.next_followup_date ? new Date(data.next_followup_date) : lead.next_followup_date,
+        demo_date: data.demo_date ? new Date(data.demo_date) : (lead.demo_date || null),
+        taken_by: data.followup_taken_by || lead.followup_taken_by || "Counselor",
+        next_followup_by: data.next_followup_by || lead.next_followup_by || "",
+        followup_round: data.followup_round || `${(lead.followup_history.length || 0) + 1}th Follow-up`,
+      });
     }
 
     if (data.call_outcome !== undefined) lead.call_outcome = data.call_outcome;

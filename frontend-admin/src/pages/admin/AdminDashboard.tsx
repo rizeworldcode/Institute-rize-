@@ -889,6 +889,65 @@ export default function AdminDashboard() {
             }
           });
           
+          // Collect and normalize all payments from admissions and item.fee
+          const allPaymentsList: any[] = [];
+          admissions.forEach(adm => {
+            if (Array.isArray(adm.payments)) {
+              adm.payments.forEach((p: any) => {
+                if (p && (Number(p.amount) > 0 || p.date)) {
+                  const amt = Number(p.amount) || 0;
+                  const utr = String(p.utrNumber || p.utr_Number || "").trim();
+                  const meth = p.paymentMethod || p.payment_method || (utr ? "Online" : "Cash");
+                  allPaymentsList.push({
+                    id: p._id || p.id,
+                    amount: amt,
+                    paymentMethod: meth,
+                    payment_method: meth,
+                    utrNumber: utr,
+                    utr_Number: utr,
+                    date: p.date ? new Date(p.date).toISOString() : new Date().toISOString()
+                  });
+                }
+              });
+            }
+          });
+
+          if (Array.isArray(item.fee)) {
+            item.fee.forEach((f: any) => {
+              if (f && (Number(f.amount) > 0 || f.date)) {
+                const amt = Number(f.amount) || 0;
+                const utr = String(f.utr_Number || f.utrNumber || "").trim();
+                const dateStr = f.date ? new Date(f.date).toISOString().split('T')[0] : "";
+                const exists = allPaymentsList.some(existing => {
+                  const exUtr = (existing.utrNumber || "").trim();
+                  if (utr && exUtr && utr.toLowerCase() === exUtr.toLowerCase()) return true;
+                  const exDateStr = existing.date ? new Date(existing.date).toISOString().split('T')[0] : "";
+                  return existing.amount === amt && exDateStr === dateStr;
+                });
+                if (!exists) {
+                  const meth = f.payment_method || f.paymentMethod || (utr ? "Online" : "Cash");
+                  allPaymentsList.push({
+                    id: f._id || f.id,
+                    amount: amt,
+                    paymentMethod: meth,
+                    payment_method: meth,
+                    utrNumber: utr,
+                    utr_Number: utr,
+                    date: f.date ? new Date(f.date).toISOString() : new Date().toISOString()
+                  });
+                }
+              }
+            });
+          }
+
+          allPaymentsList.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+
+          const totalInstallmentCount = Math.max(
+            Number(item.fee_installment) || 0,
+            admissions.reduce((sum, adm) => sum + (Number(adm.feesInstallment) || 0), 0),
+            allPaymentsList.length
+          );
+
           return {
             id: item.student_ID,
             name: item.student_name,
@@ -903,8 +962,8 @@ export default function AdminDashboard() {
             address: item.address,
             startDate: admissions[0]?.startDate || "",
             endDate: admissions[admissions.length - 1]?.endDate || "",
-            feesInstallment: admissions.reduce((sum, adm) => sum + adm.feesInstallment, 0),
-            fee: admissions.flatMap(adm => adm.payments),
+            feesInstallment: totalInstallmentCount,
+            fee: allPaymentsList,
             certificates: allCertificates,
             admissions,
             referredByName: item.referredByName,
@@ -1415,6 +1474,65 @@ export default function AdminDashboard() {
             }
           });
           
+          // Collect and normalize all payments from admissions and item.fee
+          const allPaymentsList: any[] = [];
+          admissions.forEach(adm => {
+            if (Array.isArray(adm.payments)) {
+              adm.payments.forEach((p: any) => {
+                if (p && (Number(p.amount) > 0 || p.date)) {
+                  const amt = Number(p.amount) || 0;
+                  const utr = String(p.utrNumber || p.utr_Number || "").trim();
+                  const meth = p.paymentMethod || p.payment_method || (utr ? "Online" : "Cash");
+                  allPaymentsList.push({
+                    id: p._id || p.id,
+                    amount: amt,
+                    paymentMethod: meth,
+                    payment_method: meth,
+                    utrNumber: utr,
+                    utr_Number: utr,
+                    date: p.date ? new Date(p.date).toISOString() : new Date().toISOString()
+                  });
+                }
+              });
+            }
+          });
+
+          if (Array.isArray(item.fee)) {
+            item.fee.forEach((f: any) => {
+              if (f && (Number(f.amount) > 0 || f.date)) {
+                const amt = Number(f.amount) || 0;
+                const utr = String(f.utr_Number || f.utrNumber || "").trim();
+                const dateStr = f.date ? new Date(f.date).toISOString().split('T')[0] : "";
+                const exists = allPaymentsList.some(existing => {
+                  const exUtr = (existing.utrNumber || "").trim();
+                  if (utr && exUtr && utr.toLowerCase() === exUtr.toLowerCase()) return true;
+                  const exDateStr = existing.date ? new Date(existing.date).toISOString().split('T')[0] : "";
+                  return existing.amount === amt && exDateStr === dateStr;
+                });
+                if (!exists) {
+                  const meth = f.payment_method || f.paymentMethod || (utr ? "Online" : "Cash");
+                  allPaymentsList.push({
+                    id: f._id || f.id,
+                    amount: amt,
+                    paymentMethod: meth,
+                    payment_method: meth,
+                    utrNumber: utr,
+                    utr_Number: utr,
+                    date: f.date ? new Date(f.date).toISOString() : new Date().toISOString()
+                  });
+                }
+              }
+            });
+          }
+
+          allPaymentsList.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+
+          const totalInstallmentCount = Math.max(
+            Number(item.fee_installment) || 0,
+            admissions.reduce((sum, adm) => sum + (Number(adm.feesInstallment) || 0), 0),
+            allPaymentsList.length
+          );
+
           return {
             id: item.student_ID,
             name: item.student_name,
@@ -1429,8 +1547,8 @@ export default function AdminDashboard() {
             address: item.address,
             startDate: admissions[0]?.startDate || "",
             endDate: admissions[admissions.length - 1]?.endDate || "",
-            feesInstallment: admissions.reduce((sum, adm) => sum + adm.feesInstallment, 0),
-            fee: admissions.flatMap(adm => adm.payments),
+            feesInstallment: totalInstallmentCount,
+            fee: allPaymentsList,
             certificates: allCertificates,
             admissions,
             referredByName: item.referredByName,

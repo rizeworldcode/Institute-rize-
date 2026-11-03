@@ -22,10 +22,13 @@ export type Student = {
   endDate?: string;
   certificates: Certificate[];
   fee?: {
-    amount: string;
+    id?: string;
+    amount: string | number;
     utr_Number?: string;
+    utrNumber?: string;
     date: string;
-    payment_method: string;
+    payment_method?: string;
+    paymentMethod?: string;
   }[];
 };
 
