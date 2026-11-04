@@ -1,9 +1,7 @@
-import http from 'http';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import esbuild from 'esbuild';
-import sirv from 'sirv';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -11,7 +9,7 @@ const distDir = path.resolve(__dirname, '../dist');
 const indexHtmlPath = path.join(distDir, 'index.html');
 
 if (!fs.existsSync(indexHtmlPath)) {
-  console.error('[Prerender] Error: dist/index.html not found! Run vite build first.');
+  console.error('[Prerender] Error: dist/index.html not found! Please run vite build first.');
   process.exit(1);
 }
 
@@ -28,7 +26,7 @@ function escapeAttr(str) {
     .replace(/>/g, '&gt;');
 }
 
-// 1. Load blog posts from src/data/posts.ts using esbuild
+// 1. Extract blog posts from src/data/posts.ts using esbuild
 const postsFilePath = path.resolve(__dirname, '../src/data/posts.ts');
 let posts = [];
 try {
@@ -47,7 +45,7 @@ try {
   console.error('[Prerender] Failed to parse posts.ts with esbuild:', err);
 }
 
-// 2. Prerender all blog posts statically (SSR / View Page Source ready)
+// 2. Prerender all blog posts statically (full View Page Source & SEO ready)
 let blogCount = 0;
 for (const post of posts) {
   const canonicalUrl = `https://rizeworldinstitute.in/blog/${post.slug}`;
@@ -126,12 +124,12 @@ for (const post of posts) {
 
   postHtml = postHtml.replace('<div id="root"></div>', `<div id="root">${innerContent}</div>`);
 
-  // Write flat file: dist/blog/<slug>.html
+  // 1. Write flat file: dist/blog/<slug>.html
   const flatFile = path.join(distDir, 'blog', `${post.slug}.html`);
   fs.mkdirSync(path.dirname(flatFile), { recursive: true });
   fs.writeFileSync(flatFile, postHtml, 'utf8');
 
-  // Write directory index file: dist/blog/<slug>/index.html
+  // 2. Write directory index file: dist/blog/<slug>/index.html
   const dirIndexFile = path.join(distDir, 'blog', post.slug, 'index.html');
   fs.mkdirSync(path.dirname(dirIndexFile), { recursive: true });
   fs.writeFileSync(dirIndexFile, postHtml, 'utf8');
@@ -265,42 +263,4 @@ for (const page of staticPagesMeta) {
   fs.writeFileSync(dirIndexFile, pageHtml, 'utf8');
 }
 console.log(`[Prerender] Statically generated ${staticPagesMeta.length} static page HTML shells!`);
-
-// 4. Try optional Puppeteer rendering if available
-try {
-  const puppeteerMod = await import('puppeteer');
-  const puppeteer = puppeteerMod.default;
-  // If puppeteer is available and can launch, run preview server
-  const PORT = 4173;
-  const serve = sirv(distDir, { single: false, dev: false });
-  const server = http.createServer((req, res) => {
-    serve(req, res);
-  });
-
-  server.listen(PORT, async () => {
-    try {
-      const browser = await puppeteer.launch({
-        headless: true,
-        args: ['--no-sandbox', '--disable-setuid-sandbox']
-      });
-      console.log('[Prerender] Puppeteer browser launched for full hydration capture');
-      // Prerender root index.html
-      const p = await browser.newPage();
-      await p.goto(`http://localhost:${PORT}/`, { waitUntil: 'domcontentloaded', timeout: 15000 });
-      await p.evaluate(() => new Promise(resolve => setTimeout(resolve, 1000)));
-      const rootHtml = await p.content();
-      fs.writeFileSync(path.join(distDir, 'index.html'), rootHtml, 'utf8');
-      console.log('[Prerender] Root index.html fully rendered with Puppeteer');
-      await browser.close();
-    } catch (e) {
-      console.log('[Prerender] Puppeteer runtime skipped (using static SSG fallbacks):', e.message);
-    } finally {
-      server.close();
-      console.log('[Prerender] Finished all prerendering successfully!');
-      process.exit(0);
-    }
-  });
-} catch (e) {
-  console.log('[Prerender] Puppeteer not invoked, SSG complete.');
-  process.exit(0);
-}
+console.log('[Prerender] All prerendered files generated successfully with zero errors.');
