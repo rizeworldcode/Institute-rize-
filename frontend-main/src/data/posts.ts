@@ -3521,7 +3521,7 @@ export const posts: BlogPost[] = [
 ,
   {
     slug: "ai-digital-marketing-master-course-what-you-should-have-by-week-16",
-    title: "AI & Digital Marketing Master Course – 4 Months + 2 Months Free Internship",
+    title: "AI & Digital Marketing Master Course - 4 Months + 2 Months Free Internship",
     excerpt: "Discover what practical skills and portfolio proofs you should have by Week 16 of an AI and Digital Marketing Master Course. Take the Day 112 test to evaluate course outcomes, client projects, and internship experience at RizeWorld Institute.",
     category: "Career Tips",
     readTime: "10 min read",
