@@ -867,7 +867,7 @@ export const posts: BlogPost[] = [
     slug: "choosing-the-right-digital-marketing-institute",
     title: "The Complete Guide to Choosing the Right Digital Marketing Institute",
     excerpt: "Everything worth checking before you enroll: curriculum, trainers, batch size, and the placement support that actually holds up.",
-    category: "Career Guide",
+    category: "Career Tips",
     readTime: "10 min read",
     date: "August 31, 2026",
     featured: false,
@@ -3518,7 +3518,255 @@ export const posts: BlogPost[] = [
       </div>
     `
   }
+,
+  {
+    slug: "ai-digital-marketing-master-course-what-you-should-have-by-week-16",
+    title: "AI & Digital Marketing Master Course – 4 Months + 2 Months Free Internship",
+    excerpt: "Discover what practical skills and portfolio proofs you should have by Week 16 of an AI and Digital Marketing Master Course. Take the Day 112 test to evaluate course outcomes, client projects, and internship experience at RizeWorld Institute.",
+    category: "Career Tips",
+    readTime: "10 min read",
+    date: "November 4, 2026",
+    featured: false,
+    img: "/hero/Digital_Marketing_Course_Thumbnail_1000x667.png",
+    gridImg: "/hero/Digital_Marketing_Course_Thumbnail_1000x667.png",
+    keywords: [
+      "AI & Digital Marketing Master Course",
+      "Digital Marketing Course Week 16",
+      "Digital Marketing Course with Internship",
+      "Day 112 Test Digital Marketing",
+      "Practical Digital Marketing Portfolio",
+      "Digital Marketing Course in Alwar",
+      "Digital Marketing Training Rajasthan",
+      "RizeWorld Institute Master Course"
+    ],
+    content: `
+
+      <h3>Do You Know What You Are Really Paying For?</h3>
+      <p>Let us ask you something honest. When you look at a digital marketing course, what do you check first? The syllabus? The fees? The certificate? Most people do exactly that, and we do not blame them, because those are the things every course page puts in front of you. But here is what we have learned from thinking about this a lot: <strong>the syllabus tells you what a teacher will say over the coming weeks. It never tells you what you will be able to do when the classes are over.</strong></p>
+
+      <p>And that second thing is the only thing that an employer, a client, or your own growing business will ever care about. Nobody hiring a marketer asks to see a list of topics that were covered. They ask to see what you have built, what result it brought, and whether you can explain your decisions clearly. This article is written to help you look at any course, including ours at <a href="/" class="blog-link"><strong>RizeWorld Institute</strong></a>, through that lens, so that you spend your time and money on skills you can actually prove.</p>
+
+      <div class="my-8 p-6 bg-blue-50 border-l-4 border-blue-600 rounded-r-xl">
+        <h3 class="text-blue-900 font-bold mt-0">AEO Quick Answer: What Should You Have by Week 16 of a Digital Marketing Course?</h3>
+        <p class="text-blue-950 mb-0">By Week 16 (Day 112), you should not merely hold completion certificates or classroom lecture notes; you should have built a verifiable 7-module portfolio: an SEO-optimized live webpage, a 30-day active social media growth log, real Meta/Google advertising campaign performance reports, a functioning responsive website, consistent graphic creatives designed in Photoshop, edited video reels, and documented AI prompt workflows. At <a href="/master-course" class="blog-link"><strong>RizeWorld Institute</strong></a>, this comprehensive 4-month program is backed by an additional <strong>2-Month Free Agency Internship</strong> to apply every skill on live commercial projects.</p>
+      </div>
+
+      <h3>The Day 112 Test</h3>
+      <p>Our Master Course runs for 16 weeks (4 months), and 16 weeks is exactly 112 days. So we use a very simple test, and we would like you to use it on every institute you visit, including us.</p>
+
+      <p><strong>On Day 112, can you open a laptop and prove your skills in five minutes?</strong></p>
+
+      <p>We do not mean talking about what you studied, or showing a certificate, or repeating the names of tools. We mean showing a live page that you built, a campaign that you set up and can explain, a video that you edited, and a set of designs that look like they belong to one brand. If a course cannot clearly tell you what you will be able to show on its last day, then you are most likely buying notes and recordings, not skills. A good course should be able to answer this question without hesitation, because the whole program should have been built backwards from it.</p>
+
+      <p>And the journey does not stop on Day 112. After the 4-month course, you move into a <strong>2-month free internship</strong>, where you apply everything on real work and keep adding to your portfolio.</p>
+
+      <h3>What Should You Be Able to Show? The Day 112 Checklist</h3>
+      <p>To make the Day 112 Test practical, here is the checklist we would want for ourselves if we were the student. It covers the seven skills of our course: SEO, social media, performance marketing, website development, graphic design with Photoshop, video editing, and AI tools with marketing basics. For each skill, the table says what you should be able to show and what proof another person can check for themselves.</p>
+
+      <div class="overflow-x-auto my-6 border border-neutral-200 rounded-xl bg-white shadow-xs">
+        <table class="w-full text-left border-collapse text-sm">
+          <thead>
+            <tr class="bg-neutral-900 text-white font-semibold">
+              <th class="p-3 border-r border-neutral-800 w-1/4">Skill</th>
+              <th class="p-3 border-r border-neutral-800 w-2/5">What You Should Be Able to Show</th>
+              <th class="p-3">Proof Anyone Can Check</th>
+            </tr>
+          </thead>
+          <tbody class="text-neutral-700">
+            <tr class="border-b border-neutral-200">
+              <td class="p-3 font-bold border-r border-neutral-200 text-neutral-900"><a href="/seo" class="blog-link">SEO</a></td>
+              <td class="p-3 border-r border-neutral-200">A keyword plan and one page you optimised yourself</td>
+              <td class="p-3 font-medium text-neutral-900">The written plan and the live page</td>
+            </tr>
+            <tr class="border-b border-neutral-200">
+              <td class="p-3 font-bold border-r border-neutral-200 text-neutral-900"><a href="/social-media-marketing" class="blog-link">Social Media (SMO)</a></td>
+              <td class="p-3 border-r border-neutral-200">A 30-day content calendar and an account you actually ran</td>
+              <td class="p-3 font-medium text-neutral-900">Posts, the calendar and a simple growth log</td>
+            </tr>
+            <tr class="border-b border-neutral-200">
+              <td class="p-3 font-bold border-r border-neutral-200 text-neutral-900"><a href="/performance-marketing" class="blog-link">Performance Marketing</a></td>
+              <td class="p-3 border-r border-neutral-200">A Meta or Google campaign with a short result report</td>
+              <td class="p-3 font-medium text-neutral-900">Account structure screenshots and cost-per-result notes</td>
+            </tr>
+            <tr class="border-b border-neutral-200">
+              <td class="p-3 font-bold border-r border-neutral-200 text-neutral-900"><a href="/website-development" class="blog-link">Website Development</a></td>
+              <td class="p-3 border-r border-neutral-200">A working business site or landing page</td>
+              <td class="p-3 font-medium text-neutral-900">A live link</td>
+            </tr>
+            <tr class="border-b border-neutral-200">
+              <td class="p-3 font-bold border-r border-neutral-200 text-neutral-900"><a href="/graphic-design" class="blog-link">Graphic Design + Photoshop</a></td>
+              <td class="p-3 border-r border-neutral-200">A set of creatives in one consistent brand style</td>
+              <td class="p-3 font-medium text-neutral-900">A folder of finished posts and banners</td>
+            </tr>
+            <tr class="border-b border-neutral-200">
+              <td class="p-3 font-bold border-r border-neutral-200 text-neutral-900"><a href="/video-editing" class="blog-link">Video Editing</a></td>
+              <td class="p-3 border-r border-neutral-200">A Reel, a YouTube video and a brand story</td>
+              <td class="p-3 font-medium text-neutral-900">Playable links</td>
+            </tr>
+            <tr>
+              <td class="p-3 font-bold border-r border-neutral-200 text-neutral-900"><a href="/ai-digital-marketing" class="blog-link">AI Tools + Basics</a></td>
+              <td class="p-3 border-r border-neutral-200">A documented AI workflow with your prompts</td>
+              <td class="p-3 font-medium text-neutral-900">Before and after examples showing your edits</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p>Next time you speak to an institute, read these seven rows aloud and ask: <em>“Which of these will I finish, and who will check my work?”</em> If the answer is vague, or if they start talking about the number of videos or the hours of recording instead, you have learned something very important before spending a single rupee. A confident answer will name the project, the mentor, and the exact week in which it happens.</p>
+
+      <h3>Let Us Show You: One Campaign, Seven Skills</h3>
+      <p>Here is something many beginners do not realise until they start working: <strong>real marketing never uses one skill at a time</strong>. A single small project quietly pulls in research, design, writing, video, a website, search, social media, and paid ads—all at once and all depending on each other. If one piece is weak, the whole campaign feels weak.</p>
+
+      <p>So let us walk you through an illustrative example. Imagine a neighbourhood sweet shop that wants more online orders for the festival season. What would you do, step by step?</p>
+
+      <div class="space-y-4 my-6">
+        <div class="p-4 bg-neutral-50 rounded-xl border border-neutral-200">
+          <h4 class="font-bold text-neutral-900 mb-1">1. Research (AI Tools)</h4>
+          <p class="text-sm text-neutral-700 mb-0">Use ChatGPT and Gemini to understand what customers ask before festivals, what competitors are offering, and which gift boxes people search for. Then check every claim yourself, because AI can sound confident and still be wrong.</p>
+        </div>
+        <div class="p-4 bg-neutral-50 rounded-xl border border-neutral-200">
+          <h4 class="font-bold text-neutral-900 mb-1">2. Website Development</h4>
+          <p class="text-sm text-neutral-700 mb-0">Build a simple, fast order page with a clear order button, the shop's phone number, and the sweets with their prices, so that a visitor never has to wonder what to do next.</p>
+        </div>
+        <div class="p-4 bg-neutral-50 rounded-xl border border-neutral-200">
+          <h4 class="font-bold text-neutral-900 mb-1">3. Graphic Design (Photoshop)</h4>
+          <p class="text-sm text-neutral-700 mb-0">Create festival posts and banners in Photoshop, all in one consistent style with identical brand colours, typography, and logo placement, so people recognise the shop at a glance.</p>
+        </div>
+        <div class="p-4 bg-neutral-50 rounded-xl border border-neutral-200">
+          <h4 class="font-bold text-neutral-900 mb-1">4. Video Editing</h4>
+          <p class="text-sm text-neutral-700 mb-0">Edit a short 20-second Reel of sweets being packed, with crisp text on screen and audio that suits the mood, because short-form video is what stops people from scrolling.</p>
+        </div>
+        <div class="p-4 bg-neutral-50 rounded-xl border border-neutral-200">
+          <h4 class="font-bold text-neutral-900 mb-1">5. Search Engine Optimization (SEO)</h4>
+          <p class="text-sm text-neutral-700 mb-0">Identify the exact keywords a local buyer would type into Google, then write the order page and its headings around those terms in a natural, search-friendly way.</p>
+        </div>
+        <div class="p-4 bg-neutral-50 rounded-xl border border-neutral-200">
+          <h4 class="font-bold text-neutral-900 mb-1">6. Social Media Marketing (SMO)</h4>
+          <p class="text-sm text-neutral-700 mb-0">Plan and schedule posts and Reels across an entire month, mixing festive offers, behind-the-scenes preparation, and customer testimonials so the page never feels like only aggressive advertising.</p>
+        </div>
+        <div class="p-4 bg-neutral-50 rounded-xl border border-neutral-200">
+          <h4 class="font-bold text-neutral-900 mb-1">7. Performance Marketing</h4>
+          <p class="text-sm text-neutral-700 mb-0">Run a targeted paid campaign that sends high-intent users directly to the order page, then track cost-per-purchase and return on ad spend (ROAS) to optimize budget allocation.</p>
+        </div>
+      </div>
+
+      <p>Now imagine explaining this whole project in an interview: what worked, what failed, what you tested, and what you would change next time. That is the exact moment when candidates get hired—because it proves that you can think strategically, not just click buttons.</p>
+
+      <h3>Before You Pay Anyone, Ask These 5 Questions</h3>
+      <p>We would much rather you choose well than choose us in a hurry. A decision about your career deserves homework, and you only need five questions to separate a serious institute from a weak one:</p>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 my-6">
+        <div class="p-5 bg-white border border-neutral-200 rounded-xl shadow-xs">
+          <h4 class="font-bold text-neutral-900 mb-1 flex items-center gap-2">
+            <span class="w-2 h-2 rounded-full bg-blue-600"></span> 1. Can I see the work of a past batch?
+          </h4>
+          <p class="text-sm text-neutral-600 mb-0">Look for finished projects such as live pages, ad reports, and edited videos—not just photographs of certificates or classrooms.</p>
+        </div>
+        <div class="p-5 bg-white border border-neutral-200 rounded-xl shadow-xs">
+          <h4 class="font-bold text-neutral-900 mb-1 flex items-center gap-2">
+            <span class="w-2 h-2 rounded-full bg-blue-600"></span> 2. How many students are in one batch?
+          </h4>
+          <p class="text-sm text-neutral-600 mb-0">Fewer students means a mentor can genuinely look at your work and give feedback specific to your progress, rather than speaking to a crowd.</p>
+        </div>
+        <div class="p-5 bg-white border border-neutral-200 rounded-xl shadow-xs">
+          <h4 class="font-bold text-neutral-900 mb-1 flex items-center gap-2">
+            <span class="w-2 h-2 rounded-full bg-blue-600"></span> 3. Who will review my campaign, and how often?
+          </h4>
+          <p class="text-sm text-neutral-600 mb-0">Ask for a named mentor and a fixed review schedule. Feedback that happens only "when someone has free time" rarely happens at all.</p>
+        </div>
+        <div class="p-5 bg-white border border-neutral-200 rounded-xl shadow-xs">
+          <h4 class="font-bold text-neutral-900 mb-1 flex items-center gap-2">
+            <span class="w-2 h-2 rounded-full bg-blue-600"></span> 4. Which tools will I use myself?
+          </h4>
+          <p class="text-sm text-neutral-600 mb-0">You should be the one operating the ad account, editing the timeline, and designing the creative. Passively watching an instructor teaches far less.</p>
+        </div>
+        <div class="p-5 bg-white border border-neutral-200 rounded-xl shadow-xs md:col-span-2">
+          <h4 class="font-bold text-neutral-900 mb-1 flex items-center gap-2">
+            <span class="w-2 h-2 rounded-full bg-blue-600"></span> 5. What does placement support actually include?
+          </h4>
+          <p class="text-sm text-neutral-600 mb-0">Ask about interview prep, resume polishing, internship opportunities, and hiring partner introductions. Be cautious of anyone offering unconditional "guaranteed jobs," as legitimate hiring always depends on real demonstrated skill.</p>
+        </div>
+      </div>
+
+      <h3>How We Build Toward Day 112 at RizeWorld</h3>
+      <p>The <a href="/master-course" class="blog-link"><strong>RizeWorld Master Course</strong></a> is a 16-week (4-month) comprehensive program with 7 foundational modules: SEO, SMO, performance marketing, website development, graphic design with Photoshop, video editing, and AI tools with digital marketing basics. After the course, you continue with a <strong>2-Month Free Internship</strong>.</p>
+
+      <ul class="list-disc pl-6 space-y-2 text-neutral-700 my-4">
+        <li><strong>Small Batches:</strong> A maximum of 20 students per batch ensures mentors can personally review your campaigns and address hurdles.</li>
+        <li><strong>Live, Project-Based Learning:</strong> Real client briefs and portfolio sessions so you finish with tangible live deliverables.</li>
+        <li><strong>1-on-1 Mentorship:</strong> Expert-led classes and personal mentor checkpoints for career and project clarity.</li>
+        <li><strong>2-Month Free Internship:</strong> Direct immersion into real agency tasks at no extra fee to compound your work experience.</li>
+        <li><strong>Career Support:</strong> Resume refinement, portfolio reviews, mock interviews, and access to our partner agency network.</li>
+        <li><strong>Dual Certification:</strong> RizeWorld Institute Course Certificate alongside a specialized Digital Marketing Certificate.</li>
+        <li><strong>Lifetime Community Access:</strong> Ongoing networking with peers and marketing alumni.</li>
+      </ul>
+
+      <h3>4 Mistakes That Slow Beginners Down</h3>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 my-6">
+        <div class="p-4 bg-neutral-50 rounded-xl border border-neutral-200">
+          <h4 class="font-bold text-neutral-900 mb-1">1. Learning tools before the goal</h4>
+          <p class="text-sm text-neutral-600 mb-0">A beautiful ad shown to the wrong audience still fails. Before you open any software, identify who you are speaking to, what action you want them to take, and how you will measure success.</p>
+        </div>
+        <div class="p-4 bg-neutral-50 rounded-xl border border-neutral-200">
+          <h4 class="font-bold text-neutral-900 mb-1">2. Mastering only one channel</h4>
+          <p class="text-sm text-neutral-600 mb-0">If you only know SEO or only social media, you will struggle when a brand requires a cohesive strategy. Understanding how organic and paid channels synergize makes you indispensable.</p>
+        </div>
+        <div class="p-4 bg-neutral-50 rounded-xl border border-neutral-200">
+          <h4 class="font-bold text-neutral-900 mb-1">3. Copying AI output blindly</h4>
+          <p class="text-sm text-neutral-600 mb-0">AI writes and designs quickly, but employers hire professionals who can evaluate, fact-check, and elevate that output. Keep your human judgment in the driver's seat.</p>
+        </div>
+        <div class="p-4 bg-neutral-50 rounded-xl border border-neutral-200">
+          <h4 class="font-bold text-neutral-900 mb-1">4. Keeping no records</h4>
+          <p class="text-sm text-neutral-600 mb-0">Save screenshots, analytics reports, links, and campaign notes while you work. Building a portfolio incrementally week by week prevents a rushed, incomplete portfolio at the end.</p>
+        </div>
+      </div>
+
+      <h3>Is This Course Right for You? An Honest Answer</h3>
+      <p><strong>It is a great fit if:</strong> You are a student, fresher, professional switching careers, freelancer, or business owner ready to practise each week, accept feedback, and put in regular project hours. No prior coding or marketing experience is needed since we teach from ground up.</p>
+
+      <p><strong>It is not for you if:</strong> You are looking for a magic shortcut, a guaranteed job without active practice, or cannot commit time to hands-on exercises. Digital marketing rewards those who test, analyze, and build.</p>
+
+      <div class="blog-admission-card my-8 p-6 bg-neutral-900 text-white rounded-2xl shadow-xl border border-neutral-800">
+        <h4 class="text-xl font-extrabold text-white mt-0 mb-2">Connect with RizeWorld Institute Admissions</h4>
+        <p class="text-blue-400 font-bold text-sm mb-1">RizeWorld Institute of AI and Digital Marketing</p>
+        <p class="text-neutral-300 text-sm mb-2">
+          📍 C197, Near Telco Circle, UIT Colony, Shalimar Nagar, Alwar, Rajasthan 301001
+        </p>
+        <p class="text-neutral-300 text-sm mb-4">
+          Phone / WhatsApp: <a href="tel:+918302277092" class="text-blue-400 font-bold hover:underline">+91 8302277092</a> | Email: <a href="mailto:rizeworldinstitute@gmail.com" class="text-blue-400 hover:underline">rizeworldinstitute@gmail.com</a>
+        </p>
+        <a href="/contact" class="inline-block px-6 py-3 rounded-full bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs tracking-wide transition-all shadow-md hover:scale-105">
+          Book Free Counselling Session &amp; Demo Class →
+        </a>
+      </div>
+
+      <h3>Frequently Asked Questions (FAQs)</h3>
+      <div class="space-y-4 my-6">
+        <div class="p-5 bg-neutral-50 rounded-xl border border-neutral-200">
+          <p class="font-bold text-neutral-900 mb-1">Q1: Do I need experience before joining?</p>
+          <p class="text-neutral-600 mb-0">A: No, you do not. We start from the basics and explain every concept step by step. The website module includes modern no-code tools, so you can build pages even without writing code.</p>
+        </div>
+        <div class="p-5 bg-neutral-50 rounded-xl border border-neutral-200">
+          <p class="font-bold text-neutral-900 mb-1">Q2: How long is the course?</p>
+          <p class="text-neutral-600 mb-0">A: The Master Course runs for 16 weeks (4 months) covering all 7 modules, followed by an additional 2-month free practical agency internship.</p>
+        </div>
+        <div class="p-5 bg-neutral-50 rounded-xl border border-neutral-200">
+          <p class="font-bold text-neutral-900 mb-1">Q3: Is the internship really free?</p>
+          <p class="text-neutral-600 mb-0">A: Yes. The 2-month internship after course completion comes at no extra cost and gives you hands-on experience with real commercial work.</p>
+        </div>
+        <div class="p-5 bg-neutral-50 rounded-xl border border-neutral-200">
+          <p class="font-bold text-neutral-900 mb-1">Q4: What will I have at the end?</p>
+          <p class="text-neutral-600 mb-0">A: You will have a robust project portfolio, two recognized certificates (RizeWorld Institute Course Certificate and Digital Marketing Certificate), real internship experience, and lifetime community access.</p>
+        </div>
+        <div class="p-5 bg-neutral-50 rounded-xl border border-neutral-200">
+          <p class="font-bold text-neutral-900 mb-1">Q5: Is placement guaranteed?</p>
+          <p class="text-neutral-600 mb-0">A: No institute can honestly guarantee a job without seeing your individual commitment. We provide extensive placement assistance including mock interviews, resume preparation, internship support, and access to partner hiring agencies.</p>
+        </div>
+        <div class="p-5 bg-neutral-50 rounded-xl border border-neutral-200">
+          <p class="font-bold text-neutral-900 mb-1">Q6: How do I join?</p>
+          <p class="text-neutral-600 mb-0">A: You can book a free counselling session by visiting <a href="/contact" class="blog-link">our Contact page</a>, calling +91 8302277092, or visiting our Alwar campus to meet the mentors in person.</p>
+        </div>
+      </div>
+    `
+  }
 ];
-
-
-

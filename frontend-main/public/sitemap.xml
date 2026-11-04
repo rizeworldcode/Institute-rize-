@@ -167,7 +167,7 @@
   </url>
   <url>
     <loc>https://rizeworldinstitute.in/blog</loc>
-    <lastmod>2026-10-21</lastmod>
+    <lastmod>2026-11-04</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -302,5 +302,11 @@
     <lastmod>2026-06-23</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
+  </url>
+  <url>
+    <loc>https://rizeworldinstitute.in/blog/ai-digital-marketing-master-course-what-you-should-have-by-week-16</loc>
+    <lastmod>2026-11-04</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
   </url>
 </urlset>
