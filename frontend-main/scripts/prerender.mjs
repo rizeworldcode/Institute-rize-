@@ -124,19 +124,14 @@ for (const post of posts) {
 
   postHtml = postHtml.replace('<div id="root"></div>', `<div id="root">${innerContent}</div>`);
 
-  // 1. Write flat file: dist/blog/<slug>.html
+  // Write flat file: dist/blog/<slug>.html
   const flatFile = path.join(distDir, 'blog', `${post.slug}.html`);
   fs.mkdirSync(path.dirname(flatFile), { recursive: true });
   fs.writeFileSync(flatFile, postHtml, 'utf8');
 
-  // 2. Write directory index file: dist/blog/<slug>/index.html
-  const dirIndexFile = path.join(distDir, 'blog', post.slug, 'index.html');
-  fs.mkdirSync(path.dirname(dirIndexFile), { recursive: true });
-  fs.writeFileSync(dirIndexFile, postHtml, 'utf8');
-
   blogCount++;
 }
-console.log(`[Prerender] Statically generated ${blogCount} blog HTML files with full SEO content!`);
+console.log(`[Prerender] Statically generated ${blogCount} flat blog HTML files with full SEO content!`);
 
 // 3. Known static pages metadata for SSR static shells
 const staticPagesMeta = [
@@ -252,15 +247,10 @@ for (const page of staticPagesMeta) {
   }
   pageHtml = pageHtml.replace('</head>', `${metaTags}\n</head>`);
 
-  // Flat file
+  // Flat file only (e.g. dist/courses.html, dist/about.html)
   const flatFile = path.join(distDir, `${cleanRoute}.html`);
   fs.mkdirSync(path.dirname(flatFile), { recursive: true });
   fs.writeFileSync(flatFile, pageHtml, 'utf8');
-
-  // Dir index file
-  const dirIndexFile = path.join(distDir, cleanRoute, 'index.html');
-  fs.mkdirSync(path.dirname(dirIndexFile), { recursive: true });
-  fs.writeFileSync(dirIndexFile, pageHtml, 'utf8');
 }
-console.log(`[Prerender] Statically generated ${staticPagesMeta.length} static page HTML shells!`);
-console.log('[Prerender] All prerendered files generated successfully with zero errors.');
+console.log(`[Prerender] Statically generated ${staticPagesMeta.length} flat static page HTML shells!`);
+console.log('[Prerender] Complete: Flat files generated without directory conflicts.');
