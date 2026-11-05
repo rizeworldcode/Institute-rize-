@@ -1,186 +1,227 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 import { X, Sparkles } from "lucide-react";
 
-interface Particle {
+interface AmbientSparkle {
   x: number;
   y: number;
-  vx: number;
-  vy: number;
+  char: string;
   color: string;
   alpha: number;
-  decay: number;
-  size: number;
-  flicker: boolean;
+  speed: number;
+  angle: number;
 }
 
-interface Rocket {
-  x: number;
-  y: number;
-  targetY: number;
-  vy: number;
-  color: string;
-}
-
-const FESTIVE_COLORS = [
-  "#fbbf24", // Warm Gold
-  "#f59e0b", // Rich Amber
-  "#f97316", // Saffron Orange
-  "#ef4444", // Festival Red
-  "#ec4899", // Deep Pink
-  "#a855f7", // Royal Purple
-  "#38bdf8", // Sky Blue
-  "#4ade80", // Emerald Green
-  "#ffffff", // Shimmer White
-];
+const AMBIENT_CHARS = ["+", "*", "x", "#", "%", "·", "✦", "~"];
+const AMBIENT_COLORS = ["#38bdf8", "#a855f7", "#ec4899", "#fbbf24", "#f97316", "#ef4444"];
+const GLYPHS = ["#", "x", "@", "X", "+", "*", "%", "&", "8", "$"];
 
 export default function DiwaliIntro() {
   const [isOpen, setIsOpen] = useState(true);
   const [showFloatingDiya, setShowFloatingDiya] = useState(false);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const particlesRef = useRef<Particle[]>([]);
-  const rocketsRef = useRef<Rocket[]>([]);
   const animFrameRef = useRef<number | null>(null);
-  const autoBurstTimerRef = useRef<number | null>(null);
+  const ambientSparklesRef = useRef<AmbientSparkle[]>([]);
 
-  // Trigger firework explosion at (x, y) with multiple spark layers
-  const createExplosion = useCallback((x: number, y: number, primaryColor?: string, count = 65) => {
-    const particles: Particle[] = [];
-    const color = primaryColor || FESTIVE_COLORS[Math.floor(Math.random() * FESTIVE_COLORS.length)];
-    const secondaryColor = FESTIVE_COLORS[Math.floor(Math.random() * FESTIVE_COLORS.length)];
-
-    for (let i = 0; i < count; i++) {
-      const angle = (Math.PI * 2 * i) / count + (Math.random() - 0.5) * 0.35;
-      const speed = Math.random() * 5.5 + 2.2;
-      particles.push({
-        x,
-        y,
-        vx: Math.cos(angle) * speed,
-        vy: Math.sin(angle) * speed,
-        color: Math.random() > 0.35 ? color : secondaryColor,
-        alpha: 1,
-        decay: Math.random() * 0.018 + 0.012,
-        size: Math.random() * 3.2 + 1.6,
-        flicker: Math.random() > 0.4,
-      });
-    }
-
-    // Add bright central flash
-    for (let j = 0; j < 12; j++) {
-      const angle = Math.random() * Math.PI * 2;
-      const speed = Math.random() * 1.5 + 0.5;
-      particles.push({
-        x,
-        y,
-        vx: Math.cos(angle) * speed,
-        vy: Math.sin(angle) * speed,
-        color: "#ffffff",
-        alpha: 1,
-        decay: 0.035,
-        size: Math.random() * 4 + 2,
-        flicker: true,
-      });
-    }
-
-    particlesRef.current.push(...particles);
+  const handleClose = useCallback(() => {
+    setIsOpen(false);
+    setShowFloatingDiya(true);
   }, []);
 
-  // Launch a sky rocket from the bottom
-  const launchRocket = useCallback(() => {
-    if (typeof window === "undefined") return;
-    const width = window.innerWidth;
-    const height = window.innerHeight;
+  const handleReopen = () => {
+    setIsOpen(true);
+    setShowFloatingDiya(false);
+  };
 
-    const x = Math.random() * (width * 0.84) + width * 0.08;
-    const targetY = Math.random() * (height * 0.55) + height * 0.1;
-    const color = FESTIVE_COLORS[Math.floor(Math.random() * FESTIVE_COLORS.length)];
-
-    rocketsRef.current.push({
-      x,
-      y: height + 10,
-      targetY,
-      vy: -(Math.random() * 4 + 11),
-      color,
-    });
-  }, []);
-
-  // Canvas render & animation loop
+  // Auto-dismiss after 7.5 seconds so user can freely interact with the site
   useEffect(() => {
+    if (!isOpen) return;
+    const timer = setTimeout(() => {
+      handleClose();
+    }, 7500);
+    return () => clearTimeout(timer);
+  }, [isOpen, handleClose]);
+
+  // Canvas Animation: ASCII / Code Matrix Glowing Diya
+  useEffect(() => {
+    if (!isOpen) return;
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
+    let width = (canvas.width = window.innerWidth);
+    let height = (canvas.height = window.innerHeight);
+
     const handleResize = () => {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
+      if (!canvas) return;
+      width = canvas.width = window.innerWidth;
+      height = canvas.height = window.innerHeight;
     };
-    handleResize();
     window.addEventListener("resize", handleResize);
 
+    // Initialize floating ambient code sparks around Diya
+    const sparkles: AmbientSparkle[] = [];
+    for (let i = 0; i < 90; i++) {
+      sparkles.push({
+        x: Math.random() * width,
+        y: Math.random() * height,
+        char: AMBIENT_CHARS[Math.floor(Math.random() * AMBIENT_CHARS.length)],
+        color: AMBIENT_COLORS[Math.floor(Math.random() * AMBIENT_COLORS.length)],
+        alpha: Math.random() * 0.65 + 0.15,
+        speed: Math.random() * 0.35 + 0.15,
+        angle: Math.random() * Math.PI * 2,
+      });
+    }
+    ambientSparklesRef.current = sparkles;
+
+    let time = 0;
+
     const render = () => {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      time++;
 
-      // 1. Update and Draw Rockets (Shooting up)
-      for (let i = rocketsRef.current.length - 1; i >= 0; i--) {
-        const r = rocketsRef.current[i];
-        r.y += r.vy;
+      // Deep dark cyber festive background with subtle trail
+      ctx.fillStyle = "rgba(7, 3, 13, 0.28)";
+      ctx.fillRect(0, 0, width, height);
 
-        // Sparkle tail for rocket
+      // 1. Draw floating ambient sparkles
+      for (const sp of ambientSparklesRef.current) {
+        sp.y += Math.sin(time * 0.02 + sp.angle) * sp.speed;
+        sp.x += Math.cos(time * 0.02 + sp.angle) * sp.speed;
+        sp.alpha += (Math.random() - 0.5) * 0.03;
+        sp.alpha = Math.max(0.1, Math.min(0.8, sp.alpha));
+
+        // Wrap around
+        if (sp.x < 0) sp.x = width;
+        if (sp.x > width) sp.x = 0;
+        if (sp.y < 0) sp.y = height;
+        if (sp.y > height) sp.y = 0;
+
         ctx.save();
-        ctx.beginPath();
-        ctx.arc(r.x, r.y, 3, 0, Math.PI * 2);
-        ctx.fillStyle = "#ffffff";
-        ctx.shadowBlur = 12;
-        ctx.shadowColor = r.color;
-        ctx.fill();
-
-        // Trail sparks
-        for (let t = 0; t < 2; t++) {
-          particlesRef.current.push({
-            x: r.x + (Math.random() - 0.5) * 4,
-            y: r.y + Math.random() * 8,
-            vx: (Math.random() - 0.5) * 0.8,
-            vy: Math.random() * 2 + 1,
-            color: r.color,
-            alpha: 0.8,
-            decay: 0.05,
-            size: Math.random() * 2 + 1,
-            flicker: false,
-          });
-        }
+        ctx.font = "bold 13px 'Courier New', monospace";
+        ctx.fillStyle = sp.color;
+        ctx.globalAlpha = sp.alpha;
+        ctx.shadowBlur = 8;
+        ctx.shadowColor = sp.color;
+        ctx.fillText(sp.char, sp.x, sp.y);
         ctx.restore();
-
-        if (r.y <= r.targetY) {
-          createExplosion(r.x, r.y, r.color, 70);
-          rocketsRef.current.splice(i, 1);
-        }
       }
 
-      // 2. Update and Draw Explosion Particles
-      const remaining: Particle[] = [];
-      for (const p of particlesRef.current) {
-        p.x += p.vx;
-        p.y += p.vy;
-        p.vy += 0.06; // Gravity
-        p.vx *= 0.98; // Drag
-        p.alpha -= p.decay;
-        p.size *= 0.985;
+      // 2. Render ASCII Coded Diya in Center
+      const isMobile = width < 640;
+      const cellW = isMobile ? 8.5 : 12;
+      const cellH = isMobile ? 12 : 16;
+      const rows = 31;
+      const cols = 41;
+      const centerCol = 20;
 
-        if (p.alpha > 0.03 && p.size > 0.4) {
-          ctx.save();
-          const displayAlpha = p.flicker && Math.random() > 0.3 ? p.alpha * 0.7 : p.alpha;
-          ctx.globalAlpha = Math.max(0, displayAlpha);
-          ctx.fillStyle = p.color;
-          ctx.shadowBlur = 14;
-          ctx.shadowColor = p.color;
-          ctx.beginPath();
-          ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-          ctx.fill();
-          ctx.restore();
-          remaining.push(p);
+      // Center the Diya slightly above middle
+      const startX = width / 2 - (cols * cellW) / 2;
+      const startY = height / 2 - (rows * cellH) / 2 - (isMobile ? 10 : 20);
+
+      // Flickering flame tip sway with sine wave
+      const flameSway = Math.sin(time * 0.08) * 1.8;
+
+      for (let r = 0; r < rows; r++) {
+        for (let c = 0; c < cols; c++) {
+          const dx = c - centerCol;
+          let drawChar = "";
+          let charColor = "";
+          let shadowColor = "";
+          let shadowBlur = 0;
+
+          // ================= FLAME (Rows 3 to 17) =================
+          if (r >= 3 && r <= 17) {
+            const fy = (r - 3) / 14; // 0 at top, 1 at base
+            // Flame sway offset (tip sways more)
+            const currentDx = dx - (1 - fy) * flameSway;
+            // Flame envelope width
+            const flameWidth = Math.sin(fy * Math.PI) * 4.6 + (1 - fy) * 0.6;
+
+            if (Math.abs(currentDx) <= flameWidth) {
+              const coreDist = Math.abs(currentDx) / flameWidth;
+
+              // Core flame: white / bright yellow
+              if (coreDist <= 0.38) {
+                drawChar = Math.random() > 0.3 ? "@" : "x";
+                charColor = "#ffffff";
+                shadowColor = "#fef08a";
+                shadowBlur = 14;
+              }
+              // Mid flame: gold / warm yellow
+              else if (coreDist <= 0.72) {
+                drawChar = GLYPHS[Math.floor((time + r * 3 + c) % GLYPHS.length)];
+                charColor = "#fbbf24";
+                shadowColor = "#f59e0b";
+                shadowBlur = 12;
+              }
+              // Outer flame / base: saffron / flame red
+              else {
+                drawChar = Math.random() > 0.4 ? "x" : "+";
+                charColor = fy > 0.8 ? "#ef4444" : "#f97316";
+                shadowColor = "#dc2626";
+                shadowBlur = 9;
+              }
+            }
+          }
+
+          // ================= DIYA RIM (Row 18) =================
+          else if (r === 18) {
+            if (Math.abs(dx) <= 17) {
+              drawChar = Math.abs(dx) === 17 ? "/" : dx % 2 === 0 ? "=" : "-";
+              charColor = "#fbbf24";
+              shadowColor = "#f59e0b";
+              shadowBlur = 10;
+            }
+          }
+
+          // ================= DIYA BOWL (Rows 19 to 26) =================
+          else if (r >= 19 && r <= 26) {
+            const by = (r - 18) / 8; // 0 to 1
+            const bowlW = 16.5 * Math.sqrt(Math.max(0, 1 - by * by * 0.75));
+
+            if (Math.abs(dx) <= bowlW) {
+              const edgeDist = Math.abs(dx) / bowlW;
+
+              // Outer bowl edge: gold & terracotta
+              if (edgeDist > 0.8) {
+                drawChar = Math.random() > 0.5 ? "#" : "x";
+                charColor = "#ea580c";
+                shadowColor = "#f97316";
+                shadowBlur = 8;
+              }
+              // Inner bowl fill: crimson red / maroon code characters
+              else {
+                drawChar = GLYPHS[Math.floor((time * 2 + r * 5 + c) % GLYPHS.length)];
+                charColor = (r + c) % 2 === 0 ? "#ef4444" : "#b91c1c";
+                shadowColor = "#991b1b";
+                shadowBlur = 6;
+              }
+            }
+          }
+
+          // ================= DIYA BASE STAND (Rows 27 to 29) =================
+          else if (r >= 27 && r <= 29) {
+            const standW = 6 - (r - 27) * 1.5;
+            if (Math.abs(dx) <= standW) {
+              drawChar = "_";
+              charColor = "#b45309";
+              shadowColor = "#78350f";
+              shadowBlur = 5;
+            }
+          }
+
+          // Draw the character if defined
+          if (drawChar) {
+            ctx.save();
+            ctx.font = `bold ${isMobile ? 11 : 14}px 'Courier New', monospace`;
+            ctx.fillStyle = charColor;
+            ctx.shadowBlur = shadowBlur;
+            ctx.shadowColor = shadowColor;
+            ctx.fillText(drawChar, startX + c * cellW, startY + r * cellH);
+            ctx.restore();
+          }
         }
       }
-      particlesRef.current = remaining;
 
       animFrameRef.current = requestAnimationFrame(render);
     };
@@ -191,249 +232,90 @@ export default function DiwaliIntro() {
       window.removeEventListener("resize", handleResize);
       if (animFrameRef.current) cancelAnimationFrame(animFrameRef.current);
     };
-  }, [createExplosion]);
-
-  // Periodic rockets & bursts when isOpen
-  useEffect(() => {
-    if (!isOpen) {
-      if (autoBurstTimerRef.current) clearInterval(autoBurstTimerRef.current);
-      return;
-    }
-
-    // Launch instant celebration salvos
-    launchRocket();
-    createExplosion(window.innerWidth * 0.25, window.innerHeight * 0.3, "#fbbf24", 60);
-    createExplosion(window.innerWidth * 0.75, window.innerHeight * 0.28, "#ef4444", 60);
-
-    const t1 = setTimeout(() => {
-      launchRocket();
-      launchRocket();
-    }, 300);
-
-    const t2 = setTimeout(() => {
-      createExplosion(window.innerWidth * 0.5, window.innerHeight * 0.2, "#a855f7", 75);
-    }, 700);
-
-    // Continuous celebration rockets every 650ms
-    autoBurstTimerRef.current = window.setInterval(() => {
-      launchRocket();
-      if (Math.random() > 0.35) launchRocket();
-    }, 650);
-
-    // Auto-minimize after 8 seconds
-    const autoCloseTimer = setTimeout(() => {
-      handleClose();
-    }, 8000);
-
-    return () => {
-      clearTimeout(t1);
-      clearTimeout(t2);
-      clearTimeout(autoCloseTimer);
-      if (autoBurstTimerRef.current) clearInterval(autoBurstTimerRef.current);
-    };
-  }, [isOpen, createExplosion, launchRocket]);
-
-  const handleClose = () => {
-    setIsOpen(false);
-    setShowFloatingDiya(true);
-  };
-
-  const handleReopen = () => {
-    setIsOpen(true);
-    setShowFloatingDiya(false);
-    // Extra celebration salvos on reopen
-    launchRocket();
-    launchRocket();
-    createExplosion(window.innerWidth * 0.5, window.innerHeight * 0.3, "#fbbf24", 80);
-  };
+  }, [isOpen]);
 
   return (
     <>
-      {/* High-priority Foreground Canvas - Placed at z-[105] so fireworks burst OVER the screen and around the card! */}
-      <canvas
-        ref={canvasRef}
-        className="fixed inset-0 pointer-events-none z-[105] w-full h-full"
-      />
-
-      {/* Main Diwali Greeting Modal */}
+      {/* Immersive Diwali Screen Overlay */}
       {isOpen && (
-        <div
-          className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/40 backdrop-blur-xs animate-in fade-in duration-300"
-          onClick={(e) => {
-            // Clicking anywhere on backdrop or card triggers a celebration burst at that spot!
-            createExplosion(e.clientX, e.clientY, undefined, 60);
-          }}
-        >
-          {/* Royal Festive Card */}
-          <div
-            className="relative w-full max-w-lg rounded-[2.5rem] bg-gradient-to-b from-[#181005]/95 via-[#100902]/98 to-[#090501]/95 p-8 sm:p-10 text-center border-2 border-amber-400/70 shadow-[0_0_80px_rgba(245,158,11,0.5),inset_0_1px_20px_rgba(251,191,36,0.15)] overflow-hidden animate-in zoom-in-95 duration-400"
-            onClick={(e) => {
-              e.stopPropagation();
-              createExplosion(e.clientX, e.clientY, undefined, 50);
-            }}
-          >
-            {/* Traditional Golden Corner Accents */}
-            <div className="absolute top-3 left-3 w-6 h-6 border-t-2 border-l-2 border-amber-400/80 rounded-tl-lg pointer-events-none" />
-            <div className="absolute top-3 right-3 w-6 h-6 border-t-2 border-r-2 border-amber-400/80 rounded-tr-lg pointer-events-none" />
-            <div className="absolute bottom-3 left-3 w-6 h-6 border-b-2 border-l-2 border-amber-400/80 rounded-bl-lg pointer-events-none" />
-            <div className="absolute bottom-3 right-3 w-6 h-6 border-b-2 border-r-2 border-amber-400/80 rounded-br-lg pointer-events-none" />
+        <div className="fixed inset-0 z-[100] flex flex-col justify-between items-center bg-[#07030d] select-none overflow-hidden animate-in fade-in duration-500">
+          {/* Background Canvas: Animated ASCII / Code Matrix Diya */}
+          <canvas
+            ref={canvasRef}
+            className="absolute inset-0 w-full h-full pointer-events-none"
+          />
 
-            {/* Glowing Golden Aura Backdrops */}
-            <div className="absolute -top-20 -left-20 w-52 h-52 bg-amber-500/25 rounded-full blur-3xl pointer-events-none animate-pulse" />
-            <div className="absolute -bottom-20 -right-20 w-52 h-52 bg-orange-600/25 rounded-full blur-3xl pointer-events-none animate-pulse" />
-
-            {/* Close Button */}
+          {/* Top Bar: Close Button & Sparkling Heading */}
+          <div className="relative z-10 w-full pt-8 sm:pt-12 px-6 flex flex-col items-center text-center">
+            {/* Close Button in top right */}
             <button
               type="button"
-              onClick={(e) => {
-                e.stopPropagation();
-                handleClose();
-              }}
-              className="absolute top-4 right-4 p-2.5 rounded-full bg-white/10 text-amber-200 hover:text-white hover:bg-white/20 border border-amber-400/30 transition-all cursor-pointer z-10 shadow-md"
+              onClick={handleClose}
+              className="absolute top-6 right-6 p-2 rounded-full bg-white/10 text-neutral-300 hover:text-white hover:bg-white/20 border border-white/15 transition-all cursor-pointer backdrop-blur-md"
               aria-label="Close Greeting"
             >
               <X size={18} />
             </button>
 
-            {/* Top Traditional Diya with 3D Glowing Flickering Flame */}
-            <div className="relative mb-5 flex justify-center items-center">
-              {/* Outer Radiant Glow */}
-              <div className="absolute -top-4 w-24 h-24 bg-amber-400/40 rounded-full blur-2xl animate-pulse" />
-              
-              <svg
-                viewBox="0 0 100 80"
-                className="w-24 h-20 drop-shadow-[0_0_30px_rgba(251,191,36,0.95)] relative z-10"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <defs>
-                  <radialGradient id="royalFlameGrad" cx="50%" cy="65%" r="50%">
-                    <stop offset="0%" stopColor="#ffffff" />
-                    <stop offset="30%" stopColor="#fef08a" />
-                    <stop offset="65%" stopColor="#f59e0b" />
-                    <stop offset="100%" stopColor="#dc2626" />
-                  </radialGradient>
-                  <linearGradient id="royalDiyaGrad" x1="0" y1="0" x2="1" y2="1">
-                    <stop offset="0%" stopColor="#fef08a" />
-                    <stop offset="35%" stopColor="#f59e0b" />
-                    <stop offset="70%" stopColor="#b45309" />
-                    <stop offset="100%" stopColor="#78350f" />
-                  </linearGradient>
-                  <linearGradient id="rimGrad" x1="0" y1="0" x2="1" y2="0">
-                    <stop offset="0%" stopColor="#fef08a" />
-                    <stop offset="50%" stopColor="#ffffff" />
-                    <stop offset="100%" stopColor="#fef08a" />
-                  </linearGradient>
-                </defs>
-
-                {/* Flame Aura Glow */}
-                <ellipse cx="50" cy="30" rx="18" ry="24" fill="#f59e0b" opacity="0.35" className="animate-pulse" />
-
-                {/* Flickering Outer Flame */}
-                <path
-                  d="M50 4 C45 18 36 25 36 36 C36 48 43 54 50 54 C57 54 64 48 64 36 C64 25 55 18 50 4 Z"
-                  fill="url(#royalFlameGrad)"
-                  className="animate-pulse"
-                />
-
-                {/* Inner Core Flame */}
-                <path
-                  d="M50 15 C47 23 42 29 42 36 C42 43 46 48 50 48 C54 48 58 43 58 36 C58 29 53 23 50 15 Z"
-                  fill="#ffffff"
-                  opacity="0.95"
-                />
-
-                {/* Diya Clay Base */}
-                <path
-                  d="M12 47 C24 70 76 70 88 47 C92 41 96 44 87 53 C74 68 26 68 13 53 C4 44 8 41 12 47 Z"
-                  fill="url(#royalDiyaGrad)"
-                  stroke="url(#rimGrad)"
-                  strokeWidth="2"
-                />
-
-                {/* Base Stand */}
-                <path
-                  d="M38 64 C43 71 57 71 62 64 Z"
-                  fill="#92400e"
-                  stroke="#fbbf24"
-                  strokeWidth="1.5"
-                />
-              </svg>
-            </div>
-
-            {/* Shubh Deepawali Decorative Badge */}
-            <div className="inline-flex items-center gap-3 px-5 py-1.5 rounded-full bg-gradient-to-r from-amber-500/10 via-amber-500/25 to-amber-500/10 border border-amber-400/50 text-amber-300 text-xs sm:text-sm font-extrabold tracking-[0.25em] uppercase mb-4 shadow-[0_0_20px_rgba(245,158,11,0.3)]">
-              <span className="text-amber-400">✦</span>
-              <span>SHUBH DEEPAWALI</span>
-              <span className="text-amber-400">✦</span>
-            </div>
-
-            {/* Royal Heading */}
-            <h2
-              className="font-serif text-4xl sm:text-5xl md:text-6xl font-black tracking-tight leading-none mb-3"
-              style={{
-                background: "linear-gradient(135deg, #fffbeb 0%, #fef08a 25%, #f59e0b 55%, #fbbf24 85%, #ffffff 100%)",
-                WebkitBackgroundClip: "text",
-                WebkitTextFillColor: "transparent",
-                filter: "drop-shadow(0 0 25px rgba(245, 158, 11, 0.5))",
-              }}
-            >
-              HAPPY DIWALI!
-            </h2>
-
-            {/* Institute Warm Wishes Subtitle */}
-            <p className="text-amber-200 font-bold text-sm sm:text-base tracking-wide mt-1">
-              Warm Wishes from RizeWorld Institute
-            </p>
-
-            {/* Heartfelt Wish Message */}
-            <p className="text-neutral-200 text-xs sm:text-sm mt-3.5 leading-relaxed max-w-md mx-auto font-medium">
-              May the divine festival of lights illuminate your path with infinite wisdom, happiness, and outstanding career success.
-            </p>
-
-            {/* Festive Diya Emoticons */}
-            <div className="flex justify-center items-center gap-3 my-4 text-lg">
-              <span className="animate-bounce" style={{ animationDuration: "1.8s" }}>🪔</span>
-              <span className="text-amber-300 text-xs tracking-widest font-bold">✨ FESTIVAL OF LIGHTS ✨</span>
-              <span className="animate-bounce" style={{ animationDuration: "1.8s", animationDelay: "0.3s" }}>🪔</span>
-            </div>
-
-            {/* Celebrate With Us Button */}
-            <div className="mt-6 flex flex-col sm:flex-row gap-3 justify-center items-center">
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  // Extra burst of fireworks on click
-                  createExplosion(window.innerWidth * 0.5, window.innerHeight * 0.4, "#fbbf24", 80);
-                  setTimeout(() => handleClose(), 600);
+            {/* Top Reel-Style Header: "HAPPY DIWALI ✦" */}
+            <div className="flex items-center justify-center gap-3">
+              <h1
+                className="font-mono text-3xl sm:text-5xl md:text-6xl font-black tracking-[0.22em] uppercase"
+                style={{
+                  background: "linear-gradient(90deg, #fde047 0%, #38bdf8 50%, #f59e0b 100%)",
+                  WebkitBackgroundClip: "text",
+                  WebkitTextFillColor: "transparent",
+                  filter: "drop-shadow(0 0 20px rgba(56, 189, 248, 0.5))",
                 }}
-                className="w-full sm:w-auto px-8 py-3.5 rounded-full bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 hover:from-amber-300 hover:to-yellow-300 text-neutral-950 font-extrabold text-sm shadow-[0_0_30px_rgba(251,191,36,0.65)] hover:scale-105 active:scale-95 transition-all cursor-pointer flex items-center justify-center gap-2 border border-amber-200"
               >
-                <span>Celebrate With Us</span>
-                <span className="text-base">🪔</span>
-              </button>
+                HAPPY DIWALI
+              </h1>
+              <span className="text-2xl sm:text-3xl text-cyan-400 animate-pulse font-mono">
+                ✦
+              </span>
             </div>
 
-            {/* Click to explode hint */}
-            <p className="text-[11px] text-amber-300/60 mt-3 font-medium">
-              Click anywhere for extra fireworks ✨
+            <p className="font-mono text-xs sm:text-sm text-amber-300/80 tracking-widest uppercase mt-2 font-semibold">
+              RizeWorld Institute of AI & Digital Marketing
+            </p>
+          </div>
+
+          {/* Spacer for center Canvas Diya */}
+          <div className="flex-1 pointer-events-none" />
+
+          {/* Bottom Bar: Festive Quote & Enter Button */}
+          <div className="relative z-10 w-full pb-8 sm:pb-12 px-6 flex flex-col items-center text-center">
+            <p className="font-mono text-xs sm:text-sm text-neutral-300 max-w-md mx-auto leading-relaxed mb-6 font-medium">
+              May your code run bug-free, your campaigns convert, and your career shine brighter than a thousand lamps. 🪔✨
+            </p>
+
+            <button
+              type="button"
+              onClick={handleClose}
+              className="group inline-flex items-center gap-2.5 px-8 py-3 rounded-full bg-linear-to-r from-amber-500 via-yellow-400 to-cyan-400 hover:from-amber-400 hover:to-cyan-300 text-neutral-950 font-mono font-black text-xs sm:text-sm tracking-wider uppercase shadow-[0_0_35px_rgba(251,191,36,0.6)] hover:scale-105 active:scale-95 transition-all cursor-pointer border border-white/30"
+            >
+              <span>Celebrate & Enter Site</span>
+              <span className="text-base group-hover:rotate-12 transition-transform">🪔</span>
+            </button>
+
+            <p className="font-mono text-[11px] text-neutral-500 mt-3">
+              Auto-entering in a few seconds...
             </p>
           </div>
         </div>
       )}
 
-      {/* Floating Corner Diya Widget to Replay */}
+      {/* Floating Corner Diya Widget to Replay celebration */}
       {showFloatingDiya && (
         <button
           type="button"
           onClick={handleReopen}
-          className="fixed bottom-24 right-5 md:right-8 z-40 group flex items-center gap-2.5 px-4 py-2.5 rounded-full bg-gradient-to-r from-neutral-950 via-neutral-900 to-neutral-950 border-2 border-amber-400/70 shadow-[0_0_30px_rgba(245,158,11,0.5)] text-amber-300 text-xs font-bold tracking-wide transition-all hover:scale-110 active:scale-95 cursor-pointer backdrop-blur-md"
-          title="Click to celebrate Diwali with fireworks!"
+          className="fixed bottom-24 right-5 md:right-8 z-40 group flex items-center gap-2.5 px-4 py-2 rounded-full bg-neutral-950/90 border border-cyan-400/50 shadow-[0_0_25px_rgba(56,189,248,0.4)] text-cyan-300 font-mono text-xs font-bold tracking-wider uppercase transition-all hover:scale-110 active:scale-95 cursor-pointer backdrop-blur-md"
+          title="Click to replay Diwali animation!"
         >
-          <span className="text-lg animate-bounce">🪔</span>
-          <span className="text-amber-200 font-bold group-hover:text-amber-100">Happy Diwali</span>
-          <Sparkles size={14} className="text-amber-400 animate-spin" style={{ animationDuration: "5s" }} />
+          <span className="text-base animate-bounce">🪔</span>
+          <span className="text-amber-200 group-hover:text-cyan-200">Happy Diwali</span>
+          <Sparkles size={13} className="text-cyan-400 animate-spin" style={{ animationDuration: "5s" }} />
         </button>
       )}
     </>
