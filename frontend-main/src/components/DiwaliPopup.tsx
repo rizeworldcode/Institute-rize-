@@ -25,8 +25,16 @@ interface FloatingDust {
   fadeSpeed: number;
 }
 
+// Ensures Diwali greeting shows only ONCE per website load / session
+let hasShownDiwaliInSession = false;
+
 export default function DiwaliPopup() {
-  const [isOpen, setIsOpen] = useState(true);
+  const [isOpen, setIsOpen] = useState(() => {
+    if (typeof window === "undefined") return false;
+    if (hasShownDiwaliInSession) return false;
+    hasShownDiwaliInSession = true;
+    return true;
+  });
   const [isClosing, setIsClosing] = useState(false);
 
   const containerRef = useRef<HTMLDivElement>(null);
