@@ -13,7 +13,7 @@ const roadmap = [
   { week: "Week 3-5", title: "Video Editing & Content Creation", desc: "Cinematic editing, Reels, Shorts, and YouTube content creation mastery with Premiere Pro & CapCut.", icon: Video, color: "orange" },
   { week: "Week 6-8", title: "Website Development & CMS", desc: "Build fast, modern, high-converting websites and landing pages with WordPress and Webflow.", icon: Code, color: "green" },
   { week: "Week 9-11", title: "Search Engine Optimization (SEO)", desc: "Rank #1 on Google with advanced on-page, off-page, technical, and AI-powered SEO.", icon: Search, color: "orange" },
-  { week: "Week 12-13", title: "Social Media Optimization (SMO)", desc: "Build and grow viral audiences across Instagram, Facebook, and LinkedIn with organic strategies.", icon: TrendingUp, color: "green" },
+  { week: "Week 12-13", title: "Social Media Marketing", desc: "Build and grow viral audiences across Instagram, Facebook, and LinkedIn with organic strategies.", icon: TrendingUp, color: "green" },
   { week: "Week 14-16", title: "Performance Marketing & Paid Ads", desc: "Run profitable Meta, Google, and YouTube ad campaigns with data-driven ROAS strategies.", icon: BarChart3, color: "orange" },
   { week: "Month 5-6", title: "2 Months Free Agency Internship", desc: "Work on live client accounts, active advertising budgets, real deliverables, and receive dedicated placement support.", icon: Briefcase, color: "green" },
 ];
