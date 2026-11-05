@@ -1,16 +1,96 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams, useParams, useNavigate } from "react-router-dom";
 import { 
   Plus, RotateCw, Search, Phone, Copy, Check, 
   Trash2, Edit2, FileText, Calendar, User, 
   Clock, TrendingUp, CheckCircle2, AlertCircle, 
   Building, Target, ChevronDown, PhoneCall, PhoneIncoming, PhoneOff, CalendarCheck, XCircle,
-  X, MessageSquare
+  X, MessageSquare, ArrowLeft, ArrowRight, Download
 } from "lucide-react";
 import { StudentLead, StudentLeadStats } from "../types";
 import { StudentLeadModal } from "../modals/StudentLeadModal";
 import { StudentLeadDetailsModal } from "../modals/StudentLeadDetailsModal";
 import { getApiUrl } from "../../../utils/api";
+
+export const CATEGORY_CONFIG = {
+  "total-leads": {
+    key: "total-leads",
+    title: "Total Leads",
+    badge: "All Registered",
+    description: "Complete directory of all registered inquiries, workshop participants, and student leads across all pipeline stages.",
+    themeColor: "from-[#1d4ed8] via-[#2563eb] to-[#3b82f6]",
+    bgLight: "bg-blue-50",
+    borderColor: "border-blue-200",
+    textColor: "text-blue-700",
+    icon: Building,
+  },
+  "new-inquiries": {
+    key: "new-inquiries",
+    title: "New Inquiries",
+    badge: "Fresh Prospects",
+    description: "Newly submitted student inquiries and workshop leads requiring initial dialer contact and profiling.",
+    themeColor: "from-sky-500 to-blue-600",
+    bgLight: "bg-sky-50",
+    borderColor: "border-sky-200",
+    textColor: "text-sky-700",
+    icon: Clock,
+  },
+  "in-follow-up": {
+    key: "in-follow-up",
+    title: "In Follow-up Leads",
+    badge: "Active Engagement",
+    description: "Active prospect leads undergoing follow-up calls, scheduled demo sessions, or completed demo evaluations.",
+    themeColor: "from-purple-600 to-indigo-600",
+    bgLight: "bg-purple-50",
+    borderColor: "border-purple-200",
+    textColor: "text-purple-700",
+    icon: TrendingUp,
+  },
+  "converted": {
+    key: "converted",
+    title: "Converted Students",
+    badge: "Enrolled",
+    description: "Leads who successfully enrolled into courses with registered admissions and fee records.",
+    themeColor: "from-emerald-600 to-teal-600",
+    bgLight: "bg-emerald-50",
+    borderColor: "border-emerald-200",
+    textColor: "text-emerald-700",
+    icon: CheckCircle2,
+  },
+  "lost-leads": {
+    key: "lost-leads",
+    title: "Lost Leads",
+    badge: "Dropped Inquiries",
+    description: "Inquiries marked as lost, not interested, or discontinued from the telecalling funnel.",
+    themeColor: "from-rose-600 to-pink-600",
+    bgLight: "bg-rose-50",
+    borderColor: "border-rose-200",
+    textColor: "text-rose-700",
+    icon: AlertCircle,
+  },
+} as const;
+
+export type CategoryKey = keyof typeof CATEGORY_CONFIG;
+export const CATEGORY_KEYS: CategoryKey[] = ["total-leads", "new-inquiries", "in-follow-up", "converted", "lost-leads"];
+
+export const getCategoryBaseLeads = (catKey: CategoryKey, leadsList: StudentLead[]) => {
+  switch (catKey) {
+    case "total-leads":
+      return leadsList;
+    case "new-inquiries":
+      return leadsList.filter((l) => l.status === "New Inquiry");
+    case "in-follow-up":
+      return leadsList.filter(
+        (l) => l.status === "In Follow-up" || l.status === "Demo Scheduled" || l.status === "Demo Completed"
+      );
+    case "converted":
+      return leadsList.filter((l) => l.status === "Converted");
+    case "lost-leads":
+      return leadsList.filter((l) => l.status === "Lost");
+    default:
+      return leadsList;
+  }
+};
 
 export function StudentLeadCrmTab() {
   const [leads, setLeads] = useState<StudentLead[]>(() => {
@@ -44,6 +124,22 @@ export function StudentLeadCrmTab() {
   });
 
   const [isRefreshing, setIsRefreshing] = useState(false);
+
+  // URL Routing & Category Subview
+  const { subview } = useParams<{ tab?: string; subview?: string }>();
+  const navigate = useNavigate();
+
+  const isCategoryActive = Boolean(subview && subview in CATEGORY_CONFIG);
+  const activeCategory = isCategoryActive ? (subview as CategoryKey) : null;
+  const currentCategory = activeCategory ? CATEGORY_CONFIG[activeCategory] : null;
+
+  // Individual category page specific filters
+  const [categorySearch, setCategorySearch] = useState("");
+  const [categorySourceFilter, setCategorySourceFilter] = useState("All Sources");
+  const [categoryCallFilter, setCategoryCallFilter] = useState("All");
+  const [categoryDateFilterMode, setCategoryDateFilterMode] = useState<"all" | "today" | "yesterday" | "7days" | "custom">("all");
+  const [categoryCustomDate, setCategoryCustomDate] = useState<string>("");
+  const [subStatusFilter, setSubStatusFilter] = useState<"All" | "In Follow-up" | "Demo Scheduled" | "Demo Completed">("All");
 
   // URL Query Params
   const [searchParams, setSearchParams] = useSearchParams();
@@ -504,24 +600,33 @@ export function StudentLeadCrmTab() {
 
     // Has scheduled or attended demo
     const hasDemo = Boolean(latestCall?.demo_date || (mode === "all" ? lead.demo_date : null));
-    const isDemo = latestOutcome === "Yes for Demo" || latestStatus === "Demo Scheduled" || latestStatus === "Demo Completed" || (mode === "all" && lead.demo_class_taken) || hasDemo;
+
+    // DEMO COMPLETED:
+    const isDemoCompleted = latestStatus === "Demo Completed" || latestOutcome === "Demo Completed" || Boolean(lead.demo_class_taken);
+
+    // YES FOR DEMO (DEMO SCHEDULED ONLY - strictly excludes Demo Completed):
+    const isDemo = !isDemoCompleted && (
+      latestOutcome === "Yes for Demo" ||
+      latestStatus === "Demo Scheduled" ||
+      hasDemo
+    );
 
     // Dropped / Lost / Refused
     const isNo = latestOutcome === "No" || interest === "Not Interested" || latestStatus === "Lost" || latestNotes.includes("not interest") || latestNotes.includes("refused") || latestNotes.includes("nahi karna");
 
     // Not Connected (strictly unanswered)
-    const isNotConnected = !isDemo && !isNo && (latestOutcome === "Not Connected" || (!latestOutcome && (
+    const isNotConnected = !isDemo && !isDemoCompleted && !isNo && (latestOutcome === "Not Connected" || (!latestOutcome && (
       latestNotes.includes("not connect") || latestNotes.includes("not receive") || latestNotes.includes("did not pick") || latestNotes.includes("didn't pick") || latestNotes.includes("switched off") || latestNotes.includes("ringing") || latestNotes.includes("unanswered")
     )));
 
     // Told Later / Callback / Busy schedule (student answered and said they are busy)
-    const isToldLater = !isDemo && !isNo && !isNotConnected && (
+    const isToldLater = !isDemo && !isDemoCompleted && !isNo && !isNotConnected && (
       latestOutcome === "Told Later" || latestNotes.includes("later") || latestNotes.includes("kal") || latestNotes.includes("baad me") || latestNotes.includes("busy") || latestNotes.includes("call back") || Boolean((latestCall?.next_followup_date || (mode === "all" ? lead.next_followup_date : null)) && latestStatus === "In Follow-up")
     );
 
-    // Connected: Spoke with counselor (Demo, Told Later, or explicit Connected or active follow-up/converted)
+    // Connected: Spoke with counselor (Demo Scheduled, Demo Completed, Told Later, or explicit Connected or active follow-up/converted)
     const isConnected = !isNo && !isNotConnected && (
-      latestOutcome === "Connected" || isDemo || isToldLater || latestStatus === "In Follow-up" || latestStatus === "Converted"
+      latestOutcome === "Connected" || isDemo || isDemoCompleted || isToldLater || latestStatus === "In Follow-up" || latestStatus === "Demo Scheduled" || latestStatus === "Demo Completed" || latestStatus === "Converted"
     );
 
     // Activity timestamp for sorting by latest follow-up / call activity
@@ -535,6 +640,7 @@ export function StudentLeadCrmTab() {
       latestStatus,
       latestNotes,
       isDemo,
+      isDemoCompleted,
       isNo,
       isNotConnected,
       isToldLater,
@@ -605,6 +711,7 @@ export function StudentLeadCrmTab() {
       // Match Call Response filter using the exact same latest follow-up outcome
       if (callResponseFilter !== "All") {
         if (!info) return false;
+        if (callResponseFilter === "Demo Completed" && !info.isDemoCompleted) return false;
         if (callResponseFilter === "Yes for Demo" && !info.isDemo) return false;
         if (callResponseFilter === "No" && !info.isNo) return false;
         if (callResponseFilter === "Told Later" && !info.isToldLater) return false;
@@ -629,6 +736,7 @@ export function StudentLeadCrmTab() {
     let connected = 0;
     let notConnected = 0;
     let yesForDemo = 0;
+    let demoCompleted = 0;
     let noLeads = 0;
     let toldLater = 0;
 
@@ -645,7 +753,8 @@ export function StudentLeadCrmTab() {
       // 2. Count each lead according to their LATEST follow-up/call outcome
       const info = getLeadLatestCallInfo(lead, dateFilterMode, customDate);
       if (info) {
-        if (info.isDemo) yesForDemo++;
+        if (info.isDemoCompleted) demoCompleted++;
+        else if (info.isDemo) yesForDemo++;
         if (info.isNo) noLeads++;
         if (info.isToldLater) toldLater++;
         if (info.isNotConnected) notConnected++;
@@ -658,6 +767,7 @@ export function StudentLeadCrmTab() {
       connected,
       notConnected,
       yesForDemo,
+      demoCompleted,
       noLeads,
       toldLater,
     };
@@ -667,6 +777,14 @@ export function StudentLeadCrmTab() {
   const renderCallOutcomeBadge = (lead: StudentLead) => {
     const info = getLeadLatestCallInfo(lead);
 
+    if (info?.isDemoCompleted) {
+      return (
+        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-teal-50 text-teal-700 border border-teal-200/80 shadow-2xs whitespace-nowrap shrink-0">
+          <CheckCircle2 size={11} className="text-teal-600 shrink-0" />
+          Demo Completed
+        </span>
+      );
+    }
     if (info?.isDemo) {
       return (
         <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-200/60 shadow-2xs whitespace-nowrap shrink-0">
@@ -755,6 +873,1002 @@ export function StudentLeadCrmTab() {
     }
   };
 
+  // Base leads list corresponding to the current active category
+  const categoryBaseLeads = useMemo(() => {
+    if (!activeCategory) return [];
+    return getCategoryBaseLeads(activeCategory, leads);
+  }, [activeCategory, leads]);
+
+  // Sub-status counts specifically for the "In Follow-up" category
+  const inFollowUpCounts = useMemo(() => {
+    const followUpLeads = leads.filter(
+      (l) => l.status === "In Follow-up" || l.status === "Demo Scheduled" || l.status === "Demo Completed"
+    );
+    return {
+      all: followUpLeads.length,
+      followUp: followUpLeads.filter((l) => l.status === "In Follow-up").length,
+      scheduled: followUpLeads.filter((l) => l.status === "Demo Scheduled").length,
+      completed: followUpLeads.filter((l) => l.status === "Demo Completed").length,
+    };
+  }, [leads]);
+
+  // Date label for individual category page
+  const categoryDateLabel = useMemo(() => {
+    if (categoryDateFilterMode === "today") return "Today";
+    if (categoryDateFilterMode === "yesterday") return "Yesterday";
+    if (categoryDateFilterMode === "7days") return "Last 7 Days";
+    if (categoryDateFilterMode === "custom" && categoryCustomDate) {
+      try {
+        const parts = categoryCustomDate.split("-");
+        if (parts.length === 3) {
+          const d = new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]));
+          return d.toLocaleDateString(undefined, { day: "numeric", month: "short", year: "numeric" });
+        }
+        return categoryCustomDate;
+      } catch {
+        return categoryCustomDate;
+      }
+    }
+    return "";
+  }, [categoryDateFilterMode, categoryCustomDate]);
+
+  // Filtered leads within the active individual category page
+  const categoryFilteredLeads = useMemo(() => {
+    if (!activeCategory) return [];
+    let list = categoryBaseLeads;
+
+    // Sub-status filter (only for In Follow-up category)
+    if (activeCategory === "in-follow-up" && subStatusFilter !== "All") {
+      list = list.filter((l) => l.status === subStatusFilter);
+    }
+
+    // Date filter
+    if (categoryDateFilterMode !== "all") {
+      list = list.filter((l) => {
+        const calls = getLeadCallsForDateFilter(l, categoryDateFilterMode, categoryCustomDate);
+        const isCreated = isDateMatching(l.created_at, categoryDateFilterMode, categoryCustomDate);
+        return calls.length > 0 || isCreated;
+      });
+    }
+
+    // Call response filter
+    if (categoryCallFilter !== "All") {
+      list = list.filter((l) => {
+        const info = getLeadLatestCallInfo(l, categoryDateFilterMode, categoryCustomDate);
+        if (!info) return false;
+        if (categoryCallFilter === "Connected") return info.isConnected;
+        if (categoryCallFilter === "Not Connected") return info.isNotConnected;
+        if (categoryCallFilter === "Yes for Demo") return info.isDemo;
+        if (categoryCallFilter === "Demo Completed") return info.isDemoCompleted;
+        if (categoryCallFilter === "Told Later") return info.isToldLater;
+        if (categoryCallFilter === "No") return info.isNo;
+        return true;
+      });
+    }
+
+    // Source filter
+    if (categorySourceFilter === "Workshop") {
+      list = list.filter((l) => l.is_from_workshop);
+    } else if (categorySourceFilter === "Other") {
+      list = list.filter((l) => !l.is_from_workshop);
+    }
+
+    // Search filter
+    if (categorySearch.trim() !== "") {
+      const q = categorySearch.toLowerCase().trim();
+      list = list.filter((lead) => {
+        const matchId = (lead.lead_ID || "").toLowerCase().includes(q);
+        const matchName = (lead.student_name || "").toLowerCase().includes(q);
+        const matchPhone = (lead.phone || "").toLowerCase().includes(q);
+        const matchSchool = (lead.school_name || "").toLowerCase().includes(q);
+        const matchWorkshopSchool = (lead.workshop_school_name || "").toLowerCase().includes(q);
+        const matchCourse = (lead.interested_course || "").toLowerCase().includes(q);
+        const matchEducation = (lead.current_education || "").toLowerCase().includes(q);
+        const matchStaff = (lead.followup_taken_by || "").toLowerCase().includes(q);
+        return matchId || matchName || matchPhone || matchSchool || matchWorkshopSchool || matchCourse || matchEducation || matchStaff;
+      });
+    }
+
+    // Sort by latest activity timestamp descending
+    return [...list].sort((a, b) => {
+      const timeA = getLeadLatestCallInfo(a, categoryDateFilterMode, categoryCustomDate)?.latestActivityTime || 0;
+      const timeB = getLeadLatestCallInfo(b, categoryDateFilterMode, categoryCustomDate)?.latestActivityTime || 0;
+      return timeB - timeA;
+    });
+  }, [
+    activeCategory,
+    categoryBaseLeads,
+    subStatusFilter,
+    categoryDateFilterMode,
+    categoryCustomDate,
+    categoryCallFilter,
+    categorySourceFilter,
+    categorySearch,
+  ]);
+
+  // Export currently filtered/selected leads to Excel CSV
+  const exportLeadsToExcel = (targetList: StudentLead[], titlePrefix: string = "Student_Leads") => {
+    if (!targetList || targetList.length === 0) {
+      alert("No student leads found matching current filter criteria to download.");
+      return;
+    }
+
+    const headers = [
+      "Lead ID",
+      "Registration Date",
+      "Student Name",
+      "Phone Number",
+      "WhatsApp Direct Link",
+      "Lead Status",
+      "Latest Call Response",
+      "Total Calls Made",
+      "Interested Course",
+      "Current Education",
+      "School / College Name",
+      "Lead Source",
+      "Workshop School Name",
+      "Workshop Date",
+      "Demo Class Status",
+      "Scheduled Demo Date & Time",
+      "Next Follow-up Date & Time",
+      "Follow-up Round",
+      "Follow-up Taken By / Counselor",
+      "Next Follow-up Assigned To",
+      "Interest Level",
+      "Problems Faced / Remarks",
+      "Latest Discussion Notes",
+      "Complete Follow-up Call History Timeline"
+    ];
+
+    const escapeCsv = (val: any): string => {
+      if (val === null || val === undefined) return '""';
+      const clean = String(val).replace(/"/g, '""');
+      return `"${clean}"`;
+    };
+
+    const mode = activeCategory ? categoryDateFilterMode : dateFilterMode;
+    const dateParam = activeCategory ? categoryCustomDate : customDate;
+
+    const rows = targetList.map((lead) => {
+      const info = getLeadLatestCallInfo(lead, mode, dateParam);
+
+      const rawPhone = (lead.phone || "").trim();
+      const phoneCell = rawPhone ? `="${rawPhone.replace(/"/g, '""')}"` : '""';
+      const cleanPhoneDigits = rawPhone.replace(/\D/g, "").slice(-10);
+      const waUrl = cleanPhoneDigits ? `https://wa.me/91${cleanPhoneDigits}` : "";
+
+      const regDate = lead.created_at ? new Date(lead.created_at).toLocaleString("en-IN") : "";
+      const demoDate = lead.demo_date ? new Date(lead.demo_date).toLocaleString("en-IN") : "";
+      const nextFollowup = lead.next_followup_date ? new Date(lead.next_followup_date).toLocaleString("en-IN") : "";
+      const workshopDate = lead.workshop_date ? new Date(lead.workshop_date).toLocaleDateString("en-IN") : "";
+
+      let callOutcome = "Connected";
+      if (info?.isDemoCompleted) callOutcome = "Demo Completed";
+      else if (info?.isDemo) callOutcome = "Yes for Demo";
+      else if (info?.isNo) callOutcome = "No / Dropped";
+      else if (info?.isToldLater) callOutcome = "Told Later";
+      else if (info?.isNotConnected) callOutcome = "Not Connected";
+      else if (info?.isConnected) callOutcome = "Connected";
+
+      const historyTimeline = Array.isArray(lead.followup_history) && lead.followup_history.length > 0
+        ? lead.followup_history
+            .map((h, i) => {
+              const dt = h.date ? new Date(h.date).toLocaleDateString("en-IN") : "";
+              const staff = h.taken_by || "Counselor";
+              const outcome = h.call_outcome || h.status || "";
+              const note = h.conversation ? `Notes: ${h.conversation.replace(/[\r\n]+/g, " ")}` : "";
+              const demo = h.demo_date ? `Demo: ${new Date(h.demo_date).toLocaleDateString("en-IN")}` : "";
+              return `[Call #${i + 1}] ${[dt, staff, outcome, note, demo].filter(Boolean).join(" - ")}`;
+            })
+            .join(" | ")
+        : (lead.conversation_notes ? `Notes: ${lead.conversation_notes.replace(/[\r\n]+/g, " ")}` : "No prior calls logged");
+
+      const latestNotes = (info?.latestNotes || lead.conversation_notes || "").replace(/[\r\n]+/g, " ").trim();
+
+      return [
+        escapeCsv(lead.lead_ID || ""),
+        escapeCsv(regDate),
+        escapeCsv(lead.student_name || ""),
+        phoneCell,
+        escapeCsv(waUrl),
+        escapeCsv(lead.status || "New Inquiry"),
+        escapeCsv(callOutcome),
+        escapeCsv(getLeadTotalCalls(lead)),
+        escapeCsv(lead.interested_course || "N/A"),
+        escapeCsv(lead.current_education || "N/A"),
+        escapeCsv(lead.school_name || "N/A"),
+        escapeCsv(lead.is_from_workshop ? "Workshop" : (lead.source_other || "Direct Walk-in")),
+        escapeCsv(lead.workshop_school_name || ""),
+        escapeCsv(workshopDate),
+        escapeCsv(lead.demo_class_taken ? "Demo Class Taken" : "No Demo Taken"),
+        escapeCsv(demoDate),
+        escapeCsv(nextFollowup),
+        escapeCsv(lead.followup_round || ""),
+        escapeCsv(lead.followup_taken_by || "Counselor"),
+        escapeCsv(lead.next_followup_by || ""),
+        escapeCsv(lead.interest_level || "Medium"),
+        escapeCsv((lead.remarks || lead.problems_faced || "").replace(/[\r\n]+/g, " ")),
+        escapeCsv(latestNotes),
+        escapeCsv(historyTimeline),
+      ].join(",");
+    });
+
+    const csvContent = "\uFEFF" + headers.join(",") + "\n" + rows.join("\n");
+
+    // Dynamic filename building according to current filters & date
+    const nameParts = [titlePrefix.replace(/\s+/g, "_")];
+    if (!activeCategory) {
+      if (callResponseFilter !== "All") nameParts.push(callResponseFilter.replace(/\s+/g, "_"));
+      if (statusFilter !== "All Statuses") nameParts.push(statusFilter.replace(/\s+/g, "_"));
+      if (sourceFilter !== "All Sources") nameParts.push(sourceFilter.replace(/\s+/g, "_"));
+      if (dateFilterMode !== "all") {
+        if (dateFilterMode === "today") nameParts.push("Today");
+        else if (dateFilterMode === "yesterday") nameParts.push("Yesterday");
+        else if (dateFilterMode === "7days") nameParts.push("Last_7_Days");
+        else if (dateFilterMode === "custom" && customDate) nameParts.push(customDate);
+      } else {
+        nameParts.push("All_Time");
+      }
+    } else {
+      if (subStatusFilter !== "All") nameParts.push(subStatusFilter.replace(/\s+/g, "_"));
+      if (categoryCallFilter !== "All") nameParts.push(categoryCallFilter.replace(/\s+/g, "_"));
+      if (categoryDateFilterMode !== "all") {
+        if (categoryDateFilterMode === "today") nameParts.push("Today");
+        else if (categoryDateFilterMode === "yesterday") nameParts.push("Yesterday");
+        else if (categoryDateFilterMode === "7days") nameParts.push("Last_7_Days");
+        else if (categoryDateFilterMode === "custom" && categoryCustomDate) nameParts.push(categoryCustomDate);
+      } else {
+        nameParts.push("All_Time");
+      }
+    }
+
+    const todayDateStr = new Date().toISOString().split("T")[0];
+    nameParts.push(todayDateStr);
+    const filename = `${nameParts.join("_")}.csv`;
+
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const downloadUrl = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = downloadUrl;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(downloadUrl);
+  };
+
+  // Shared renderer for the lead list: mobile cards (< md) and desktop table (>= md)
+  const renderLeadList = (targetList: StudentLead[], emptyTitle: string, emptySubtitle: string) => {
+    if (targetList.length === 0) {
+      return (
+        <div className="py-12 sm:py-16 text-center">
+          <div className="flex flex-col items-center justify-center gap-3 max-w-sm mx-auto">
+            <div className="w-12 h-12 rounded-2xl bg-neutral-100 text-neutral-400 flex items-center justify-center">
+              <Target size={24} />
+            </div>
+            <h4 className="text-base font-bold text-neutral-800">{emptyTitle}</h4>
+            <p className="text-xs text-neutral-400 text-center font-medium">
+              {emptySubtitle}
+            </p>
+            <button
+              onClick={() => {
+                setSelectedLeadForEdit(null);
+                setIsFormModalOpen(true);
+              }}
+              className="mt-2 px-4 py-2 bg-[#2563eb] hover:bg-blue-700 text-white rounded-full text-xs font-semibold transition-all shadow-xs flex items-center gap-1.5 cursor-pointer"
+            >
+              <Plus size={15} />
+              <span>Enter Lead</span>
+            </button>
+          </div>
+        </div>
+      );
+    }
+
+    return (
+      <>
+        {/* Mobile Lead Cards View (< md) */}
+        <div className="block md:hidden space-y-3 pt-3">
+          {targetList.map((lead) => {
+            const cleanPhone = (lead.phone || "").replace(/\D/g, "");
+            const isIdCopied = copiedId === `id-${lead._id}`;
+            const isPhoneCopied = copiedId === `phone-${lead._id}`;
+
+            let formattedFollowup = "Not scheduled";
+            let isFollowupDue = false;
+            if (lead.next_followup_date) {
+              try {
+                const d = new Date(lead.next_followup_date);
+                formattedFollowup = d.toLocaleDateString("en-US", {
+                  month: "short",
+                  day: "numeric",
+                  hour: "2-digit",
+                  minute: "2-digit",
+                });
+                isFollowupDue = d.getTime() <= Date.now() + 24 * 60 * 60 * 1000;
+              } catch {
+                formattedFollowup = lead.next_followup_date;
+              }
+            }
+
+            const createdDate = new Date(lead.created_at).toLocaleDateString("en-US");
+
+            return (
+              <div
+                key={lead._id}
+                className="p-3 sm:p-4 rounded-2xl border border-neutral-200/80 bg-white hover:border-blue-200 transition-all space-y-2.5 shadow-2xs"
+              >
+                {/* Header: Lead ID, Copy, Date, Status */}
+                <div className="flex items-center justify-between gap-1.5">
+                  <div className="flex items-center gap-1 font-mono text-xs font-bold text-neutral-700 min-w-0">
+                    <span className="whitespace-nowrap">{lead.lead_ID}</span>
+                    <button
+                      onClick={() => handleCopy(lead.lead_ID, `id-${lead._id}`)}
+                      className="p-0.5 text-neutral-400 hover:text-neutral-700 rounded cursor-pointer"
+                      title="Copy Lead ID"
+                    >
+                      {isIdCopied ? <Check size={11} className="text-emerald-600" /> : <Copy size={11} />}
+                    </button>
+                    <span className="text-[10px] text-neutral-400 font-sans font-normal whitespace-nowrap">
+                      ({createdDate})
+                    </span>
+                    <span className="text-[10px] text-purple-700 bg-purple-50 font-bold px-1.5 py-0.5 rounded border border-purple-200">
+                      {getLeadTotalCalls(lead)} {getLeadTotalCalls(lead) === 1 ? "call" : "calls"}
+                    </span>
+                  </div>
+                  <div className="shrink-0">
+                    {renderStatusBadge(lead.status)}
+                  </div>
+                </div>
+
+                {/* Student Info & Call Response Badge */}
+                <div className="flex items-center justify-between gap-2">
+                  <div
+                    onClick={() => setSelectedLeadForDetails(lead)}
+                    className="flex items-center gap-2 min-w-0 flex-1 cursor-pointer group"
+                  >
+                    <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-blue-100 to-indigo-100 text-blue-700 flex items-center justify-center text-xs font-bold shadow-2xs border border-blue-200/50 shrink-0">
+                      {lead.student_name ? lead.student_name.charAt(0).toUpperCase() : "L"}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <div className="font-bold text-neutral-900 group-hover:text-blue-600 transition-colors text-xs sm:text-sm truncate">
+                        {lead.student_name}
+                      </div>
+                      <div className="flex items-center gap-1 text-[10px] text-neutral-400 font-medium truncate mt-0.5">
+                        <span className="truncate">{lead.interested_course || "Course N/A"}</span>
+                        {lead.school_name && <span className="truncate">• {lead.school_name}</span>}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="shrink-0">
+                    {renderCallOutcomeBadge(lead)}
+                  </div>
+                </div>
+
+                {/* Scheduled Demo Badge on Mobile */}
+                {lead.demo_date && (lead.status === "Demo Scheduled" || lead.call_outcome === "Yes for Demo") && (
+                  <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200 text-amber-900 text-[11px] font-bold">
+                    <CalendarCheck size={12} className="text-amber-600 shrink-0" />
+                    <span className="truncate">
+                      Demo: {new Date(lead.demo_date).toLocaleString([], { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}
+                    </span>
+                  </div>
+                )}
+
+                {/* Quick Call & WhatsApp Action Row */}
+                {cleanPhone ? (
+                  <div className="grid grid-cols-2 gap-2 pt-2 border-t border-neutral-100">
+                    <a
+                      href={`tel:${cleanPhone}`}
+                      className="flex items-center justify-center gap-1.5 py-1.5 px-3 rounded-xl text-xs font-bold bg-blue-50 text-blue-700 hover:bg-blue-100 active:scale-98 border border-blue-200/60 transition-all cursor-pointer shadow-2xs"
+                    >
+                      <Phone size={12} className="text-blue-600" />
+                      <span>Call</span>
+                    </a>
+                    <a
+                      href={`https://wa.me/91${cleanPhone.slice(-10)}?text=${encodeURIComponent(
+                        `Hello ${lead.student_name}, greetings from RizeWorld Institute!`
+                      )}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center justify-center gap-1.5 py-1.5 px-3 rounded-xl text-xs font-bold bg-emerald-50 text-emerald-700 hover:bg-emerald-100 active:scale-98 border border-emerald-200/60 transition-all cursor-pointer shadow-2xs"
+                    >
+                      <MessageSquare size={12} className="text-emerald-600" />
+                      <span>WhatsApp</span>
+                    </a>
+                  </div>
+                ) : (
+                  <div className="text-center text-[10px] text-neutral-400 pt-1.5 border-t border-neutral-100 italic">
+                    No phone number available
+                  </div>
+                )}
+
+                {/* Bottom Toolbar Row */}
+                <div className="flex items-center justify-between gap-1.5 pt-1 text-xs">
+                  <div className="flex items-center gap-1.5 text-[10px] text-neutral-500 min-w-0 flex-1">
+                    <Calendar size={11} className={isFollowupDue ? "text-amber-600 shrink-0" : "text-neutral-400 shrink-0"} />
+                    <span className={`truncate ${isFollowupDue ? "text-amber-700 font-bold" : ""}`}>
+                      {formattedFollowup}
+                    </span>
+                    {(lead.next_followup_by || lead.followup_taken_by) && (
+                      <span className="text-neutral-400 truncate">
+                        • {lead.next_followup_by || lead.followup_taken_by}
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Toolbar Icons */}
+                  <div className="flex items-center gap-0.5 shrink-0">
+                    {cleanPhone && (
+                      <button
+                        onClick={() => handleCopy(lead.phone, `phone-${lead._id}`)}
+                        className="p-1.5 text-neutral-400 hover:text-neutral-700 hover:bg-neutral-100 rounded-lg transition-colors cursor-pointer"
+                        title="Copy Phone Number"
+                      >
+                        {isPhoneCopied ? <Check size={13} className="text-emerald-600" /> : <Copy size={13} />}
+                      </button>
+                    )}
+                    <button
+                      onClick={() => setSelectedLeadForDetails(lead)}
+                      className="p-1.5 text-neutral-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors cursor-pointer"
+                      title="View Full Details"
+                    >
+                      <FileText size={15} />
+                    </button>
+                    <button
+                      onClick={() => {
+                        setSelectedLeadForEdit(lead);
+                        setIsFormModalOpen(true);
+                      }}
+                      className="p-1.5 text-neutral-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors cursor-pointer"
+                      title="Edit Lead"
+                    >
+                      <Edit2 size={15} />
+                    </button>
+                    <button
+                      onClick={() => handleDeleteLead(lead)}
+                      className="p-1.5 text-neutral-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors cursor-pointer"
+                      title="Delete Lead"
+                    >
+                      <Trash2 size={15} />
+                    </button>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Desktop Full Table View (>= md) */}
+        <div className="hidden md:block overflow-x-auto min-h-[300px]">
+          <table className="w-full text-left border-collapse">
+            <thead>
+              <tr className="border-b border-neutral-100 text-neutral-400 text-[11px] uppercase tracking-wider font-bold">
+                <th className="py-4 px-4 font-semibold">LEAD ID</th>
+                <th className="py-4 px-4 font-semibold">STUDENT NAME</th>
+                <th className="py-4 px-4 font-semibold">CONTACT & WHATSAPP</th>
+                <th className="py-4 px-4 font-semibold">STATUS & RESPONSE</th>
+                <th className="py-4 px-4 font-semibold">NEXT FOLLOW-UP</th>
+                <th className="py-4 px-4 font-semibold">FOLLOW-UP BY</th>
+                <th className="py-4 px-4 text-right font-semibold">ACTIONS</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-neutral-100/70 text-xs font-medium">
+              {targetList.map((lead) => {
+                const cleanPhone = (lead.phone || "").replace(/\D/g, "");
+                const isIdCopied = copiedId === `id-${lead._id}`;
+                const isPhoneCopied = copiedId === `phone-${lead._id}`;
+
+                let formattedFollowup = "Not scheduled";
+                let isFollowupDue = false;
+                if (lead.next_followup_date) {
+                  try {
+                    const d = new Date(lead.next_followup_date);
+                    formattedFollowup = d.toLocaleDateString("en-US", {
+                      month: "short",
+                      day: "numeric",
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    });
+                    isFollowupDue = d.getTime() <= Date.now() + 24 * 60 * 60 * 1000;
+                  } catch {
+                    formattedFollowup = lead.next_followup_date;
+                  }
+                }
+
+                const createdDate = new Date(lead.created_at).toLocaleDateString("en-US");
+
+                return (
+                  <tr 
+                    key={lead._id}
+                    className="hover:bg-neutral-50/70 transition-colors group"
+                  >
+                    {/* UNIQUE ID */}
+                    <td className="py-4 px-4 font-mono text-neutral-500 font-semibold text-xs">
+                      <div className="flex items-center gap-1.5">
+                        <span>{lead.lead_ID}</span>
+                        <button
+                          onClick={() => handleCopy(lead.lead_ID, `id-${lead._id}`)}
+                          title="Copy Lead ID"
+                          className="text-neutral-400 hover:text-neutral-600 transition-colors p-0.5 cursor-pointer"
+                        >
+                          {isIdCopied ? <Check size={12} className="text-emerald-600" /> : <Copy size={12} />}
+                        </button>
+                      </div>
+                      <div className="text-[11px] text-neutral-400 mt-0.5 font-sans font-medium">
+                        {createdDate}
+                      </div>
+                    </td>
+
+                    {/* STUDENT NAME */}
+                    <td className="py-4 px-4">
+                      <div className="flex items-center gap-2.5">
+                        <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-blue-100 to-indigo-100 text-blue-700 flex items-center justify-center text-xs font-bold shadow-2xs border border-blue-200/50 shrink-0">
+                          {lead.student_name ? lead.student_name.charAt(0).toUpperCase() : "L"}
+                        </div>
+                        <div className="min-w-0">
+                          <div 
+                            onClick={() => setSelectedLeadForDetails(lead)}
+                            className="font-bold text-neutral-900 hover:text-blue-600 transition-colors cursor-pointer text-xs sm:text-sm truncate"
+                          >
+                            {lead.student_name}
+                          </div>
+                          {lead.interested_course && (
+                            <div className="text-[11px] text-neutral-400 font-medium truncate max-w-[200px]">
+                              {lead.interested_course}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </td>
+
+                    {/* CONTACT & WHATSAPP */}
+                    <td className="py-4 px-4">
+                      <div className="flex items-center gap-1.5 font-semibold text-neutral-800 text-xs">
+                        <Phone size={12} className="text-neutral-400 shrink-0" />
+                        <span>{lead.phone}</span>
+                        <button
+                          onClick={() => handleCopy(lead.phone, `phone-${lead._id}`)}
+                          title="Copy Phone"
+                          className="text-neutral-400 hover:text-neutral-600 transition-colors p-0.5 cursor-pointer"
+                        >
+                          {isPhoneCopied ? <Check size={12} className="text-emerald-600" /> : <Copy size={12} />}
+                        </button>
+                      </div>
+                      {cleanPhone && (
+                        <div className="mt-1">
+                          <a
+                            href={`https://wa.me/91${cleanPhone.slice(-10)}?text=${encodeURIComponent(`Hello ${lead.student_name}, greetings from RizeWorld Institute!`)}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-700 hover:text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded-full hover:bg-emerald-100 transition-colors border border-emerald-200/60 shadow-2xs"
+                          >
+                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                            <span>WA: {cleanPhone.slice(-10)}</span>
+                          </a>
+                        </div>
+                      )}
+                    </td>
+
+                    {/* STATUS & RESPONSE */}
+                    <td className="py-4 px-4">
+                      <div className="flex flex-col gap-1 items-start">
+                        {renderStatusBadge(lead.status)}
+                        {renderCallOutcomeBadge(lead)}
+                        {lead.demo_date && (lead.status === "Demo Scheduled" || lead.call_outcome === "Yes for Demo") && (
+                          <div className="inline-flex items-center gap-1 text-[10px] font-bold text-amber-800 bg-amber-50 px-2 py-0.5 rounded-md border border-amber-200 shadow-2xs mt-0.5 whitespace-nowrap">
+                            <CalendarCheck size={11} className="text-amber-600 shrink-0" />
+                            <span>Demo: {new Date(lead.demo_date).toLocaleString([], { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}</span>
+                          </div>
+                        )}
+                      </div>
+                    </td>
+
+                    {/* NEXT FOLLOW-UP DATE */}
+                    <td className="py-4 px-4">
+                      <div className={`flex items-center gap-1.5 text-xs font-bold ${
+                        isFollowupDue ? "text-amber-700" : "text-neutral-800"
+                      }`}>
+                        <Calendar size={13} className={`shrink-0 ${isFollowupDue ? "text-amber-600" : "text-neutral-400"}`} />
+                        <span>{formattedFollowup}</span>
+                      </div>
+                      <div className="mt-1 flex items-center gap-1.5 flex-wrap">
+                        {lead.followup_round && (
+                          <span className="text-[10px] font-bold text-purple-700 bg-purple-50 px-2 py-0.5 rounded-full border border-purple-200/60 shadow-2xs">
+                            {lead.followup_round}
+                          </span>
+                        )}
+                        <span className="text-[10px] font-bold text-neutral-600 bg-neutral-100 px-1.5 py-0.5 rounded-full border border-neutral-200 shadow-2xs">
+                          {getLeadTotalCalls(lead)} {getLeadTotalCalls(lead) === 1 ? "call" : "calls"}
+                        </span>
+                      </div>
+                    </td>
+
+                    {/* FOLLOW-UP BY */}
+                    <td className="py-4 px-4">
+                      <div className="inline-flex items-center gap-1.5 bg-neutral-100 px-2.5 py-1 rounded-full text-neutral-800 font-semibold text-xs border border-neutral-200/60 shadow-2xs">
+                        <User size={12} className="text-blue-600 shrink-0" />
+                        <span className="truncate max-w-[130px]">{lead.next_followup_by || lead.followup_taken_by || "Counselor"}</span>
+                      </div>
+                    </td>
+
+                    {/* ACTIONS */}
+                    <td className="py-4 px-4 text-right">
+                      <div className="flex items-center justify-end gap-1">
+                        <button
+                          onClick={() => setSelectedLeadForDetails(lead)}
+                          className="p-2 text-neutral-400 hover:text-blue-600 hover:bg-blue-50/80 rounded-xl transition-all cursor-pointer"
+                          title="View Full Lead Details"
+                        >
+                          <FileText size={16} />
+                        </button>
+                        <button
+                          onClick={() => {
+                            setSelectedLeadForEdit(lead);
+                            setIsFormModalOpen(true);
+                          }}
+                          className="p-2 text-neutral-400 hover:text-emerald-600 hover:bg-emerald-50/80 rounded-xl transition-all cursor-pointer"
+                          title="Edit / Record Follow-up"
+                        >
+                          <Edit2 size={16} />
+                        </button>
+                        <button
+                          onClick={() => handleDeleteLead(lead)}
+                          className="p-2 text-neutral-400 hover:text-rose-600 hover:bg-rose-50/80 rounded-xl transition-all cursor-pointer"
+                          title="Delete Lead"
+                        >
+                          <Trash2 size={16} />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      </>
+    );
+  };
+
+  // INDIVIDUAL CATEGORY PAGE VIEW (If subview matches one of the 5 top cards)
+  if (activeCategory && currentCategory) {
+    const isFollowUpCat = activeCategory === "in-follow-up";
+
+    return (
+      <div className="max-w-[1520px] mx-auto space-y-6 pb-12 animate-in fade-in duration-300">
+        {/* Top Navigation Row: Back Button & Category Switcher Tabs */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <button
+            onClick={() => {
+              setCategorySearch("");
+              setSubStatusFilter("All");
+              navigate("/admin/dashboard/student-crm");
+            }}
+            className="inline-flex items-center gap-2 text-neutral-700 hover:text-neutral-900 font-bold transition-all cursor-pointer bg-white px-4 py-2 rounded-full border border-neutral-200/80 shadow-xs hover:border-neutral-300 text-xs self-start"
+          >
+            <ArrowLeft size={16} />
+            <span>Back to Student Leads CRM</span>
+          </button>
+
+          {/* Quick Category Switcher Tabs */}
+          <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5 -mx-1 px-1">
+            {CATEGORY_KEYS.map((key) => {
+              const cfg = CATEGORY_CONFIG[key];
+              const isTabActive = key === activeCategory;
+              const tabCount = getCategoryBaseLeads(key, leads).length;
+              return (
+                <button
+                  key={key}
+                  onClick={() => {
+                    setCategorySearch("");
+                    setSubStatusFilter("All");
+                    navigate(`/admin/dashboard/student-crm/${key}`);
+                  }}
+                  className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer whitespace-nowrap flex items-center gap-1.5 shadow-2xs ${
+                    isTabActive
+                      ? "bg-neutral-900 text-white shadow-xs"
+                      : "bg-white text-neutral-600 hover:text-neutral-900 border border-neutral-200/80 hover:border-neutral-300"
+                  }`}
+                >
+                  <cfg.icon size={13} className={isTabActive ? "text-white" : cfg.textColor} />
+                  <span>{cfg.title}</span>
+                  <span className={`px-1.5 py-0.2 rounded-full text-[10px] ${
+                    isTabActive ? "bg-white/20 text-white font-black" : "bg-neutral-100 text-neutral-700 font-semibold"
+                  }`}>
+                    {tabCount}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Hero Category Banner */}
+        <div className="bg-white rounded-2xl sm:rounded-[26px] p-5 sm:p-7 border border-neutral-200/80 shadow-xs relative overflow-hidden">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div className="flex items-start sm:items-center gap-3.5">
+              <div className={`w-12 h-12 sm:w-14 sm:h-14 rounded-2xl ${currentCategory.bgLight} ${currentCategory.textColor} flex items-center justify-center shadow-xs border ${currentCategory.borderColor} shrink-0`}>
+                <currentCategory.icon size={26} />
+              </div>
+              <div>
+                <div className="flex items-center gap-2.5 flex-wrap">
+                  <h1 className="text-xl sm:text-2xl md:text-3xl font-black text-neutral-900 tracking-tight">
+                    {currentCategory.title}
+                  </h1>
+                  <span className={`px-2.5 py-0.5 rounded-full text-xs font-bold ${currentCategory.bgLight} ${currentCategory.textColor} border ${currentCategory.borderColor}`}>
+                    {categoryBaseLeads.length} {categoryBaseLeads.length === 1 ? "Lead" : "Leads"}
+                  </span>
+                  {categoryDateLabel && (
+                    <span className="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-blue-50 text-blue-700 border border-blue-200/60 flex items-center gap-1 shadow-2xs">
+                      <Calendar size={12} className="text-blue-600" /> {categoryDateLabel}
+                    </span>
+                  )}
+                </div>
+                <p className="text-xs sm:text-sm text-neutral-500 font-medium mt-1 max-w-2xl">
+                  {currentCategory.description}
+                </p>
+              </div>
+            </div>
+
+            {/* Quick Actions */}
+            <div className="flex items-center gap-2 shrink-0">
+              <button
+                onClick={() => {
+                  fetchLeads();
+                  fetchStats();
+                }}
+                disabled={isRefreshing}
+                className="p-2 sm:px-3 sm:py-2 rounded-full border border-neutral-200/80 bg-neutral-50 hover:bg-neutral-100 text-neutral-600 text-xs font-semibold transition-all flex items-center gap-1.5 cursor-pointer shadow-2xs"
+                title="Refresh leads list"
+              >
+                <RotateCw size={14} className={isRefreshing ? "animate-spin text-blue-600" : ""} />
+                <span className="hidden sm:inline">Refresh</span>
+              </button>
+              <button
+                onClick={() => exportLeadsToExcel(categoryFilteredLeads, currentCategory.title)}
+                className="px-3.5 py-2 sm:px-4 sm:py-2.5 rounded-full bg-emerald-600 hover:bg-emerald-700 text-white text-xs sm:text-sm font-bold transition-all shadow-xs flex items-center justify-center gap-1.5 cursor-pointer shadow-emerald-600/20 hover:shadow"
+                title={`Download Excel sheet of ${categoryFilteredLeads.length} leads in ${currentCategory.title}`}
+              >
+                <Download size={15} />
+                <span>Download Excel ({categoryFilteredLeads.length})</span>
+              </button>
+              <button
+                onClick={() => {
+                  setSelectedLeadForEdit(null);
+                  setIsFormModalOpen(true);
+                }}
+                className="px-4 py-2 sm:px-5 sm:py-2.5 rounded-full bg-[#2563eb] hover:bg-blue-700 text-white text-xs sm:text-sm font-bold transition-all shadow-xs shadow-blue-500/20 flex items-center justify-center gap-2 cursor-pointer hover:shadow"
+              >
+                <Plus size={16} />
+                <span>Enter Lead</span>
+              </button>
+            </div>
+          </div>
+
+          {/* Sub-status stage tabs (Only displayed on In Follow-up category page) */}
+          {isFollowUpCat && (
+            <div className="mt-5 pt-4 border-t border-neutral-100 flex items-center gap-2 flex-wrap">
+              <span className="text-xs font-bold text-neutral-500 uppercase tracking-wider mr-1">Stage Filter:</span>
+              {[
+                { label: "All In Follow-up", value: "All", count: inFollowUpCounts.all },
+                { label: "In Follow-up Only", value: "In Follow-up", count: inFollowUpCounts.followUp },
+                { label: "Demo Scheduled", value: "Demo Scheduled", count: inFollowUpCounts.scheduled },
+                { label: "Demo Completed", value: "Demo Completed", count: inFollowUpCounts.completed },
+              ].map((pill) => (
+                <button
+                  key={pill.value}
+                  onClick={() => setSubStatusFilter(pill.value as any)}
+                  className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer shadow-2xs flex items-center gap-1.5 ${
+                    subStatusFilter === pill.value
+                      ? "bg-purple-600 text-white shadow-xs"
+                      : "bg-purple-50 text-purple-700 hover:bg-purple-100 border border-purple-200/60"
+                  }`}
+                >
+                  <span>{pill.label}</span>
+                  <span className={`px-1.5 py-0.2 rounded-full text-[10px] ${
+                    subStatusFilter === pill.value ? "bg-white/20 text-white font-black" : "bg-purple-200/70 text-purple-800 font-semibold"
+                  }`}>
+                    {pill.count}
+                  </span>
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Entries Table Container */}
+        <div className="bg-white rounded-2xl sm:rounded-[26px] p-3.5 sm:p-6 md:p-7 border border-neutral-200/80 shadow-xs">
+          {/* Table Header Controls */}
+          <div className="flex flex-col gap-3 pb-4 sm:pb-6 border-b border-neutral-100">
+            <div className="flex items-center justify-between flex-wrap gap-2">
+              <div className="flex items-center gap-2.5 flex-wrap">
+                <h3 className="text-base sm:text-lg font-black text-neutral-900 tracking-tight">
+                  {currentCategory.title} Directory
+                </h3>
+                <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-neutral-100 text-neutral-600 border border-neutral-200/60">
+                  {categoryFilteredLeads.length} of {categoryBaseLeads.length} leads
+                </span>
+                {categoryDateLabel && (
+                  <span className="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-blue-50 text-blue-700 border border-blue-200/60 flex items-center gap-1 shadow-2xs">
+                    <Calendar size={12} className="text-blue-600" /> {categoryDateLabel}
+                  </span>
+                )}
+              </div>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => exportLeadsToExcel(categoryFilteredLeads, currentCategory.title)}
+                className="text-[11px] font-bold text-emerald-700 hover:text-emerald-800 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200/80 px-2.5 py-1 rounded-full transition-all cursor-pointer shadow-2xs flex items-center gap-1"
+                title={`Download Excel sheet of ${categoryFilteredLeads.length} leads in this category`}
+              >
+                <Download size={12} />
+                <span>Download Excel ({categoryFilteredLeads.length})</span>
+              </button>
+              {(categorySearch || categoryCallFilter !== "All" || categorySourceFilter !== "All Sources" || categoryDateFilterMode !== "all" || (isFollowUpCat && subStatusFilter !== "All")) && (
+                <button
+                  onClick={() => {
+                    setCategorySearch("");
+                    setCategoryCallFilter("All");
+                    setCategorySourceFilter("All Sources");
+                    setCategoryDateFilterMode("all");
+                    setCategoryCustomDate("");
+                    setSubStatusFilter("All");
+                  }}
+                  className="text-[11px] font-bold text-blue-600 hover:text-blue-800 bg-blue-50 hover:bg-blue-100 px-2.5 py-1 rounded-full transition-all cursor-pointer shadow-2xs"
+                >
+                  Reset Filters
+                </button>
+              )}
+            </div>
+            </div>
+
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 sm:gap-3">
+              {/* Search Bar */}
+              <div className="relative flex-1">
+                <Search size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-neutral-400" />
+                <input
+                  type="text"
+                  value={categorySearch}
+                  onChange={(e) => setCategorySearch(e.target.value)}
+                  placeholder={`Search ${currentCategory.title.toLowerCase()} by name, phone, school, course, ID...`}
+                  className="w-full pl-9 pr-8 py-2 rounded-full bg-neutral-50/80 border border-neutral-200/80 focus:bg-white focus:border-blue-500 focus:outline-none transition-all text-xs font-medium text-neutral-900 placeholder-neutral-400 shadow-2xs"
+                />
+                {categorySearch && (
+                  <button
+                    onClick={() => setCategorySearch("")}
+                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-700 p-1 cursor-pointer"
+                  >
+                    <X size={13} />
+                  </button>
+                )}
+              </div>
+
+              {/* Filter Dropdowns */}
+              <div className="grid grid-cols-3 sm:flex sm:items-center gap-1.5 sm:gap-2">
+                <div className="relative flex-1">
+                  <select
+                    value={categoryCallFilter}
+                    onChange={(e) => setCategoryCallFilter(e.target.value)}
+                    className="w-full appearance-none bg-neutral-50/80 border border-neutral-200/80 rounded-full pl-2.5 sm:pl-3.5 pr-6 py-2 text-[11px] sm:text-xs font-semibold text-neutral-700 hover:border-neutral-300 focus:outline-none cursor-pointer shadow-2xs truncate"
+                  >
+                    <option value="All">All Calls</option>
+                    <option value="Connected">📞 Connected</option>
+                    <option value="Yes for Demo">✨ Demo Sched.</option>
+                    <option value="Demo Completed">🎓 Demo Done</option>
+                    <option value="Told Later">⏳ Later</option>
+                    <option value="No">❌ Dropped</option>
+                    <option value="Not Connected">📵 Not Connected</option>
+                  </select>
+                  <ChevronDown size={11} className="absolute right-2 top-1/2 -translate-y-1/2 text-neutral-400 pointer-events-none" />
+                </div>
+
+                <div className="relative flex-1">
+                  <select
+                    value={categorySourceFilter}
+                    onChange={(e) => setCategorySourceFilter(e.target.value)}
+                    className="w-full appearance-none bg-neutral-50/80 border border-neutral-200/80 rounded-full pl-2.5 sm:pl-3.5 pr-6 py-2 text-[11px] sm:text-xs font-semibold text-neutral-700 hover:border-neutral-300 focus:outline-none cursor-pointer shadow-2xs truncate"
+                  >
+                    <option value="All Sources">All Source</option>
+                    <option value="Workshop">🏫 Workshop</option>
+                    <option value="Other">🌐 Other</option>
+                  </select>
+                  <ChevronDown size={11} className="absolute right-2 top-1/2 -translate-y-1/2 text-neutral-400 pointer-events-none" />
+                </div>
+
+                <div className="relative col-span-3 sm:col-span-1">
+                  <input
+                    type="date"
+                    value={categoryCustomDate}
+                    onChange={(e) => {
+                      if (e.target.value) {
+                        setCategoryDateFilterMode("custom");
+                        setCategoryCustomDate(e.target.value);
+                      } else {
+                        setCategoryDateFilterMode("all");
+                        setCategoryCustomDate("");
+                      }
+                    }}
+                    className={`w-full appearance-none rounded-full px-3 py-2 text-[11px] sm:text-xs font-semibold focus:outline-none cursor-pointer shadow-2xs border transition-all ${
+                      categoryDateFilterMode !== "all"
+                        ? "bg-blue-50 text-blue-900 border-blue-300 ring-2 ring-blue-100 font-bold"
+                        : "bg-neutral-50/80 text-neutral-600 border-neutral-200/80 hover:border-neutral-300"
+                    }`}
+                    title="Filter leads by specific date"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Render Leads List using the shared helper */}
+          {renderLeadList(
+            categoryFilteredLeads,
+            `No ${currentCategory.title} Found`,
+            categorySearch || categoryCallFilter !== "All" || categorySourceFilter !== "All Sources" || categoryDateFilterMode !== "all" || (isFollowUpCat && subStatusFilter !== "All")
+              ? "No leads matched your filter criteria in this category. Try resetting filters."
+              : `Currently there are no registered student inquiries in ${currentCategory.title}.`
+          )}
+
+          {/* Table Footer with Summary */}
+          <div className="pt-4 border-t border-neutral-100 flex flex-col sm:flex-row items-center justify-between text-xs text-neutral-500 font-medium gap-2 mt-2">
+            <div className="flex items-center gap-3">
+              <span>
+                Showing <span className="font-bold text-neutral-900">{categoryFilteredLeads.length}</span> of{" "}
+                <span className="font-bold text-neutral-900">{categoryBaseLeads.length}</span> {currentCategory.title}
+              </span>
+              <button
+                onClick={() => exportLeadsToExcel(categoryFilteredLeads, currentCategory.title)}
+                className="text-emerald-700 hover:text-emerald-800 font-bold flex items-center gap-1 text-[11px] hover:underline cursor-pointer"
+              >
+                <Download size={12} />
+                <span>Download Excel</span>
+              </button>
+            </div>
+            <button
+              onClick={() => {
+                setCategorySearch("");
+                setSubStatusFilter("All");
+                navigate("/admin/dashboard/student-crm");
+              }}
+              className="text-blue-600 hover:text-blue-800 font-bold cursor-pointer text-xs flex items-center gap-1"
+            >
+              <span>View all student leads in CRM overview</span>
+              <ArrowRight size={13} />
+            </button>
+          </div>
+        </div>
+
+        {/* MODALS */}
+        <StudentLeadModal
+          isOpen={isFormModalOpen}
+          onClose={() => {
+            setIsFormModalOpen(false);
+            setSelectedLeadForEdit(null);
+          }}
+          onSave={handleSaveLead}
+          lead={selectedLeadForEdit}
+        />
+
+        <StudentLeadDetailsModal
+          lead={selectedLeadForDetails}
+          onClose={() => setSelectedLeadForDetails(null)}
+          onEdit={(lead) => {
+            setSelectedLeadForEdit(lead);
+            setIsFormModalOpen(true);
+          }}
+          onLeadUpdated={(updated) => {
+            setSelectedLeadForDetails(updated);
+            setLeads((prev) => {
+              const next = prev.map((l) => (l._id === updated._id ? updated : l));
+              saveLeadsToCacheAndNotify(next);
+              return next;
+            });
+          }}
+        />
+      </div>
+    );
+  }
+
   return (
     <div className="max-w-[1520px] mx-auto space-y-6 pb-12 animate-in fade-in duration-300">
       {/* Top Breadcrumb & Page Header */}
@@ -779,7 +1893,7 @@ export function StudentLeadCrmTab() {
         </div>
 
         {/* Action Buttons */}
-        <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
+        <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto flex-wrap">
           <button
             onClick={() => {
               fetchLeads();
@@ -790,6 +1904,16 @@ export function StudentLeadCrmTab() {
           >
             <RotateCw size={14} className={isRefreshing ? "animate-spin text-blue-600" : ""} />
             <span>Refresh</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => exportLeadsToExcel(filteredLeads, "Student_Leads")}
+            className="flex-1 sm:flex-initial px-3.5 py-2 sm:px-4 sm:py-2.5 rounded-full bg-emerald-600 hover:bg-emerald-700 text-white text-xs sm:text-sm font-bold transition-all shadow-xs flex items-center justify-center gap-1.5 cursor-pointer shadow-emerald-600/20 hover:shadow"
+            title={`Download Excel sheet of ${filteredLeads.length} currently filtered leads`}
+          >
+            <Download size={15} />
+            <span>Download Excel ({filteredLeads.length})</span>
           </button>
 
           <button
@@ -805,10 +1929,16 @@ export function StudentLeadCrmTab() {
         </div>
       </div>
 
-      {/* 5 KPI Stat Cards (Smooth Horizontal Swipe on Mobile, Full Grid on Desktop) */}
+      {/* 5 KPI Stat Cards (Smooth Horizontal Swipe on Mobile, Full Grid on Desktop) - CLICKABLE */}
       <div className="flex overflow-x-auto no-scrollbar gap-2.5 sm:gap-4 pb-1 -mx-2 px-2 sm:mx-0 sm:px-0 sm:grid sm:grid-cols-3 lg:grid-cols-5 snap-x">
         {/* 1. Total Leads (Primary Blue Gradient matching Dashboard Card 1) */}
-        <div className="min-w-[145px] max-w-[170px] sm:min-w-0 sm:max-w-none snap-start shrink-0 sm:shrink bg-gradient-to-br from-[#1d4ed8] via-[#2563eb] to-[#3b82f6] text-white rounded-2xl sm:rounded-[26px] p-4 sm:p-6 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-300 relative overflow-hidden group flex flex-col justify-between min-h-[125px] sm:min-h-[165px]">
+        <div 
+          onClick={() => navigate("/admin/dashboard/student-crm/total-leads")}
+          role="button"
+          tabIndex={0}
+          title="Click to view all registered leads"
+          className="cursor-pointer select-none min-w-[145px] max-w-[170px] sm:min-w-0 sm:max-w-none snap-start shrink-0 sm:shrink bg-gradient-to-br from-[#1d4ed8] via-[#2563eb] to-[#3b82f6] text-white rounded-2xl sm:rounded-[26px] p-4 sm:p-6 shadow-sm hover:shadow-md hover:-translate-y-1 active:scale-[0.98] transition-all duration-300 relative overflow-hidden group flex flex-col justify-between min-h-[135px] sm:min-h-[175px]"
+        >
           <div className="flex items-center justify-between mb-2">
             <span className="text-[11px] sm:text-xs font-semibold text-blue-100 uppercase tracking-wider">Total Leads</span>
             <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-white text-blue-600 flex items-center justify-center shadow-xs">
@@ -825,13 +1955,22 @@ export function StudentLeadCrmTab() {
               </span>
             </div>
           </div>
-          <div className="text-[11px] sm:text-xs text-blue-100 font-medium opacity-90 truncate">
-            {dateLabel ? `Active leads on ${dateLabel}` : "All registered inquiries"}
+          <div className="flex items-center justify-between text-[11px] sm:text-xs text-blue-100 font-medium opacity-90 truncate mt-2 pt-2 border-t border-white/20">
+            <span className="truncate">{dateLabel ? `Active on ${dateLabel}` : "All inquiries"}</span>
+            <span className="shrink-0 text-white font-bold group-hover:translate-x-1 transition-transform flex items-center gap-0.5">
+              View <ArrowRight size={12} />
+            </span>
           </div>
         </div>
 
         {/* 2. New Inquiries */}
-        <div className="min-w-[145px] max-w-[170px] sm:min-w-0 sm:max-w-none snap-start shrink-0 sm:shrink bg-white rounded-2xl sm:rounded-[26px] p-4 sm:p-6 border border-neutral-200/80 shadow-xs hover:border-neutral-300 hover:shadow-sm hover:-translate-y-1 transition-all duration-300 relative overflow-hidden group flex flex-col justify-between min-h-[125px] sm:min-h-[165px]">
+        <div 
+          onClick={() => navigate("/admin/dashboard/student-crm/new-inquiries")}
+          role="button"
+          tabIndex={0}
+          title="Click to view fresh new inquiries"
+          className="cursor-pointer select-none min-w-[145px] max-w-[170px] sm:min-w-0 sm:max-w-none snap-start shrink-0 sm:shrink bg-white rounded-2xl sm:rounded-[26px] p-4 sm:p-6 border border-neutral-200/80 shadow-xs hover:border-neutral-300 hover:shadow-md hover:-translate-y-1 active:scale-[0.98] transition-all duration-300 relative overflow-hidden group flex flex-col justify-between min-h-[135px] sm:min-h-[175px]"
+        >
           <div className="flex items-center justify-between mb-2">
             <span className="text-[11px] sm:text-xs font-semibold text-neutral-500 uppercase tracking-wider">New Inquiries</span>
             <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-sky-50 text-sky-600 flex items-center justify-center shadow-2xs">
@@ -845,13 +1984,22 @@ export function StudentLeadCrmTab() {
               </span>
             </div>
           </div>
-          <div className="text-[11px] sm:text-xs text-neutral-400 font-medium truncate">
-            {dateLabel ? `New on ${dateLabel}` : "Fresh prospects"}
+          <div className="flex items-center justify-between text-[11px] sm:text-xs text-neutral-400 font-medium truncate mt-2 pt-2 border-t border-neutral-100">
+            <span className="truncate">{dateLabel ? `New on ${dateLabel}` : "Fresh prospects"}</span>
+            <span className="shrink-0 text-sky-600 font-bold group-hover:translate-x-1 transition-transform flex items-center gap-0.5">
+              View <ArrowRight size={12} />
+            </span>
           </div>
         </div>
 
         {/* 3. In Follow-up */}
-        <div className="min-w-[145px] max-w-[170px] sm:min-w-0 sm:max-w-none snap-start shrink-0 sm:shrink bg-white rounded-2xl sm:rounded-[26px] p-4 sm:p-6 border border-neutral-200/80 shadow-xs hover:border-neutral-300 hover:shadow-sm hover:-translate-y-1 transition-all duration-300 relative overflow-hidden group flex flex-col justify-between min-h-[125px] sm:min-h-[165px]">
+        <div 
+          onClick={() => navigate("/admin/dashboard/student-crm/in-follow-up")}
+          role="button"
+          tabIndex={0}
+          title="Click to view active follow-up leads"
+          className="cursor-pointer select-none min-w-[145px] max-w-[170px] sm:min-w-0 sm:max-w-none snap-start shrink-0 sm:shrink bg-white rounded-2xl sm:rounded-[26px] p-4 sm:p-6 border border-neutral-200/80 shadow-xs hover:border-neutral-300 hover:shadow-md hover:-translate-y-1 active:scale-[0.98] transition-all duration-300 relative overflow-hidden group flex flex-col justify-between min-h-[135px] sm:min-h-[175px]"
+        >
           <div className="flex items-center justify-between mb-2">
             <span className="text-[11px] sm:text-xs font-semibold text-neutral-500 uppercase tracking-wider">In Follow-up</span>
             <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-purple-50 text-purple-600 flex items-center justify-center shadow-2xs">
@@ -865,13 +2013,22 @@ export function StudentLeadCrmTab() {
               </span>
             </div>
           </div>
-          <div className="text-[11px] sm:text-xs text-neutral-400 font-medium truncate">
-            {dateLabel ? `In follow-up on ${dateLabel}` : "Active engagement"}
+          <div className="flex items-center justify-between text-[11px] sm:text-xs text-neutral-400 font-medium truncate mt-2 pt-2 border-t border-neutral-100">
+            <span className="truncate">{dateLabel ? `In follow-up on ${dateLabel}` : "Active engagement"}</span>
+            <span className="shrink-0 text-purple-600 font-bold group-hover:translate-x-1 transition-transform flex items-center gap-0.5">
+              View <ArrowRight size={12} />
+            </span>
           </div>
         </div>
 
         {/* 4. Converted */}
-        <div className="min-w-[145px] max-w-[170px] sm:min-w-0 sm:max-w-none snap-start shrink-0 sm:shrink bg-white rounded-2xl sm:rounded-[26px] p-4 sm:p-6 border border-neutral-200/80 shadow-xs hover:border-neutral-300 hover:shadow-sm hover:-translate-y-1 transition-all duration-300 relative overflow-hidden group flex flex-col justify-between min-h-[125px] sm:min-h-[165px]">
+        <div 
+          onClick={() => navigate("/admin/dashboard/student-crm/converted")}
+          role="button"
+          tabIndex={0}
+          title="Click to view enrolled converted students"
+          className="cursor-pointer select-none min-w-[145px] max-w-[170px] sm:min-w-0 sm:max-w-none snap-start shrink-0 sm:shrink bg-white rounded-2xl sm:rounded-[26px] p-4 sm:p-6 border border-neutral-200/80 shadow-xs hover:border-neutral-300 hover:shadow-md hover:-translate-y-1 active:scale-[0.98] transition-all duration-300 relative overflow-hidden group flex flex-col justify-between min-h-[135px] sm:min-h-[175px]"
+        >
           <div className="flex items-center justify-between mb-2">
             <span className="text-[11px] sm:text-xs font-semibold text-neutral-500 uppercase tracking-wider">Converted</span>
             <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center shadow-2xs">
@@ -885,13 +2042,22 @@ export function StudentLeadCrmTab() {
               </span>
             </div>
           </div>
-          <div className="text-[11px] sm:text-xs text-neutral-400 font-medium truncate">
-            {dateLabel ? `Converted on ${dateLabel}` : "Enrolled students"}
+          <div className="flex items-center justify-between text-[11px] sm:text-xs text-neutral-400 font-medium truncate mt-2 pt-2 border-t border-neutral-100">
+            <span className="truncate">{dateLabel ? `Converted on ${dateLabel}` : "Enrolled students"}</span>
+            <span className="shrink-0 text-emerald-600 font-bold group-hover:translate-x-1 transition-transform flex items-center gap-0.5">
+              View <ArrowRight size={12} />
+            </span>
           </div>
         </div>
 
         {/* 5. Lost Leads */}
-        <div className="min-w-[145px] max-w-[170px] sm:min-w-0 sm:max-w-none snap-start shrink-0 sm:shrink bg-white rounded-2xl sm:rounded-[26px] p-4 sm:p-6 border border-neutral-200/80 shadow-xs hover:border-neutral-300 hover:shadow-sm hover:-translate-y-1 transition-all duration-300 relative overflow-hidden group flex flex-col justify-between min-h-[125px] sm:min-h-[165px]">
+        <div 
+          onClick={() => navigate("/admin/dashboard/student-crm/lost-leads")}
+          role="button"
+          tabIndex={0}
+          title="Click to view dropped inquiries"
+          className="cursor-pointer select-none min-w-[145px] max-w-[170px] sm:min-w-0 sm:max-w-none snap-start shrink-0 sm:shrink bg-white rounded-2xl sm:rounded-[26px] p-4 sm:p-6 border border-neutral-200/80 shadow-xs hover:border-neutral-300 hover:shadow-md hover:-translate-y-1 active:scale-[0.98] transition-all duration-300 relative overflow-hidden group flex flex-col justify-between min-h-[135px] sm:min-h-[175px]"
+        >
           <div className="flex items-center justify-between mb-2">
             <span className="text-[11px] sm:text-xs font-semibold text-neutral-500 uppercase tracking-wider">Lost Leads</span>
             <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-rose-50 text-rose-600 flex items-center justify-center shadow-2xs">
@@ -905,8 +2071,11 @@ export function StudentLeadCrmTab() {
               </span>
             </div>
           </div>
-          <div className="text-[11px] sm:text-xs text-neutral-400 font-medium truncate">
-            {dateLabel ? `Dropped on ${dateLabel}` : "Dropped inquiries"}
+          <div className="flex items-center justify-between text-[11px] sm:text-xs text-neutral-400 font-medium truncate mt-2 pt-2 border-t border-neutral-100">
+            <span className="truncate">{dateLabel ? `Dropped on ${dateLabel}` : "Dropped inquiries"}</span>
+            <span className="shrink-0 text-rose-600 font-bold group-hover:translate-x-1 transition-transform flex items-center gap-0.5">
+              View <ArrowRight size={12} />
+            </span>
           </div>
         </div>
       </div>
@@ -1027,10 +2196,20 @@ export function StudentLeadCrmTab() {
                 <X size={11} /> Clear Date
               </button>
             )}
+
+            <button
+              type="button"
+              onClick={() => exportLeadsToExcel(filteredLeads, callResponseFilter !== "All" ? callResponseFilter : "Calling_Response")}
+              className="px-2.5 py-1 rounded-full text-[11px] font-bold bg-emerald-600 hover:bg-emerald-700 text-white transition-all cursor-pointer shadow-2xs flex items-center gap-1 shrink-0 ml-auto sm:ml-0"
+              title={`Download Excel sheet of ${filteredLeads.length} leads matching current call & date selection`}
+            >
+              <Download size={11} />
+              <span>Download Excel ({filteredLeads.length})</span>
+            </button>
           </div>
         </div>
 
-        <div className="flex overflow-x-auto no-scrollbar gap-2.5 sm:gap-3.5 pb-1 -mx-2 px-2 sm:mx-0 sm:px-0 sm:grid sm:grid-cols-3 lg:grid-cols-6 snap-x">
+        <div className="flex overflow-x-auto no-scrollbar gap-2.5 sm:gap-3.5 pb-1 -mx-2 px-2 sm:mx-0 sm:px-0 sm:grid sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 snap-x">
           {/* 1. Total Calls */}
           <div 
             onClick={() => setCallResponseFilter("All")}
@@ -1100,7 +2279,7 @@ export function StudentLeadCrmTab() {
             </div>
           </div>
 
-          {/* 4. Yes for Demo */}
+          {/* 4. Yes for Demo (Demo Scheduled Only) */}
           <div 
             onClick={() => setCallResponseFilter(callResponseFilter === "Yes for Demo" ? "All" : "Yes for Demo")}
             className={`cursor-pointer min-w-[135px] max-w-[155px] sm:min-w-0 sm:max-w-none snap-start shrink-0 sm:shrink bg-white rounded-2xl sm:rounded-[24px] p-3.5 sm:p-5 border shadow-xs hover:shadow-sm hover:-translate-y-1 transition-all duration-300 relative overflow-hidden group flex flex-col justify-between min-h-[115px] sm:min-h-[145px] ${
@@ -1119,11 +2298,34 @@ export function StudentLeadCrmTab() {
               </span>
             </div>
             <div className="text-[10px] sm:text-xs text-neutral-400 font-medium truncate">
-              {dateLabel ? `Demos on ${dateLabel}` : "Demo booked"}
+              {dateLabel ? `Scheduled on ${dateLabel}` : "Demo scheduled"}
             </div>
           </div>
 
-          {/* 5. Told Later */}
+          {/* 5. Demo Completed (NEW DEDICATED CARD) */}
+          <div 
+            onClick={() => setCallResponseFilter(callResponseFilter === "Demo Completed" ? "All" : "Demo Completed")}
+            className={`cursor-pointer min-w-[135px] max-w-[155px] sm:min-w-0 sm:max-w-none snap-start shrink-0 sm:shrink bg-white rounded-2xl sm:rounded-[24px] p-3.5 sm:p-5 border shadow-xs hover:shadow-sm hover:-translate-y-1 transition-all duration-300 relative overflow-hidden group flex flex-col justify-between min-h-[115px] sm:min-h-[145px] ${
+              callResponseFilter === "Demo Completed" ? "border-teal-500 ring-2 ring-teal-200" : "border-neutral-200/80 hover:border-neutral-300"
+            }`}
+          >
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-[10px] sm:text-[11px] font-semibold text-neutral-500 uppercase tracking-wider">Demo Completed</span>
+              <div className="w-7 h-7 sm:w-9 sm:h-9 rounded-full bg-teal-50 text-teal-600 flex items-center justify-center shadow-2xs">
+                <CheckCircle2 size={15} className="sm:w-[17px] sm:h-[17px]" />
+              </div>
+            </div>
+            <div className="my-auto">
+              <span className="text-xl sm:text-2xl md:text-3xl font-black text-teal-600 tracking-tight">
+                {callStats.demoCompleted}
+              </span>
+            </div>
+            <div className="text-[10px] sm:text-xs text-neutral-400 font-medium truncate">
+              {dateLabel ? `Completed on ${dateLabel}` : "Demo attended"}
+            </div>
+          </div>
+
+          {/* 6. Told Later */}
           <div 
             onClick={() => setCallResponseFilter(callResponseFilter === "Told Later" ? "All" : "Told Later")}
             className={`cursor-pointer min-w-[135px] max-w-[155px] sm:min-w-0 sm:max-w-none snap-start shrink-0 sm:shrink bg-white rounded-2xl sm:rounded-[24px] p-3.5 sm:p-5 border shadow-xs hover:shadow-sm hover:-translate-y-1 transition-all duration-300 relative overflow-hidden group flex flex-col justify-between min-h-[115px] sm:min-h-[145px] ${
@@ -1146,7 +2348,7 @@ export function StudentLeadCrmTab() {
             </div>
           </div>
 
-          {/* 6. No (Not Interested / Dropped) */}
+          {/* 7. No (Not Interested / Dropped) */}
           <div 
             onClick={() => setCallResponseFilter(callResponseFilter === "No" ? "All" : "No")}
             className={`cursor-pointer min-w-[135px] max-w-[155px] sm:min-w-0 sm:max-w-none snap-start shrink-0 sm:shrink bg-white rounded-2xl sm:rounded-[24px] p-3.5 sm:p-5 border shadow-xs hover:shadow-sm hover:-translate-y-1 transition-all duration-300 relative overflow-hidden group flex flex-col justify-between min-h-[115px] sm:min-h-[145px] ${
@@ -1187,23 +2389,34 @@ export function StudentLeadCrmTab() {
                 </span>
               )}
             </div>
-            {(callResponseFilter !== "All" || statusFilter !== "All Statuses" || sourceFilter !== "All Sources" || search || dateFilterMode !== "all") && (
+            <div className="flex items-center gap-2 flex-wrap">
               <button
-                onClick={() => {
-                  setCallResponseFilter("All");
-                  setStatusFilter("All Statuses");
-                  setSourceFilter("All Sources");
-                  setSearch("");
-                  setDateFilterMode("all");
-                  setCustomDate("");
-                  searchParams.delete("search");
-                  setSearchParams(searchParams, { replace: true });
-                }}
-                className="text-[11px] font-bold text-blue-600 hover:text-blue-800 bg-blue-50 hover:bg-blue-100 px-2.5 py-1 rounded-full transition-all cursor-pointer shadow-2xs"
+                type="button"
+                onClick={() => exportLeadsToExcel(filteredLeads, "Student_Leads")}
+                className="text-[11px] font-bold text-emerald-700 hover:text-emerald-800 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200/80 px-2.5 py-1 rounded-full transition-all cursor-pointer shadow-2xs flex items-center gap-1"
+                title={`Download Excel sheet of ${filteredLeads.length} leads matching current filters`}
               >
-                Reset Filters
+                <Download size={12} />
+                <span>Download Excel ({filteredLeads.length})</span>
               </button>
-            )}
+              {(callResponseFilter !== "All" || statusFilter !== "All Statuses" || sourceFilter !== "All Sources" || search || dateFilterMode !== "all") && (
+                <button
+                  onClick={() => {
+                    setCallResponseFilter("All");
+                    setStatusFilter("All Statuses");
+                    setSourceFilter("All Sources");
+                    setSearch("");
+                    setDateFilterMode("all");
+                    setCustomDate("");
+                    searchParams.delete("search");
+                    setSearchParams(searchParams, { replace: true });
+                  }}
+                  className="text-[11px] font-bold text-blue-600 hover:text-blue-800 bg-blue-50 hover:bg-blue-100 px-2.5 py-1 rounded-full transition-all cursor-pointer shadow-2xs"
+                >
+                  Reset Filters
+                </button>
+              )}
+            </div>
           </div>
 
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 sm:gap-3">
@@ -1248,8 +2461,9 @@ export function StudentLeadCrmTab() {
                   title="Filter by Call Response"
                 >
                   <option value="All">All Calls</option>
-                  <option value="Yes for Demo">✨ Demo</option>
                   <option value="Connected">📞 Connected</option>
+                  <option value="Yes for Demo">✨ Demo Sched.</option>
+                  <option value="Demo Completed">🎓 Demo Done</option>
                   <option value="Told Later">⏳ Later</option>
                   <option value="No">❌ Dropped</option>
                   <option value="Not Connected">📵 Not Connected</option>
@@ -1324,401 +2538,30 @@ export function StudentLeadCrmTab() {
           </div>
         )}
 
-        {filteredLeads.length === 0 ? (
-          <div className="py-12 sm:py-16 text-center">
-            <div className="flex flex-col items-center justify-center gap-3 max-w-sm mx-auto">
-              <div className="w-12 h-12 rounded-2xl bg-neutral-100 text-neutral-400 flex items-center justify-center">
-                <Target size={24} />
-              </div>
-              <h4 className="text-base font-bold text-neutral-800">No Student Leads Found</h4>
-              <p className="text-xs text-neutral-400 text-center font-medium">
-                {search || statusFilter !== "All Statuses" || sourceFilter !== "All Sources" || callResponseFilter !== "All"
-                  ? "No leads matched your filter criteria. Try resetting filters."
-                  : "Start tracking student inquiries and workshop participants by adding your first lead."}
-              </p>
-              <button
-                onClick={() => {
-                  setSelectedLeadForEdit(null);
-                  setIsFormModalOpen(true);
-                }}
-                className="mt-2 px-4 py-2 bg-[#2563eb] hover:bg-blue-700 text-white rounded-full text-xs font-semibold transition-all shadow-xs flex items-center gap-1.5 cursor-pointer"
-              >
-                <Plus size={15} />
-                <span>Enter First Lead</span>
-              </button>
-            </div>
-          </div>
-        ) : (
-          <>
-            {/* Mobile Lead Cards View (< md) */}
-            <div className="block md:hidden space-y-3 pt-3">
-              {filteredLeads.map((lead) => {
-                const cleanPhone = (lead.phone || "").replace(/\D/g, "");
-                const isIdCopied = copiedId === `id-${lead._id}`;
-                const isPhoneCopied = copiedId === `phone-${lead._id}`;
-
-                // Next followup formatting
-                let formattedFollowup = "Not scheduled";
-                let isFollowupDue = false;
-                if (lead.next_followup_date) {
-                  try {
-                    const d = new Date(lead.next_followup_date);
-                    formattedFollowup = d.toLocaleDateString("en-US", {
-                      month: "short",
-                      day: "numeric",
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    });
-                    isFollowupDue = d.getTime() <= Date.now() + 24 * 60 * 60 * 1000;
-                  } catch {
-                    formattedFollowup = lead.next_followup_date;
-                  }
-                }
-
-                const createdDate = new Date(lead.created_at).toLocaleDateString("en-US");
-
-                return (
-                  <div
-                    key={lead._id}
-                    className="p-3 sm:p-4 rounded-2xl border border-neutral-200/80 bg-white hover:border-blue-200 transition-all space-y-2.5 shadow-2xs"
-                  >
-                    {/* Header: Lead ID, Copy, Date, Status */}
-                    <div className="flex items-center justify-between gap-1.5">
-                      <div className="flex items-center gap-1 font-mono text-xs font-bold text-neutral-700 min-w-0">
-                        <span className="whitespace-nowrap">{lead.lead_ID}</span>
-                        <button
-                          onClick={() => handleCopy(lead.lead_ID, `id-${lead._id}`)}
-                          className="p-0.5 text-neutral-400 hover:text-neutral-700 rounded cursor-pointer"
-                          title="Copy Lead ID"
-                        >
-                          {isIdCopied ? <Check size={11} className="text-emerald-600" /> : <Copy size={11} />}
-                        </button>
-                        <span className="text-[10px] text-neutral-400 font-sans font-normal whitespace-nowrap">
-                          ({createdDate})
-                        </span>
-                        <span className="text-[10px] text-purple-700 bg-purple-50 font-bold px-1.5 py-0.5 rounded border border-purple-200">
-                          {getLeadTotalCalls(lead)} {getLeadTotalCalls(lead) === 1 ? "call" : "calls"}
-                        </span>
-                      </div>
-                      <div className="shrink-0">
-                        {renderStatusBadge(lead.status)}
-                      </div>
-                    </div>
-
-                    {/* Student Info & Call Response Badge */}
-                    <div className="flex items-center justify-between gap-2">
-                      <div
-                        onClick={() => setSelectedLeadForDetails(lead)}
-                        className="flex items-center gap-2 min-w-0 flex-1 cursor-pointer group"
-                      >
-                        <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-blue-100 to-indigo-100 text-blue-700 flex items-center justify-center text-xs font-bold shadow-2xs border border-blue-200/50 shrink-0">
-                          {lead.student_name ? lead.student_name.charAt(0).toUpperCase() : "L"}
-                        </div>
-                        <div className="min-w-0 flex-1">
-                          <div className="font-bold text-neutral-900 group-hover:text-blue-600 transition-colors text-xs sm:text-sm truncate">
-                            {lead.student_name}
-                          </div>
-                          <div className="flex items-center gap-1 text-[10px] text-neutral-400 font-medium truncate mt-0.5">
-                            <span className="truncate">{lead.interested_course || "Course N/A"}</span>
-                            {lead.school_name && <span className="truncate">• {lead.school_name}</span>}
-                          </div>
-                        </div>
-                      </div>
-                      <div className="shrink-0">
-                        {renderCallOutcomeBadge(lead)}
-                      </div>
-                    </div>
-
-                    {/* Scheduled Demo Badge on Mobile */}
-                    {lead.demo_date && (lead.status === "Demo Scheduled" || lead.call_outcome === "Yes for Demo") && (
-                      <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200 text-amber-900 text-[11px] font-bold">
-                        <CalendarCheck size={12} className="text-amber-600 shrink-0" />
-                        <span className="truncate">
-                          Demo: {new Date(lead.demo_date).toLocaleString([], { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}
-                        </span>
-                      </div>
-                    )}
-
-                    {/* Quick Call & WhatsApp Action Row */}
-                    {cleanPhone ? (
-                      <div className="grid grid-cols-2 gap-2 pt-2 border-t border-neutral-100">
-                        <a
-                          href={`tel:${cleanPhone}`}
-                          className="flex items-center justify-center gap-1.5 py-1.5 px-3 rounded-xl text-xs font-bold bg-blue-50 text-blue-700 hover:bg-blue-100 active:scale-98 border border-blue-200/60 transition-all cursor-pointer shadow-2xs"
-                        >
-                          <Phone size={12} className="text-blue-600" />
-                          <span>Call</span>
-                        </a>
-                        <a
-                          href={`https://wa.me/91${cleanPhone.slice(-10)}?text=${encodeURIComponent(
-                            `Hello ${lead.student_name}, greetings from RizeWorld Institute!`
-                          )}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="flex items-center justify-center gap-1.5 py-1.5 px-3 rounded-xl text-xs font-bold bg-emerald-50 text-emerald-700 hover:bg-emerald-100 active:scale-98 border border-emerald-200/60 transition-all cursor-pointer shadow-2xs"
-                        >
-                          <MessageSquare size={12} className="text-emerald-600" />
-                          <span>WhatsApp</span>
-                        </a>
-                      </div>
-                    ) : (
-                      <div className="text-center text-[10px] text-neutral-400 pt-1.5 border-t border-neutral-100 italic">
-                        No phone number available
-                      </div>
-                    )}
-
-                    {/* Bottom Toolbar Row: Follow-up Info on Left & Action Icons on Right */}
-                    <div className="flex items-center justify-between gap-1.5 pt-1 text-xs">
-                      <div className="flex items-center gap-1.5 text-[10px] text-neutral-500 min-w-0 flex-1">
-                        <Calendar size={11} className={isFollowupDue ? "text-amber-600 shrink-0" : "text-neutral-400 shrink-0"} />
-                        <span className={`truncate ${isFollowupDue ? "text-amber-700 font-bold" : ""}`}>
-                          {formattedFollowup}
-                        </span>
-                        {(lead.next_followup_by || lead.followup_taken_by) && (
-                          <span className="text-neutral-400 truncate">
-                            • {lead.next_followup_by || lead.followup_taken_by}
-                          </span>
-                        )}
-                      </div>
-
-                      {/* Toolbar Icons (All 4 fit easily within ~100px width with no overflow!) */}
-                      <div className="flex items-center gap-0.5 shrink-0">
-                        {cleanPhone && (
-                          <button
-                            onClick={() => handleCopy(lead.phone, `phone-${lead._id}`)}
-                            className="p-1.5 text-neutral-400 hover:text-neutral-700 hover:bg-neutral-100 rounded-lg transition-colors cursor-pointer"
-                            title="Copy Phone Number"
-                          >
-                            {isPhoneCopied ? <Check size={13} className="text-emerald-600" /> : <Copy size={13} />}
-                          </button>
-                        )}
-                        <button
-                          onClick={() => setSelectedLeadForDetails(lead)}
-                          className="p-1.5 text-neutral-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors cursor-pointer"
-                          title="View Full Details"
-                        >
-                          <FileText size={15} />
-                        </button>
-                        <button
-                          onClick={() => {
-                            setSelectedLeadForEdit(lead);
-                            setIsFormModalOpen(true);
-                          }}
-                          className="p-1.5 text-neutral-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors cursor-pointer"
-                          title="Edit Lead"
-                        >
-                          <Edit2 size={15} />
-                        </button>
-                        <button
-                          onClick={() => handleDeleteLead(lead)}
-                          className="p-1.5 text-neutral-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors cursor-pointer"
-                          title="Delete Lead"
-                        >
-                          <Trash2 size={15} />
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-
-            {/* Desktop Full Table View (>= md) */}
-            <div className="hidden md:block overflow-x-auto min-h-[300px]">
-              <table className="w-full text-left border-collapse">
-                <thead>
-                  <tr className="border-b border-neutral-100 text-neutral-400 text-[11px] uppercase tracking-wider font-bold">
-                    <th className="py-4 px-4 font-semibold">LEAD ID</th>
-                    <th className="py-4 px-4 font-semibold">STUDENT NAME</th>
-                    <th className="py-4 px-4 font-semibold">CONTACT & WHATSAPP</th>
-                    <th className="py-4 px-4 font-semibold">STATUS & RESPONSE</th>
-                    <th className="py-4 px-4 font-semibold">NEXT FOLLOW-UP</th>
-                    <th className="py-4 px-4 font-semibold">FOLLOW-UP BY</th>
-                    <th className="py-4 px-4 text-right font-semibold">ACTIONS</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-neutral-100/70 text-xs font-medium">
-                  {filteredLeads.map((lead) => {
-                    const cleanPhone = (lead.phone || "").replace(/\D/g, "");
-                    const isIdCopied = copiedId === `id-${lead._id}`;
-                    const isPhoneCopied = copiedId === `phone-${lead._id}`;
-
-                    let formattedFollowup = "Not scheduled";
-                    let isFollowupDue = false;
-                    if (lead.next_followup_date) {
-                      try {
-                        const d = new Date(lead.next_followup_date);
-                        formattedFollowup = d.toLocaleDateString("en-US", {
-                          month: "short",
-                          day: "numeric",
-                          hour: "2-digit",
-                          minute: "2-digit",
-                        });
-                        isFollowupDue = d.getTime() <= Date.now() + 24 * 60 * 60 * 1000;
-                      } catch {
-                        formattedFollowup = lead.next_followup_date;
-                      }
-                    }
-
-                    const createdDate = new Date(lead.created_at).toLocaleDateString("en-US");
-
-                    return (
-                    <tr 
-                      key={lead._id}
-                      className="hover:bg-neutral-50/70 transition-colors group"
-                    >
-                      {/* UNIQUE ID */}
-                      <td className="py-4 px-4 font-mono text-neutral-500 font-semibold text-xs">
-                        <div className="flex items-center gap-1.5">
-                          <span>{lead.lead_ID}</span>
-                          <button
-                            onClick={() => handleCopy(lead.lead_ID, `id-${lead._id}`)}
-                            title="Copy Lead ID"
-                            className="text-neutral-400 hover:text-neutral-600 transition-colors p-0.5 cursor-pointer"
-                          >
-                            {isIdCopied ? <Check size={12} className="text-emerald-600" /> : <Copy size={12} />}
-                          </button>
-                        </div>
-                        <div className="text-[11px] text-neutral-400 mt-0.5 font-sans font-medium">
-                          {createdDate}
-                        </div>
-                      </td>
-
-                      {/* STUDENT NAME */}
-                      <td className="py-4 px-4">
-                        <div className="flex items-center gap-2.5">
-                          <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-blue-100 to-indigo-100 text-blue-700 flex items-center justify-center text-xs font-bold shadow-2xs border border-blue-200/50 shrink-0">
-                            {lead.student_name ? lead.student_name.charAt(0).toUpperCase() : "L"}
-                          </div>
-                          <div className="min-w-0">
-                            <div 
-                              onClick={() => setSelectedLeadForDetails(lead)}
-                              className="font-bold text-neutral-900 hover:text-blue-600 transition-colors cursor-pointer text-xs sm:text-sm truncate"
-                            >
-                              {lead.student_name}
-                            </div>
-                            {lead.interested_course && (
-                              <div className="text-[11px] text-neutral-400 font-medium truncate max-w-[200px]">
-                                {lead.interested_course}
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      </td>
-
-                      {/* CONTACT & WHATSAPP */}
-                      <td className="py-4 px-4">
-                        <div className="flex items-center gap-1.5 font-semibold text-neutral-800 text-xs">
-                          <Phone size={12} className="text-neutral-400 shrink-0" />
-                          <span>{lead.phone}</span>
-                          <button
-                            onClick={() => handleCopy(lead.phone, `phone-${lead._id}`)}
-                            title="Copy Phone"
-                            className="text-neutral-400 hover:text-neutral-600 transition-colors p-0.5 cursor-pointer"
-                          >
-                            {isPhoneCopied ? <Check size={12} className="text-emerald-600" /> : <Copy size={12} />}
-                          </button>
-                        </div>
-                        {cleanPhone && (
-                          <div className="mt-1">
-                            <a
-                              href={`https://wa.me/91${cleanPhone.slice(-10)}?text=${encodeURIComponent(`Hello ${lead.student_name}, greetings from RizeWorld Institute!`)}`}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-700 hover:text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded-full hover:bg-emerald-100 transition-colors border border-emerald-200/60 shadow-2xs"
-                            >
-                              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                              <span>WA: {cleanPhone.slice(-10)}</span>
-                            </a>
-                          </div>
-                        )}
-                      </td>
-
-                      {/* STATUS & RESPONSE */}
-                      <td className="py-4 px-4">
-                        <div className="flex flex-col gap-1 items-start">
-                          {renderStatusBadge(lead.status)}
-                          {renderCallOutcomeBadge(lead)}
-                          {lead.demo_date && (lead.status === "Demo Scheduled" || lead.call_outcome === "Yes for Demo") && (
-                            <div className="inline-flex items-center gap-1 text-[10px] font-bold text-amber-800 bg-amber-50 px-2 py-0.5 rounded-md border border-amber-200 shadow-2xs mt-0.5 whitespace-nowrap">
-                              <CalendarCheck size={11} className="text-amber-600 shrink-0" />
-                              <span>Demo: {new Date(lead.demo_date).toLocaleString([], { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}</span>
-                            </div>
-                          )}
-                        </div>
-                      </td>
-
-                      {/* NEXT FOLLOW-UP DATE */}
-                      <td className="py-4 px-4">
-                        <div className={`flex items-center gap-1.5 text-xs font-bold ${
-                          isFollowupDue ? "text-amber-700" : "text-neutral-800"
-                        }`}>
-                          <Calendar size={13} className={`shrink-0 ${isFollowupDue ? "text-amber-600" : "text-neutral-400"}`} />
-                          <span>{formattedFollowup}</span>
-                        </div>
-                        <div className="mt-1 flex items-center gap-1.5 flex-wrap">
-                          {lead.followup_round && (
-                            <span className="text-[10px] font-bold text-purple-700 bg-purple-50 px-2 py-0.5 rounded-full border border-purple-200/60 shadow-2xs">
-                              {lead.followup_round}
-                            </span>
-                          )}
-                          <span className="text-[10px] font-bold text-neutral-600 bg-neutral-100 px-1.5 py-0.5 rounded-full border border-neutral-200 shadow-2xs">
-                            {getLeadTotalCalls(lead)} {getLeadTotalCalls(lead) === 1 ? "call" : "calls"}
-                          </span>
-                        </div>
-                      </td>
-
-                      {/* FOLLOW-UP BY */}
-                      <td className="py-4 px-4">
-                        <div className="inline-flex items-center gap-1.5 bg-neutral-100 px-2.5 py-1 rounded-full text-neutral-800 font-semibold text-xs border border-neutral-200/60 shadow-2xs">
-                          <User size={12} className="text-blue-600 shrink-0" />
-                          <span className="truncate max-w-[130px]">{lead.next_followup_by || lead.followup_taken_by || "Counselor"}</span>
-                        </div>
-                      </td>
-
-                      {/* ACTIONS */}
-                      <td className="py-4 px-4 text-right">
-                        <div className="flex items-center justify-end gap-1">
-                          <button
-                            onClick={() => setSelectedLeadForDetails(lead)}
-                            className="p-2 text-neutral-400 hover:text-blue-600 hover:bg-blue-50/80 rounded-xl transition-all cursor-pointer"
-                            title="View Full Lead Details"
-                          >
-                            <FileText size={16} />
-                          </button>
-                          <button
-                            onClick={() => {
-                              setSelectedLeadForEdit(lead);
-                              setIsFormModalOpen(true);
-                            }}
-                            className="p-2 text-neutral-400 hover:text-emerald-600 hover:bg-emerald-50/80 rounded-xl transition-all cursor-pointer"
-                            title="Edit / Record Follow-up"
-                          >
-                            <Edit2 size={16} />
-                          </button>
-                          <button
-                            onClick={() => handleDeleteLead(lead)}
-                            className="p-2 text-neutral-400 hover:text-rose-600 hover:bg-rose-50/80 rounded-xl transition-all cursor-pointer"
-                            title="Delete Lead"
-                          >
-                            <Trash2 size={16} />
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })}
-            </tbody>
-          </table>
-        </div>
-        </>
-      )}
+        {/* Render Leads List using the shared helper */}
+        {renderLeadList(
+          filteredLeads,
+          "No Student Leads Found",
+          search || statusFilter !== "All Statuses" || sourceFilter !== "All Sources" || callResponseFilter !== "All" || dateFilterMode !== "all"
+            ? "No leads matched your filter criteria. Try resetting filters."
+            : "Start tracking student inquiries and workshop participants by adding your first lead."
+        )}
 
         {/* Table Footer with Summary */}
         <div className="pt-4 border-t border-neutral-100 flex flex-col sm:flex-row items-center justify-between text-xs text-neutral-500 font-medium gap-2 mt-2">
-          <div>
-            Showing <span className="font-bold text-neutral-900">{filteredLeads.length}</span> of{" "}
-            <span className="font-bold text-neutral-900">{leads.length}</span> total student leads
+          <div className="flex items-center gap-3 flex-wrap">
+            <div>
+              Showing <span className="font-bold text-neutral-900">{filteredLeads.length}</span> of{" "}
+              <span className="font-bold text-neutral-900">{leads.length}</span> total student leads
+            </div>
+            <button
+              type="button"
+              onClick={() => exportLeadsToExcel(filteredLeads, "Student_Leads")}
+              className="text-[11px] font-bold text-emerald-700 hover:text-emerald-800 hover:underline flex items-center gap-1 cursor-pointer"
+              title="Download currently filtered leads as Excel"
+            >
+              <Download size={12} /> Export to Excel ({filteredLeads.length})
+            </button>
           </div>
           <div className="flex items-center gap-4 text-[11px]">
             <span className="flex items-center gap-1.5">

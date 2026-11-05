@@ -81,6 +81,7 @@ export function StudentLeadDetailsModal({ lead, onClose, onEdit, onLeadUpdated }
     let connected = 0;
     let notConnected = 0;
     let yesDemo = 0;
+    let demoCompleted = 0;
     let toldLater = 0;
     let noDropped = 0;
 
@@ -91,7 +92,10 @@ export function StudentLeadDetailsModal({ lead, onClose, onEdit, onLeadUpdated }
 
       if (outcome === "Not Connected") {
         notConnected++;
-      } else if (outcome === "Yes for Demo" || status === "Demo Scheduled" || status === "Demo Completed") {
+      } else if (outcome === "Demo Completed" || status === "Demo Completed") {
+        demoCompleted++;
+        connected++;
+      } else if (outcome === "Yes for Demo" || status === "Demo Scheduled") {
         yesDemo++;
         connected++;
       } else if (outcome === "Told Later" || conv.includes("later") || conv.includes("kal") || conv.includes("busy")) {
@@ -114,7 +118,7 @@ export function StudentLeadDetailsModal({ lead, onClose, onEdit, onLeadUpdated }
     });
 
     const total = Math.max(1, historyList.length);
-    return { total, connected, notConnected, yesDemo, toldLater, noDropped };
+    return { total, connected, notConnected, yesDemo, demoCompleted, toldLater, noDropped };
   }, [historyList]);
 
   const latestHistoryItem = historyList.length > 0 ? historyList[historyList.length - 1] : null;
@@ -149,6 +153,12 @@ export function StudentLeadDetailsModal({ lead, onClose, onEdit, onLeadUpdated }
 
   const renderOutcomePill = (outcome?: string) => {
     switch (outcome) {
+      case "Demo Completed":
+        return (
+          <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-teal-50 text-teal-700 border border-teal-200/80 flex items-center gap-1 shadow-2xs">
+            <CheckCircle2 size={11} className="text-teal-600 shrink-0" /> Demo Completed
+          </span>
+        );
       case "Yes for Demo":
         return (
           <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-200/80 flex items-center gap-1 shadow-2xs">
@@ -191,11 +201,18 @@ export function StudentLeadDetailsModal({ lead, onClose, onEdit, onLeadUpdated }
     const counselorName = activeLead.followup_taken_by || "Counselor";
     const noteText = quickNote.trim() ? quickNote.trim() : `Call response: ${outcome}`;
 
+    const isDemoDone = outcome === "Demo Completed";
+    const nextStatus = isDemoDone
+      ? "Demo Completed"
+      : outcome === "Yes for Demo" 
+      ? "Demo Scheduled" 
+      : (outcome === "No" ? "Lost" : (activeLead.status === "New Inquiry" ? "In Follow-up" : activeLead.status));
+
     const newHistoryEntry = {
       _id: `call-${Date.now()}`,
       date: new Date().toISOString(),
       conversation: noteText,
-      status: outcome === "Yes for Demo" ? "Demo Scheduled" : (outcome === "No" ? "Lost" : "In Follow-up"),
+      status: nextStatus,
       call_outcome: outcome,
       taken_by: counselorName,
       followup_round: roundName,
@@ -203,14 +220,11 @@ export function StudentLeadDetailsModal({ lead, onClose, onEdit, onLeadUpdated }
       demo_date: activeLead.demo_date || null,
     };
 
-    const nextStatus = outcome === "Yes for Demo" 
-      ? "Demo Scheduled" 
-      : (outcome === "No" ? "Lost" : (activeLead.status === "New Inquiry" ? "In Follow-up" : activeLead.status));
-
     const updatedLead: StudentLead = {
       ...activeLead,
       call_outcome: outcome as any,
       status: nextStatus,
+      demo_class_taken: isDemoDone ? true : activeLead.demo_class_taken,
       followup_history: [...historyList, newHistoryEntry],
       conversation_notes: noteText,
       updated_at: new Date().toISOString(),
@@ -277,6 +291,16 @@ export function StudentLeadDetailsModal({ lead, onClose, onEdit, onLeadUpdated }
                 {callBreakdown.connected > 0 && (
                   <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-emerald-50 text-emerald-800 border border-emerald-200 shadow-2xs">
                     ✅ {callBreakdown.connected} Connected
+                  </span>
+                )}
+                {callBreakdown.demoCompleted > 0 && (
+                  <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-teal-50 text-teal-800 border border-teal-200 shadow-2xs">
+                    🎓 {callBreakdown.demoCompleted} Demo Completed
+                  </span>
+                )}
+                {callBreakdown.yesDemo > 0 && (
+                  <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-indigo-50 text-indigo-800 border border-indigo-200 shadow-2xs">
+                    📅 {callBreakdown.yesDemo} Demo Sched.
                   </span>
                 )}
                 {callBreakdown.notConnected > 0 && (
@@ -634,6 +658,14 @@ export function StudentLeadDetailsModal({ lead, onClose, onEdit, onLeadUpdated }
                   className="px-3 py-1.5 rounded-lg text-xs font-bold bg-indigo-50 text-indigo-800 border border-indigo-300 hover:bg-indigo-100 transition-all cursor-pointer shadow-2xs flex items-center gap-1 disabled:opacity-50"
                 >
                   <CalendarCheck size={12} className="text-indigo-600" /> 📅 Yes for Demo
+                </button>
+                <button
+                  type="button"
+                  disabled={isLoggingCall}
+                  onClick={() => handleQuickCallLog("Demo Completed")}
+                  className="px-3 py-1.5 rounded-lg text-xs font-bold bg-teal-50 text-teal-800 border border-teal-300 hover:bg-teal-100 transition-all cursor-pointer shadow-2xs flex items-center gap-1 disabled:opacity-50"
+                >
+                  <CheckCircle2 size={12} className="text-teal-600" /> 🎓 Demo Completed
                 </button>
                 <button
                   type="button"

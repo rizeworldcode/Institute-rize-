@@ -39,7 +39,7 @@ export default function AdminDashboard() {
   }, [tab, STAT_VIEWS]);
 
   const expandedStat = useMemo(() => {
-    if (subview) return subview;
+    if (tab === "dashboard" && subview) return subview;
     if (tab && STAT_VIEWS.includes(tab)) return tab;
     return null;
   }, [tab, subview, STAT_VIEWS]);

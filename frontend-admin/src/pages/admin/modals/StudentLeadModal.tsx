@@ -708,9 +708,10 @@ export function StudentLeadModal({ isOpen, onClose, onSave, lead }: StudentLeadM
                 <label className="block text-xs font-semibold text-neutral-700 mb-1.5">
                   Call Outcome / Response (Telecalling Result)
                 </label>
-                <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2">
                   {[
                     { key: "Yes for Demo", label: "✨ Yes for Demo", color: "text-indigo-700 bg-indigo-50 border-indigo-300 ring-indigo-200" },
+                    { key: "Demo Completed", label: "🎓 Demo Completed", color: "text-teal-700 bg-teal-50 border-teal-300 ring-teal-200" },
                     { key: "Connected", label: "📞 Connected", color: "text-emerald-700 bg-emerald-50 border-emerald-300 ring-emerald-200" },
                     { key: "Told Later", label: "⏳ Told Later", color: "text-purple-700 bg-purple-50 border-purple-300 ring-purple-200" },
                     { key: "No", label: "❌ No / Dropped", color: "text-rose-700 bg-rose-50 border-rose-300 ring-rose-200" },
@@ -726,6 +727,9 @@ export function StudentLeadModal({ isOpen, onClose, onSave, lead }: StudentLeadM
                           setCallOutcome(newOutcome);
                           if (newOutcome === "Yes for Demo") {
                             setStatus("Demo Scheduled");
+                          } else if (newOutcome === "Demo Completed") {
+                            setStatus("Demo Completed");
+                            setDemoClassTaken(true);
                           } else if (newOutcome === "No") {
                             setStatus("Lost");
                             setInterestLevel("Not Interested");
