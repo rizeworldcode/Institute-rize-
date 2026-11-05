@@ -131,7 +131,6 @@ export default function MasterCourse() {
                     "Complete All-in-One Master Module",
                     "2 Months Free Agency Internship Included",
                     "2 Certificates (RizeWorld & Digital Marketing)",
-                    "Live classes + recordings",
                     "1-on-1 mentor calls & portfolio building",
                     "100% Job & Placement Assistance",
                   ].map((f, i) => (
