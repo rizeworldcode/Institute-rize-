@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState, useCallback } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import { X, Sparkles } from "lucide-react";
 
 interface Particle {
@@ -311,3 +311,4 @@ export default function DiwaliIntro() {
     </>
   );
 }
+
