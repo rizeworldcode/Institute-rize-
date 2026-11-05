@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState, useCallback } from "react";
-import { X, Sparkles, ArrowRight } from "lucide-react";
+import { Sparkles } from "lucide-react";
 import { gsap } from "gsap";
 
 interface Particle {
@@ -31,19 +31,22 @@ export default function DiwaliPopup() {
 
   const containerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const progressBarRef = useRef<HTMLDivElement>(null);
 
   const particlesRef = useRef<Particle[]>([]);
   const dustRef = useRef<FloatingDust[]>([]);
   const animationFrameRef = useRef<number | null>(null);
   const autoFireworkTimerRef = useRef<NodeJS.Timeout | null>(null);
 
-  // ================= 1. BODY SCROLL LOCK =================
+  // ================= 1. BODY SCROLL LOCK & ACTIVE STATE =================
   useEffect(() => {
     if (isOpen) {
       const originalOverflow = document.body.style.overflow;
       document.body.style.overflow = "hidden";
+      document.body.setAttribute("data-diwali-active", "true");
       return () => {
         document.body.style.overflow = originalOverflow || "unset";
+        document.body.removeAttribute("data-diwali-active");
       };
     }
   }, [isOpen]);
@@ -239,13 +242,32 @@ export default function DiwaliPopup() {
     gsap.to(container, {
       opacity: 0,
       scale: 0.98,
-      duration: 0.4,
+      duration: 0.5,
       ease: "power2.inOut",
       onComplete: () => {
         setIsOpen(false);
       },
     });
   }, [isClosing]);
+
+  // ================= 4. AUTO-TRANSITION TO WEBSITE (5.5 SECONDS) =================
+  useEffect(() => {
+    if (!isOpen) return;
+
+    if (progressBarRef.current) {
+      gsap.fromTo(
+        progressBarRef.current,
+        { scaleX: 0 },
+        { scaleX: 1, duration: 5.5, ease: "linear", transformOrigin: "left center" }
+      );
+    }
+
+    const autoTimer = setTimeout(() => {
+      handleClose();
+    }, 5500);
+
+    return () => clearTimeout(autoTimer);
+  }, [isOpen, handleClose]);
 
   // Keyboard Escape handler
   useEffect(() => {
@@ -290,6 +312,14 @@ export default function DiwaliPopup() {
       aria-modal="true"
       role="dialog"
     >
+      {/* 5.5s Luxury Golden Countdown Progress Bar */}
+      <div className="absolute top-0 left-0 right-0 h-[3px] bg-amber-950/40 z-50 overflow-hidden">
+        <div
+          ref={progressBarRef}
+          className="w-full h-full bg-gradient-to-r from-amber-500 via-yellow-300 to-amber-500 shadow-[0_0_12px_rgba(251,191,36,0.9)]"
+        />
+      </div>
+
       {/* Full-Screen Fireworks Canvas */}
       <canvas
         ref={canvasRef}
@@ -401,10 +431,8 @@ export default function DiwaliPopup() {
         ))}
       </svg>
 
-      {/* ================= TOP HEADER (PROMINENT LARGE OFFICIAL LOGO & ENTER SITE) ================= */}
-      {/* Placed outside the wish card at prominent large size as requested by user */}
-      <header className="relative z-30 w-full px-5 sm:px-10 py-3 sm:py-5 flex items-center justify-between">
-        
+      {/* ================= TOP HEADER (PROMINENT LARGE OFFICIAL LOGO CENTERED) ================= */}
+      <header className="relative z-30 w-full px-5 sm:px-10 py-3 sm:py-5 flex items-center justify-center">
         {/* Prominent Large RizeWorld Institute Logo */}
         <div className="flex items-center">
           <div className="bg-white px-3.5 py-1.5 sm:px-5 sm:py-2 rounded-2xl shadow-[0_6px_28px_rgba(0,0,0,0.6),0_0_20px_rgba(251,191,36,0.3)] border-2 border-amber-300 transition-all duration-300 hover:scale-105">
@@ -415,20 +443,6 @@ export default function DiwaliPopup() {
             />
           </div>
         </div>
-
-        {/* Enter Site Button */}
-        <button
-          type="button"
-          data-no-firework="true"
-          onClick={handleClose}
-          className="group flex items-center gap-2 px-4 py-2 sm:px-5 sm:py-2.5 rounded-full bg-black/50 hover:bg-black/75 text-neutral-300 hover:text-white border border-amber-400/40 hover:border-amber-300 transition-all duration-200 cursor-pointer shadow-lg backdrop-blur-md"
-          aria-label="Enter Website"
-        >
-          <span className="text-[11px] sm:text-xs md:text-sm font-semibold tracking-wider uppercase text-amber-200 group-hover:text-white">
-            Enter Site
-          </span>
-          <X size={16} className="text-amber-300 group-hover:text-white" />
-        </button>
       </header>
 
       {/* ================= CENTRAL ROYAL CARTOUCHE FRAME (NO LOGO INSIDE CARD) ================= */}
@@ -758,18 +772,8 @@ export default function DiwaliPopup() {
         </div>
       </main>
 
-      {/* ================= FOOTER ================= */}
-      <footer className="relative z-30 w-full px-6 py-4 flex items-center justify-center sm:justify-end bg-gradient-to-t from-[#0B081E] to-transparent">
-        <button
-          type="button"
-          data-no-firework="true"
-          onClick={handleClose}
-          className="text-neutral-400 hover:text-amber-200 text-xs tracking-wider flex items-center gap-1 transition-colors cursor-pointer"
-        >
-          <span>Continue to Institute Website</span>
-          <ArrowRight size={13} />
-        </button>
-      </footer>
+      {/* Bottom spacer */}
+      <div className="relative z-30 w-full h-4 sm:h-6 pointer-events-none" />
     </div>
   );
 }
