@@ -758,14 +758,8 @@ export default function DiwaliPopup() {
         </div>
       </main>
 
-      {/* ================= FOOTER / INSTRUCTION ================= */}
-      <footer className="relative z-30 w-full px-6 py-4 flex flex-col sm:flex-row items-center justify-between gap-2 text-center bg-gradient-to-t from-[#0B081E] to-transparent">
-        <span className="text-amber-300/80 text-xs sm:text-sm tracking-widest uppercase font-medium flex items-center gap-1.5 mx-auto sm:mx-0">
-          <span>✨</span>
-          <span>Click anywhere for magical fireworks</span>
-          <span>✨</span>
-        </span>
-
+      {/* ================= FOOTER ================= */}
+      <footer className="relative z-30 w-full px-6 py-4 flex items-center justify-center sm:justify-end bg-gradient-to-t from-[#0B081E] to-transparent">
         <button
           type="button"
           data-no-firework="true"
