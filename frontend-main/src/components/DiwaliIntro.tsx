@@ -2,26 +2,26 @@ import { useEffect, useState, useCallback } from "react";
 import {
   X,
   Instagram,
-  Facebook,
   Linkedin,
   Youtube,
-  Twitter,
   MessageCircle,
   Globe,
-  Sparkles,
+  Palette,
+  PenTool,
+  Code2,
 } from "lucide-react";
 
-// 8 Marketing Channels arranged in clockwise order
-// Placed at the exact midpoint (22.5 deg offset) between each Diya
-const SOCIAL_CHANNELS = [
-  { icon: MessageCircle, label: "WhatsApp", angle: 22.5 },
-  { icon: Facebook, label: "Facebook", angle: 67.5 },
-  { icon: Instagram, label: "Instagram", angle: 112.5 },
-  { icon: Linkedin, label: "LinkedIn", angle: 157.5 },
-  { icon: Twitter, label: "X / Twitter", angle: 202.5 },
-  { icon: Youtube, label: "YouTube", angle: 247.5 },
-  { icon: Globe, label: "Website & SEO", angle: 292.5 },
-  { icon: Sparkles, label: "AI Marketing", angle: 337.5 },
+// 8 Channels representing: Social Media, Graphic Design & Website Development
+// Arranged clockwise in the V-notches between each 🪔 Diya
+const INSTITUTE_DOMAINS = [
+  { icon: Instagram, label: "Social Media (Instagram)", angle: 22.5, color: "#E4405F" },
+  { icon: Palette, label: "Graphic Design", angle: 67.5, color: "#EA580C" },
+  { icon: Globe, label: "Website & SEO", angle: 112.5, color: "#0284C7" },
+  { icon: Youtube, label: "Social Media (YouTube)", angle: 157.5, color: "#EF4444" },
+  { icon: Code2, label: "Web Development", angle: 202.5, color: "#10B981" },
+  { icon: PenTool, label: "Graphic & UI/UX Design", angle: 247.5, color: "#8B5CF6" },
+  { icon: Linkedin, label: "Social Media (LinkedIn)", angle: 292.5, color: "#0A66C2" },
+  { icon: MessageCircle, label: "WhatsApp & Social", angle: 337.5, color: "#25D366" },
 ];
 
 // 8 Diyas arranged in 45-degree intervals (0° = Top / 12 o'clock)
@@ -48,7 +48,7 @@ export default function DiwaliIntro() {
   // Exact mathematical radial distances for a seamless circular ring
   // R_DIYA: places the 🪔 lamps in a ring hugging the center circle
   const R_DIYA = 29.5;
-  // R_ICON: places the social badge in the notch between adjacent Diyas
+  // R_ICON: places the badges in the notch between adjacent Diyas
   const R_ICON = 34.0;
 
   return (
@@ -91,7 +91,7 @@ export default function DiwaliIntro() {
         {/* Strictly aspect-square container ensures perfect circular geometry on all screen sizes */}
         <div className="relative w-[340px] h-[340px] sm:w-[480px] sm:h-[480px] aspect-square flex items-center justify-center">
           
-          {/* ROTATING WHEEL (Contains Mandala Lace + 8 🪔 Diyas + 8 Social Badges) */}
+          {/* ROTATING WHEEL (Contains Mandala Lace + 8 🪔 Diyas + 8 Domain Badges) */}
           <div className="absolute inset-0 w-full h-full animate-diwali-wheel pointer-events-none">
             
             {/* Traditional Indian Mandala Background Artwork */}
@@ -238,9 +238,8 @@ export default function DiwaliIntro() {
               );
             })}
 
-            {/* ================= 8 SOCIAL MEDIA BADGES IN NOTCHES ================= */}
-            {/* Clean white discs with dark plum icons matching the reference design */}
-            {SOCIAL_CHANNELS.map((ch, idx) => {
+            {/* ================= 8 SOCIAL MEDIA, GRAPHIC & WEBSITE BADGES ================= */}
+            {INSTITUTE_DOMAINS.map((ch, idx) => {
               // Convert clockwise angle from 12 o'clock to standard radians
               const rad = (ch.angle * Math.PI) / 180;
               // Exact polar coordinates: perfectly midway between adjacent Diyas
@@ -249,7 +248,7 @@ export default function DiwaliIntro() {
 
               return (
                 <div
-                  key={`social_${idx}`}
+                  key={`domain_${idx}`}
                   className="absolute pointer-events-auto"
                   style={{
                     left: `${x}%`,
@@ -260,9 +259,9 @@ export default function DiwaliIntro() {
                 >
                   {/* Counter-rotating badge keeps icon upright as the circle spins */}
                   <div className="animate-icon-counter flex items-center justify-center">
-                    {/* Clean white circle with luxury drop shadow */}
+                    {/* Clean white circle with luxury drop shadow & brand accent color */}
                     <div className="w-7 h-7 sm:w-9 sm:h-9 rounded-full bg-white shadow-[0_4px_16px_rgba(0,0,0,0.65)] flex items-center justify-center border-2 border-amber-300 hover:scale-125 transition-transform duration-200">
-                      <ch.icon size={14} className="sm:w-4 sm:h-4 text-[#200c3b]" />
+                      <ch.icon size={15} className="sm:w-5 sm:h-5" style={{ color: ch.color }} />
                     </div>
                   </div>
                 </div>
