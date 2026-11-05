@@ -25,7 +25,7 @@ const alwarFaqs = [
   },
   {
     q: "What courses are offered at the Alwar campus?",
-    a: "We offer our comprehensive 3-Month Job-Ready Master Course blending AI Tools, SEO, Performance Marketing, SMO, Graphic Design, Video Editing, and Website Development, as well as individual modules."
+    a: "We offer our comprehensive AI & Digital Marketing Master Course (4 Months + 2 Months Free Internship) blending AI Tools, SEO, Performance Marketing, SMO, Graphic Design, Video Editing, and Website Development, as well as individual modules."
   },
   {
     q: "Is there placement assistance at the Alwar location?",

@@ -602,13 +602,13 @@ export default function Home() {
                       <Award size={13} /> FLAGSHIP PROGRAM
                     </div>
                     <h2 className="font-display text-4xl md:text-6xl font-extrabold leading-tight text-white">
-                      The 3-Month <br /><span className="text-[#fcbf12]">Job-Ready Master Course</span>
+                      AI & Digital Marketing <br /><span className="text-[#fcbf12]">Master Course</span>
                     </h2>
                     <p className="mt-6 text-lg text-white/80">
-                      7 modules. 12 weeks. Everything you need to launch a career in AI & digital marketing — in one transformative program.
+                      16 weeks (4 months) + 2 months free internship. Everything you need to launch a career in AI & digital marketing — in one transformative program.
                     </p>
                     <div className="mt-8 flex flex-wrap gap-3">
-                      {["7 Modules", "12 Weeks", "Live Projects", "Certification"].map((t, i) => (
+                      {["16 Weeks (4 Months)", "2 Mos Free Internship", "2 Certificates", "Live Projects"].map((t, i) => (
                         <span key={i} className="px-4 py-2 rounded-full glass-dark bg-white/10 border border-white/20 text-sm font-medium text-white">{t}</span>
                       ))}
                     </div>
@@ -617,7 +617,9 @@ export default function Home() {
 
                     <div className="mt-6 space-y-3">
                       {[
-                        "All 7 modules included",
+                        "Complete All-in-One Master Module",
+                        "2 Months Free Agency Internship Included",
+                        "2 Certificates (RizeWorld & Digital Marketing)",
                         "Lifetime community access",
                         "Portfolio building sessions",
                         "1-on-1 mentor calls",

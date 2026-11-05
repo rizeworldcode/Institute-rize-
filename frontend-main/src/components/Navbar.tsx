@@ -104,7 +104,7 @@ export default function Navbar() {
                 <Link to="/ai-digital-marketing" className="px-4 py-2 text-xs font-semibold text-neutral-600 hover:text-blue-600 hover:bg-neutral-100 rounded-xl transition-colors uppercase">AI Digital Marketing</Link>
               </div>
             </div>
-            <Link to="/master-course" className="hover:text-blue-600 transition-colors">Program Master Course</Link>
+            <Link to="/master-course" className="hover:text-blue-600 transition-colors">Master Course</Link>
             <Link to="/certificate" className="hover:text-blue-600 transition-colors">Certificate</Link>
           </div>
 
@@ -147,7 +147,7 @@ export default function Navbar() {
           <div className="flex-1 overflow-y-auto p-6 space-y-1" style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 400 }}>
             <MobileLink to="/location/alwar" label="Location Alwar" onClick={() => setMobileOpen(false)} isActive={location.pathname === "/location/alwar"} />
             <MobileLink to="/courses" label="Courses" onClick={() => setMobileOpen(false)} isActive={location.pathname === "/courses"} />
-            <MobileLink to="/master-course" label="Program Master Course" onClick={() => setMobileOpen(false)} isActive={location.pathname === "/master-course"} />
+            <MobileLink to="/master-course" label="Master Course" onClick={() => setMobileOpen(false)} isActive={location.pathname === "/master-course"} />
             <MobileLink to="/certificate" label="Certificate" onClick={() => setMobileOpen(false)} isActive={location.pathname === "/certificate"} />
             <MobileLink to="/about" label="About Us" onClick={() => setMobileOpen(false)} isActive={location.pathname === "/about"} />
             <MobileLink to="/hire-from-us" label="Hire From Us" onClick={() => setMobileOpen(false)} isActive={location.pathname === "/hire-from-us"} />

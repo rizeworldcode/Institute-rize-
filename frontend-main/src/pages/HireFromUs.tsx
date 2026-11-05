@@ -11,7 +11,7 @@ const reasons = [
   { icon: Target, title: "Project-Based Learning", desc: "Every student graduates with a portfolio of 10+ real client projects, not theoretical assignments." },
   { icon: Users, title: "Small Batch Mentorship", desc: "Max 20 students per batch means personalized attention and quality skill development." },
   { icon: Award, title: "Industry-Recognized Skills", desc: "Meta & Google aligned curriculum ensures students meet hiring standards of top agencies." },
-  { icon: TrendingUp, title: "Job-Ready in 12 Weeks", desc: "Our structured 3-month program produces professionals ready to contribute from day one." },
+  { icon: TrendingUp, title: "Job-Ready in 16 Weeks + Internship", desc: "Our structured 4-month program + 2-month free internship produces professionals ready to contribute from day one." },
   { icon: Lightbulb, title: "Creative + Technical Blend", desc: "Rare combination of design, marketing, and tech skills in one holistic program." },
 ];
 

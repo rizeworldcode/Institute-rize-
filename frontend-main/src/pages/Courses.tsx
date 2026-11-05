@@ -103,7 +103,7 @@ export default function Courses() {
                     <span className="text-blue-400">Digital Marketing Course</span> in Alwar.
                   </h1>
                   <p className="text-neutral-300 text-base md:text-lg mb-8 max-w-xl leading-relaxed">
-                    Looking for the best <strong>Digital Marketing institutes in Alwar</strong>? RizeWorld Institute offers an industry-leading <strong>Digital Marketing course in Alwar</strong>. Recognized among the top <strong>Digital Marketing institutes in Rajasthan</strong>, our practical curriculum delivers complete mastery across 7 modules with the most career-focused <strong>Digital Marketing course in Rajasthan</strong>.
+                    Looking for the best <strong>Digital Marketing institutes in Alwar</strong>? RizeWorld Institute offers an industry-leading <strong>AI & Digital Marketing Master Course</strong> (4 Months + 2 Months Free Internship). Recognized among the top <strong>Digital Marketing institutes in Rajasthan</strong>, our practical curriculum delivers complete mastery with the most career-focused <strong>Digital Marketing course in Rajasthan</strong>.
                   </p>
 
                   <div className="flex flex-wrap gap-4">
@@ -118,10 +118,10 @@ export default function Courses() {
 
                 <div className="grid sm:grid-cols-2 gap-4">
                   {[
-                    { icon: Layers, text: "All 7 Modules Included" },
-                    { icon: CheckCircle2, text: "12 Weeks Duration" },
-                    { icon: Brain, text: "AI-First Approach" },
-                    { icon: Zap, text: "100% Job Assistance" }
+                    { icon: Layers, text: "All-in-One Master Module" },
+                    { icon: CheckCircle2, text: "16 Weeks (4 Months)" },
+                    { icon: Brain, text: "2 Months Free Internship" },
+                    { icon: Zap, text: "2 Certificates Awarded" }
                   ].map((f, i) => (
                     <div key={i} className="bg-white/5 border border-white/10 rounded-2xl p-5 backdrop-blur-md">
                       <f.icon size={24} className="text-blue-400 mb-3" />

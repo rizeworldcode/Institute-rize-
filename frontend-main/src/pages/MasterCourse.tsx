@@ -2,26 +2,27 @@ import { useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { ArrowRight, CheckCircle2, Calendar, MapPin, Users, Zap, Brain, Palette, Video, TrendingUp, Search, BarChart3, Code, Award, Target } from "lucide-react";
+import { ArrowRight, CheckCircle2, Calendar, MapPin, Users, Zap, Brain, Palette, Video, TrendingUp, Search, BarChart3, Code, Award, Target, Briefcase } from "lucide-react";
 import Reveal from "../components/Reveal";
 import SEO from "../components/SEO";
 
 gsap.registerPlugin(ScrollTrigger);
 
 const roadmap = [
-  { week: "Week 1-2", title: "Graphic Design + Photoshop", desc: "Design stunning visuals, brand identities, and social creatives.", icon: Palette, color: "green" },
-  { week: "Week 3-4", title: "Video Editing", desc: "Cinematic editing, Reels, and YouTube content creation mastery.", icon: Video, color: "orange" },
-  { week: "Week 5-6", title: "Website Development", desc: "Build fast, modern websites with WordPress and Webflow.", icon: Code, color: "orange" },
-  { week: "Week 7-8", title: "SEO", desc: "Rank #1 on Google with on-page, off-page, and technical SEO.", icon: Search, color: "orange" },
-  { week: "Week 9-10", title: "SMO", desc: "Build and grow audiences on Instagram, Facebook, LinkedIn.", icon: TrendingUp, color: "green" },
-  { week: "Week 11-12", title: "Performance Marketing", desc: "Run profitable Meta and Google ads with data-driven strategies.", icon: BarChart3, color: "green" },
+  { week: "Week 1-2", title: "Graphic Design + Photoshop", desc: "Design stunning visuals, brand identities, and social creatives with Photoshop & Canva.", icon: Palette, color: "green" },
+  { week: "Week 3-5", title: "Video Editing & Content Creation", desc: "Cinematic editing, Reels, Shorts, and YouTube content creation mastery with Premiere Pro & CapCut.", icon: Video, color: "orange" },
+  { week: "Week 6-8", title: "Website Development & CMS", desc: "Build fast, modern, high-converting websites and landing pages with WordPress and Webflow.", icon: Code, color: "green" },
+  { week: "Week 9-11", title: "Search Engine Optimization (SEO)", desc: "Rank #1 on Google with advanced on-page, off-page, technical, and AI-powered SEO.", icon: Search, color: "orange" },
+  { week: "Week 12-13", title: "Social Media Optimization (SMO)", desc: "Build and grow viral audiences across Instagram, Facebook, and LinkedIn with organic strategies.", icon: TrendingUp, color: "green" },
+  { week: "Week 14-16", title: "Performance Marketing & Paid Ads", desc: "Run profitable Meta, Google, and YouTube ad campaigns with data-driven ROAS strategies.", icon: BarChart3, color: "orange" },
+  { week: "Month 5-6", title: "2 Months Free Agency Internship", desc: "Work on live client accounts, active advertising budgets, real deliverables, and receive dedicated placement support.", icon: Briefcase, color: "green" },
 ];
 
 const highlights = [
-  { icon: Calendar, label: "Duration", value: "12 Weeks" },
+  { icon: Calendar, label: "Course Duration", value: "16 Wks (4 Mos)" },
+  { icon: Briefcase, label: "Agency Internship", value: "2 Months Free" },
+  { icon: Award, label: "Certifications", value: "2 Certificates" },
   { icon: Zap, label: "Job Assistance", value: "100%" },
-  { icon: Users, label: "Batch Size", value: "Max 20" },
-  { icon: MapPin, label: "Location", value: "Alwar, Rajasthan" },
 ];
 
 export default function MasterCourse() {
@@ -47,22 +48,22 @@ export default function MasterCourse() {
     {
       "@context": "https://schema.org",
       "@type": "Course",
-      "name": "3-Month Job-Ready Master Course in AI & Marketing",
-      "description": "12-week intensive master program combining AI tools, digital marketing, portfolio building, and 100% placement support.",
+      "name": "AI & Digital Marketing Master Course – 4 Months + 2 Months Free Internship",
+      "description": "16-week (4 months) comprehensive master program with 2 months free internship, dual certification, AI tools integration, and 100% placement support.",
       "provider": {
         "@type": "EducationalOrganization",
         "name": "RizeWorld Institute",
         "url": "https://rizeworldinstitute.in"
       },
-      "educationalCredentialAwarded": "RizeWorld Certified AI & Digital Marketing Specialist"
+      "educationalCredentialAwarded": "Dual Certification: 1. RizeWorld Institute Course Certificate, 2. Digital Marketing Certificate"
     }
   ];
 
   return (
     <main className="pt-28 bg-neutral-50 min-h-screen">
       <SEO
-        title="3-Month Job-Ready Master Digital Marketing Course in Alwar | RizeWorld"
-        description="Enroll in the premier Digital Marketing course in Alwar. Rated among the top Digital Marketing institutes in Rajasthan with AI tools and 100% placement support."
+        title="AI & Digital Marketing Master Course – 4 Months + 2 Months Internship | RizeWorld"
+        description="Enroll in the AI & Digital Marketing Master Course in Alwar: 16 weeks (4 months) + 2 months free internship, dual certification, and 100% placement support."
         canonicalPath="/master-course"
         schemas={masterCourseSchema}
       />
@@ -81,13 +82,17 @@ export default function MasterCourse() {
               <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-orange-50 border border-orange-200 text-xs font-semibold text-orange-600 mb-5">
                 <Award size={13} /> FLAGSHIP PROGRAM
               </div>
-              <h1 className="font-display text-5xl md:text-7xl font-extrabold text-neutral-900 leading-[0.95] tracking-tight">
-                The 3-Month <br /><span className="text-blue-600">Job-Ready</span> <br />Master Course.
+              <h1 className="font-display text-4xl sm:text-5xl md:text-6xl font-extrabold text-neutral-900 leading-[1.05] tracking-tight">
+                AI & Digital Marketing <br />
+                <span className="text-blue-600">Master Course</span>
               </h1>
+              <div className="mt-4 inline-block px-4 py-1.5 rounded-full bg-blue-50 border border-blue-200 text-sm md:text-base font-bold text-blue-700">
+                4 Months Training + 2 Months Free Internship
+              </div>
               <div className="mt-6 text-base text-neutral-600 max-w-lg leading-relaxed font-medium space-y-2 border-l-4 border-blue-600 pl-4">
                 <p>Top-rated <strong>Digital Marketing course in Alwar</strong> & <strong>Digital Marketing course in Rajasthan</strong> | RizeWorld Institute</p>
                 <p className="text-sm">Recognized among the finest <strong>Digital Marketing institutes in Alwar</strong> and <strong>Digital Marketing institutes in Rajasthan</strong> with 100% placement support.</p>
-                <p className="font-bold text-neutral-900 text-sm">7 modules • 12 weeks • AI-Integrated</p>
+                <p className="font-bold text-neutral-900 text-sm">All-in-One Comprehensive Master Program • 16 Weeks + 2 Months Free Internship • AI-Integrated</p>
               </div>
 
               <div className="mt-8 flex flex-wrap gap-4">
@@ -123,12 +128,12 @@ export default function MasterCourse() {
 
                 <div className="space-y-2 pt-4 border-t border-neutral-100">
                   {[
-                    "All 7 modules included",
+                    "Complete All-in-One Master Module",
+                    "2 Months Free Agency Internship Included",
+                    "2 Certificates (RizeWorld & Digital Marketing)",
                     "Live classes + recordings",
-                    "1-on-1 mentor calls",
-                    "Portfolio building sessions",
-                    "Industry-recognized certificate",
-                    "Lifetime community access",
+                    "1-on-1 mentor calls & portfolio building",
+                    "100% Job & Placement Assistance",
                   ].map((f, i) => (
                     <div key={i} className="flex items-center gap-2">
                       <CheckCircle2 size={14} className="text-green-600" />
@@ -157,7 +162,7 @@ export default function MasterCourse() {
           <Reveal>
             <div className="text-center mb-16">
               <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-green-50 border border-green-200 text-xs font-semibold text-green-600 mb-4">
-                <Target size={12} /> 12-WEEK ROADMAP
+                <Target size={12} /> 16-WEEK ROADMAP + 2 MONTHS INTERNSHIP
               </div>
               <h2 className="font-display text-4xl md:text-6xl font-extrabold text-neutral-900 tracking-tight">
                 Your <span className="text-blue-600">journey</span>, mapped out.
@@ -222,7 +227,8 @@ export default function MasterCourse() {
           <div className="grid md:grid-cols-3 gap-6">
             {[
               { title: "Portfolio of 10+ projects", desc: "Real client briefs, personal brands, and campaigns that showcase your skills." },
-              { title: "Industry-recognized certificate", desc: "A credential valued by top agencies and brands across India." },
+              { title: "2 Recognized Certificates", desc: "Earn 2 credentials upon completion: 1. RizeWorld Institute Course Certificate, and 2. Digital Marketing Certificate." },
+              { title: "2 Months Free Agency Internship", desc: "Work on live client ad spends, campaigns, and gain real agency experience." },
               { title: "Confident interview skills", desc: "Mock interviews and portfolio reviews prep you for the job market." },
               { title: "AI-first mindset", desc: "Work 10x faster with AI tools embedded into every workflow." },
               { title: "Professional network", desc: "Connect with our alumni network and industry mentors." },
