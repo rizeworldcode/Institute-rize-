@@ -54,13 +54,13 @@ const faqs = [
 
 const heroCourseData: any = {
   master: {
-    title: "Master Course Program",
-    desc: "This flagship program seamlessly blends into the modern digital landscape. Master all core modules with our 12-week intensive curriculum.",
+    title: "AI & Digital Marketing Master Course",
+    desc: "This flagship program seamlessly blends into the modern digital landscape. Master our comprehensive curriculum with 4-month training + 2-month free internship.",
     stats: [
-      { text: "12 Weeks", icon: <Clock size={16} /> },
-      { text: "7 Modules", icon: <BookOpen size={16} /> },
-      { text: "20 Seat Batch", icon: <Users size={16} /> },
-      { text: "Placement Assistance", icon: <Briefcase size={16} /> }
+      { text: "16 Weeks (4 Mos)", icon: <Clock size={16} /> },
+      { text: "2 Mos Free Internship", icon: <Briefcase size={16} /> },
+      { text: "2 Certificates", icon: <Award size={16} /> },
+      { text: "100% Placement", icon: <Zap size={16} /> }
     ]
   },
   individual: {
@@ -490,7 +490,7 @@ export default function Home() {
                     <GraduationCap size={28} />
                   </div>
                   <h3 className="font-display text-2xl font-bold text-white mb-4">Master Course</h3>
-                  <p className="text-white/70 font-medium mb-8">Get all 7 modules + 100% placement assistance.</p>
+                  <p className="text-white/70 font-medium mb-8">4 Months Training + 2 Months Free Internship & 100% placement assistance.</p>
 
                   <Link to="/master-course" className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-white text-neutral-900 font-bold text-sm hover:scale-105 transition-transform">
                     View Details <ArrowRight size={16} />
