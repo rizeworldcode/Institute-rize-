@@ -6,6 +6,7 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { Clock, ArrowRight, Layers, Rocket, GraduationCap, Brain, Palette, Video, TrendingUp, Search, BarChart3, Code, Users, Award, Zap, CheckCircle2, Quote, Star, MapPin, BookOpen, Briefcase, Volume2, VolumeX } from "lucide-react";
 import Reveal from "../components/Reveal";
 import SEO from "../components/SEO";
+import DiwaliIntro from "../components/DiwaliIntro";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -345,6 +346,7 @@ export default function Home() {
 
   return (
     <main className="relative">
+      <DiwaliIntro />
       <SEO
         title="Best Digital Marketing Course in India | Digital Marketing Institute India"
         description="Enroll in the Best Digital Marketing Course in India at RizeWorld Institute. Master AI tools, paid ads, SEO, and join the top Digital Marketing Training India."
