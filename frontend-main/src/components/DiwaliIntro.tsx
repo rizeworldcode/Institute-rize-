@@ -10,38 +10,47 @@ interface Particle {
   alpha: number;
   decay: number;
   size: number;
+  flicker: boolean;
+}
+
+interface Rocket {
+  x: number;
+  y: number;
+  targetY: number;
+  vy: number;
+  color: string;
 }
 
 const FESTIVE_COLORS = [
-  "#f59e0b", // Gold/Amber
-  "#fbbf24", // Warm Yellow
-  "#ef4444", // Festive Red
+  "#fbbf24", // Warm Gold
+  "#f59e0b", // Rich Amber
   "#f97316", // Saffron Orange
+  "#ef4444", // Festival Red
   "#ec4899", // Deep Pink
   "#a855f7", // Royal Purple
   "#38bdf8", // Sky Blue
-  "#10b981", // Emerald Green
-  "#ffffff", // Sparkle White
+  "#4ade80", // Emerald Green
+  "#ffffff", // Shimmer White
 ];
 
 export default function DiwaliIntro() {
-  // Always open on page load so user sees celebration every time they visit/refresh!
   const [isOpen, setIsOpen] = useState(true);
   const [showFloatingDiya, setShowFloatingDiya] = useState(false);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const particlesRef = useRef<Particle[]>([]);
+  const rocketsRef = useRef<Rocket[]>([]);
   const animFrameRef = useRef<number | null>(null);
   const autoBurstTimerRef = useRef<number | null>(null);
 
-  // Trigger firework explosion at (x, y)
-  const createFirework = useCallback((x: number, y: number, count = 55) => {
+  // Trigger firework explosion at (x, y) with multiple spark layers
+  const createExplosion = useCallback((x: number, y: number, primaryColor?: string, count = 65) => {
     const particles: Particle[] = [];
-    const color = FESTIVE_COLORS[Math.floor(Math.random() * FESTIVE_COLORS.length)];
+    const color = primaryColor || FESTIVE_COLORS[Math.floor(Math.random() * FESTIVE_COLORS.length)];
     const secondaryColor = FESTIVE_COLORS[Math.floor(Math.random() * FESTIVE_COLORS.length)];
 
     for (let i = 0; i < count; i++) {
-      const angle = (Math.PI * 2 * i) / count + (Math.random() - 0.5) * 0.4;
-      const speed = Math.random() * 5 + 2;
+      const angle = (Math.PI * 2 * i) / count + (Math.random() - 0.5) * 0.35;
+      const speed = Math.random() * 5.5 + 2.2;
       particles.push({
         x,
         y,
@@ -49,22 +58,52 @@ export default function DiwaliIntro() {
         vy: Math.sin(angle) * speed,
         color: Math.random() > 0.35 ? color : secondaryColor,
         alpha: 1,
-        decay: Math.random() * 0.016 + 0.012,
-        size: Math.random() * 3.5 + 1.8,
+        decay: Math.random() * 0.018 + 0.012,
+        size: Math.random() * 3.2 + 1.6,
+        flicker: Math.random() > 0.4,
       });
     }
+
+    // Add bright central flash
+    for (let j = 0; j < 12; j++) {
+      const angle = Math.random() * Math.PI * 2;
+      const speed = Math.random() * 1.5 + 0.5;
+      particles.push({
+        x,
+        y,
+        vx: Math.cos(angle) * speed,
+        vy: Math.sin(angle) * speed,
+        color: "#ffffff",
+        alpha: 1,
+        decay: 0.035,
+        size: Math.random() * 4 + 2,
+        flicker: true,
+      });
+    }
+
     particlesRef.current.push(...particles);
   }, []);
 
-  // Launch auto fireworks bursts
-  const triggerRandomBurst = useCallback(() => {
+  // Launch a sky rocket from the bottom
+  const launchRocket = useCallback(() => {
     if (typeof window === "undefined") return;
-    const x = Math.random() * (window.innerWidth * 0.8) + window.innerWidth * 0.1;
-    const y = Math.random() * (window.innerHeight * 0.5) + window.innerHeight * 0.1;
-    createFirework(x, y, 50);
-  }, [createFirework]);
+    const width = window.innerWidth;
+    const height = window.innerHeight;
 
-  // Canvas loop
+    const x = Math.random() * (width * 0.84) + width * 0.08;
+    const targetY = Math.random() * (height * 0.55) + height * 0.1;
+    const color = FESTIVE_COLORS[Math.floor(Math.random() * FESTIVE_COLORS.length)];
+
+    rocketsRef.current.push({
+      x,
+      y: height + 10,
+      targetY,
+      vy: -(Math.random() * 4 + 11),
+      color,
+    });
+  }, []);
+
+  // Canvas render & animation loop
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -81,19 +120,58 @@ export default function DiwaliIntro() {
     const render = () => {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
+      // 1. Update and Draw Rockets (Shooting up)
+      for (let i = rocketsRef.current.length - 1; i >= 0; i--) {
+        const r = rocketsRef.current[i];
+        r.y += r.vy;
+
+        // Sparkle tail for rocket
+        ctx.save();
+        ctx.beginPath();
+        ctx.arc(r.x, r.y, 3, 0, Math.PI * 2);
+        ctx.fillStyle = "#ffffff";
+        ctx.shadowBlur = 12;
+        ctx.shadowColor = r.color;
+        ctx.fill();
+
+        // Trail sparks
+        for (let t = 0; t < 2; t++) {
+          particlesRef.current.push({
+            x: r.x + (Math.random() - 0.5) * 4,
+            y: r.y + Math.random() * 8,
+            vx: (Math.random() - 0.5) * 0.8,
+            vy: Math.random() * 2 + 1,
+            color: r.color,
+            alpha: 0.8,
+            decay: 0.05,
+            size: Math.random() * 2 + 1,
+            flicker: false,
+          });
+        }
+        ctx.restore();
+
+        if (r.y <= r.targetY) {
+          createExplosion(r.x, r.y, r.color, 70);
+          rocketsRef.current.splice(i, 1);
+        }
+      }
+
+      // 2. Update and Draw Explosion Particles
       const remaining: Particle[] = [];
       for (const p of particlesRef.current) {
         p.x += p.vx;
         p.y += p.vy;
-        p.vy += 0.045; // Gravity
+        p.vy += 0.06; // Gravity
+        p.vx *= 0.98; // Drag
         p.alpha -= p.decay;
         p.size *= 0.985;
 
-        if (p.alpha > 0.04 && p.size > 0.5) {
+        if (p.alpha > 0.03 && p.size > 0.4) {
           ctx.save();
-          ctx.globalAlpha = Math.max(0, p.alpha);
+          const displayAlpha = p.flicker && Math.random() > 0.3 ? p.alpha * 0.7 : p.alpha;
+          ctx.globalAlpha = Math.max(0, displayAlpha);
           ctx.fillStyle = p.color;
-          ctx.shadowBlur = 12;
+          ctx.shadowBlur = 14;
           ctx.shadowColor = p.color;
           ctx.beginPath();
           ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
@@ -113,39 +191,47 @@ export default function DiwaliIntro() {
       window.removeEventListener("resize", handleResize);
       if (animFrameRef.current) cancelAnimationFrame(animFrameRef.current);
     };
-  }, []);
+  }, [createExplosion]);
 
-  // Fireworks interval when isOpen
+  // Periodic rockets & bursts when isOpen
   useEffect(() => {
     if (!isOpen) {
       if (autoBurstTimerRef.current) clearInterval(autoBurstTimerRef.current);
       return;
     }
 
-    // Launch immediate burst salvo right on website open
-    triggerRandomBurst();
-    const t1 = setTimeout(() => triggerRandomBurst(), 250);
-    const t2 = setTimeout(() => triggerRandomBurst(), 550);
-    const t3 = setTimeout(() => triggerRandomBurst(), 900);
+    // Launch instant celebration salvos
+    launchRocket();
+    createExplosion(window.innerWidth * 0.25, window.innerHeight * 0.3, "#fbbf24", 60);
+    createExplosion(window.innerWidth * 0.75, window.innerHeight * 0.28, "#ef4444", 60);
 
-    // Continuous bursts while greeting is open
+    const t1 = setTimeout(() => {
+      launchRocket();
+      launchRocket();
+    }, 300);
+
+    const t2 = setTimeout(() => {
+      createExplosion(window.innerWidth * 0.5, window.innerHeight * 0.2, "#a855f7", 75);
+    }, 700);
+
+    // Continuous celebration rockets every 650ms
     autoBurstTimerRef.current = window.setInterval(() => {
-      triggerRandomBurst();
-    }, 850);
+      launchRocket();
+      if (Math.random() > 0.35) launchRocket();
+    }, 650);
 
-    // Auto-minimize after 6 seconds so user can freely interact with the site
+    // Auto-minimize after 8 seconds
     const autoCloseTimer = setTimeout(() => {
       handleClose();
-    }, 6000);
+    }, 8000);
 
     return () => {
       clearTimeout(t1);
       clearTimeout(t2);
-      clearTimeout(t3);
       clearTimeout(autoCloseTimer);
       if (autoBurstTimerRef.current) clearInterval(autoBurstTimerRef.current);
     };
-  }, [isOpen, triggerRandomBurst]);
+  }, [isOpen, createExplosion, launchRocket]);
 
   const handleClose = () => {
     setIsOpen(false);
@@ -155,33 +241,46 @@ export default function DiwaliIntro() {
   const handleReopen = () => {
     setIsOpen(true);
     setShowFloatingDiya(false);
-    // Instant celebration bursts on click
-    triggerRandomBurst();
-    setTimeout(() => triggerRandomBurst(), 200);
-    setTimeout(() => triggerRandomBurst(), 450);
+    // Extra celebration salvos on reopen
+    launchRocket();
+    launchRocket();
+    createExplosion(window.innerWidth * 0.5, window.innerHeight * 0.3, "#fbbf24", 80);
   };
 
   return (
     <>
-      {/* High-priority Canvas for Fireworks overlay across screen */}
+      {/* High-priority Foreground Canvas - Placed at z-[105] so fireworks burst OVER the screen and around the card! */}
       <canvas
         ref={canvasRef}
-        className="fixed inset-0 pointer-events-none z-[99] w-full h-full"
+        className="fixed inset-0 pointer-events-none z-[105] w-full h-full"
       />
 
       {/* Main Diwali Greeting Modal */}
       {isOpen && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-300">
+        <div
+          className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/40 backdrop-blur-xs animate-in fade-in duration-300"
+          onClick={(e) => {
+            // Clicking anywhere on backdrop or card triggers a celebration burst at that spot!
+            createExplosion(e.clientX, e.clientY, undefined, 60);
+          }}
+        >
+          {/* Royal Festive Card */}
           <div
-            className="relative w-full max-w-md rounded-3xl bg-linear-to-b from-neutral-900 via-neutral-950 to-black p-8 text-center border-2 border-amber-500/50 shadow-[0_0_60px_rgba(245,158,11,0.4)] overflow-hidden animate-in zoom-in-95 duration-400"
+            className="relative w-full max-w-lg rounded-[2.5rem] bg-gradient-to-b from-[#181005]/95 via-[#100902]/98 to-[#090501]/95 p-8 sm:p-10 text-center border-2 border-amber-400/70 shadow-[0_0_80px_rgba(245,158,11,0.5),inset_0_1px_20px_rgba(251,191,36,0.15)] overflow-hidden animate-in zoom-in-95 duration-400"
             onClick={(e) => {
-              // Click anywhere inside card bursts extra fireworks
-              createFirework(e.clientX, e.clientY, 40);
+              e.stopPropagation();
+              createExplosion(e.clientX, e.clientY, undefined, 50);
             }}
           >
-            {/* Background glowing gradients */}
-            <div className="absolute -top-16 -left-16 w-44 h-44 bg-amber-500/25 rounded-full blur-3xl pointer-events-none" />
-            <div className="absolute -bottom-16 -right-16 w-44 h-44 bg-orange-600/25 rounded-full blur-3xl pointer-events-none" />
+            {/* Traditional Golden Corner Accents */}
+            <div className="absolute top-3 left-3 w-6 h-6 border-t-2 border-l-2 border-amber-400/80 rounded-tl-lg pointer-events-none" />
+            <div className="absolute top-3 right-3 w-6 h-6 border-t-2 border-r-2 border-amber-400/80 rounded-tr-lg pointer-events-none" />
+            <div className="absolute bottom-3 left-3 w-6 h-6 border-b-2 border-l-2 border-amber-400/80 rounded-bl-lg pointer-events-none" />
+            <div className="absolute bottom-3 right-3 w-6 h-6 border-b-2 border-r-2 border-amber-400/80 rounded-br-lg pointer-events-none" />
+
+            {/* Glowing Golden Aura Backdrops */}
+            <div className="absolute -top-20 -left-20 w-52 h-52 bg-amber-500/25 rounded-full blur-3xl pointer-events-none animate-pulse" />
+            <div className="absolute -bottom-20 -right-20 w-52 h-52 bg-orange-600/25 rounded-full blur-3xl pointer-events-none animate-pulse" />
 
             {/* Close Button */}
             <button
@@ -190,113 +289,151 @@ export default function DiwaliIntro() {
                 e.stopPropagation();
                 handleClose();
               }}
-              className="absolute top-4 right-4 p-2 rounded-full bg-white/10 text-neutral-300 hover:text-white hover:bg-white/20 transition-all cursor-pointer z-10"
+              className="absolute top-4 right-4 p-2.5 rounded-full bg-white/10 text-amber-200 hover:text-white hover:bg-white/20 border border-amber-400/30 transition-all cursor-pointer z-10 shadow-md"
               aria-label="Close Greeting"
             >
               <X size={18} />
             </button>
 
-            {/* Glowing Traditional Diya SVG */}
-            <div className="relative mb-4 flex justify-center">
-              <div className="absolute -top-3 w-16 h-16 bg-amber-400/35 rounded-full blur-xl animate-pulse" />
+            {/* Top Traditional Diya with 3D Glowing Flickering Flame */}
+            <div className="relative mb-5 flex justify-center items-center">
+              {/* Outer Radiant Glow */}
+              <div className="absolute -top-4 w-24 h-24 bg-amber-400/40 rounded-full blur-2xl animate-pulse" />
+              
               <svg
                 viewBox="0 0 100 80"
-                className="w-20 h-16 drop-shadow-[0_0_25px_rgba(251,191,36,0.9)] relative z-10"
+                className="w-24 h-20 drop-shadow-[0_0_30px_rgba(251,191,36,0.95)] relative z-10"
                 fill="none"
                 xmlns="http://www.w3.org/2000/svg"
               >
                 <defs>
-                  <radialGradient id="diyaFlameGrad" cx="50%" cy="60%" r="50%">
+                  <radialGradient id="royalFlameGrad" cx="50%" cy="65%" r="50%">
                     <stop offset="0%" stopColor="#ffffff" />
-                    <stop offset="35%" stopColor="#fef08a" />
-                    <stop offset="70%" stopColor="#f59e0b" />
+                    <stop offset="30%" stopColor="#fef08a" />
+                    <stop offset="65%" stopColor="#f59e0b" />
                     <stop offset="100%" stopColor="#dc2626" />
                   </radialGradient>
-                  <linearGradient id="diyaBaseGrad" x1="0" y1="0" x2="1" y2="1">
-                    <stop offset="0%" stopColor="#fde047" />
-                    <stop offset="50%" stopColor="#d97706" />
+                  <linearGradient id="royalDiyaGrad" x1="0" y1="0" x2="1" y2="1">
+                    <stop offset="0%" stopColor="#fef08a" />
+                    <stop offset="35%" stopColor="#f59e0b" />
+                    <stop offset="70%" stopColor="#b45309" />
                     <stop offset="100%" stopColor="#78350f" />
                   </linearGradient>
+                  <linearGradient id="rimGrad" x1="0" y1="0" x2="1" y2="0">
+                    <stop offset="0%" stopColor="#fef08a" />
+                    <stop offset="50%" stopColor="#ffffff" />
+                    <stop offset="100%" stopColor="#fef08a" />
+                  </linearGradient>
                 </defs>
-                {/* Outer Flame (flickers) */}
+
+                {/* Flame Aura Glow */}
+                <ellipse cx="50" cy="30" rx="18" ry="24" fill="#f59e0b" opacity="0.35" className="animate-pulse" />
+
+                {/* Flickering Outer Flame */}
                 <path
-                  d="M50 6 C46 20 37 26 37 36 C37 47 43 53 50 53 C57 53 63 47 63 36 C63 26 54 20 50 6 Z"
-                  fill="url(#diyaFlameGrad)"
+                  d="M50 4 C45 18 36 25 36 36 C36 48 43 54 50 54 C57 54 64 48 64 36 C64 25 55 18 50 4 Z"
+                  fill="url(#royalFlameGrad)"
                   className="animate-pulse"
                 />
+
                 {/* Inner Core Flame */}
                 <path
-                  d="M50 16 C48 24 43 30 43 36 C43 43 46 47 50 47 C54 47 57 43 57 36 C57 30 52 24 50 16 Z"
+                  d="M50 15 C47 23 42 29 42 36 C42 43 46 48 50 48 C54 48 58 43 58 36 C58 29 53 23 50 15 Z"
                   fill="#ffffff"
                   opacity="0.95"
                 />
+
                 {/* Diya Clay Base */}
                 <path
-                  d="M14 47 C25 68 75 68 86 47 C90 42 94 45 86 53 C74 67 26 67 14 53 C6 45 10 42 14 47 Z"
-                  fill="url(#diyaBaseGrad)"
-                  stroke="#fef08a"
+                  d="M12 47 C24 70 76 70 88 47 C92 41 96 44 87 53 C74 68 26 68 13 53 C4 44 8 41 12 47 Z"
+                  fill="url(#royalDiyaGrad)"
+                  stroke="url(#rimGrad)"
+                  strokeWidth="2"
+                />
+
+                {/* Base Stand */}
+                <path
+                  d="M38 64 C43 71 57 71 62 64 Z"
+                  fill="#92400e"
+                  stroke="#fbbf24"
                   strokeWidth="1.5"
                 />
-                {/* Stand */}
-                <path d="M40 63 C44 69 56 69 60 63 Z" fill="#92400e" stroke="#fbbf24" strokeWidth="1" />
               </svg>
             </div>
 
-            {/* Shubh Deepavali Badge */}
-            <div className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-amber-500/15 border border-amber-500/40 text-amber-300 text-xs font-bold tracking-widest uppercase mb-3 shadow-[0_0_15px_rgba(245,158,11,0.2)]">
-              <Sparkles size={13} className="text-amber-400 animate-spin" style={{ animationDuration: "6s" }} />
-              Shubh Deepavali
-              <Sparkles size={13} className="text-amber-400 animate-spin" style={{ animationDuration: "6s" }} />
+            {/* Shubh Deepawali Decorative Badge */}
+            <div className="inline-flex items-center gap-3 px-5 py-1.5 rounded-full bg-gradient-to-r from-amber-500/10 via-amber-500/25 to-amber-500/10 border border-amber-400/50 text-amber-300 text-xs sm:text-sm font-extrabold tracking-[0.25em] uppercase mb-4 shadow-[0_0_20px_rgba(245,158,11,0.3)]">
+              <span className="text-amber-400">✦</span>
+              <span>SHUBH DEEPAWALI</span>
+              <span className="text-amber-400">✦</span>
             </div>
 
-            {/* Heading */}
-            <h2 className="font-display text-3xl sm:text-4xl font-extrabold text-transparent bg-clip-text bg-linear-to-r from-amber-200 via-yellow-300 to-amber-500 tracking-tight">
-              Happy Diwali!
+            {/* Royal Heading */}
+            <h2
+              className="font-serif text-4xl sm:text-5xl md:text-6xl font-black tracking-tight leading-none mb-3"
+              style={{
+                background: "linear-gradient(135deg, #fffbeb 0%, #fef08a 25%, #f59e0b 55%, #fbbf24 85%, #ffffff 100%)",
+                WebkitBackgroundClip: "text",
+                WebkitTextFillColor: "transparent",
+                filter: "drop-shadow(0 0 25px rgba(245, 158, 11, 0.5))",
+              }}
+            >
+              HAPPY DIWALI!
             </h2>
 
-            {/* Brand subtext */}
-            <p className="text-amber-200/90 font-semibold text-sm sm:text-base mt-1">
+            {/* Institute Warm Wishes Subtitle */}
+            <p className="text-amber-200 font-bold text-sm sm:text-base tracking-wide mt-1">
               Warm Wishes from RizeWorld Institute
             </p>
 
-            {/* Wish Message */}
-            <p className="text-neutral-300 text-xs sm:text-sm mt-3 leading-relaxed max-w-sm mx-auto">
-              May the divine festival of lights illuminate your path with infinite wisdom, happiness, and outstanding career success. 🪔✨
+            {/* Heartfelt Wish Message */}
+            <p className="text-neutral-200 text-xs sm:text-sm mt-3.5 leading-relaxed max-w-md mx-auto font-medium">
+              May the divine festival of lights illuminate your path with infinite wisdom, happiness, and outstanding career success.
             </p>
 
-            {/* Action Button */}
+            {/* Festive Diya Emoticons */}
+            <div className="flex justify-center items-center gap-3 my-4 text-lg">
+              <span className="animate-bounce" style={{ animationDuration: "1.8s" }}>🪔</span>
+              <span className="text-amber-300 text-xs tracking-widest font-bold">✨ FESTIVAL OF LIGHTS ✨</span>
+              <span className="animate-bounce" style={{ animationDuration: "1.8s", animationDelay: "0.3s" }}>🪔</span>
+            </div>
+
+            {/* Celebrate With Us Button */}
             <div className="mt-6 flex flex-col sm:flex-row gap-3 justify-center items-center">
               <button
                 type="button"
                 onClick={(e) => {
                   e.stopPropagation();
-                  handleClose();
+                  // Extra burst of fireworks on click
+                  createExplosion(window.innerWidth * 0.5, window.innerHeight * 0.4, "#fbbf24", 80);
+                  setTimeout(() => handleClose(), 600);
                 }}
-                className="w-full sm:w-auto px-6 py-2.5 rounded-full bg-linear-to-r from-amber-500 to-yellow-500 text-neutral-950 font-bold text-sm shadow-[0_0_20px_rgba(245,158,11,0.4)] hover:brightness-110 active:scale-95 transition-all cursor-pointer flex items-center justify-center gap-2"
+                className="w-full sm:w-auto px-8 py-3.5 rounded-full bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 hover:from-amber-300 hover:to-yellow-300 text-neutral-950 font-extrabold text-sm shadow-[0_0_30px_rgba(251,191,36,0.65)] hover:scale-105 active:scale-95 transition-all cursor-pointer flex items-center justify-center gap-2 border border-amber-200"
               >
-                Celebrate With Us 🪔
+                <span>Celebrate With Us</span>
+                <span className="text-base">🪔</span>
               </button>
             </div>
 
-            {/* Auto-closing hint */}
-            <p className="text-[11px] text-neutral-400 mt-3">
+            {/* Click to explode hint */}
+            <p className="text-[11px] text-amber-300/60 mt-3 font-medium">
               Click anywhere for extra fireworks ✨
             </p>
           </div>
         </div>
       )}
 
-      {/* Floating Corner Diya Widget */}
+      {/* Floating Corner Diya Widget to Replay */}
       {showFloatingDiya && (
         <button
           type="button"
           onClick={handleReopen}
-          className="fixed bottom-24 right-5 md:right-8 z-40 group flex items-center gap-2.5 px-3.5 py-2 rounded-full bg-neutral-950/90 hover:bg-neutral-900 border border-amber-500/60 shadow-[0_0_25px_rgba(245,158,11,0.4)] text-amber-300 text-xs font-bold tracking-wide transition-all hover:scale-105 active:scale-95 cursor-pointer backdrop-blur-md"
+          className="fixed bottom-24 right-5 md:right-8 z-40 group flex items-center gap-2.5 px-4 py-2.5 rounded-full bg-gradient-to-r from-neutral-950 via-neutral-900 to-neutral-950 border-2 border-amber-400/70 shadow-[0_0_30px_rgba(245,158,11,0.5)] text-amber-300 text-xs font-bold tracking-wide transition-all hover:scale-110 active:scale-95 cursor-pointer backdrop-blur-md"
           title="Click to celebrate Diwali with fireworks!"
         >
-          <span className="text-base animate-bounce">🪔</span>
-          <span className="hidden sm:inline text-amber-200 group-hover:text-amber-100">Happy Diwali</span>
-          <Sparkles size={13} className="text-amber-400 animate-spin" style={{ animationDuration: "5s" }} />
+          <span className="text-lg animate-bounce">🪔</span>
+          <span className="text-amber-200 font-bold group-hover:text-amber-100">Happy Diwali</span>
+          <Sparkles size={14} className="text-amber-400 animate-spin" style={{ animationDuration: "5s" }} />
         </button>
       )}
     </>

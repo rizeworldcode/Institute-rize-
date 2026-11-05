@@ -371,10 +371,6 @@ export default function Home() {
 
             {/* Main Left-Aligned Typography */}
             <div className="flex-1 flex flex-col justify-center w-full pointer-events-none lg:max-w-2xl xl:max-w-3xl">
-              <div className="inline-flex items-center gap-2 self-start px-4 py-1.5 rounded-full bg-amber-500/20 border border-amber-400/40 text-amber-300 text-xs sm:text-sm font-bold tracking-wide uppercase mb-4 shadow-[0_0_20px_rgba(245,158,11,0.35)] backdrop-blur-md pointer-events-auto">
-                <span className="animate-bounce">🪔</span>
-                <span>Happy Diwali from RizeWorld Institute ✨</span>
-              </div>
               <h1 className="hero-title font-display text-4xl md:text-5xl lg:text-[3.5rem] xl:text-[4.5rem] font-semibold text-white leading-[1.1] tracking-tight drop-shadow-[0_10px_30px_rgba(0,0,0,0.8)] mb-4 md:mb-6">
                 <span>Best <span className="text-[#ed5923]">Digital Marketing Course</span> in India</span><br />
                 <span className="text-white/90">RizeWorld Institute</span>
