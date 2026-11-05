@@ -16,6 +16,7 @@ const FESTIVE_COLORS = [
   "#f59e0b", // Gold/Amber
   "#fbbf24", // Warm Yellow
   "#ef4444", // Festive Red
+  "#f97316", // Saffron Orange
   "#ec4899", // Deep Pink
   "#a855f7", // Royal Purple
   "#38bdf8", // Sky Blue
@@ -24,31 +25,32 @@ const FESTIVE_COLORS = [
 ];
 
 export default function DiwaliIntro() {
-  const [isOpen, setIsOpen] = useState(false);
+  // Always open on page load so user sees celebration every time they visit/refresh!
+  const [isOpen, setIsOpen] = useState(true);
   const [showFloatingDiya, setShowFloatingDiya] = useState(false);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const particlesRef = useRef<Particle[]>([]);
   const animFrameRef = useRef<number | null>(null);
   const autoBurstTimerRef = useRef<number | null>(null);
 
-  // Trigger a firework explosion at (x, y)
-  const createFirework = useCallback((x: number, y: number, count = 45) => {
+  // Trigger firework explosion at (x, y)
+  const createFirework = useCallback((x: number, y: number, count = 55) => {
     const particles: Particle[] = [];
     const color = FESTIVE_COLORS[Math.floor(Math.random() * FESTIVE_COLORS.length)];
     const secondaryColor = FESTIVE_COLORS[Math.floor(Math.random() * FESTIVE_COLORS.length)];
 
     for (let i = 0; i < count; i++) {
       const angle = (Math.PI * 2 * i) / count + (Math.random() - 0.5) * 0.4;
-      const speed = Math.random() * 4.5 + 1.8;
+      const speed = Math.random() * 5 + 2;
       particles.push({
         x,
         y,
         vx: Math.cos(angle) * speed,
         vy: Math.sin(angle) * speed,
-        color: Math.random() > 0.4 ? color : secondaryColor,
+        color: Math.random() > 0.35 ? color : secondaryColor,
         alpha: 1,
-        decay: Math.random() * 0.018 + 0.012,
-        size: Math.random() * 3 + 1.8,
+        decay: Math.random() * 0.016 + 0.012,
+        size: Math.random() * 3.5 + 1.8,
       });
     }
     particlesRef.current.push(...particles);
@@ -59,7 +61,7 @@ export default function DiwaliIntro() {
     if (typeof window === "undefined") return;
     const x = Math.random() * (window.innerWidth * 0.8) + window.innerWidth * 0.1;
     const y = Math.random() * (window.innerHeight * 0.5) + window.innerHeight * 0.1;
-    createFirework(x, y, 40);
+    createFirework(x, y, 50);
   }, [createFirework]);
 
   // Canvas loop
@@ -83,15 +85,15 @@ export default function DiwaliIntro() {
       for (const p of particlesRef.current) {
         p.x += p.vx;
         p.y += p.vy;
-        p.vy += 0.045; // subtle gravity
+        p.vy += 0.045; // Gravity
         p.alpha -= p.decay;
         p.size *= 0.985;
 
-        if (p.alpha > 0.05 && p.size > 0.5) {
+        if (p.alpha > 0.04 && p.size > 0.5) {
           ctx.save();
           ctx.globalAlpha = Math.max(0, p.alpha);
           ctx.fillStyle = p.color;
-          ctx.shadowBlur = 10;
+          ctx.shadowBlur = 12;
           ctx.shadowColor = p.color;
           ctx.beginPath();
           ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
@@ -113,44 +115,33 @@ export default function DiwaliIntro() {
     };
   }, []);
 
-  // Show intro celebration on mount (once per session, or always allow user to reopen)
-  useEffect(() => {
-    const seen = sessionStorage.getItem("rize_diwali_seen_v1");
-    // Open on fresh load
-    if (!seen) {
-      setIsOpen(true);
-      sessionStorage.setItem("rize_diwali_seen_v1", "true");
-    } else {
-      // If already seen, keep floating Diya available in corner
-      setShowFloatingDiya(true);
-    }
-  }, []);
-
-  // When open, run periodic fireworks
+  // Fireworks interval when isOpen
   useEffect(() => {
     if (!isOpen) {
       if (autoBurstTimerRef.current) clearInterval(autoBurstTimerRef.current);
       return;
     }
 
-    // Initial burst salvo
+    // Launch immediate burst salvo right on website open
     triggerRandomBurst();
-    const t1 = setTimeout(() => triggerRandomBurst(), 300);
-    const t2 = setTimeout(() => triggerRandomBurst(), 700);
+    const t1 = setTimeout(() => triggerRandomBurst(), 250);
+    const t2 = setTimeout(() => triggerRandomBurst(), 550);
+    const t3 = setTimeout(() => triggerRandomBurst(), 900);
 
-    // Periodic fireworks
+    // Continuous bursts while greeting is open
     autoBurstTimerRef.current = window.setInterval(() => {
       triggerRandomBurst();
-    }, 900);
+    }, 850);
 
-    // Auto-minimize after 7 seconds to preserve reading experience
+    // Auto-minimize after 6 seconds so user can freely interact with the site
     const autoCloseTimer = setTimeout(() => {
       handleClose();
-    }, 7000);
+    }, 6000);
 
     return () => {
       clearTimeout(t1);
       clearTimeout(t2);
+      clearTimeout(t3);
       clearTimeout(autoCloseTimer);
       if (autoBurstTimerRef.current) clearInterval(autoBurstTimerRef.current);
     };
@@ -164,33 +155,33 @@ export default function DiwaliIntro() {
   const handleReopen = () => {
     setIsOpen(true);
     setShowFloatingDiya(false);
-    // Extra celebration bursts
+    // Instant celebration bursts on click
     triggerRandomBurst();
-    setTimeout(() => triggerRandomBurst(), 250);
-    setTimeout(() => triggerRandomBurst(), 500);
+    setTimeout(() => triggerRandomBurst(), 200);
+    setTimeout(() => triggerRandomBurst(), 450);
   };
 
   return (
     <>
-      {/* Canvas for Fireworks overlay across screen */}
+      {/* High-priority Canvas for Fireworks overlay across screen */}
       <canvas
         ref={canvasRef}
-        className="fixed inset-0 pointer-events-none z-50 w-full h-full"
+        className="fixed inset-0 pointer-events-none z-[99] w-full h-full"
       />
 
       {/* Main Diwali Greeting Modal */}
       {isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-300">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-300">
           <div
-            className="relative w-full max-w-md rounded-3xl bg-linear-to-b from-neutral-900 via-neutral-950 to-black p-8 text-center border-2 border-amber-500/50 shadow-[0_0_60px_rgba(245,158,11,0.35)] overflow-hidden animate-in zoom-in-95 duration-400"
+            className="relative w-full max-w-md rounded-3xl bg-linear-to-b from-neutral-900 via-neutral-950 to-black p-8 text-center border-2 border-amber-500/50 shadow-[0_0_60px_rgba(245,158,11,0.4)] overflow-hidden animate-in zoom-in-95 duration-400"
             onClick={(e) => {
-              // Click anywhere on card spawns extra sparkles
-              createFirework(e.clientX, e.clientY, 35);
+              // Click anywhere inside card bursts extra fireworks
+              createFirework(e.clientX, e.clientY, 40);
             }}
           >
             {/* Background glowing gradients */}
-            <div className="absolute -top-16 -left-16 w-40 h-40 bg-amber-500/20 rounded-full blur-3xl pointer-events-none" />
-            <div className="absolute -bottom-16 -right-16 w-40 h-40 bg-orange-600/20 rounded-full blur-3xl pointer-events-none" />
+            <div className="absolute -top-16 -left-16 w-44 h-44 bg-amber-500/25 rounded-full blur-3xl pointer-events-none" />
+            <div className="absolute -bottom-16 -right-16 w-44 h-44 bg-orange-600/25 rounded-full blur-3xl pointer-events-none" />
 
             {/* Close Button */}
             <button
@@ -207,7 +198,7 @@ export default function DiwaliIntro() {
 
             {/* Glowing Traditional Diya SVG */}
             <div className="relative mb-4 flex justify-center">
-              <div className="absolute -top-3 w-16 h-16 bg-amber-400/30 rounded-full blur-xl animate-pulse" />
+              <div className="absolute -top-3 w-16 h-16 bg-amber-400/35 rounded-full blur-xl animate-pulse" />
               <svg
                 viewBox="0 0 100 80"
                 className="w-20 h-16 drop-shadow-[0_0_25px_rgba(251,191,36,0.9)] relative z-10"
@@ -273,7 +264,7 @@ export default function DiwaliIntro() {
               May the divine festival of lights illuminate your path with infinite wisdom, happiness, and outstanding career success. 🪔✨
             </p>
 
-            {/* Action Buttons */}
+            {/* Action Button */}
             <div className="mt-6 flex flex-col sm:flex-row gap-3 justify-center items-center">
               <button
                 type="button"
@@ -295,7 +286,7 @@ export default function DiwaliIntro() {
         </div>
       )}
 
-      {/* Floating Corner Diya (Appears after closing so users can click to celebrate anytime) */}
+      {/* Floating Corner Diya Widget */}
       {showFloatingDiya && (
         <button
           type="button"
@@ -311,4 +302,3 @@ export default function DiwaliIntro() {
     </>
   );
 }
-
