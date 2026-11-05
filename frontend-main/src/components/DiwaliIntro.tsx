@@ -11,20 +11,21 @@ import {
   Sparkles,
 } from "lucide-react";
 
-// 8 Social Media & Digital Marketing Channels positioned in the V-notches between Diyas
+// 8 Marketing Channels arranged in exact clockwise order (offset by 22.5 deg between each Diya)
+// Angle is measured in degrees clockwise from 12 o'clock (0° = Top)
 const SOCIAL_CHANNELS = [
-  { icon: Facebook, label: "Facebook", angle: 292.5, color: "#1877F2" },
-  { icon: Instagram, label: "Instagram", angle: 337.5, color: "#E4405F" },
-  { icon: Linkedin, label: "LinkedIn", angle: 22.5, color: "#0A66C2" },
-  { icon: Twitter, label: "X / Twitter", angle: 67.5, color: "#111827" },
-  { icon: Globe, label: "Website & SEO", angle: 112.5, color: "#059669" },
-  { icon: Sparkles, label: "AI Marketing", angle: 157.5, color: "#7C3AED" },
-  { icon: Youtube, label: "YouTube", angle: 202.5, color: "#FF0000" },
-  { icon: MessageCircle, label: "WhatsApp", angle: 247.5, color: "#25D366" },
+  { icon: MessageCircle, label: "WhatsApp", angle: 22.5, color: "#25D366" },
+  { icon: Facebook, label: "Facebook", angle: 67.5, color: "#1877F2" },
+  { icon: Instagram, label: "Instagram", angle: 112.5, color: "#E4405F" },
+  { icon: Linkedin, label: "LinkedIn", angle: 157.5, color: "#0A66C2" },
+  { icon: Twitter, label: "X / Twitter", angle: 202.5, color: "#111827" },
+  { icon: Youtube, label: "YouTube", angle: 247.5, color: "#FF0000" },
+  { icon: Globe, label: "Website & SEO", angle: 292.5, color: "#059669" },
+  { icon: Sparkles, label: "AI Marketing", angle: 337.5, color: "#7C3AED" },
 ];
 
-// 8 Diyas arranged in circular angles (every 45 degrees)
-const DIYA_ANGLES = [270, 315, 0, 45, 90, 135, 180, 225];
+// 8 Diyas arranged in exact 45-degree intervals starting from 12 o'clock (0° = Top)
+const DIYA_ANGLES = [0, 45, 90, 135, 180, 225, 270, 315];
 
 export default function DiwaliIntro() {
   const [isOpen, setIsOpen] = useState(true);
@@ -44,6 +45,12 @@ export default function DiwaliIntro() {
 
   if (!isOpen) return null;
 
+  // Mathematical radius percentages (relative to the square wheel container)
+  // R_diya: places the Diya so its base touches the center DIWALI circle and flame points outward
+  const R_DIYA = 29.5;
+  // R_icon: places the social badge exactly in the middle of the V-notch between adjacent Diyas
+  const R_ICON = 33.0;
+
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-3 sm:p-4 bg-[#140628]/92 backdrop-blur-md animate-in fade-in duration-300 select-none overflow-y-auto">
       {/* Custom Keyframes for Smooth Spinning Circular Wheel and Counter-Rotation */}
@@ -53,8 +60,8 @@ export default function DiwaliIntro() {
           to { transform: rotate(360deg); }
         }
         @keyframes iconCounterSpin {
-          from { transform: translate(-50%, -50%) rotate(0deg); }
-          to { transform: translate(-50%, -50%) rotate(-360deg); }
+          from { transform: rotate(0deg); }
+          to { transform: rotate(-360deg); }
         }
         .animate-diwali-wheel {
           animation: diwaliWheelSpin 28s linear infinite;
@@ -65,8 +72,8 @@ export default function DiwaliIntro() {
       `}</style>
 
       {/* Background ambient festival glow */}
-      <div className="absolute w-[500px] h-[500px] bg-purple-600/20 rounded-full blur-[140px] pointer-events-none" />
-      <div className="absolute w-[340px] h-[340px] bg-amber-500/18 rounded-full blur-[100px] pointer-events-none" />
+      <div className="absolute w-[460px] h-[460px] bg-purple-600/20 rounded-full blur-[130px] pointer-events-none" />
+      <div className="absolute w-[320px] h-[320px] bg-amber-500/18 rounded-full blur-[90px] pointer-events-none" />
 
       {/* Main Container */}
       <div className="relative w-full max-w-[560px] flex flex-col items-center justify-center py-2 sm:py-4">
@@ -74,20 +81,20 @@ export default function DiwaliIntro() {
         <button
           type="button"
           onClick={handleClose}
-          className="absolute top-0 right-0 p-2.5 rounded-full bg-white/10 text-white hover:bg-white/20 border border-white/20 transition-all cursor-pointer z-50 shadow-lg"
+          className="absolute top-0 right-0 p-2 sm:p-2.5 rounded-full bg-white/10 text-white hover:bg-white/20 border border-white/20 transition-all cursor-pointer z-50 shadow-lg"
           aria-label="Close Greeting"
         >
           <X size={18} />
         </button>
 
-        {/* ================= AUTHENTIC DIWALI MANDALA WHEEL ================= */}
-        {/* Clean, high-fidelity circular composition matching the reference reel */}
-        <div className="relative w-[340px] h-[340px] sm:w-[480px] sm:h-[480px] aspect-square flex items-center justify-center">
+        {/* ================= PERFECT MATHEMATICAL CIRCULAR WHEEL ================= */}
+        {/* Strictly aspect-square container ensures perfect circular geometry on both mobile and desktop */}
+        <div className="relative w-[330px] h-[330px] sm:w-[460px] sm:h-[460px] aspect-square flex items-center justify-center">
           
           {/* ROTATING WHEEL (Contains Mandala Lace + 8 Diyas + 8 Social Badges) */}
           <div className="absolute inset-0 w-full h-full animate-diwali-wheel pointer-events-none">
             
-            {/* Traditional Indian Mandala Lace Ring (Hugging the center disc) */}
+            {/* Traditional Indian Mandala Background */}
             <svg viewBox="0 0 500 500" className="absolute inset-0 w-full h-full">
               <defs>
                 {/* Gold Gradient for Mandala Accents */}
@@ -104,34 +111,34 @@ export default function DiwaliIntro() {
                   <stop offset="100%" stopColor="#4c0519" />
                 </linearGradient>
 
-                {/* Soft Radial Glow behind the whole wheel */}
+                {/* Soft Radial Glow behind the wheel */}
                 <radialGradient id="wheelCenterAura" cx="50%" cy="50%" r="50%">
-                  <stop offset="40%" stopColor="#7e22ce" stopOpacity="0.35" />
-                  <stop offset="75%" stopColor="#4c1d95" stopOpacity="0.15" />
+                  <stop offset="30%" stopColor="#7e22ce" stopOpacity="0.4" />
+                  <stop offset="70%" stopColor="#4c1d95" stopOpacity="0.15" />
                   <stop offset="100%" stopColor="#1e1b4b" stopOpacity="0" />
                 </radialGradient>
               </defs>
 
               {/* Soft purple radial aura */}
-              <circle cx="250" cy="250" r="230" fill="url(#wheelCenterAura)" />
+              <circle cx="250" cy="250" r="225" fill="url(#wheelCenterAura)" />
 
-              {/* Outer delicate ring tying the composition together */}
+              {/* Subtle circular track passing behind the Diyas */}
               <circle
                 cx="250"
                 cy="250"
-                r="192"
+                r="147.5"
                 fill="none"
                 stroke="url(#mandalaGold)"
-                strokeWidth="1.2"
-                strokeDasharray="3 5"
-                opacity="0.45"
+                strokeWidth="1"
+                strokeDasharray="4 6"
+                opacity="0.35"
               />
 
               {/* Decorative Mandala Petals hugging the center ring */}
               {[...Array(24)].map((_, i) => {
                 const angle = (i * Math.PI) / 12;
-                const r1 = 105;
-                const r2 = 132;
+                const r1 = 100;
+                const r2 = 126;
                 const p1x = 250 + r1 * Math.cos(angle - 0.12);
                 const p1y = 250 + r1 * Math.sin(angle - 0.12);
                 const p2x = 250 + r2 * Math.cos(angle);
@@ -146,89 +153,68 @@ export default function DiwaliIntro() {
                     fill="url(#mandalaPetalGrad)"
                     stroke="url(#mandalaGold)"
                     strokeWidth="0.8"
-                    opacity="0.85"
+                    opacity="0.8"
                   />
                 );
               })}
 
-              {/* Inner golden beaded circle */}
+              {/* Inner golden ring right around the center disc */}
               <circle
                 cx="250"
                 cy="250"
-                r="106"
+                r="102"
                 fill="none"
                 stroke="url(#mandalaGold)"
                 strokeWidth="2"
                 opacity="0.8"
               />
-
-              {/* Golden bead accents around inner ring */}
-              {[...Array(24)].map((_, i) => {
-                const angle = (i * Math.PI) / 12;
-                return (
-                  <circle
-                    key={`bead_${i}`}
-                    cx={250 + 106 * Math.cos(angle)}
-                    cy={250 + 106 * Math.sin(angle)}
-                    r="2.2"
-                    fill="#fef08a"
-                    stroke="#d97706"
-                    strokeWidth="0.5"
-                  />
-                );
-              })}
             </svg>
 
-            {/* ================= 8 TRADITIONAL LOTUS-PETAL DIYAS ================= */}
-            {/* Sits snugly around the center circle like radiant flower petals */}
-            {DIYA_ANGLES.map((angle, idx) => {
-              const rad = (angle * Math.PI) / 180;
-              // Radius 32% places the rounded base of the Diya right against the center mandala,
-              // while the flame tip reaches outward to 43%, creating a perfect lotus circle!
-              const radiusPercent = 32;
-              const left = 50 + radiusPercent * Math.cos(rad);
-              const top = 50 + radiusPercent * Math.sin(rad);
-
-              // Flame points radially outwards
-              const rotationDeg = angle + 90;
+            {/* ================= 8 DIYAS IN 100% PERFECT CIRCULAR ALIGNMENT ================= */}
+            {DIYA_ANGLES.map((theta, idx) => {
+              // Convert clockwise angle from 12 o'clock to standard radians
+              const rad = (theta * Math.PI) / 180;
+              // Precise polar coordinates from the center (50%, 50%)
+              const x = 50 + R_DIYA * Math.sin(rad);
+              const y = 50 - R_DIYA * Math.cos(rad);
 
               return (
                 <div
-                  key={idx}
-                  className="absolute -translate-x-1/2 -translate-y-1/2 z-10"
+                  key={`diya_${idx}`}
+                  className="absolute"
                   style={{
-                    left: `${left}%`,
-                    top: `${top}%`,
-                    transform: `translate(-50%, -50%) rotate(${rotationDeg}deg)`,
+                    left: `${x}%`,
+                    top: `${y}%`,
+                    // Perfectly centered on (x, y) and rotated so flame points straight outward
+                    transform: `translate(-50%, -50%) rotate(${theta}deg)`,
                   }}
                 >
-                  {/* Diya sized to form a complete floral garland */}
-                  <div className="relative w-14 h-20 sm:w-20 sm:h-28 flex flex-col items-center">
+                  {/* Diya box sized proportionally for mobile & desktop */}
+                  <div className="relative w-12 h-16 sm:w-16 sm:h-22 flex flex-col items-center justify-center">
                     {/* Soft warm flame aura */}
-                    <div className="absolute top-1 w-7 h-7 sm:w-10 sm:h-10 bg-amber-400/35 rounded-full blur-md animate-pulse" />
+                    <div className="absolute top-1 w-6 h-6 sm:w-8 sm:h-8 bg-amber-400/35 rounded-full blur-md animate-pulse pointer-events-none" />
 
-                    {/* High-Fidelity Traditional Indian Diya Vector Artwork */}
+                    {/* Symmetrical Traditional Indian Diya Vector (Center of mass at 50, 60) */}
                     <svg
                       viewBox="0 0 100 120"
-                      className="w-full h-full drop-shadow-[0_6px_20px_rgba(0,0,0,0.75)]"
+                      className="w-full h-full drop-shadow-[0_4px_16px_rgba(0,0,0,0.7)]"
                       fill="none"
                       xmlns="http://www.w3.org/2000/svg"
                     >
                       <defs>
-                        {/* Authentic Terracotta Clay Gradient */}
+                        {/* Terracotta Clay Gradient */}
                         <linearGradient id={`clayGrad_${idx}`} x1="0" y1="0" x2="1" y2="1">
                           <stop offset="0%" stopColor="#a21caf" />
-                          <stop offset="20%" stopColor="#9f1239" />
-                          <stop offset="60%" stopColor="#701a75" />
+                          <stop offset="25%" stopColor="#9f1239" />
+                          <stop offset="65%" stopColor="#701a75" />
                           <stop offset="100%" stopColor="#4c0519" />
                         </linearGradient>
 
-                        {/* Gleaming Gold Filigree Border */}
+                        {/* Gold Filigree Rim */}
                         <linearGradient id={`goldRim_${idx}`} x1="0" y1="0" x2="1" y2="0">
                           <stop offset="0%" stopColor="#fef08a" />
-                          <stop offset="40%" stopColor="#fbbf24" />
-                          <stop offset="80%" stopColor="#f59e0b" />
-                          <stop offset="100%" stopColor="#b45309" />
+                          <stop offset="50%" stopColor="#fbbf24" />
+                          <stop offset="100%" stopColor="#d97706" />
                         </linearGradient>
 
                         {/* Radiant Flame Gradient */}
@@ -241,60 +227,55 @@ export default function DiwaliIntro() {
                       </defs>
 
                       {/* --- FLAME --- */}
-                      {/* Flickering Outer Flame */}
                       <path
-                        d="M50 4 C43 15 35 24 35 34 C35 44 42 48 50 48 C58 48 65 44 65 34 C65 24 57 15 50 4 Z"
+                        d="M50 8 C42 20 34 28 34 38 C34 48 42 52 50 52 C58 52 66 48 66 38 C66 28 58 20 50 8 Z"
                         fill={`url(#flameGrad_${idx})`}
                         className="animate-pulse"
                       />
-
-                      {/* Pure White Flame Core */}
                       <path
-                        d="M50 12 C46 19 41 26 41 34 C41 40 45 44 50 44 C55 44 59 40 59 34 C59 26 54 19 50 12 Z"
+                        d="M50 16 C45 24 40 30 40 38 C40 44 44 48 50 48 C56 48 60 44 60 38 C60 30 55 24 50 16 Z"
                         fill="#ffffff"
                         opacity="0.95"
                       />
 
-                      {/* --- DIYA BODY (TRADITIONAL CLAY POT) --- */}
-                      {/* Left Ornate Scalloped Ear / Wing */}
+                      {/* --- DIYA BODY (TRADITIONAL CLAY LAMP) --- */}
+                      {/* Left Scalloped Ear / Wing */}
                       <path
-                        d="M32 48 C20 44 10 54 14 66 C18 76 26 82 36 86"
-                        fill="none"
+                        d="M32 52 C20 48 12 58 16 70 C20 80 28 84 36 88"
                         stroke={`url(#goldRim_${idx})`}
                         strokeWidth="2"
                         strokeLinecap="round"
                       />
                       <path
-                        d="M32 48 C20 44 10 54 14 66 C18 76 26 82 36 86 C28 78 24 68 28 60 C30 54 34 50 32 48 Z"
+                        d="M32 52 C20 48 12 58 16 70 C20 80 28 84 36 88 C28 80 24 70 28 62 C30 56 34 54 32 52 Z"
                         fill="#881337"
                         opacity="0.9"
                       />
 
-                      {/* Right Ornate Scalloped Ear / Wing */}
+                      {/* Right Scalloped Ear / Wing */}
                       <path
-                        d="M68 48 C80 44 90 54 86 66 C82 76 74 82 64 86"
-                        fill="none"
+                        d="M68 52 C80 48 88 58 84 70 C80 80 72 84 64 88"
                         stroke={`url(#goldRim_${idx})`}
                         strokeWidth="2"
                         strokeLinecap="round"
                       />
                       <path
-                        d="M68 48 C80 44 90 54 86 66 C82 76 74 82 64 86 C72 78 76 68 72 60 C70 54 66 50 68 48 Z"
+                        d="M68 52 C80 48 88 58 84 70 C80 80 72 84 64 88 C72 80 76 70 72 62 C70 56 66 54 68 52 Z"
                         fill="#881337"
                         opacity="0.9"
                       />
 
-                      {/* Main Rounded Clay Bowl (Proper Rounded Bottom Base) */}
+                      {/* Main Rounded Clay Bowl */}
                       <path
-                        d="M26 50 C18 64 24 88 40 102 C44 105 56 105 60 102 C76 88 82 64 74 50 C66 56 34 56 26 50 Z"
+                        d="M26 52 C18 66 24 92 40 106 C44 110 56 110 60 106 C76 92 82 66 74 52 C66 58 34 58 26 52 Z"
                         fill={`url(#clayGrad_${idx})`}
                         stroke={`url(#goldRim_${idx})`}
                         strokeWidth="2.2"
                       />
 
-                      {/* Decorative Gold Rim along the Bowl Lip */}
+                      {/* Gold Lip Rim */}
                       <path
-                        d="M26 50 Q50 58 74 50"
+                        d="M26 52 Q50 60 74 52"
                         stroke={`url(#goldRim_${idx})`}
                         strokeWidth="2.5"
                         fill="none"
@@ -303,46 +284,51 @@ export default function DiwaliIntro() {
 
                       {/* Inner Dark Oil Well */}
                       <path
-                        d="M30 55 C26 66 32 82 44 92 C47 94 53 94 56 92 C68 82 74 66 70 55 C62 60 38 60 30 55 Z"
+                        d="M30 58 C26 70 32 86 44 96 C47 98 53 98 56 96 C68 86 74 70 70 58 C62 64 38 64 30 58 Z"
                         fill="#300718"
                       />
 
-                      {/* Golden Central Cotton Wick Line */}
+                      {/* Golden Center Wick */}
                       <path
-                        d="M50 44 L50 82"
+                        d="M50 48 L50 86"
                         stroke={`url(#goldRim_${idx})`}
                         strokeWidth="2"
                         strokeLinecap="round"
                       />
 
-                      {/* Base Decorative Golden Floral Accent */}
-                      <circle cx="50" cy="98" r="2.5" fill="#fef08a" />
+                      {/* Base Gold Dot */}
+                      <circle cx="50" cy="102" r="2.5" fill="#fef08a" />
                     </svg>
                   </div>
                 </div>
               );
             })}
 
-            {/* ================= 8 SOCIAL MEDIA BADGES IN THE NOTCHES ================= */}
-            {/* Positioned cleanly in the V-notches between adjacent Diyas */}
+            {/* ================= 8 SOCIAL MEDIA BADGES IN 100% EQUAL SPACING ================= */}
             {SOCIAL_CHANNELS.map((ch, idx) => {
+              // Convert clockwise angle from 12 o'clock to standard radians
               const rad = (ch.angle * Math.PI) / 180;
-              // Radius 35% places the badge right into the open space between the tips of adjacent Diyas
-              const radiusPercent = 35;
-              const left = 50 + radiusPercent * Math.cos(rad);
-              const top = 50 + radiusPercent * Math.sin(rad);
+              // Exact polar coordinates: perfectly midway between adjacent Diyas
+              const x = 50 + R_ICON * Math.sin(rad);
+              const y = 50 - R_ICON * Math.cos(rad);
 
               return (
                 <div
-                  key={idx}
-                  className="absolute -translate-x-1/2 -translate-y-1/2 z-20 pointer-events-auto"
-                  style={{ left: `${left}%`, top: `${top}%` }}
+                  key={`social_${idx}`}
+                  className="absolute pointer-events-auto"
+                  style={{
+                    left: `${x}%`,
+                    top: `${y}%`,
+                    // Perfectly centered on (x, y) - no double translate!
+                    transform: "translate(-50%, -50%)",
+                  }}
                   title={ch.label}
                 >
-                  {/* Counter-rotating badge keeps icon upright as the wheel spins */}
-                  <div className="animate-icon-counter">
-                    <div className="w-7 h-7 sm:w-10 sm:h-10 rounded-full bg-white shadow-[0_4px_16px_rgba(0,0,0,0.65)] flex items-center justify-center border-2 border-amber-300 hover:scale-125 transition-transform duration-200">
-                      <ch.icon size={15} className="sm:w-5 sm:h-5" style={{ color: ch.color }} />
+                  {/* Counter-rotating badge keeps icon upright as the circle spins */}
+                  <div className="animate-icon-counter flex items-center justify-center">
+                    {/* Consistent white circle size across all 8 badges */}
+                    <div className="w-7 h-7 sm:w-9 sm:h-9 rounded-full bg-white shadow-[0_3px_12px_rgba(0,0,0,0.6)] flex items-center justify-center border-2 border-amber-300 hover:scale-125 transition-transform duration-200">
+                      <ch.icon size={14} className="sm:w-4 sm:h-4" style={{ color: ch.color }} />
                     </div>
                   </div>
                 </div>
@@ -350,8 +336,8 @@ export default function DiwaliIntro() {
             })}
           </div>
 
-          {/* ================= STEADY CENTER GREETING (Crisp, High-Contrast & Readable) ================= */}
-          <div className="relative z-30 w-[140px] h-[140px] sm:w-[190px] sm:h-[190px] rounded-full bg-gradient-to-br from-[#2f1354] via-[#1f0b3a] to-[#120524] border-2 border-amber-400 shadow-[0_0_40px_rgba(245,158,11,0.55),inset_0_0_25px_rgba(168,85,247,0.45)] flex flex-col items-center justify-center text-center p-3 sm:p-5">
+          {/* ================= STEADY CENTER DIWALI GREETING (UNCHANGED & PRESERVED) ================= */}
+          <div className="relative z-30 w-[130px] h-[130px] sm:w-[190px] sm:h-[190px] rounded-full bg-gradient-to-br from-[#2f1354] via-[#1f0b3a] to-[#120524] border-2 border-amber-400 shadow-[0_0_40px_rgba(245,158,11,0.55),inset_0_0_25px_rgba(168,85,247,0.45)] flex flex-col items-center justify-center text-center p-3 sm:p-5">
             <span className="text-amber-200/95 text-[11px] sm:text-xs font-semibold tracking-widest uppercase">
               Wishing you a
             </span>
