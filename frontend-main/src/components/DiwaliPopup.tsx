@@ -50,7 +50,6 @@ export default function DiwaliPopup() {
 
   // ================= 2. CANVAS FIREWORKS & AMBIENT DUST ENGINE =================
   const spawnFirework = useCallback((originX: number, originY: number, count = 55) => {
-    // Royal Gold, Saffron & Pure White festive palette matching the reference
     const colors = [
       "#FFFFFF", // Pure white core
       "#FEF08A", // Pale lemon gold
@@ -402,31 +401,37 @@ export default function DiwaliPopup() {
         ))}
       </svg>
 
-      {/* ================= TOP HEADER (BRANDING & ENTER SITE) ================= */}
-      <header className="relative z-30 w-full px-5 sm:px-10 py-4 sm:py-5 flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <span className="text-amber-400 text-xs">✦</span>
-          <span className="text-amber-200/90 tracking-[0.28em] text-[11px] sm:text-xs md:text-sm font-bold uppercase">
-            RizeWorld Institute
-          </span>
-          <span className="text-amber-400 text-xs">✦</span>
+      {/* ================= TOP HEADER (PROMINENT LARGE OFFICIAL LOGO & ENTER SITE) ================= */}
+      {/* Placed outside the wish card at prominent large size as requested by user */}
+      <header className="relative z-30 w-full px-5 sm:px-10 py-3 sm:py-5 flex items-center justify-between">
+        
+        {/* Prominent Large RizeWorld Institute Logo */}
+        <div className="flex items-center">
+          <div className="bg-white px-3.5 py-1.5 sm:px-5 sm:py-2 rounded-2xl shadow-[0_6px_28px_rgba(0,0,0,0.6),0_0_20px_rgba(251,191,36,0.3)] border-2 border-amber-300 transition-all duration-300 hover:scale-105">
+            <img
+              src="/images/rizeworld-logo.png"
+              alt="RizeWorld Institute of AI & Digital Marketing"
+              className="h-10 sm:h-14 md:h-16 w-auto object-contain select-none"
+            />
+          </div>
         </div>
 
+        {/* Enter Site Button */}
         <button
           type="button"
           data-no-firework="true"
           onClick={handleClose}
-          className="group flex items-center gap-2 px-4 py-2 rounded-full bg-black/40 hover:bg-black/60 text-neutral-300 hover:text-white border border-amber-400/40 hover:border-amber-300 transition-all duration-200 cursor-pointer shadow-lg backdrop-blur-md"
+          className="group flex items-center gap-2 px-4 py-2 sm:px-5 sm:py-2.5 rounded-full bg-black/50 hover:bg-black/75 text-neutral-300 hover:text-white border border-amber-400/40 hover:border-amber-300 transition-all duration-200 cursor-pointer shadow-lg backdrop-blur-md"
           aria-label="Enter Website"
         >
-          <span className="text-[11px] sm:text-xs font-semibold tracking-wider uppercase text-amber-200 group-hover:text-white">
+          <span className="text-[11px] sm:text-xs md:text-sm font-semibold tracking-wider uppercase text-amber-200 group-hover:text-white">
             Enter Site
           </span>
-          <X size={15} className="text-amber-300 group-hover:text-white" />
+          <X size={16} className="text-amber-300 group-hover:text-white" />
         </button>
       </header>
 
-      {/* ================= CENTRAL ROYAL CARTOUCHE FRAME (PURE CODE SVG + CSS) ================= */}
+      {/* ================= CENTRAL ROYAL CARTOUCHE FRAME (NO LOGO INSIDE CARD) ================= */}
       <main className="relative z-30 flex-1 flex flex-col items-center justify-center px-3 sm:px-6 my-auto max-w-5xl mx-auto w-full">
         <div className="relative w-full max-w-[840px] aspect-[840/540] flex items-center justify-center">
           
@@ -700,7 +705,7 @@ export default function DiwaliPopup() {
             ✦
           </div>
 
-          {/* ================= TYPOGRAPHY INSIDE THE CARTOUCHE ================= */}
+          {/* ================= TYPOGRAPHY INSIDE THE CARTOUCHE (NO LOGO HERE) ================= */}
           <div className="relative z-20 flex flex-col items-center justify-center text-center px-6 max-w-lg mx-auto">
             {/* H A P P Y */}
             <span className="text-amber-200/90 tracking-[0.35em] text-xs sm:text-sm font-semibold uppercase mb-1">
