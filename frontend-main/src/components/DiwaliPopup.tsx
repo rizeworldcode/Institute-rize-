@@ -25,16 +25,9 @@ interface FloatingDust {
   fadeSpeed: number;
 }
 
-// Ensures Diwali greeting shows only ONCE per website load / session
-let hasShownDiwaliInSession = false;
 
 export default function DiwaliPopup() {
-  const [isOpen, setIsOpen] = useState(() => {
-    if (typeof window === "undefined") return false;
-    if (hasShownDiwaliInSession) return false;
-    hasShownDiwaliInSession = true;
-    return true;
-  });
+  const [isOpen, setIsOpen] = useState(true);
   const [isClosing, setIsClosing] = useState(false);
 
   const containerRef = useRef<HTMLDivElement>(null);
@@ -234,7 +227,10 @@ export default function DiwaliPopup() {
     const container = containerRef.current;
     if (!container) return;
 
-    gsap.fromTo(container, { opacity: 0 }, { opacity: 1, duration: 0.6, ease: "power2.out" });
+    const ctx = gsap.context(() => {
+      gsap.fromTo(container, { opacity: 0 }, { opacity: 1, duration: 0.6, ease: "power2.out" });
+    });
+    return () => ctx.revert();
   }, [isOpen]);
 
   const handleClose = useCallback(() => {
