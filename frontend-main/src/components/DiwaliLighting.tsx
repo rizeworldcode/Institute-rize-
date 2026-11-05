@@ -1,3 +1,5 @@
+import { useState, useEffect } from "react";
+
 // Festive bulb palette matching authentic Diwali fairy lights
 const BULB_COLORS = [
   { color: "#FBBF24", glow: "rgba(251, 191, 36, 0.9)", name: "Gold" },
@@ -10,8 +12,18 @@ const BULB_COLORS = [
 ];
 
 export default function DiwaliLighting() {
-  // 24 bulbs across the top screen
-  const bulbCount = 24;
+  // 14 bulbs on mobile so they don't crowd, 24 bulbs on tablet/desktop
+  const [bulbCount, setBulbCount] = useState(() =>
+    typeof window !== "undefined" && window.innerWidth < 640 ? 14 : 24
+  );
+
+  useEffect(() => {
+    const handleResize = () => {
+      setBulbCount(window.innerWidth < 640 ? 14 : 24);
+    };
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   return (
     <div
@@ -78,7 +90,8 @@ export default function DiwaliLighting() {
       />
 
       {/* ================= 2. TOP HANGING STRING FAIRY LIGHTS (LADI / JHALAR) ================= */}
-      <div className="absolute top-0 left-0 right-0 h-16 w-full flex items-start justify-between px-2 sm:px-4">
+      {/* Positioned directly below the mobile floating navbar capsule (top-[68px]), and at top-0 on desktop */}
+      <div className="absolute top-[68px] sm:top-[72px] lg:top-0 left-0 right-0 h-16 w-full flex items-start justify-between px-2 sm:px-4">
         {/* Curving green wire spanning the top */}
         <svg
           className="absolute top-0 left-0 w-full h-8 overflow-visible"
