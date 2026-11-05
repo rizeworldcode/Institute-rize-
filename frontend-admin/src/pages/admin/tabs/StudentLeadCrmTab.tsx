@@ -20,10 +20,10 @@ export const CATEGORY_CONFIG = {
     title: "Total Leads",
     badge: "All Registered",
     description: "Complete directory of all registered inquiries, workshop participants, and student leads across all pipeline stages.",
-    themeColor: "from-[#1d4ed8] via-[#2563eb] to-[#3b82f6]",
-    bgLight: "bg-blue-50",
-    borderColor: "border-blue-200",
-    textColor: "text-blue-700",
+    themeColor: "from-[#ee591e] via-[#ea580c] to-[#c2410c]",
+    bgLight: "bg-orange-50",
+    borderColor: "border-orange-200",
+    textColor: "text-[#c2410c]",
     icon: Building,
   },
   "new-inquiries": {
@@ -42,10 +42,10 @@ export const CATEGORY_CONFIG = {
     title: "In Follow-up Leads",
     badge: "Active Engagement",
     description: "Active prospect leads undergoing follow-up calls, scheduled demo sessions, or completed demo evaluations.",
-    themeColor: "from-purple-600 to-indigo-600",
-    bgLight: "bg-purple-50",
-    borderColor: "border-purple-200",
-    textColor: "text-purple-700",
+    themeColor: "from-amber-500 via-amber-600 to-orange-500",
+    bgLight: "bg-amber-50",
+    borderColor: "border-amber-200",
+    textColor: "text-amber-800",
     icon: TrendingUp,
   },
   "converted": {
@@ -53,10 +53,10 @@ export const CATEGORY_CONFIG = {
     title: "Converted Students",
     badge: "Enrolled",
     description: "Leads who successfully enrolled into courses with registered admissions and fee records.",
-    themeColor: "from-emerald-600 to-teal-600",
+    themeColor: "from-[#2a7c37] via-[#246c30] to-[#1e5827]",
     bgLight: "bg-emerald-50",
     borderColor: "border-emerald-200",
-    textColor: "text-emerald-700",
+    textColor: "text-[#1e4a24]",
     icon: CheckCircle2,
   },
   "lost-leads": {
@@ -1453,13 +1453,13 @@ export function StudentLeadCrmTab() {
                     {/* STUDENT NAME */}
                     <td className="py-4 px-4">
                       <div className="flex items-center gap-2.5">
-                        <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-blue-100 to-indigo-100 text-blue-700 flex items-center justify-center text-xs font-bold shadow-2xs border border-blue-200/50 shrink-0">
+                        <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-orange-100 via-amber-100 to-emerald-100 text-[#c2410c] flex items-center justify-center text-xs font-black shadow-2xs border border-orange-200/60 shrink-0">
                           {lead.student_name ? lead.student_name.charAt(0).toUpperCase() : "L"}
                         </div>
                         <div className="min-w-0">
                           <div 
                             onClick={() => setSelectedLeadForDetails(lead)}
-                            className="font-bold text-neutral-900 hover:text-blue-600 transition-colors cursor-pointer text-xs sm:text-sm truncate"
+                            className="font-bold text-neutral-900 hover:text-[#ee591e] transition-colors cursor-pointer text-xs sm:text-sm truncate"
                           >
                             {lead.student_name}
                           </div>
@@ -1924,12 +1924,12 @@ export function StudentLeadCrmTab() {
       {/* Top Breadcrumb & Page Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
         <div>
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-50 text-blue-700 text-xs font-bold mb-1.5 border border-blue-200/60 shadow-2xs">
-            <span>#</span> CRM Leads Hub
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-orange-50 text-[#c2410c] text-xs font-bold mb-1.5 border border-orange-200/80 shadow-2xs">
+            <span className="text-[#ee591e]">#</span> CRM Leads Hub
           </div>
           <div className="flex items-center gap-2.5 sm:gap-3">
-            <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl bg-white border border-neutral-200/80 text-blue-600 flex items-center justify-center shadow-xs shrink-0">
-              <Target size={20} className="text-blue-600 sm:w-[22px] sm:h-[22px]" />
+            <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl bg-orange-50 border border-orange-200/80 text-[#ee591e] flex items-center justify-center shadow-xs shrink-0">
+              <Target size={20} className="text-[#ee591e] sm:w-[22px] sm:h-[22px]" />
             </div>
             <div>
               <h1 className="text-xl sm:text-2xl md:text-3xl font-black text-neutral-900 tracking-tight">
@@ -1952,17 +1952,17 @@ export function StudentLeadCrmTab() {
             disabled={isRefreshing}
             className="flex-1 sm:flex-initial px-3.5 py-2 sm:px-4 sm:py-2.5 rounded-full bg-white border border-neutral-200/80 hover:bg-neutral-50 text-neutral-700 text-xs sm:text-sm font-bold transition-all shadow-xs flex items-center justify-center gap-2 cursor-pointer disabled:opacity-60"
           >
-            <RotateCw size={14} className={isRefreshing ? "animate-spin text-blue-600" : ""} />
+            <RotateCw size={14} className={isRefreshing ? "animate-spin text-[#ee591e]" : ""} />
             <span>Refresh</span>
           </button>
 
           <button
             type="button"
             onClick={() => exportLeadsToPdf(filteredLeads, "Student_Leads")}
-            className="flex-1 sm:flex-initial px-3.5 py-2 sm:px-4 sm:py-2.5 rounded-full bg-rose-600 hover:bg-rose-700 text-white text-xs sm:text-sm font-bold transition-all shadow-xs flex items-center justify-center gap-1.5 cursor-pointer shadow-rose-600/20 hover:shadow"
+            className="flex-1 sm:flex-initial px-3.5 py-2 sm:px-4 sm:py-2.5 rounded-full bg-[#18181b] hover:bg-black text-white text-xs sm:text-sm font-bold transition-all shadow-xs flex items-center justify-center gap-1.5 cursor-pointer shadow-black/10 hover:shadow"
             title={`Download PDF sheet of ${filteredLeads.length} currently filtered leads`}
           >
-            <FileDown size={15} />
+            <FileDown size={15} className="text-[#ee591e]" />
             <span>Download PDF ({filteredLeads.length})</span>
           </button>
 
@@ -1971,9 +1971,9 @@ export function StudentLeadCrmTab() {
               setSelectedLeadForEdit(null);
               setIsFormModalOpen(true);
             }}
-            className="flex-1 sm:flex-initial px-4 py-2 sm:px-5 sm:py-2.5 rounded-full bg-[#2563eb] hover:bg-blue-700 text-white text-xs sm:text-sm font-bold transition-all shadow-xs shadow-blue-500/20 flex items-center justify-center gap-2 cursor-pointer hover:shadow"
+            className="flex-1 sm:flex-initial px-4 py-2 sm:px-5 sm:py-2.5 rounded-full bg-gradient-to-r from-[#ee591e] to-[#ff7a1a] hover:from-[#d84810] hover:to-[#ee591e] text-white text-xs sm:text-sm font-bold transition-all shadow-md shadow-[#ee591e]/25 flex items-center justify-center gap-2 cursor-pointer hover:shadow-lg active:scale-[0.98]"
           >
-            <Plus size={16} />
+            <Plus size={16} className="stroke-[2.5]" />
             <span>Enter Lead</span>
           </button>
         </div>
@@ -1981,18 +1981,18 @@ export function StudentLeadCrmTab() {
 
       {/* 5 KPI Stat Cards (Smooth Horizontal Swipe on Mobile, Full Grid on Desktop) - CLICKABLE */}
       <div className="flex overflow-x-auto no-scrollbar gap-2.5 sm:gap-4 pb-1 -mx-2 px-2 sm:mx-0 sm:px-0 sm:grid sm:grid-cols-3 lg:grid-cols-5 snap-x">
-        {/* 1. Total Leads (Primary Blue Gradient matching Dashboard Card 1) */}
+        {/* 1. Total Leads (Signature Rize Orange Gradient matching Logo) */}
         <div 
           onClick={() => navigate("/admin/dashboard/student-crm/total-leads")}
           role="button"
           tabIndex={0}
           title="Click to view all registered leads"
-          className="cursor-pointer select-none min-w-[145px] max-w-[170px] sm:min-w-0 sm:max-w-none snap-start shrink-0 sm:shrink bg-gradient-to-br from-[#1d4ed8] via-[#2563eb] to-[#3b82f6] text-white rounded-2xl sm:rounded-[26px] p-4 sm:p-6 shadow-sm hover:shadow-md hover:-translate-y-1 active:scale-[0.98] transition-all duration-300 relative overflow-hidden group flex flex-col justify-between min-h-[135px] sm:min-h-[175px]"
+          className="cursor-pointer select-none min-w-[145px] max-w-[170px] sm:min-w-0 sm:max-w-none snap-start shrink-0 sm:shrink bg-gradient-to-br from-[#ee591e] via-[#ea580c] to-[#c2410c] text-white rounded-2xl sm:rounded-[26px] p-4 sm:p-6 shadow-md shadow-[#ee591e]/20 hover:shadow-lg hover:-translate-y-1 active:scale-[0.98] transition-all duration-300 relative overflow-hidden group flex flex-col justify-between min-h-[135px] sm:min-h-[175px]"
         >
           <div className="flex items-center justify-between mb-2">
-            <span className="text-[11px] sm:text-xs font-semibold text-blue-100 uppercase tracking-wider">Total Leads</span>
-            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-white text-blue-600 flex items-center justify-center shadow-xs">
-              <Building size={17} className="sm:w-5 sm:h-5" />
+            <span className="text-[11px] sm:text-xs font-bold text-orange-100 uppercase tracking-wider">Total Leads</span>
+            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-white text-[#ee591e] flex items-center justify-center shadow-xs">
+              <Building size={17} className="sm:w-5 sm:h-5 stroke-[2.2]" />
             </div>
           </div>
           <div className="my-auto">
@@ -2000,12 +2000,12 @@ export function StudentLeadCrmTab() {
               <span className="text-2xl sm:text-3xl md:text-4xl font-black text-white tracking-tight">
                 {displayStats.totalLeads}
               </span>
-              <span className="inline-flex items-center text-[10px] sm:text-[11px] font-bold px-1.5 py-0.5 rounded-full bg-white/20 text-white backdrop-blur-xs">
+              <span className="inline-flex items-center text-[10px] sm:text-[11px] font-bold px-1.5 py-0.5 rounded-full bg-white/20 text-white backdrop-blur-xs border border-white/20">
                 Active
               </span>
             </div>
           </div>
-          <div className="flex items-center justify-between text-[11px] sm:text-xs text-blue-100 font-medium opacity-90 truncate mt-2 pt-2 border-t border-white/20">
+          <div className="flex items-center justify-between text-[11px] sm:text-xs text-orange-100 font-medium opacity-95 truncate mt-2 pt-2 border-t border-white/20">
             <span className="truncate">{dateLabel ? `Active on ${dateLabel}` : "All inquiries"}</span>
             <span className="shrink-0 text-white font-bold group-hover:translate-x-1 transition-transform flex items-center gap-0.5">
               View <ArrowRight size={12} />
@@ -2019,11 +2019,11 @@ export function StudentLeadCrmTab() {
           role="button"
           tabIndex={0}
           title="Click to view fresh new inquiries"
-          className="cursor-pointer select-none min-w-[145px] max-w-[170px] sm:min-w-0 sm:max-w-none snap-start shrink-0 sm:shrink bg-white rounded-2xl sm:rounded-[26px] p-4 sm:p-6 border border-neutral-200/80 shadow-xs hover:border-neutral-300 hover:shadow-md hover:-translate-y-1 active:scale-[0.98] transition-all duration-300 relative overflow-hidden group flex flex-col justify-between min-h-[135px] sm:min-h-[175px]"
+          className="cursor-pointer select-none min-w-[145px] max-w-[170px] sm:min-w-0 sm:max-w-none snap-start shrink-0 sm:shrink bg-white rounded-2xl sm:rounded-[26px] p-4 sm:p-6 border border-neutral-200/80 shadow-xs hover:border-blue-300 hover:shadow-md hover:-translate-y-1 active:scale-[0.98] transition-all duration-300 relative overflow-hidden group flex flex-col justify-between min-h-[135px] sm:min-h-[175px]"
         >
           <div className="flex items-center justify-between mb-2">
             <span className="text-[11px] sm:text-xs font-semibold text-neutral-500 uppercase tracking-wider">New Inquiries</span>
-            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-sky-50 text-sky-600 flex items-center justify-center shadow-2xs">
+            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-blue-50 text-[#0a66ff] flex items-center justify-center shadow-2xs">
               <Clock size={16} className="sm:w-[19px] sm:h-[19px]" />
             </div>
           </div>
@@ -2036,23 +2036,23 @@ export function StudentLeadCrmTab() {
           </div>
           <div className="flex items-center justify-between text-[11px] sm:text-xs text-neutral-400 font-medium truncate mt-2 pt-2 border-t border-neutral-100">
             <span className="truncate">{dateLabel ? `New on ${dateLabel}` : "Fresh prospects"}</span>
-            <span className="shrink-0 text-sky-600 font-bold group-hover:translate-x-1 transition-transform flex items-center gap-0.5">
+            <span className="shrink-0 text-[#0a66ff] font-bold group-hover:translate-x-1 transition-transform flex items-center gap-0.5">
               View <ArrowRight size={12} />
             </span>
           </div>
         </div>
 
-        {/* 3. In Follow-up */}
+        {/* 3. In Follow-up (Rize Gold / Amber matching Logo) */}
         <div 
           onClick={() => navigate("/admin/dashboard/student-crm/in-follow-up")}
           role="button"
           tabIndex={0}
           title="Click to view active follow-up leads"
-          className="cursor-pointer select-none min-w-[145px] max-w-[170px] sm:min-w-0 sm:max-w-none snap-start shrink-0 sm:shrink bg-white rounded-2xl sm:rounded-[26px] p-4 sm:p-6 border border-neutral-200/80 shadow-xs hover:border-neutral-300 hover:shadow-md hover:-translate-y-1 active:scale-[0.98] transition-all duration-300 relative overflow-hidden group flex flex-col justify-between min-h-[135px] sm:min-h-[175px]"
+          className="cursor-pointer select-none min-w-[145px] max-w-[170px] sm:min-w-0 sm:max-w-none snap-start shrink-0 sm:shrink bg-white rounded-2xl sm:rounded-[26px] p-4 sm:p-6 border border-neutral-200/80 shadow-xs hover:border-amber-300 hover:shadow-md hover:-translate-y-1 active:scale-[0.98] transition-all duration-300 relative overflow-hidden group flex flex-col justify-between min-h-[135px] sm:min-h-[175px]"
         >
           <div className="flex items-center justify-between mb-2">
             <span className="text-[11px] sm:text-xs font-semibold text-neutral-500 uppercase tracking-wider">In Follow-up</span>
-            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-purple-50 text-purple-600 flex items-center justify-center shadow-2xs">
+            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-amber-50 text-[#d97706] flex items-center justify-center shadow-2xs">
               <TrendingUp size={16} className="sm:w-[19px] sm:h-[19px]" />
             </div>
           </div>
@@ -2065,36 +2065,36 @@ export function StudentLeadCrmTab() {
           </div>
           <div className="flex items-center justify-between text-[11px] sm:text-xs text-neutral-400 font-medium truncate mt-2 pt-2 border-t border-neutral-100">
             <span className="truncate">{dateLabel ? `In follow-up on ${dateLabel}` : "Active engagement"}</span>
-            <span className="shrink-0 text-purple-600 font-bold group-hover:translate-x-1 transition-transform flex items-center gap-0.5">
+            <span className="shrink-0 text-[#d97706] font-bold group-hover:translate-x-1 transition-transform flex items-center gap-0.5">
               View <ArrowRight size={12} />
             </span>
           </div>
         </div>
 
-        {/* 4. Converted */}
+        {/* 4. Converted (Rize Forest Green matching WORLD in Logo) */}
         <div 
           onClick={() => navigate("/admin/dashboard/student-crm/converted")}
           role="button"
           tabIndex={0}
           title="Click to view enrolled converted students"
-          className="cursor-pointer select-none min-w-[145px] max-w-[170px] sm:min-w-0 sm:max-w-none snap-start shrink-0 sm:shrink bg-white rounded-2xl sm:rounded-[26px] p-4 sm:p-6 border border-neutral-200/80 shadow-xs hover:border-neutral-300 hover:shadow-md hover:-translate-y-1 active:scale-[0.98] transition-all duration-300 relative overflow-hidden group flex flex-col justify-between min-h-[135px] sm:min-h-[175px]"
+          className="cursor-pointer select-none min-w-[145px] max-w-[170px] sm:min-w-0 sm:max-w-none snap-start shrink-0 sm:shrink bg-white rounded-2xl sm:rounded-[26px] p-4 sm:p-6 border border-neutral-200/80 shadow-xs hover:border-emerald-300 hover:shadow-md hover:-translate-y-1 active:scale-[0.98] transition-all duration-300 relative overflow-hidden group flex flex-col justify-between min-h-[135px] sm:min-h-[175px]"
         >
           <div className="flex items-center justify-between mb-2">
             <span className="text-[11px] sm:text-xs font-semibold text-neutral-500 uppercase tracking-wider">Converted</span>
-            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center shadow-2xs">
+            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-emerald-50 text-[#2a7c37] flex items-center justify-center shadow-2xs">
               <CheckCircle2 size={16} className="sm:w-[19px] sm:h-[19px]" />
             </div>
           </div>
           <div className="my-auto">
             <div className="flex items-baseline gap-2">
-              <span className="text-2xl sm:text-3xl font-black text-emerald-600 tracking-tight">
+              <span className="text-2xl sm:text-3xl font-black text-[#2a7c37] tracking-tight">
                 {displayStats.converted}
               </span>
             </div>
           </div>
           <div className="flex items-center justify-between text-[11px] sm:text-xs text-neutral-400 font-medium truncate mt-2 pt-2 border-t border-neutral-100">
             <span className="truncate">{dateLabel ? `Converted on ${dateLabel}` : "Enrolled students"}</span>
-            <span className="shrink-0 text-emerald-600 font-bold group-hover:translate-x-1 transition-transform flex items-center gap-0.5">
+            <span className="shrink-0 text-[#2a7c37] font-bold group-hover:translate-x-1 transition-transform flex items-center gap-0.5">
               View <ArrowRight size={12} />
             </span>
           </div>
@@ -2134,15 +2134,15 @@ export function StudentLeadCrmTab() {
       <div className="space-y-2.5 sm:space-y-3">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 px-1 pb-1">
           <div className="flex items-center gap-2 flex-wrap">
-            <div className="w-7 h-7 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center shadow-2xs">
+            <div className="w-7 h-7 rounded-lg bg-orange-50 text-[#ee591e] border border-orange-200/60 flex items-center justify-center shadow-2xs">
               <PhoneCall size={15} />
             </div>
             <h3 className="text-xs sm:text-sm font-black uppercase tracking-wider text-neutral-900">
               Calling & Demo Response Performance
             </h3>
             {dateLabel && (
-              <span className="text-[10px] font-black px-2.5 py-0.5 rounded-full bg-blue-100 text-blue-800 border border-blue-200 shadow-2xs flex items-center gap-1">
-                <Calendar size={11} className="text-blue-600" />
+              <span className="text-[10px] font-black px-2.5 py-0.5 rounded-full bg-orange-50 text-[#9a3412] border border-orange-200 shadow-2xs flex items-center gap-1">
+                <Calendar size={11} className="text-[#ee591e]" />
                 {dateLabel}
               </span>
             )}
@@ -2173,8 +2173,8 @@ export function StudentLeadCrmTab() {
               }}
               className={`px-2.5 py-1 rounded-full text-[11px] font-bold transition-all cursor-pointer shadow-2xs ${
                 dateFilterMode === "today"
-                  ? "bg-blue-600 text-white"
-                  : "bg-blue-50 text-blue-700 hover:bg-blue-100 border border-blue-200/60"
+                  ? "bg-[#ee591e] text-white shadow-xs"
+                  : "bg-orange-50 text-[#c2410c] hover:bg-orange-100 border border-orange-200/60"
               }`}
             >
               Today
@@ -2189,8 +2189,8 @@ export function StudentLeadCrmTab() {
               }}
               className={`px-2.5 py-1 rounded-full text-[11px] font-bold transition-all cursor-pointer shadow-2xs ${
                 dateFilterMode === "yesterday"
-                  ? "bg-purple-600 text-white"
-                  : "bg-purple-50 text-purple-700 hover:bg-purple-100 border border-purple-200/60"
+                  ? "bg-[#d97706] text-white shadow-xs"
+                  : "bg-amber-50 text-amber-800 hover:bg-amber-100 border border-amber-200/60"
               }`}
             >
               Yesterday
@@ -2203,8 +2203,8 @@ export function StudentLeadCrmTab() {
               }}
               className={`px-2.5 py-1 rounded-full text-[11px] font-bold transition-all cursor-pointer shadow-2xs ${
                 dateFilterMode === "7days"
-                  ? "bg-indigo-600 text-white"
-                  : "bg-indigo-50 text-indigo-700 hover:bg-indigo-100 border border-indigo-200/60"
+                  ? "bg-[#0a66ff] text-white shadow-xs"
+                  : "bg-blue-50 text-blue-700 hover:bg-blue-100 border border-blue-200/60"
               }`}
             >
               Last 7 Days
@@ -2226,7 +2226,7 @@ export function StudentLeadCrmTab() {
                 }}
                 className={`text-[11px] font-semibold pl-2 pr-1.5 py-1 rounded-full border transition-all cursor-pointer focus:outline-none shadow-2xs ${
                   dateFilterMode === "custom"
-                    ? "bg-amber-50 text-amber-900 border-amber-300 ring-2 ring-amber-200 font-bold"
+                    ? "bg-orange-50 text-orange-950 border-orange-300 ring-2 ring-orange-200 font-bold"
                     : "bg-neutral-50 text-neutral-700 border-neutral-200/80 hover:border-neutral-300"
                 }`}
                 title="Select a specific date to view calls made on that date"
@@ -2250,10 +2250,10 @@ export function StudentLeadCrmTab() {
             <button
               type="button"
               onClick={() => exportLeadsToPdf(filteredLeads, callResponseFilter !== "All" ? callResponseFilter : "Calling_Response")}
-              className="px-2.5 py-1 rounded-full text-[11px] font-bold bg-rose-600 hover:bg-rose-700 text-white transition-all cursor-pointer shadow-2xs flex items-center gap-1 shrink-0 ml-auto sm:ml-0"
+              className="px-2.5 py-1 rounded-full text-[11px] font-bold bg-[#18181b] hover:bg-black text-white transition-all cursor-pointer shadow-2xs flex items-center gap-1 shrink-0 ml-auto sm:ml-0"
               title={`Download PDF sheet of ${filteredLeads.length} leads matching current call & date selection`}
             >
-              <FileDown size={11} />
+              <FileDown size={11} className="text-[#ee591e]" />
               <span>Download PDF ({filteredLeads.length})</span>
             </button>
           </div>
@@ -2264,12 +2264,12 @@ export function StudentLeadCrmTab() {
           <div 
             onClick={() => setCallResponseFilter("All")}
             className={`cursor-pointer min-w-[135px] max-w-[155px] sm:min-w-0 sm:max-w-none snap-start shrink-0 sm:shrink bg-white rounded-2xl sm:rounded-[24px] p-3.5 sm:p-5 border shadow-xs hover:shadow-sm hover:-translate-y-1 transition-all duration-300 relative overflow-hidden group flex flex-col justify-between min-h-[115px] sm:min-h-[145px] ${
-              callResponseFilter === "All" ? "border-blue-500/80 ring-2 ring-blue-100" : "border-neutral-200/80 hover:border-neutral-300"
+              callResponseFilter === "All" ? "border-[#ee591e] ring-2 ring-orange-200" : "border-neutral-200/80 hover:border-neutral-300"
             }`}
           >
             <div className="flex items-center justify-between mb-2">
               <span className="text-[10px] sm:text-[11px] font-semibold text-neutral-500 uppercase tracking-wider">Total Calls</span>
-              <div className="w-7 h-7 sm:w-9 sm:h-9 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center shadow-2xs">
+              <div className="w-7 h-7 sm:w-9 sm:h-9 rounded-full bg-orange-50 text-[#ee591e] flex items-center justify-center shadow-2xs">
                 <PhoneCall size={15} className="sm:w-[17px] sm:h-[17px]" />
               </div>
             </div>
@@ -2283,21 +2283,21 @@ export function StudentLeadCrmTab() {
             </div>
           </div>
 
-          {/* 2. Total Connected */}
+          {/* 2. Total Connected (Rize Forest Green matching WORLD in Logo) */}
           <div 
             onClick={() => setCallResponseFilter(callResponseFilter === "Connected" ? "All" : "Connected")}
             className={`cursor-pointer min-w-[135px] max-w-[155px] sm:min-w-0 sm:max-w-none snap-start shrink-0 sm:shrink bg-white rounded-2xl sm:rounded-[24px] p-3.5 sm:p-5 border shadow-xs hover:shadow-sm hover:-translate-y-1 transition-all duration-300 relative overflow-hidden group flex flex-col justify-between min-h-[115px] sm:min-h-[145px] ${
-              callResponseFilter === "Connected" ? "border-emerald-500 ring-2 ring-emerald-200" : "border-neutral-200/80 hover:border-neutral-300"
+              callResponseFilter === "Connected" ? "border-[#2a7c37] ring-2 ring-emerald-200" : "border-neutral-200/80 hover:border-neutral-300"
             }`}
           >
             <div className="flex items-center justify-between mb-2">
               <span className="text-[10px] sm:text-[11px] font-semibold text-neutral-500 uppercase tracking-wider">Connected</span>
-              <div className="w-7 h-7 sm:w-9 sm:h-9 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center shadow-2xs">
+              <div className="w-7 h-7 sm:w-9 sm:h-9 rounded-full bg-emerald-50 text-[#2a7c37] flex items-center justify-center shadow-2xs">
                 <PhoneIncoming size={15} className="sm:w-[17px] sm:h-[17px]" />
               </div>
             </div>
             <div className="my-auto">
-              <span className="text-xl sm:text-2xl md:text-3xl font-black text-emerald-600 tracking-tight">
+              <span className="text-xl sm:text-2xl md:text-3xl font-black text-[#2a7c37] tracking-tight">
                 {callStats.connected}
               </span>
             </div>
@@ -2306,7 +2306,7 @@ export function StudentLeadCrmTab() {
             </div>
           </div>
 
-          {/* 3. Total Not Connected */}
+          {/* 3. Total Not Connected (Rize Yellow / Amber matching Logo) */}
           <div 
             onClick={() => setCallResponseFilter(callResponseFilter === "Not Connected" ? "All" : "Not Connected")}
             className={`cursor-pointer min-w-[135px] max-w-[155px] sm:min-w-0 sm:max-w-none snap-start shrink-0 sm:shrink bg-white rounded-2xl sm:rounded-[24px] p-3.5 sm:p-5 border shadow-xs hover:shadow-sm hover:-translate-y-1 transition-all duration-300 relative overflow-hidden group flex flex-col justify-between min-h-[115px] sm:min-h-[145px] ${
@@ -2315,12 +2315,12 @@ export function StudentLeadCrmTab() {
           >
             <div className="flex items-center justify-between mb-2">
               <span className="text-[10px] sm:text-[11px] font-semibold text-neutral-500 uppercase tracking-wider">Not Connected</span>
-              <div className="w-7 h-7 sm:w-9 sm:h-9 rounded-full bg-amber-50 text-amber-600 flex items-center justify-center shadow-2xs">
+              <div className="w-7 h-7 sm:w-9 sm:h-9 rounded-full bg-amber-50 text-[#d97706] flex items-center justify-center shadow-2xs">
                 <PhoneOff size={15} className="sm:w-[17px] sm:h-[17px]" />
               </div>
             </div>
             <div className="my-auto">
-              <span className="text-xl sm:text-2xl md:text-3xl font-black text-amber-600 tracking-tight">
+              <span className="text-xl sm:text-2xl md:text-3xl font-black text-[#d97706] tracking-tight">
                 {callStats.notConnected}
               </span>
             </div>
@@ -2329,21 +2329,21 @@ export function StudentLeadCrmTab() {
             </div>
           </div>
 
-          {/* 4. Yes for Demo (Demo Scheduled Only) */}
+          {/* 4. Yes for Demo (Rize Blue matching Logo) */}
           <div 
             onClick={() => setCallResponseFilter(callResponseFilter === "Yes for Demo" ? "All" : "Yes for Demo")}
             className={`cursor-pointer min-w-[135px] max-w-[155px] sm:min-w-0 sm:max-w-none snap-start shrink-0 sm:shrink bg-white rounded-2xl sm:rounded-[24px] p-3.5 sm:p-5 border shadow-xs hover:shadow-sm hover:-translate-y-1 transition-all duration-300 relative overflow-hidden group flex flex-col justify-between min-h-[115px] sm:min-h-[145px] ${
-              callResponseFilter === "Yes for Demo" ? "border-indigo-500 ring-2 ring-indigo-200" : "border-neutral-200/80 hover:border-neutral-300"
+              callResponseFilter === "Yes for Demo" ? "border-blue-500 ring-2 ring-blue-200" : "border-neutral-200/80 hover:border-neutral-300"
             }`}
           >
             <div className="flex items-center justify-between mb-2">
               <span className="text-[10px] sm:text-[11px] font-semibold text-neutral-500 uppercase tracking-wider">Yes for Demo</span>
-              <div className="w-7 h-7 sm:w-9 sm:h-9 rounded-full bg-indigo-50 text-indigo-600 flex items-center justify-center shadow-2xs">
+              <div className="w-7 h-7 sm:w-9 sm:h-9 rounded-full bg-blue-50 text-[#0a66ff] flex items-center justify-center shadow-2xs">
                 <CalendarCheck size={15} className="sm:w-[17px] sm:h-[17px]" />
               </div>
             </div>
             <div className="my-auto">
-              <span className="text-xl sm:text-2xl md:text-3xl font-black text-indigo-600 tracking-tight">
+              <span className="text-xl sm:text-2xl md:text-3xl font-black text-[#0a66ff] tracking-tight">
                 {callStats.yesForDemo}
               </span>
             </div>
@@ -2434,8 +2434,8 @@ export function StudentLeadCrmTab() {
                 {filteredLeads.length} total
               </span>
               {dateLabel && (
-                <span className="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-blue-50 text-blue-700 border border-blue-200/60 flex items-center gap-1 shadow-2xs">
-                  <Calendar size={12} className="text-blue-600" /> {dateLabel}
+                <span className="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-orange-50 text-[#c2410c] border border-orange-200/60 flex items-center gap-1 shadow-2xs">
+                  <Calendar size={12} className="text-[#ee591e]" /> {dateLabel}
                 </span>
               )}
             </div>
@@ -2443,10 +2443,10 @@ export function StudentLeadCrmTab() {
               <button
                 type="button"
                 onClick={() => exportLeadsToPdf(filteredLeads, "Student_Leads")}
-                className="text-[11px] font-bold text-rose-700 hover:text-rose-800 bg-rose-50 hover:bg-rose-100 border border-rose-200/80 px-2.5 py-1 rounded-full transition-all cursor-pointer shadow-2xs flex items-center gap-1"
+                className="text-[11px] font-bold text-neutral-800 hover:text-black bg-neutral-100 hover:bg-neutral-200 border border-neutral-300/80 px-2.5 py-1 rounded-full transition-all cursor-pointer shadow-2xs flex items-center gap-1"
                 title={`Download PDF sheet of ${filteredLeads.length} leads matching current filters`}
               >
-                <FileDown size={12} />
+                <FileDown size={12} className="text-[#ee591e]" />
                 <span>Download PDF ({filteredLeads.length})</span>
               </button>
               {(callResponseFilter !== "All" || statusFilter !== "All Statuses" || sourceFilter !== "All Sources" || search || dateFilterMode !== "all") && (
@@ -2461,7 +2461,7 @@ export function StudentLeadCrmTab() {
                     searchParams.delete("search");
                     setSearchParams(searchParams, { replace: true });
                   }}
-                  className="text-[11px] font-bold text-blue-600 hover:text-blue-800 bg-blue-50 hover:bg-blue-100 px-2.5 py-1 rounded-full transition-all cursor-pointer shadow-2xs"
+                  className="text-[11px] font-bold text-[#ee591e] hover:text-[#c2410c] bg-orange-50 hover:bg-orange-100 px-2.5 py-1 rounded-full transition-all cursor-pointer shadow-2xs"
                 >
                   Reset Filters
                 </button>
@@ -2484,7 +2484,7 @@ export function StudentLeadCrmTab() {
                   }
                 }}
                 placeholder="Search name, phone, course..."
-                className="w-full pl-9 pr-8 py-2 rounded-full bg-neutral-50/80 border border-neutral-200/80 focus:bg-white focus:border-blue-500 focus:outline-none transition-all text-xs font-medium text-neutral-900 placeholder-neutral-400 shadow-2xs"
+                className="w-full pl-9 pr-8 py-2 rounded-full bg-neutral-50/80 border border-neutral-200/80 focus:bg-white focus:border-[#ee591e] focus:ring-2 focus:ring-[#ee591e]/15 focus:outline-none transition-all text-xs font-medium text-neutral-900 placeholder-neutral-400 shadow-2xs"
               />
               {search && (
                 <button

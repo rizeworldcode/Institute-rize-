@@ -1947,7 +1947,7 @@ export default function AdminDashboard() {
             <div className="pt-4 border-t border-neutral-100 mt-6 space-y-3">
               {/* Profile Details in Drawer */}
               <div className="flex items-center gap-3 px-2 py-1 bg-neutral-50 rounded-xl p-2.5 border border-neutral-100">
-                <div className="w-9 h-9 rounded-full bg-linear-to-tr from-blue-600 to-indigo-600 text-white font-bold text-xs flex items-center justify-center shadow-xs shrink-0">
+                <div className="w-9 h-9 rounded-full bg-gradient-to-tr from-[#ee591e] to-[#ff7a1a] text-white font-black text-xs flex items-center justify-center shadow-xs shrink-0">
                   {adminInitials}
                 </div>
                 <div className="text-left overflow-hidden min-w-0 flex-1">
@@ -2651,10 +2651,10 @@ export default function AdminDashboard() {
                 <button
                   type="button"
                   onClick={() => setIsStaffModalOpen(true)}
-                  className="hidden sm:inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-bold text-blue-700 bg-blue-50 hover:bg-blue-100/80 border border-blue-200 transition-all cursor-pointer shadow-2xs hover:shadow-xs shrink-0"
+                  className="hidden sm:inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-bold text-[#c2410c] bg-orange-50 hover:bg-orange-100/80 border border-orange-200/80 transition-all cursor-pointer shadow-2xs hover:shadow-xs shrink-0"
                   title="Manage Staff Accounts & Feature Access"
                 >
-                  <Key size={13} className="stroke-[2.5]" />
+                  <Key size={13} className="text-[#ee591e] stroke-[2.5]" />
                   <span>Manage Staff</span>
                 </button>
               )}
@@ -2674,7 +2674,7 @@ export default function AdminDashboard() {
                 className="flex items-center gap-1.5 sm:gap-2.5 pl-1.5 sm:pl-3 border-l border-neutral-200 cursor-pointer"
                 title="View Admin Profile & Navigation"
               >
-                <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-linear-to-tr from-blue-600 to-indigo-600 text-white font-bold text-[10px] sm:text-xs flex items-center justify-center shadow-2xs shrink-0">
+                <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-gradient-to-tr from-[#ee591e] to-[#ff7a1a] text-white font-black text-[10px] sm:text-xs flex items-center justify-center shadow-2xs shrink-0">
                   {adminInitials}
                 </div>
                 <div className="hidden sm:block text-left">
