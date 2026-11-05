@@ -155,7 +155,7 @@ export default function DiwaliLighting() {
 
       {/* ================= 3. TOP-LEFT HANGING TRADITIONAL AKASH KANDIL (LANTERN) ================= */}
       <div
-        className="hidden md:flex flex-col items-center absolute top-0 left-6 sm:left-10 origin-top"
+        className="hidden md:flex flex-col items-center absolute top-0 left-16 sm:left-24 lg:left-28 origin-top"
         style={{
           animation: "lanternSwayLeft 4.5s ease-in-out infinite alternate",
         }}
