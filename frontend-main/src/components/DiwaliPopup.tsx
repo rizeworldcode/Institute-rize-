@@ -710,9 +710,9 @@ export default function DiwaliPopup() {
           </div>
 
           {/* ================= TYPOGRAPHY INSIDE THE CARTOUCHE (NO LOGO HERE) ================= */}
-          <div className="relative z-20 flex flex-col items-center justify-center text-center px-6 max-w-lg mx-auto">
+          <div className="relative z-20 flex flex-col items-center justify-center text-center px-6 max-w-lg mx-auto pt-2 sm:pt-4">
             {/* H A P P Y */}
-            <span className="text-amber-200/90 tracking-[0.35em] text-xs sm:text-sm font-semibold uppercase mb-1">
+            <span className="font-serif font-bold text-base sm:text-xl md:text-2xl lg:text-3xl tracking-[0.45em] sm:tracking-[0.5em] uppercase text-transparent bg-clip-text bg-gradient-to-r from-yellow-100 via-amber-200 to-yellow-300 drop-shadow-[0_2px_10px_rgba(251,191,36,0.6)] mt-2 sm:mt-4 mb-0.5 sm:mb-1">
               H A P P Y
             </span>
 
