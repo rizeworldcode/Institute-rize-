@@ -147,7 +147,7 @@ export default function MasterCourse() {
                 >
                   Reserve My Seat <ArrowRight size={16} />
                 </Link>
-                <p className="text-[10px] text-center text-neutral-500 mt-2">EMI options available • No credit check</p>
+
               </div>
 
             </div>
