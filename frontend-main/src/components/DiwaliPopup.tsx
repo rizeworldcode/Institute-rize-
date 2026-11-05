@@ -30,7 +30,6 @@ export default function DiwaliPopup() {
   const [isClosing, setIsClosing] = useState(false);
 
   const containerRef = useRef<HTMLDivElement>(null);
-  const cardRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   const particlesRef = useRef<Particle[]>([]);
@@ -51,10 +50,9 @@ export default function DiwaliPopup() {
 
   // ================= 2. CANVAS FIREWORKS & AMBIENT DUST ENGINE =================
   const spawnFirework = useCallback((originX: number, originY: number, count = 55) => {
-    // Royal Gold, Saffron & Pure White festive palette matching the image
     const colors = [
       "#FFFFFF", // Pure white core
-      "#FEF08A", // Pale gold
+      "#FEF08A", // Pale lemon gold
       "#FDE68A", // Champagne gold
       "#FBBF24", // Vibrant gold
       "#F59E0B", // Warm amber
@@ -89,7 +87,7 @@ export default function DiwaliPopup() {
     if (!isOpen) return;
 
     const dust: FloatingDust[] = [];
-    const count = window.innerWidth < 640 ? 25 : 50;
+    const count = window.innerWidth < 640 ? 25 : 55;
     for (let i = 0; i < count; i++) {
       dust.push({
         x: Math.random() * window.innerWidth,
@@ -128,14 +126,14 @@ export default function DiwaliPopup() {
 
     // Initial festive welcome bursts
     const initialTimer = setTimeout(() => {
-      spawnFirework(window.innerWidth * 0.5, window.innerHeight * 0.25, 60);
+      spawnFirework(window.innerWidth * 0.5, window.innerHeight * 0.28, 65);
       setTimeout(() => {
-        spawnFirework(window.innerWidth * 0.25, window.innerHeight * 0.35, 45);
-        spawnFirework(window.innerWidth * 0.75, window.innerHeight * 0.35, 45);
+        spawnFirework(window.innerWidth * 0.25, window.innerHeight * 0.32, 45);
+        spawnFirework(window.innerWidth * 0.75, window.innerHeight * 0.32, 45);
       }, 350);
-    }, 450);
+    }, 400);
 
-    // Periodic ambient fireworks in background sky (every 4 seconds)
+    // Periodic fireworks in background sky (every 4 seconds)
     autoFireworkTimerRef.current = setInterval(() => {
       if (!isRunning) return;
       const rx = window.innerWidth * (0.15 + Math.random() * 0.7);
@@ -223,21 +221,9 @@ export default function DiwaliPopup() {
     if (!isOpen) return;
 
     const container = containerRef.current;
-    const card = cardRef.current;
-    if (!container || !card) return;
+    if (!container) return;
 
-    const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
-    tl.fromTo(container, { opacity: 0 }, { opacity: 1, duration: 0.5 })
-      .fromTo(
-        card,
-        { opacity: 0, scale: 0.92, y: 25 },
-        { opacity: 1, scale: 1, y: 0, duration: 0.75 },
-        "-=0.25"
-      );
-
-    return () => {
-      tl.kill();
-    };
+    gsap.fromTo(container, { opacity: 0 }, { opacity: 1, duration: 0.6, ease: "power2.out" });
   }, [isOpen]);
 
   const handleClose = useCallback(() => {
@@ -252,7 +238,7 @@ export default function DiwaliPopup() {
 
     gsap.to(container, {
       opacity: 0,
-      scale: 0.97,
+      scale: 0.98,
       duration: 0.4,
       ease: "power2.inOut",
       onComplete: () => {
@@ -270,7 +256,7 @@ export default function DiwaliPopup() {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [handleClose]);
 
-  // Click handler for fireworks
+  // Screen click handler (triggers fireworks unless clicking interactive buttons)
   const handleScreenClick = (e: React.MouseEvent) => {
     const target = e.target as HTMLElement;
     if (target.closest("[data-no-firework]")) return;
@@ -285,8 +271,8 @@ export default function DiwaliPopup() {
 
     spawnFirework(cx, cy, 70);
     setTimeout(() => {
-      spawnFirework(cx - 70, cy - 30, 40);
-      spawnFirework(cx + 70, cy - 30, 40);
+      spawnFirework(cx - 80, cy - 30, 45);
+      spawnFirework(cx + 80, cy - 30, 45);
     }, 180);
   };
 
@@ -296,15 +282,11 @@ export default function DiwaliPopup() {
     <div
       ref={containerRef}
       onClick={handleScreenClick}
-      className="fixed inset-0 w-screen h-[100dvh] z-[9999] overflow-y-auto overflow-x-hidden select-none cursor-crosshair flex flex-col justify-between"
-      style={{
-        background:
-          "radial-gradient(ellipse at 50% 35%, #191238 0%, #0F0B24 45%, #080614 100%)",
-      }}
+      className="fixed inset-0 w-screen h-[100dvh] z-[9999] overflow-hidden select-none cursor-crosshair flex flex-col justify-between bg-[#0B081E]"
       aria-modal="true"
       role="dialog"
     >
-      {/* Full-Screen Fireworks Canvas */}
+      {/* Interactive Fireworks & Golden Dust Canvas */}
       <canvas
         ref={canvasRef}
         className="fixed inset-0 pointer-events-none z-10"
@@ -326,10 +308,6 @@ export default function DiwaliPopup() {
           0%, 100% { transform: scale(0.85) rotate(0deg); opacity: 0.5; }
           50% { transform: scale(1.25) rotate(45deg); opacity: 1; filter: drop-shadow(0 0 10px #fef08a); }
         }
-        @keyframes cardGlowShimmer {
-          0%, 100% { box-shadow: 0 20px 60px rgba(0,0,0,0.85), 0 0 35px rgba(245, 158, 11, 0.2); }
-          50% { box-shadow: 0 25px 80px rgba(0,0,0,0.9), 0 0 55px rgba(245, 158, 11, 0.35); }
-        }
         .animate-diya-flame {
           animation: diyaFlamePulse 1.8s ease-in-out infinite;
           transform-origin: 50% 90%;
@@ -340,16 +318,139 @@ export default function DiwaliPopup() {
         .animate-star-twinkle {
           animation: starTwinkle 3.2s ease-in-out infinite;
         }
-        .animate-card-shimmer {
-          animation: cardGlowShimmer 5s ease-in-out infinite;
-        }
       `}</style>
 
-      {/* ================= TOP BAR ================= */}
+      {/* ================= FULL-SCREEN ARTWORK LAYER ================= */}
+      {/* Strictly covers 100% of the screen edge-to-edge */}
+      <div className="absolute inset-0 w-full h-full flex items-center justify-center overflow-hidden pointer-events-none z-0">
+        <div className="relative w-full h-full max-w-[1440px] max-h-[960px] aspect-[800/533] mx-auto">
+          <img
+            src="/images/diwali-card.jpg"
+            alt="Happy Diwali Festival of Lights"
+            className="w-full h-full object-contain sm:object-cover"
+          />
+
+          {/* ================= LIVE ANIMATED FLICKERING FLAMES ON THE 3 DIYAS ================= */}
+          {/* 1. Large Diya Flame (Bottom Right - x: 88.2%, y: 73.2%) */}
+          <div
+            className="absolute pointer-events-none -translate-x-1/2 -translate-y-1/2 z-20"
+            style={{ left: "88.2%", top: "73.2%" }}
+          >
+            <div className="absolute -inset-4 bg-amber-400/50 rounded-full blur-md animate-diya-halo" />
+            <svg
+              width="32"
+              height="42"
+              viewBox="0 0 28 38"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+              className="relative z-10 animate-diya-flame drop-shadow-[0_0_14px_rgba(251,191,36,0.9)]"
+            >
+              <path
+                d="M14 2 C10 10 5 16 5 24 C5 32 9 36 14 36 C19 36 23 32 23 24 C23 16 18 10 14 2 Z"
+                fill="url(#fullDiyaFlame)"
+              />
+              <path
+                d="M14 10 C12 16 9 20 9 25 C9 29 11 32 14 32 C17 32 19 29 19 25 C19 20 16 16 14 10 Z"
+                fill="#FFFFFF"
+                opacity="0.95"
+              />
+              <defs>
+                <radialGradient id="fullDiyaFlame" cx="50%" cy="65%" r="60%">
+                  <stop offset="0%" stopColor="#FFFFFF" />
+                  <stop offset="30%" stopColor="#FEF08A" />
+                  <stop offset="65%" stopColor="#F59E0B" />
+                  <stop offset="100%" stopColor="#DC2626" />
+                </radialGradient>
+              </defs>
+            </svg>
+          </div>
+
+          {/* 2. Medium Diya Flame (Mid Right - x: 81.2%, y: 66.8%) */}
+          <div
+            className="absolute pointer-events-none -translate-x-1/2 -translate-y-1/2 z-20"
+            style={{ left: "81.2%", top: "66.8%" }}
+          >
+            <div className="absolute -inset-3 bg-amber-400/45 rounded-full blur-md animate-diya-halo" />
+            <svg
+              width="24"
+              height="32"
+              viewBox="0 0 28 38"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+              className="relative z-10 animate-diya-flame drop-shadow-[0_0_10px_rgba(251,191,36,0.85)]"
+              style={{ animationDelay: "0.4s" }}
+            >
+              <path
+                d="M14 2 C10 10 5 16 5 24 C5 32 9 36 14 36 C19 36 23 32 23 24 C23 16 18 10 14 2 Z"
+                fill="url(#fullDiyaFlame)"
+              />
+              <path
+                d="M14 10 C12 16 9 20 9 25 C9 29 11 32 14 32 C17 32 19 29 19 25 C19 20 16 16 14 10 Z"
+                fill="#FFFFFF"
+                opacity="0.95"
+              />
+            </svg>
+          </div>
+
+          {/* 3. Small Diya Flame (Far Right - x: 93.8%, y: 65.5%) */}
+          <div
+            className="absolute pointer-events-none -translate-x-1/2 -translate-y-1/2 z-20"
+            style={{ left: "93.8%", top: "65.5%" }}
+          >
+            <div className="absolute -inset-2.5 bg-amber-400/40 rounded-full blur-sm animate-diya-halo" />
+            <svg
+              width="20"
+              height="26"
+              viewBox="0 0 28 38"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+              className="relative z-10 animate-diya-flame drop-shadow-[0_0_8px_rgba(251,191,36,0.8)]"
+              style={{ animationDelay: "0.8s" }}
+            >
+              <path
+                d="M14 2 C10 10 5 16 5 24 C5 32 9 36 14 36 C19 36 23 32 23 24 C23 16 18 10 14 2 Z"
+                fill="url(#fullDiyaFlame)"
+              />
+              <path
+                d="M14 10 C12 16 9 20 9 25 C9 29 11 32 14 32 C17 32 19 29 19 25 C19 20 16 16 14 10 Z"
+                fill="#FFFFFF"
+                opacity="0.95"
+              />
+            </svg>
+          </div>
+
+          {/* ================= TWINKLING SPARKLE STARS ================= */}
+          {/* Top-Right Star */}
+          <div
+            className="absolute pointer-events-none -translate-x-1/2 -translate-y-1/2 animate-star-twinkle text-amber-200"
+            style={{ left: "89%", top: "15%", fontSize: "22px" }}
+          >
+            ✦
+          </div>
+
+          {/* Left Star */}
+          <div
+            className="absolute pointer-events-none -translate-x-1/2 -translate-y-1/2 animate-star-twinkle text-amber-300"
+            style={{ left: "7%", top: "58%", fontSize: "18px", animationDelay: "1.2s" }}
+          >
+            ✦
+          </div>
+
+          {/* Bottom-Center Star */}
+          <div
+            className="absolute pointer-events-none -translate-x-1/2 -translate-y-1/2 animate-star-twinkle text-amber-200"
+            style={{ left: "60%", top: "87%", fontSize: "16px", animationDelay: "0.6s" }}
+          >
+            ✦
+          </div>
+        </div>
+      </div>
+
+      {/* ================= TOP HEADER (BRANDING & ENTER SITE) ================= */}
       <header className="relative z-30 w-full px-5 sm:px-10 py-4 sm:py-5 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <span className="text-amber-400 text-xs">✦</span>
-          <span className="text-amber-200/90 tracking-[0.26em] text-[11px] sm:text-xs md:text-sm font-bold uppercase">
+          <span className="text-amber-200/90 tracking-[0.28em] text-[11px] sm:text-xs md:text-sm font-bold uppercase">
             RizeWorld Institute
           </span>
           <span className="text-amber-400 text-xs">✦</span>
@@ -359,7 +460,7 @@ export default function DiwaliPopup() {
           type="button"
           data-no-firework="true"
           onClick={handleClose}
-          className="group flex items-center gap-2 px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-full bg-white/10 hover:bg-white/20 text-neutral-300 hover:text-white border border-amber-400/30 hover:border-amber-300 transition-all duration-200 cursor-pointer shadow-lg backdrop-blur-md"
+          className="group flex items-center gap-2 px-4 py-2 rounded-full bg-black/40 hover:bg-black/60 text-neutral-300 hover:text-white border border-amber-400/40 hover:border-amber-300 transition-all duration-200 cursor-pointer shadow-lg backdrop-blur-md"
           aria-label="Enter Website"
         >
           <span className="text-[11px] sm:text-xs font-semibold tracking-wider uppercase text-amber-200 group-hover:text-white">
@@ -369,143 +470,10 @@ export default function DiwaliPopup() {
         </button>
       </header>
 
-      {/* ================= MAIN CONTENT SHOWCASE ================= */}
-      <main className="relative z-30 flex-1 flex flex-col items-center justify-center px-3 sm:px-6 my-auto max-w-5xl mx-auto w-full">
-        {/* ================= THE LUXURY DIWALI CARD ================= */}
-        <div
-          ref={cardRef}
-          className="relative w-full max-w-[760px] rounded-2xl sm:rounded-3xl overflow-hidden animate-card-shimmer border border-amber-400/40"
-        >
-          {/* Exact Luxury Diwali Card Graphic */}
-          <div className="relative w-full aspect-[800/533] select-none">
-            <img
-              src="/images/diwali-card.jpg"
-              alt="Happy Diwali - Festival of Lights"
-              className="w-full h-full object-cover select-none pointer-events-none"
-            />
-
-            {/* ================= LIVE ANIMATED FLICKERING FLAMES ON THE 3 DIYAS ================= */}
-            {/* 1. Large Diya Flame (Bottom Right Corner - x: 88.0%, y: 72.8%) */}
-            <div
-              className="absolute pointer-events-none -translate-x-1/2 -translate-y-1/2"
-              style={{ left: "88.2%", top: "73.2%" }}
-            >
-              {/* Pulsing Warm Light Halo */}
-              <div className="absolute -inset-4 bg-amber-400/45 rounded-full blur-md animate-diya-halo" />
-
-              {/* Glowing Golden Flame SVG */}
-              <svg
-                width="28"
-                height="38"
-                viewBox="0 0 28 38"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-                className="relative z-10 animate-diya-flame drop-shadow-[0_0_12px_rgba(251,191,36,0.9)]"
-              >
-                <path
-                  d="M14 2 C10 10 5 16 5 24 C5 32 9 36 14 36 C19 36 23 32 23 24 C23 16 18 10 14 2 Z"
-                  fill="url(#diyaFlame1)"
-                />
-                <path
-                  d="M14 10 C12 16 9 20 9 25 C9 29 11 32 14 32 C17 32 19 29 19 25 C19 20 16 16 14 10 Z"
-                  fill="#FFFFFF"
-                  opacity="0.95"
-                />
-                <defs>
-                  <radialGradient id="diyaFlame1" cx="50%" cy="65%" r="60%">
-                    <stop offset="0%" stopColor="#FFFFFF" />
-                    <stop offset="30%" stopColor="#FEF08A" />
-                    <stop offset="65%" stopColor="#F59E0B" />
-                    <stop offset="100%" stopColor="#DC2626" />
-                  </radialGradient>
-                </defs>
-              </svg>
-            </div>
-
-            {/* 2. Medium Diya Flame (Mid Right - x: 81.0%, y: 66.6%) */}
-            <div
-              className="absolute pointer-events-none -translate-x-1/2 -translate-y-1/2"
-              style={{ left: "81.2%", top: "66.8%" }}
-            >
-              <div className="absolute -inset-3 bg-amber-400/40 rounded-full blur-md animate-diya-halo" />
-              <svg
-                width="22"
-                height="30"
-                viewBox="0 0 28 38"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-                className="relative z-10 animate-diya-flame drop-shadow-[0_0_10px_rgba(251,191,36,0.85)]"
-                style={{ animationDelay: "0.4s" }}
-              >
-                <path
-                  d="M14 2 C10 10 5 16 5 24 C5 32 9 36 14 36 C19 36 23 32 23 24 C23 16 18 10 14 2 Z"
-                  fill="url(#diyaFlame1)"
-                />
-                <path
-                  d="M14 10 C12 16 9 20 9 25 C9 29 11 32 14 32 C17 32 19 29 19 25 C19 20 16 16 14 10 Z"
-                  fill="#FFFFFF"
-                  opacity="0.95"
-                />
-              </svg>
-            </div>
-
-            {/* 3. Small Diya Flame (Far Right - x: 94.0%, y: 65.3%) */}
-            <div
-              className="absolute pointer-events-none -translate-x-1/2 -translate-y-1/2"
-              style={{ left: "93.8%", top: "65.5%" }}
-            >
-              <div className="absolute -inset-2.5 bg-amber-400/35 rounded-full blur-sm animate-diya-halo" />
-              <svg
-                width="18"
-                height="24"
-                viewBox="0 0 28 38"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-                className="relative z-10 animate-diya-flame drop-shadow-[0_0_8px_rgba(251,191,36,0.8)]"
-                style={{ animationDelay: "0.8s" }}
-              >
-                <path
-                  d="M14 2 C10 10 5 16 5 24 C5 32 9 36 14 36 C19 36 23 32 23 24 C23 16 18 10 14 2 Z"
-                  fill="url(#diyaFlame1)"
-                />
-                <path
-                  d="M14 10 C12 16 9 20 9 25 C9 29 11 32 14 32 C17 32 19 29 19 25 C19 20 16 16 14 10 Z"
-                  fill="#FFFFFF"
-                  opacity="0.95"
-                />
-              </svg>
-            </div>
-
-            {/* ================= TWINKLING SPARKLE STARS ================= */}
-            {/* Top-Right Star */}
-            <div
-              className="absolute pointer-events-none -translate-x-1/2 -translate-y-1/2 animate-star-twinkle text-amber-200"
-              style={{ left: "89%", top: "15%", fontSize: "20px" }}
-            >
-              ✦
-            </div>
-
-            {/* Left Star */}
-            <div
-              className="absolute pointer-events-none -translate-x-1/2 -translate-y-1/2 animate-star-twinkle text-amber-300"
-              style={{ left: "7%", top: "58%", fontSize: "16px", animationDelay: "1.2s" }}
-            >
-              ✦
-            </div>
-
-            {/* Bottom-Center Star */}
-            <div
-              className="absolute pointer-events-none -translate-x-1/2 -translate-y-1/2 animate-star-twinkle text-amber-200"
-              style={{ left: "60%", top: "87%", fontSize: "14px", animationDelay: "0.6s" }}
-            >
-              ✦
-            </div>
-          </div>
-        </div>
-
-        {/* ================= GREETING & INTERACTIVE CTA ================= */}
-        <div className="mt-4 sm:mt-6 flex flex-col items-center text-center max-w-xl mx-auto px-3">
-          <p className="text-amber-200/95 font-semibold text-sm sm:text-base md:text-lg tracking-wide mb-1.5 flex items-center gap-2">
+      {/* ================= INTERACTIVE GREETING & CTA OVERLAY ================= */}
+      <main className="relative z-30 flex-1 flex flex-col items-center justify-end pb-8 sm:pb-12 text-center max-w-2xl mx-auto px-4 w-full">
+        <div className="bg-gradient-to-t from-[#0B081E]/95 via-[#0B081E]/80 to-transparent p-4 sm:p-6 rounded-3xl backdrop-blur-sm max-w-xl">
+          <p className="text-amber-200/95 font-semibold text-sm sm:text-base md:text-lg tracking-wide mb-1.5 flex items-center justify-center gap-2">
             <span className="text-amber-400">✧</span>
             Warm Wishes from <span className="text-amber-300 font-bold">RizeWorld Institute</span>
             <span className="text-amber-400">✧</span>
@@ -519,7 +487,7 @@ export default function DiwaliPopup() {
             type="button"
             data-no-firework="true"
             onClick={handleCtaClick}
-            className="group relative px-9 py-3.5 sm:px-11 sm:py-4 rounded-full bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 hover:brightness-110 text-neutral-950 font-extrabold text-xs sm:text-sm md:text-base tracking-wider uppercase shadow-[0_0_30px_rgba(245,158,11,0.6)] hover:shadow-[0_0_45px_rgba(245,158,11,0.85)] hover:scale-105 active:scale-95 transition-all duration-300 cursor-pointer flex items-center gap-2.5 border-2 border-amber-200"
+            className="group relative px-9 py-3.5 sm:px-11 sm:py-4 rounded-full bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 hover:brightness-110 text-neutral-950 font-extrabold text-xs sm:text-sm md:text-base tracking-wider uppercase shadow-[0_0_35px_rgba(245,158,11,0.65)] hover:shadow-[0_0_50px_rgba(245,158,11,0.9)] hover:scale-105 active:scale-95 transition-all duration-300 cursor-pointer flex items-center gap-2.5 mx-auto border-2 border-amber-200"
           >
             <span>Celebrate With Us</span>
             <Sparkles size={18} className="text-neutral-950 animate-pulse" />
@@ -528,7 +496,7 @@ export default function DiwaliPopup() {
       </main>
 
       {/* ================= FOOTER / INSTRUCTION ================= */}
-      <footer className="relative z-30 w-full px-6 py-4 flex flex-col sm:flex-row items-center justify-between gap-2 text-center">
+      <footer className="relative z-30 w-full px-6 py-4 flex flex-col sm:flex-row items-center justify-between gap-2 text-center bg-gradient-to-t from-[#0B081E] to-transparent">
         <span className="text-amber-300/80 text-xs sm:text-sm tracking-widest uppercase font-medium flex items-center gap-1.5 mx-auto sm:mx-0">
           <span>✨</span>
           <span>Click anywhere for magical fireworks</span>
