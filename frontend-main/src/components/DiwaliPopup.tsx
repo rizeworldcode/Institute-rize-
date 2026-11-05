@@ -30,7 +30,7 @@ export default function DiwaliPopup() {
   const [isClosing, setIsClosing] = useState(false);
 
   const containerRef = useRef<HTMLDivElement>(null);
-  const contentRef = useRef<HTMLDivElement>(null);
+  const cardRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   const particlesRef = useRef<Particle[]>([]);
@@ -51,10 +51,10 @@ export default function DiwaliPopup() {
 
   // ================= 2. CANVAS FIREWORKS & AMBIENT DUST ENGINE =================
   const spawnFirework = useCallback((originX: number, originY: number, count = 55) => {
-    // Luxury Festive Color Spectrum: Pure White, Golden Yellow, Saffron Orange, Amber
+    // Royal Gold, Saffron & Pure White festive palette matching the image
     const colors = [
       "#FFFFFF", // Pure white core
-      "#FEF08A", // Pale lemon gold
+      "#FEF08A", // Pale gold
       "#FDE68A", // Champagne gold
       "#FBBF24", // Vibrant gold
       "#F59E0B", // Warm amber
@@ -72,9 +72,9 @@ export default function DiwaliPopup() {
         x: originX,
         y: originY,
         vx: Math.cos(angle) * speed,
-        vy: Math.sin(angle) * speed - 1.5, // slight upward impulse
+        vy: Math.sin(angle) * speed - 1.5,
         alpha: 1,
-        decay: 0.01 + Math.random() * 0.016, // graceful 1.5 to 2.2s lifespan
+        decay: 0.01 + Math.random() * 0.016,
         color,
         size: 2.0 + Math.random() * 2.8,
         sparkle: Math.random() > 0.35,
@@ -84,18 +84,18 @@ export default function DiwaliPopup() {
     particlesRef.current.push(...newParticles);
   }, []);
 
-  // Initialize floating golden dust particles
+  // Ambient golden dust particles
   useEffect(() => {
     if (!isOpen) return;
 
     const dust: FloatingDust[] = [];
-    const count = window.innerWidth < 640 ? 25 : 55;
+    const count = window.innerWidth < 640 ? 25 : 50;
     for (let i = 0; i < count; i++) {
       dust.push({
         x: Math.random() * window.innerWidth,
         y: Math.random() * window.innerHeight,
-        vx: (Math.random() - 0.5) * 0.4,
-        vy: -0.2 - Math.random() * 0.5, // gentle upward drift
+        vx: (Math.random() - 0.5) * 0.35,
+        vy: -0.15 - Math.random() * 0.45,
         size: 1.2 + Math.random() * 2.2,
         alpha: Math.random() * 0.7,
         maxAlpha: 0.3 + Math.random() * 0.5,
@@ -126,33 +126,29 @@ export default function DiwaliPopup() {
 
     let isRunning = true;
 
-    // Opening festive celebration burst
+    // Initial festive welcome bursts
     const initialTimer = setTimeout(() => {
-      spawnFirework(window.innerWidth * 0.5, window.innerHeight * 0.32, 65);
+      spawnFirework(window.innerWidth * 0.5, window.innerHeight * 0.25, 60);
       setTimeout(() => {
-        spawnFirework(window.innerWidth * 0.25, window.innerHeight * 0.28, 45);
-        spawnFirework(window.innerWidth * 0.75, window.innerHeight * 0.28, 45);
+        spawnFirework(window.innerWidth * 0.25, window.innerHeight * 0.35, 45);
+        spawnFirework(window.innerWidth * 0.75, window.innerHeight * 0.35, 45);
       }, 350);
-    }, 400);
+    }, 450);
 
-    // Periodic ambient background fireworks (every 4 seconds)
-    const startPeriodicFireworks = () => {
-      autoFireworkTimerRef.current = setInterval(() => {
-        if (!isRunning) return;
-        const randomX = window.innerWidth * (0.2 + Math.random() * 0.6);
-        const randomY = window.innerHeight * (0.15 + Math.random() * 0.35);
-        spawnFirework(randomX, randomY, 40);
-      }, 3800);
-    };
-
-    startPeriodicFireworks();
+    // Periodic ambient fireworks in background sky (every 4 seconds)
+    autoFireworkTimerRef.current = setInterval(() => {
+      if (!isRunning) return;
+      const rx = window.innerWidth * (0.15 + Math.random() * 0.7);
+      const ry = window.innerHeight * (0.12 + Math.random() * 0.4);
+      spawnFirework(rx, ry, 40);
+    }, 4000);
 
     const render = () => {
       if (!isRunning) return;
 
       ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
 
-      // 1. Render Floating Ambient Golden Dust
+      // 1. Render Floating Golden Dust
       const dust = dustRef.current;
       for (let i = 0; i < dust.length; i++) {
         const d = dust[i];
@@ -164,7 +160,6 @@ export default function DiwaliPopup() {
           d.fadeSpeed = -d.fadeSpeed;
         }
 
-        // Wrap around viewport
         if (d.y < -10) d.y = window.innerHeight + 10;
         if (d.x < -10) d.x = window.innerWidth + 10;
         if (d.x > window.innerWidth + 10) d.x = -10;
@@ -187,8 +182,8 @@ export default function DiwaliPopup() {
 
         p.x += p.vx;
         p.y += p.vy;
-        p.vy += 0.09; // Realistic gravity
-        p.vx *= 0.98; // Air drag
+        p.vy += 0.09;
+        p.vx *= 0.98;
         p.vy *= 0.98;
         p.alpha -= p.decay;
 
@@ -228,17 +223,16 @@ export default function DiwaliPopup() {
     if (!isOpen) return;
 
     const container = containerRef.current;
-    const content = contentRef.current;
-    if (!container || !content) return;
+    const card = cardRef.current;
+    if (!container || !card) return;
 
-    // Use fromTo with explicit safety defaults so content is guaranteed visible
     const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
-    tl.fromTo(container, { opacity: 0 }, { opacity: 1, duration: 0.6 })
+    tl.fromTo(container, { opacity: 0 }, { opacity: 1, duration: 0.5 })
       .fromTo(
-        content,
-        { opacity: 0, scale: 0.94, y: 30 },
-        { opacity: 1, scale: 1, y: 0, duration: 0.8 },
-        "-=0.3"
+        card,
+        { opacity: 0, scale: 0.92, y: 25 },
+        { opacity: 1, scale: 1, y: 0, duration: 0.75 },
+        "-=0.25"
       );
 
     return () => {
@@ -258,8 +252,8 @@ export default function DiwaliPopup() {
 
     gsap.to(container, {
       opacity: 0,
-      scale: 0.98,
-      duration: 0.45,
+      scale: 0.97,
+      duration: 0.4,
       ease: "power2.inOut",
       onComplete: () => {
         setIsOpen(false);
@@ -267,7 +261,7 @@ export default function DiwaliPopup() {
     });
   }, [isClosing]);
 
-  // Keyboard accessibility: Escape key to close
+  // Keyboard Escape handler
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") handleClose();
@@ -276,7 +270,7 @@ export default function DiwaliPopup() {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [handleClose]);
 
-  // Screen click handler (triggers fireworks unless clicking interactive buttons)
+  // Click handler for fireworks
   const handleScreenClick = (e: React.MouseEvent) => {
     const target = e.target as HTMLElement;
     if (target.closest("[data-no-firework]")) return;
@@ -289,11 +283,10 @@ export default function DiwaliPopup() {
     const cx = rect.left + rect.width / 2;
     const cy = rect.top + rect.height / 2;
 
-    // Massive grand celebration firework
-    spawnFirework(cx, cy, 75);
+    spawnFirework(cx, cy, 70);
     setTimeout(() => {
-      spawnFirework(cx - 80, cy - 40, 45);
-      spawnFirework(cx + 80, cy - 40, 45);
+      spawnFirework(cx - 70, cy - 30, 40);
+      spawnFirework(cx + 70, cy - 30, 40);
     }, 180);
   };
 
@@ -303,254 +296,245 @@ export default function DiwaliPopup() {
     <div
       ref={containerRef}
       onClick={handleScreenClick}
-      className="fixed inset-0 w-screen h-[100dvh] z-[9999] overflow-hidden select-none cursor-crosshair flex flex-col justify-between"
+      className="fixed inset-0 w-screen h-[100dvh] z-[9999] overflow-y-auto overflow-x-hidden select-none cursor-crosshair flex flex-col justify-between"
       style={{
         background:
-          "radial-gradient(ellipse at 50% 32%, #261108 0%, #170702 42%, #0a0301 75%, #050100 100%)",
+          "radial-gradient(ellipse at 50% 35%, #191238 0%, #0F0B24 45%, #080614 100%)",
       }}
       aria-modal="true"
       role="dialog"
     >
-      {/* Interactive Fireworks & Golden Dust Canvas */}
+      {/* Full-Screen Fireworks Canvas */}
       <canvas
         ref={canvasRef}
         className="fixed inset-0 pointer-events-none z-10"
       />
 
-      {/* Custom Keyframe Animations */}
+      {/* Animation Keyframes */}
       <style>{`
-        @keyframes flameFlicker {
+        @keyframes diyaFlamePulse {
           0%, 100% { transform: scale(1) rotate(-0.5deg); opacity: 0.98; }
-          25% { transform: scale(1.08, 0.94) rotate(1.4deg); opacity: 1; }
-          50% { transform: scale(0.95, 1.06) rotate(-1deg); opacity: 0.94; }
-          75% { transform: scale(1.04, 1.02) rotate(0.6deg); opacity: 0.99; }
+          25% { transform: scale(1.1, 0.94) rotate(1.5deg); opacity: 1; }
+          50% { transform: scale(0.95, 1.08) rotate(-1deg); opacity: 0.94; }
+          75% { transform: scale(1.05, 1.02) rotate(0.8deg); opacity: 0.99; }
         }
-        @keyframes haloPulse {
-          0%, 100% { transform: scale(1); opacity: 0.45; }
-          50% { transform: scale(1.22); opacity: 0.75; }
+        @keyframes diyaHaloGlow {
+          0%, 100% { transform: scale(1); opacity: 0.55; }
+          50% { transform: scale(1.25); opacity: 0.85; }
         }
-        @keyframes borderGoldShimmer {
-          0%, 100% { border-color: rgba(245, 158, 11, 0.35); box-shadow: 0 0 25px rgba(245, 158, 11, 0.15); }
-          50% { border-color: rgba(253, 230, 138, 0.65); box-shadow: 0 0 45px rgba(245, 158, 11, 0.3); }
+        @keyframes starTwinkle {
+          0%, 100% { transform: scale(0.85) rotate(0deg); opacity: 0.5; }
+          50% { transform: scale(1.25) rotate(45deg); opacity: 1; filter: drop-shadow(0 0 10px #fef08a); }
         }
-        .animate-flame-flicker {
-          animation: flameFlicker 1.8s ease-in-out infinite;
+        @keyframes cardGlowShimmer {
+          0%, 100% { box-shadow: 0 20px 60px rgba(0,0,0,0.85), 0 0 35px rgba(245, 158, 11, 0.2); }
+          50% { box-shadow: 0 25px 80px rgba(0,0,0,0.9), 0 0 55px rgba(245, 158, 11, 0.35); }
+        }
+        .animate-diya-flame {
+          animation: diyaFlamePulse 1.8s ease-in-out infinite;
           transform-origin: 50% 90%;
         }
-        .animate-halo-pulse {
-          animation: haloPulse 3.5s ease-in-out infinite;
+        .animate-diya-halo {
+          animation: diyaHaloGlow 3s ease-in-out infinite;
         }
-        .animate-border-shimmer {
-          animation: borderGoldShimmer 6s ease-in-out infinite;
+        .animate-star-twinkle {
+          animation: starTwinkle 3.2s ease-in-out infinite;
+        }
+        .animate-card-shimmer {
+          animation: cardGlowShimmer 5s ease-in-out infinite;
         }
       `}</style>
 
-      {/* ================= BACKGROUND AMBIENT GLOW ORBS ================= */}
-      <div className="absolute top-[18%] left-1/2 -translate-x-1/2 -translate-y-1/2 w-[550px] h-[550px] bg-amber-500/18 rounded-full blur-[140px] pointer-events-none" />
-      <div className="absolute top-[40%] left-[20%] w-[380px] h-[380px] bg-orange-600/12 rounded-full blur-[120px] pointer-events-none" />
-      <div className="absolute top-[40%] right-[20%] w-[380px] h-[380px] bg-amber-600/12 rounded-full blur-[120px] pointer-events-none" />
-
-      {/* ================= CINEMATIC METALLIC GOLD BORDER FRAME ================= */}
-      <div className="fixed inset-3 sm:inset-5 md:inset-7 rounded-2xl sm:rounded-3xl border border-amber-400/30 pointer-events-none z-20 animate-border-shimmer">
-        {/* Ornate Corner Highlights */}
-        <div className="absolute top-2 left-2 text-amber-400/60 text-xs sm:text-sm">✧</div>
-        <div className="absolute top-2 right-2 text-amber-400/60 text-xs sm:text-sm">✧</div>
-        <div className="absolute bottom-2 left-2 text-amber-400/60 text-xs sm:text-sm">✧</div>
-        <div className="absolute bottom-2 right-2 text-amber-400/60 text-xs sm:text-sm">✧</div>
-      </div>
-
       {/* ================= TOP BAR ================= */}
-      <header className="relative z-30 w-full px-6 sm:px-12 py-5 sm:py-6 flex items-center justify-between">
-        {/* Brand Logo / Identity */}
+      <header className="relative z-30 w-full px-5 sm:px-10 py-4 sm:py-5 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <span className="text-amber-400 text-xs">✦</span>
-          <span className="text-amber-200/95 tracking-[0.28em] text-[11px] sm:text-xs md:text-sm font-bold uppercase">
+          <span className="text-amber-200/90 tracking-[0.26em] text-[11px] sm:text-xs md:text-sm font-bold uppercase">
             RizeWorld Institute
           </span>
           <span className="text-amber-400 text-xs">✦</span>
         </div>
 
-        {/* Close Button / Skip Option */}
-        <div className="flex items-center gap-3">
-          <button
-            type="button"
-            data-no-firework="true"
-            data-close-btn="true"
-            onClick={handleClose}
-            className="group flex items-center gap-2 px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-full bg-white/10 hover:bg-white/20 text-neutral-300 hover:text-white border border-amber-400/30 hover:border-amber-300 transition-all duration-200 cursor-pointer shadow-lg backdrop-blur-md"
-            aria-label="Enter Website"
-          >
-            <span className="text-[11px] sm:text-xs font-semibold tracking-wider uppercase text-amber-200 group-hover:text-white">
-              Enter Site
-            </span>
-            <X size={15} className="text-amber-300 group-hover:text-white" />
-          </button>
-        </div>
+        <button
+          type="button"
+          data-no-firework="true"
+          onClick={handleClose}
+          className="group flex items-center gap-2 px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-full bg-white/10 hover:bg-white/20 text-neutral-300 hover:text-white border border-amber-400/30 hover:border-amber-300 transition-all duration-200 cursor-pointer shadow-lg backdrop-blur-md"
+          aria-label="Enter Website"
+        >
+          <span className="text-[11px] sm:text-xs font-semibold tracking-wider uppercase text-amber-200 group-hover:text-white">
+            Enter Site
+          </span>
+          <X size={15} className="text-amber-300 group-hover:text-white" />
+        </button>
       </header>
 
-      {/* ================= MAIN FULL-SCREEN CONTENT ================= */}
-      <main
-        ref={contentRef}
-        className="relative z-30 flex-1 flex flex-col items-center justify-center text-center px-4 sm:px-6 max-w-4xl mx-auto my-auto"
-      >
-        {/* ================= 1. GLOWING UPPER-CENTER DIYA ================= */}
-        <div className="relative flex flex-col items-center justify-center mb-3 sm:mb-5">
-          {/* Ambient Pulsing Light Halo */}
-          <div className="absolute -top-6 w-32 h-32 sm:w-44 sm:h-44 bg-gradient-to-t from-amber-400/50 via-yellow-300/30 to-transparent rounded-full blur-2xl animate-halo-pulse pointer-events-none" />
-
-          {/* Upward Radiating Soft Light Beam */}
-          <div className="absolute -top-10 w-2 h-20 sm:h-28 bg-gradient-to-t from-amber-200 via-white to-transparent blur-[1px] animate-pulse pointer-events-none" />
-
-          {/* High-Fidelity Majestic Diya Lamp Vector */}
-          <svg
-            width="120"
-            height="84"
-            viewBox="0 0 120 84"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-            className="relative z-10 w-24 h-18 sm:w-32 sm:h-24 md:w-36 md:h-26 drop-shadow-[0_6px_22px_rgba(245,158,11,0.7)]"
-          >
-            <defs>
-              {/* Flame Radial Gradient: White Core -> Lemon Yellow -> Amber Red */}
-              <radialGradient id="fsFlameGrad" cx="50%" cy="65%" r="60%">
-                <stop offset="0%" stopColor="#FFFFFF" />
-                <stop offset="30%" stopColor="#FEF08A" />
-                <stop offset="65%" stopColor="#F59E0B" />
-                <stop offset="100%" stopColor="#DC2626" />
-              </radialGradient>
-
-              {/* Metallic Gold Trim Gradient */}
-              <linearGradient id="fsGoldRim" x1="0" y1="0" x2="1" y2="0">
-                <stop offset="0%" stopColor="#FDE68A" />
-                <stop offset="35%" stopColor="#F59E0B" />
-                <stop offset="70%" stopColor="#FEF08A" />
-                <stop offset="100%" stopColor="#D97706" />
-              </linearGradient>
-
-              {/* Terracotta Clay Body Gradient */}
-              <linearGradient id="fsClayGrad" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="#B45309" />
-                <stop offset="45%" stopColor="#78350F" />
-                <stop offset="100%" stopColor="#451A03" />
-              </linearGradient>
-            </defs>
-
-            {/* Flickering Teardrop Flame */}
-            <g className="animate-flame-flicker">
-              <path
-                d="M60 4 C52 18 44 26 44 38 C44 49 51 56 60 56 C69 56 76 49 76 38 C76 26 68 18 60 4 Z"
-                fill="url(#fsFlameGrad)"
-              />
-              <path
-                d="M60 18 C56 26 52 32 52 39 C52 45 56 49 60 49 C64 49 68 45 68 39 C68 32 64 26 60 18 Z"
-                fill="#FFFFFF"
-                opacity="0.96"
-              />
-            </g>
-
-            {/* Diya Lamp Base */}
-            {/* Outer Golden Fluted Wings */}
-            <path
-              d="M20 50 C32 64 46 72 60 72 C74 72 88 64 100 50 C94 58 80 66 60 66 C40 66 26 58 20 50 Z"
-              fill="url(#fsGoldRim)"
+      {/* ================= MAIN CONTENT SHOWCASE ================= */}
+      <main className="relative z-30 flex-1 flex flex-col items-center justify-center px-3 sm:px-6 my-auto max-w-5xl mx-auto w-full">
+        {/* ================= THE LUXURY DIWALI CARD ================= */}
+        <div
+          ref={cardRef}
+          className="relative w-full max-w-[760px] rounded-2xl sm:rounded-3xl overflow-hidden animate-card-shimmer border border-amber-400/40"
+        >
+          {/* Exact Luxury Diwali Card Graphic */}
+          <div className="relative w-full aspect-[800/533] select-none">
+            <img
+              src="/images/diwali-card.jpg"
+              alt="Happy Diwali - Festival of Lights"
+              className="w-full h-full object-cover select-none pointer-events-none"
             />
 
-            {/* Main Clay Lamp Body */}
-            <path
-              d="M22 48 C30 62 44 70 60 70 C76 70 90 62 98 48 C90 54 76 60 60 60 C44 60 30 54 22 48 Z"
-              fill="url(#fsClayGrad)"
-              stroke="url(#fsGoldRim)"
-              strokeWidth="2"
-            />
+            {/* ================= LIVE ANIMATED FLICKERING FLAMES ON THE 3 DIYAS ================= */}
+            {/* 1. Large Diya Flame (Bottom Right Corner - x: 88.0%, y: 72.8%) */}
+            <div
+              className="absolute pointer-events-none -translate-x-1/2 -translate-y-1/2"
+              style={{ left: "88.2%", top: "73.2%" }}
+            >
+              {/* Pulsing Warm Light Halo */}
+              <div className="absolute -inset-4 bg-amber-400/45 rounded-full blur-md animate-diya-halo" />
 
-            {/* Golden Lip Arc */}
-            <path
-              d="M20 48 Q60 58 100 48"
-              stroke="url(#fsGoldRim)"
-              strokeWidth="2.8"
-              strokeLinecap="round"
-            />
+              {/* Glowing Golden Flame SVG */}
+              <svg
+                width="28"
+                height="38"
+                viewBox="0 0 28 38"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+                className="relative z-10 animate-diya-flame drop-shadow-[0_0_12px_rgba(251,191,36,0.9)]"
+              >
+                <path
+                  d="M14 2 C10 10 5 16 5 24 C5 32 9 36 14 36 C19 36 23 32 23 24 C23 16 18 10 14 2 Z"
+                  fill="url(#diyaFlame1)"
+                />
+                <path
+                  d="M14 10 C12 16 9 20 9 25 C9 29 11 32 14 32 C17 32 19 29 19 25 C19 20 16 16 14 10 Z"
+                  fill="#FFFFFF"
+                  opacity="0.95"
+                />
+                <defs>
+                  <radialGradient id="diyaFlame1" cx="50%" cy="65%" r="60%">
+                    <stop offset="0%" stopColor="#FFFFFF" />
+                    <stop offset="30%" stopColor="#FEF08A" />
+                    <stop offset="65%" stopColor="#F59E0B" />
+                    <stop offset="100%" stopColor="#DC2626" />
+                  </radialGradient>
+                </defs>
+              </svg>
+            </div>
 
-            {/* Subtle Star Sparkles Beside Lamp */}
-            <circle cx="34" cy="34" r="1.8" fill="#FEF08A" opacity="0.85" />
-            <circle cx="86" cy="32" r="1.5" fill="#FEF08A" opacity="0.85" />
-          </svg>
-        </div>
+            {/* 2. Medium Diya Flame (Mid Right - x: 81.0%, y: 66.6%) */}
+            <div
+              className="absolute pointer-events-none -translate-x-1/2 -translate-y-1/2"
+              style={{ left: "81.2%", top: "66.8%" }}
+            >
+              <div className="absolute -inset-3 bg-amber-400/40 rounded-full blur-md animate-diya-halo" />
+              <svg
+                width="22"
+                height="30"
+                viewBox="0 0 28 38"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+                className="relative z-10 animate-diya-flame drop-shadow-[0_0_10px_rgba(251,191,36,0.85)]"
+                style={{ animationDelay: "0.4s" }}
+              >
+                <path
+                  d="M14 2 C10 10 5 16 5 24 C5 32 9 36 14 36 C19 36 23 32 23 24 C23 16 18 10 14 2 Z"
+                  fill="url(#diyaFlame1)"
+                />
+                <path
+                  d="M14 10 C12 16 9 20 9 25 C9 29 11 32 14 32 C17 32 19 29 19 25 C19 20 16 16 14 10 Z"
+                  fill="#FFFFFF"
+                  opacity="0.95"
+                />
+              </svg>
+            </div>
 
-        {/* ================= 2. SHUBH DEEPAWALI PILL BADGE ================= */}
-        <div className="mb-3 sm:mb-4">
-          <div className="inline-flex items-center gap-2.5 px-5 py-1.5 rounded-full border border-amber-400/60 bg-gradient-to-r from-amber-950/60 via-amber-900/40 to-amber-950/60 shadow-[0_0_20px_rgba(245,158,11,0.25)] backdrop-blur-md">
-            <span className="text-amber-400 text-xs sm:text-sm">✧</span>
-            <span className="text-amber-300 tracking-[0.3em] text-xs sm:text-sm font-bold uppercase">
-              SHUBH DEEPAWALI
-            </span>
-            <span className="text-amber-400 text-xs sm:text-sm">✧</span>
+            {/* 3. Small Diya Flame (Far Right - x: 94.0%, y: 65.3%) */}
+            <div
+              className="absolute pointer-events-none -translate-x-1/2 -translate-y-1/2"
+              style={{ left: "93.8%", top: "65.5%" }}
+            >
+              <div className="absolute -inset-2.5 bg-amber-400/35 rounded-full blur-sm animate-diya-halo" />
+              <svg
+                width="18"
+                height="24"
+                viewBox="0 0 28 38"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+                className="relative z-10 animate-diya-flame drop-shadow-[0_0_8px_rgba(251,191,36,0.8)]"
+                style={{ animationDelay: "0.8s" }}
+              >
+                <path
+                  d="M14 2 C10 10 5 16 5 24 C5 32 9 36 14 36 C19 36 23 32 23 24 C23 16 18 10 14 2 Z"
+                  fill="url(#diyaFlame1)"
+                />
+                <path
+                  d="M14 10 C12 16 9 20 9 25 C9 29 11 32 14 32 C17 32 19 29 19 25 C19 20 16 16 14 10 Z"
+                  fill="#FFFFFF"
+                  opacity="0.95"
+                />
+              </svg>
+            </div>
+
+            {/* ================= TWINKLING SPARKLE STARS ================= */}
+            {/* Top-Right Star */}
+            <div
+              className="absolute pointer-events-none -translate-x-1/2 -translate-y-1/2 animate-star-twinkle text-amber-200"
+              style={{ left: "89%", top: "15%", fontSize: "20px" }}
+            >
+              ✦
+            </div>
+
+            {/* Left Star */}
+            <div
+              className="absolute pointer-events-none -translate-x-1/2 -translate-y-1/2 animate-star-twinkle text-amber-300"
+              style={{ left: "7%", top: "58%", fontSize: "16px", animationDelay: "1.2s" }}
+            >
+              ✦
+            </div>
+
+            {/* Bottom-Center Star */}
+            <div
+              className="absolute pointer-events-none -translate-x-1/2 -translate-y-1/2 animate-star-twinkle text-amber-200"
+              style={{ left: "60%", top: "87%", fontSize: "14px", animationDelay: "0.6s" }}
+            >
+              ✦
+            </div>
           </div>
         </div>
 
-        {/* ================= 3. MAJESTIC MAIN HEADING ================= */}
-        <div className="my-1 sm:my-2">
-          <h1
-            className="font-serif text-5xl sm:text-7xl md:text-8xl lg:text-[96px] font-black uppercase tracking-wider leading-[0.95]"
-            style={{
-              background:
-                "linear-gradient(135deg, #FFFDF5 0%, #FDE68A 25%, #F59E0B 55%, #FEF08A 75%, #D97706 100%)",
-              WebkitBackgroundClip: "text",
-              WebkitTextFillColor: "transparent",
-              textShadow: "0 0 35px rgba(245,158,11,0.45)",
-            }}
-          >
-            HAPPY DIWALI!
-          </h1>
-        </div>
-
-        {/* ================= 4. SUBHEADING ================= */}
-        <div className="mt-3 sm:mt-4">
-          <p className="text-amber-200/95 font-semibold tracking-wide text-base sm:text-xl md:text-2xl">
-            Warm Wishes from <span className="text-amber-300 font-extrabold">RizeWorld Institute</span>
+        {/* ================= GREETING & INTERACTIVE CTA ================= */}
+        <div className="mt-4 sm:mt-6 flex flex-col items-center text-center max-w-xl mx-auto px-3">
+          <p className="text-amber-200/95 font-semibold text-sm sm:text-base md:text-lg tracking-wide mb-1.5 flex items-center gap-2">
+            <span className="text-amber-400">✧</span>
+            Warm Wishes from <span className="text-amber-300 font-bold">RizeWorld Institute</span>
+            <span className="text-amber-400">✧</span>
           </p>
-        </div>
 
-        {/* ================= 5. DESCRIPTION ================= */}
-        <div className="mt-3 sm:mt-4 max-w-xl mx-auto px-2">
-          <p className="text-neutral-200/90 text-sm sm:text-base md:text-lg leading-relaxed font-normal">
+          <p className="text-neutral-200 text-xs sm:text-sm leading-relaxed max-w-md mx-auto font-normal mb-4">
             May this Diwali illuminate your path with knowledge, happiness, new opportunities, and outstanding career success.
           </p>
-        </div>
 
-        {/* Golden Ornamental Divider */}
-        <div className="flex items-center justify-center gap-3 my-4 sm:my-6 text-amber-400/80 text-sm">
-          <span className="w-16 sm:w-24 h-[1px] bg-gradient-to-r from-transparent to-amber-400/60" />
-          <span>✦</span>
-          <span>🪔</span>
-          <span>✦</span>
-          <span className="w-16 sm:w-24 h-[1px] bg-gradient-to-l from-transparent to-amber-400/60" />
-        </div>
-
-        {/* ================= 6. LARGE GLOWING CTA BUTTON ================= */}
-        <div className="flex flex-col items-center gap-3">
           <button
             type="button"
             data-no-firework="true"
             onClick={handleCtaClick}
-            className="group relative px-9 py-3.5 sm:px-12 sm:py-4.5 rounded-full bg-gradient-to-r from-amber-400 via-amber-500 to-yellow-400 hover:brightness-110 text-neutral-950 font-black text-sm sm:text-base md:text-lg tracking-wider uppercase shadow-[0_0_35px_rgba(245,158,11,0.65)] hover:shadow-[0_0_50px_rgba(245,158,11,0.9)] hover:scale-105 active:scale-95 transition-all duration-300 cursor-pointer flex items-center gap-3 border-2 border-amber-200"
+            className="group relative px-9 py-3.5 sm:px-11 sm:py-4 rounded-full bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 hover:brightness-110 text-neutral-950 font-extrabold text-xs sm:text-sm md:text-base tracking-wider uppercase shadow-[0_0_30px_rgba(245,158,11,0.6)] hover:shadow-[0_0_45px_rgba(245,158,11,0.85)] hover:scale-105 active:scale-95 transition-all duration-300 cursor-pointer flex items-center gap-2.5 border-2 border-amber-200"
           >
             <span>Celebrate With Us</span>
-            <Sparkles size={20} className="text-neutral-950 animate-pulse" />
+            <Sparkles size={18} className="text-neutral-950 animate-pulse" />
           </button>
         </div>
       </main>
 
       {/* ================= FOOTER / INSTRUCTION ================= */}
-      <footer className="relative z-30 w-full px-6 py-4 sm:py-6 flex flex-col sm:flex-row items-center justify-between gap-2 text-center">
-        {/* Fireworks Instruction */}
+      <footer className="relative z-30 w-full px-6 py-4 flex flex-col sm:flex-row items-center justify-between gap-2 text-center">
         <span className="text-amber-300/80 text-xs sm:text-sm tracking-widest uppercase font-medium flex items-center gap-1.5 mx-auto sm:mx-0">
           <span>✨</span>
           <span>Click anywhere for magical fireworks</span>
           <span>✨</span>
         </span>
 
-        {/* Enter Site Quick Link */}
         <button
           type="button"
           data-no-firework="true"
