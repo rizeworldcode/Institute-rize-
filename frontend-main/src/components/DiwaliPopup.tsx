@@ -1,5 +1,4 @@
 import React, { useEffect, useRef, useState, useCallback } from "react";
-import { Sparkles } from "lucide-react";
 import { gsap } from "gsap";
 
 interface Particle {
@@ -287,19 +286,6 @@ export default function DiwaliPopup() {
     const target = e.target as HTMLElement;
     if (target.closest("[data-no-firework]")) return;
     spawnFirework(e.clientX, e.clientY, 40);
-  };
-
-  const handleCtaClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
-    const cx = rect.left + rect.width / 2;
-    const cy = rect.top + rect.height / 2;
-
-    spawnFirework(cx, cy, 75);
-    setTimeout(() => {
-      spawnFirework(cx - 80, cy - 30, 45);
-      spawnFirework(cx + 80, cy - 30, 45);
-    }, 180);
   };
 
   if (!isOpen) return null;
@@ -762,16 +748,26 @@ export default function DiwaliPopup() {
               </p>
             </div>
 
-            {/* Glowing CTA Button */}
-            <button
-              type="button"
-              data-no-firework="true"
-              onClick={handleCtaClick}
-              className="group relative px-7 py-2.5 sm:px-9 sm:py-3 rounded-full bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 hover:brightness-110 text-neutral-950 font-extrabold text-xs sm:text-sm tracking-wider uppercase shadow-[0_0_25px_rgba(245,158,11,0.6)] hover:shadow-[0_0_38px_rgba(245,158,11,0.85)] hover:scale-105 active:scale-95 transition-all duration-300 cursor-pointer flex items-center gap-2 border border-amber-200 mt-1"
-            >
-              <span>Celebrate With Us</span>
-              <Sparkles size={15} className="text-neutral-950 animate-pulse" />
-            </button>
+            {/* Royal Festive Flourish & Auspicious Blessing */}
+            <div className="flex flex-col items-center justify-center mt-2.5 sm:mt-3.5">
+              {/* Royal Golden Filigree Line with Glowing Traditional Diya */}
+              <div className="flex items-center justify-center gap-3 w-full max-w-[260px] sm:max-w-xs mb-2 sm:mb-2.5">
+                <div className="h-[1px] flex-1 bg-gradient-to-r from-transparent via-amber-400/80 to-transparent" />
+                <span className="text-amber-300 text-xs sm:text-sm animate-pulse">✦</span>
+                <span className="text-base sm:text-lg drop-shadow-[0_0_10px_rgba(251,191,36,0.8)]">🪔</span>
+                <span className="text-amber-300 text-xs sm:text-sm animate-pulse">✦</span>
+                <div className="h-[1px] flex-1 bg-gradient-to-r from-transparent via-amber-400/80 to-transparent" />
+              </div>
+
+              {/* Luxury Auspicious Shubh Deepawali Crest */}
+              <div className="px-4 py-1.5 sm:px-6 sm:py-2 rounded-full bg-gradient-to-r from-amber-500/15 via-yellow-400/25 to-amber-500/15 border border-amber-300/40 shadow-[0_0_22px_rgba(251,191,36,0.3)] backdrop-blur-md flex items-center gap-2 select-none">
+                <span className="text-amber-300 text-[11px] sm:text-xs">✧</span>
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-yellow-100 via-amber-200 to-yellow-300 font-bold tracking-[0.25em] text-[11px] sm:text-xs md:text-sm uppercase font-serif">
+                  शुभ दीपावली • SHUBH DEEPAWALI
+                </span>
+                <span className="text-amber-300 text-[11px] sm:text-xs">✧</span>
+              </div>
+            </div>
           </div>
         </div>
       </main>
