@@ -1979,445 +1979,457 @@ export function StudentLeadCrmTab() {
         </div>
       </div>
 
-      {/* 5 KPI Stat Cards (Smooth Horizontal Swipe on Mobile, Full Grid on Desktop) - CLICKABLE */}
-      <div className="flex overflow-x-auto no-scrollbar gap-2.5 sm:gap-4 pb-1 -mx-2 px-2 sm:mx-0 sm:px-0 sm:grid sm:grid-cols-3 lg:grid-cols-5 snap-x">
-        {/* 1. Total Leads (Signature Rize Orange Gradient matching Logo) */}
-        <div 
-          onClick={() => navigate("/admin/dashboard/student-crm/total-leads")}
-          role="button"
-          tabIndex={0}
-          title="Click to view all registered leads"
-          className="cursor-pointer select-none min-w-[145px] max-w-[170px] sm:min-w-0 sm:max-w-none snap-start shrink-0 sm:shrink bg-gradient-to-br from-[#ee591e] via-[#ea580c] to-[#c2410c] text-white rounded-2xl sm:rounded-[26px] p-4 sm:p-6 shadow-md shadow-[#ee591e]/20 hover:shadow-lg hover:-translate-y-1 active:scale-[0.98] transition-all duration-300 relative overflow-hidden group flex flex-col justify-between min-h-[135px] sm:min-h-[175px]"
-        >
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-[11px] sm:text-xs font-bold text-orange-100 uppercase tracking-wider">Total Leads</span>
-            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-white text-[#ee591e] flex items-center justify-center shadow-xs">
-              <Building size={17} className="sm:w-5 sm:h-5 stroke-[2.2]" />
-            </div>
-          </div>
-          <div className="my-auto">
-            <div className="flex items-baseline gap-2">
-              <span className="text-2xl sm:text-3xl md:text-4xl font-black text-white tracking-tight">
-                {displayStats.totalLeads}
-              </span>
-              <span className="inline-flex items-center text-[10px] sm:text-[11px] font-bold px-1.5 py-0.5 rounded-full bg-white/20 text-white backdrop-blur-xs border border-white/20">
-                Active
-              </span>
-            </div>
-          </div>
-          <div className="flex items-center justify-between text-[11px] sm:text-xs text-orange-100 font-medium opacity-95 truncate mt-2 pt-2 border-t border-white/20">
-            <span className="truncate">{dateLabel ? `Active on ${dateLabel}` : "All inquiries"}</span>
-            <span className="shrink-0 text-white font-bold group-hover:translate-x-1 transition-transform flex items-center gap-0.5">
-              View <ArrowRight size={12} />
-            </span>
-          </div>
-        </div>
+      {/* COMBINED HERO ANALYTICS COMMAND CENTER (DARK BACKGROUND THEME) */}
+      <div className="bg-[#141417] rounded-3xl sm:rounded-[32px] p-4 sm:p-6 md:p-7 border border-neutral-800 shadow-2xl space-y-6 relative overflow-hidden">
+        {/* Subtle Ambient Brand Glows */}
+        <div className="absolute -top-24 -left-24 w-96 h-96 bg-[#ee591e]/10 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute -bottom-24 -right-24 w-96 h-96 bg-[#2a7c37]/10 rounded-full blur-3xl pointer-events-none" />
 
-        {/* 2. New Inquiries */}
-        <div 
-          onClick={() => navigate("/admin/dashboard/student-crm/new-inquiries")}
-          role="button"
-          tabIndex={0}
-          title="Click to view fresh new inquiries"
-          className="cursor-pointer select-none min-w-[145px] max-w-[170px] sm:min-w-0 sm:max-w-none snap-start shrink-0 sm:shrink bg-white rounded-2xl sm:rounded-[26px] p-4 sm:p-6 border border-neutral-200/80 shadow-xs hover:border-blue-300 hover:shadow-md hover:-translate-y-1 active:scale-[0.98] transition-all duration-300 relative overflow-hidden group flex flex-col justify-between min-h-[135px] sm:min-h-[175px]"
-        >
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-[11px] sm:text-xs font-semibold text-neutral-500 uppercase tracking-wider">New Inquiries</span>
-            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-blue-50 text-[#0a66ff] flex items-center justify-center shadow-2xs">
-              <Clock size={16} className="sm:w-[19px] sm:h-[19px]" />
-            </div>
-          </div>
-          <div className="my-auto">
-            <div className="flex items-baseline gap-2">
-              <span className="text-2xl sm:text-3xl font-black text-neutral-900 tracking-tight">
-                {displayStats.newInquiries}
-              </span>
-            </div>
-          </div>
-          <div className="flex items-center justify-between text-[11px] sm:text-xs text-neutral-400 font-medium truncate mt-2 pt-2 border-t border-neutral-100">
-            <span className="truncate">{dateLabel ? `New on ${dateLabel}` : "Fresh prospects"}</span>
-            <span className="shrink-0 text-[#0a66ff] font-bold group-hover:translate-x-1 transition-transform flex items-center gap-0.5">
-              View <ArrowRight size={12} />
-            </span>
-          </div>
-        </div>
-
-        {/* 3. In Follow-up (Rize Gold / Amber matching Logo) */}
-        <div 
-          onClick={() => navigate("/admin/dashboard/student-crm/in-follow-up")}
-          role="button"
-          tabIndex={0}
-          title="Click to view active follow-up leads"
-          className="cursor-pointer select-none min-w-[145px] max-w-[170px] sm:min-w-0 sm:max-w-none snap-start shrink-0 sm:shrink bg-white rounded-2xl sm:rounded-[26px] p-4 sm:p-6 border border-neutral-200/80 shadow-xs hover:border-amber-300 hover:shadow-md hover:-translate-y-1 active:scale-[0.98] transition-all duration-300 relative overflow-hidden group flex flex-col justify-between min-h-[135px] sm:min-h-[175px]"
-        >
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-[11px] sm:text-xs font-semibold text-neutral-500 uppercase tracking-wider">In Follow-up</span>
-            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-amber-50 text-[#d97706] flex items-center justify-center shadow-2xs">
-              <TrendingUp size={16} className="sm:w-[19px] sm:h-[19px]" />
-            </div>
-          </div>
-          <div className="my-auto">
-            <div className="flex items-baseline gap-2">
-              <span className="text-2xl sm:text-3xl font-black text-neutral-900 tracking-tight">
-                {displayStats.inFollowUp}
-              </span>
-            </div>
-          </div>
-          <div className="flex items-center justify-between text-[11px] sm:text-xs text-neutral-400 font-medium truncate mt-2 pt-2 border-t border-neutral-100">
-            <span className="truncate">{dateLabel ? `In follow-up on ${dateLabel}` : "Active engagement"}</span>
-            <span className="shrink-0 text-[#d97706] font-bold group-hover:translate-x-1 transition-transform flex items-center gap-0.5">
-              View <ArrowRight size={12} />
-            </span>
-          </div>
-        </div>
-
-        {/* 4. Converted (Rize Forest Green matching WORLD in Logo) */}
-        <div 
-          onClick={() => navigate("/admin/dashboard/student-crm/converted")}
-          role="button"
-          tabIndex={0}
-          title="Click to view enrolled converted students"
-          className="cursor-pointer select-none min-w-[145px] max-w-[170px] sm:min-w-0 sm:max-w-none snap-start shrink-0 sm:shrink bg-white rounded-2xl sm:rounded-[26px] p-4 sm:p-6 border border-neutral-200/80 shadow-xs hover:border-emerald-300 hover:shadow-md hover:-translate-y-1 active:scale-[0.98] transition-all duration-300 relative overflow-hidden group flex flex-col justify-between min-h-[135px] sm:min-h-[175px]"
-        >
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-[11px] sm:text-xs font-semibold text-neutral-500 uppercase tracking-wider">Converted</span>
-            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-emerald-50 text-[#2a7c37] flex items-center justify-center shadow-2xs">
-              <CheckCircle2 size={16} className="sm:w-[19px] sm:h-[19px]" />
-            </div>
-          </div>
-          <div className="my-auto">
-            <div className="flex items-baseline gap-2">
-              <span className="text-2xl sm:text-3xl font-black text-[#2a7c37] tracking-tight">
-                {displayStats.converted}
-              </span>
-            </div>
-          </div>
-          <div className="flex items-center justify-between text-[11px] sm:text-xs text-neutral-400 font-medium truncate mt-2 pt-2 border-t border-neutral-100">
-            <span className="truncate">{dateLabel ? `Converted on ${dateLabel}` : "Enrolled students"}</span>
-            <span className="shrink-0 text-[#2a7c37] font-bold group-hover:translate-x-1 transition-transform flex items-center gap-0.5">
-              View <ArrowRight size={12} />
-            </span>
-          </div>
-        </div>
-
-        {/* 5. Lost Leads */}
-        <div 
-          onClick={() => navigate("/admin/dashboard/student-crm/lost-leads")}
-          role="button"
-          tabIndex={0}
-          title="Click to view dropped inquiries"
-          className="cursor-pointer select-none min-w-[145px] max-w-[170px] sm:min-w-0 sm:max-w-none snap-start shrink-0 sm:shrink bg-white rounded-2xl sm:rounded-[26px] p-4 sm:p-6 border border-neutral-200/80 shadow-xs hover:border-neutral-300 hover:shadow-md hover:-translate-y-1 active:scale-[0.98] transition-all duration-300 relative overflow-hidden group flex flex-col justify-between min-h-[135px] sm:min-h-[175px]"
-        >
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-[11px] sm:text-xs font-semibold text-neutral-500 uppercase tracking-wider">Lost Leads</span>
-            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-rose-50 text-rose-600 flex items-center justify-center shadow-2xs">
-              <AlertCircle size={16} className="sm:w-[19px] sm:h-[19px]" />
-            </div>
-          </div>
-          <div className="my-auto">
-            <div className="flex items-baseline gap-2">
-              <span className="text-2xl sm:text-3xl font-black text-rose-600 tracking-tight">
-                {displayStats.lostLeads}
-              </span>
-            </div>
-          </div>
-          <div className="flex items-center justify-between text-[11px] sm:text-xs text-neutral-400 font-medium truncate mt-2 pt-2 border-t border-neutral-100">
-            <span className="truncate">{dateLabel ? `Dropped on ${dateLabel}` : "Dropped inquiries"}</span>
-            <span className="shrink-0 text-rose-600 font-bold group-hover:translate-x-1 transition-transform flex items-center gap-0.5">
-              View <ArrowRight size={12} />
-            </span>
-          </div>
-        </div>
-      </div>
-
-      {/* Calling & Demo Telecalling Performance Cards (Horizontal Swipe on Mobile, 6 Grid on Desktop) */}
-      <div className="space-y-2.5 sm:space-y-3">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 px-1 pb-1">
-          <div className="flex items-center gap-2 flex-wrap">
-            <div className="w-7 h-7 rounded-lg bg-orange-50 text-[#ee591e] border border-orange-200/60 flex items-center justify-center shadow-2xs">
-              <PhoneCall size={15} />
-            </div>
-            <h3 className="text-xs sm:text-sm font-black uppercase tracking-wider text-neutral-900">
-              Calling & Demo Response Performance
-            </h3>
-            {dateLabel && (
-              <span className="text-[10px] font-black px-2.5 py-0.5 rounded-full bg-orange-50 text-[#9a3412] border border-orange-200 shadow-2xs flex items-center gap-1">
-                <Calendar size={11} className="text-[#ee591e]" />
-                {dateLabel}
-              </span>
-            )}
-          </div>
-
-          {/* Date-wise Quick Filter Toolbar */}
-          <div className="flex items-center gap-1.5 flex-wrap">
-            <button
-              type="button"
-              onClick={() => {
-                setDateFilterMode("all");
-                setCustomDate("");
-              }}
-              className={`px-2.5 py-1 rounded-full text-[11px] font-bold transition-all cursor-pointer shadow-2xs ${
-                dateFilterMode === "all"
-                  ? "bg-neutral-900 text-white"
-                  : "bg-neutral-100 text-neutral-600 hover:bg-neutral-200 border border-neutral-200/60"
-              }`}
+        <div className="relative z-10 space-y-6">
+          {/* 5 KPI Stat Cards (Smooth Horizontal Swipe on Mobile, Full Grid on Desktop) - CLICKABLE */}
+          <div className="flex overflow-x-auto no-scrollbar gap-2.5 sm:gap-4 pb-1 -mx-2 px-2 sm:mx-0 sm:px-0 sm:grid sm:grid-cols-3 lg:grid-cols-5 snap-x">
+            {/* 1. Total Leads (Signature Rize Orange Gradient matching Logo) */}
+            <div 
+              onClick={() => navigate("/admin/dashboard/student-crm/total-leads")}
+              role="button"
+              tabIndex={0}
+              title="Click to view all registered leads"
+              className="cursor-pointer select-none min-w-[145px] max-w-[170px] sm:min-w-0 sm:max-w-none snap-start shrink-0 sm:shrink bg-gradient-to-br from-[#ee591e] via-[#ea580c] to-[#c2410c] text-white rounded-2xl sm:rounded-[26px] p-4 sm:p-6 shadow-lg shadow-[#ee591e]/25 hover:shadow-xl hover:-translate-y-1 active:scale-[0.98] transition-all duration-300 relative overflow-hidden group flex flex-col justify-between min-h-[135px] sm:min-h-[175px] border border-orange-400/30"
             >
-              All Time
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                const todayStr = toLocalDateKey(new Date());
-                setDateFilterMode("today");
-                setCustomDate(todayStr);
-              }}
-              className={`px-2.5 py-1 rounded-full text-[11px] font-bold transition-all cursor-pointer shadow-2xs ${
-                dateFilterMode === "today"
-                  ? "bg-[#ee591e] text-white shadow-xs"
-                  : "bg-orange-50 text-[#c2410c] hover:bg-orange-100 border border-orange-200/60"
-              }`}
-            >
-              Today
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                const y = new Date();
-                y.setDate(y.getDate() - 1);
-                setDateFilterMode("yesterday");
-                setCustomDate(toLocalDateKey(y));
-              }}
-              className={`px-2.5 py-1 rounded-full text-[11px] font-bold transition-all cursor-pointer shadow-2xs ${
-                dateFilterMode === "yesterday"
-                  ? "bg-[#d97706] text-white shadow-xs"
-                  : "bg-amber-50 text-amber-800 hover:bg-amber-100 border border-amber-200/60"
-              }`}
-            >
-              Yesterday
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                setDateFilterMode("7days");
-                setCustomDate("");
-              }}
-              className={`px-2.5 py-1 rounded-full text-[11px] font-bold transition-all cursor-pointer shadow-2xs ${
-                dateFilterMode === "7days"
-                  ? "bg-[#0a66ff] text-white shadow-xs"
-                  : "bg-blue-50 text-blue-700 hover:bg-blue-100 border border-blue-200/60"
-              }`}
-            >
-              Last 7 Days
-            </button>
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-[11px] sm:text-xs font-bold text-orange-100 uppercase tracking-wider">Total Leads</span>
+                <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-white text-[#ee591e] flex items-center justify-center shadow-xs">
+                  <Building size={17} className="sm:w-5 sm:h-5 stroke-[2.2]" />
+                </div>
+              </div>
+              <div className="my-auto">
+                <div className="flex items-baseline gap-2">
+                  <span className="text-2xl sm:text-3xl md:text-4xl font-black text-white tracking-tight">
+                    {displayStats.totalLeads}
+                  </span>
+                  <span className="inline-flex items-center text-[10px] sm:text-[11px] font-bold px-1.5 py-0.5 rounded-full bg-white/20 text-white backdrop-blur-xs border border-white/20">
+                    Active
+                  </span>
+                </div>
+              </div>
+              <div className="flex items-center justify-between text-[11px] sm:text-xs text-orange-100 font-medium opacity-95 truncate mt-2 pt-2 border-t border-white/20">
+                <span className="truncate">{dateLabel ? `Active on ${dateLabel}` : "All inquiries"}</span>
+                <span className="shrink-0 text-white font-bold group-hover:translate-x-1 transition-transform flex items-center gap-0.5">
+                  View <ArrowRight size={12} />
+                </span>
+              </div>
+            </div>
 
-            {/* Specific Date Picker */}
-            <div className="relative inline-flex items-center">
-              <input
-                type="date"
-                value={customDate}
-                onChange={(e) => {
-                  if (e.target.value) {
-                    setDateFilterMode("custom");
-                    setCustomDate(e.target.value);
-                  } else {
+            {/* 2. New Inquiries */}
+            <div 
+              onClick={() => navigate("/admin/dashboard/student-crm/new-inquiries")}
+              role="button"
+              tabIndex={0}
+              title="Click to view fresh new inquiries"
+              className="cursor-pointer select-none min-w-[145px] max-w-[170px] sm:min-w-0 sm:max-w-none snap-start shrink-0 sm:shrink bg-[#1f1f24] hover:bg-[#26262d] rounded-2xl sm:rounded-[26px] p-4 sm:p-6 border border-neutral-800 hover:border-blue-500/40 shadow-sm hover:shadow-md hover:-translate-y-1 active:scale-[0.98] transition-all duration-300 relative overflow-hidden group flex flex-col justify-between min-h-[135px] sm:min-h-[175px] text-white"
+            >
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-[11px] sm:text-xs font-semibold text-neutral-400 uppercase tracking-wider">New Inquiries</span>
+                <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-blue-500/15 text-blue-400 border border-blue-500/20 flex items-center justify-center shadow-2xs">
+                  <Clock size={16} className="sm:w-[19px] sm:h-[19px]" />
+                </div>
+              </div>
+              <div className="my-auto">
+                <div className="flex items-baseline gap-2">
+                  <span className="text-2xl sm:text-3xl font-black text-white tracking-tight">
+                    {displayStats.newInquiries}
+                  </span>
+                </div>
+              </div>
+              <div className="flex items-center justify-between text-[11px] sm:text-xs text-neutral-400 font-medium truncate mt-2 pt-2 border-t border-neutral-800/90">
+                <span className="truncate">{dateLabel ? `New on ${dateLabel}` : "Fresh prospects"}</span>
+                <span className="shrink-0 text-blue-400 font-bold group-hover:translate-x-1 transition-transform flex items-center gap-0.5">
+                  View <ArrowRight size={12} />
+                </span>
+              </div>
+            </div>
+
+            {/* 3. In Follow-up (Rize Gold / Amber matching Logo) */}
+            <div 
+              onClick={() => navigate("/admin/dashboard/student-crm/in-follow-up")}
+              role="button"
+              tabIndex={0}
+              title="Click to view active follow-up leads"
+              className="cursor-pointer select-none min-w-[145px] max-w-[170px] sm:min-w-0 sm:max-w-none snap-start shrink-0 sm:shrink bg-[#1f1f24] hover:bg-[#26262d] rounded-2xl sm:rounded-[26px] p-4 sm:p-6 border border-neutral-800 hover:border-amber-500/40 shadow-sm hover:shadow-md hover:-translate-y-1 active:scale-[0.98] transition-all duration-300 relative overflow-hidden group flex flex-col justify-between min-h-[135px] sm:min-h-[175px] text-white"
+            >
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-[11px] sm:text-xs font-semibold text-neutral-400 uppercase tracking-wider">In Follow-up</span>
+                <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-amber-500/15 text-amber-400 border border-amber-500/20 flex items-center justify-center shadow-2xs">
+                  <TrendingUp size={16} className="sm:w-[19px] sm:h-[19px]" />
+                </div>
+              </div>
+              <div className="my-auto">
+                <div className="flex items-baseline gap-2">
+                  <span className="text-2xl sm:text-3xl font-black text-white tracking-tight">
+                    {displayStats.inFollowUp}
+                  </span>
+                </div>
+              </div>
+              <div className="flex items-center justify-between text-[11px] sm:text-xs text-neutral-400 font-medium truncate mt-2 pt-2 border-t border-neutral-800/90">
+                <span className="truncate">{dateLabel ? `In follow-up on ${dateLabel}` : "Active engagement"}</span>
+                <span className="shrink-0 text-amber-400 font-bold group-hover:translate-x-1 transition-transform flex items-center gap-0.5">
+                  View <ArrowRight size={12} />
+                </span>
+              </div>
+            </div>
+
+            {/* 4. Converted (Rize Forest Green matching WORLD in Logo) */}
+            <div 
+              onClick={() => navigate("/admin/dashboard/student-crm/converted")}
+              role="button"
+              tabIndex={0}
+              title="Click to view enrolled converted students"
+              className="cursor-pointer select-none min-w-[145px] max-w-[170px] sm:min-w-0 sm:max-w-none snap-start shrink-0 sm:shrink bg-[#1f1f24] hover:bg-[#26262d] rounded-2xl sm:rounded-[26px] p-4 sm:p-6 border border-neutral-800 hover:border-emerald-500/40 shadow-sm hover:shadow-md hover:-translate-y-1 active:scale-[0.98] transition-all duration-300 relative overflow-hidden group flex flex-col justify-between min-h-[135px] sm:min-h-[175px] text-white"
+            >
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-[11px] sm:text-xs font-semibold text-neutral-400 uppercase tracking-wider">Converted</span>
+                <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-emerald-500/15 text-emerald-400 border border-emerald-500/20 flex items-center justify-center shadow-2xs">
+                  <CheckCircle2 size={16} className="sm:w-[19px] sm:h-[19px]" />
+                </div>
+              </div>
+              <div className="my-auto">
+                <div className="flex items-baseline gap-2">
+                  <span className="text-2xl sm:text-3xl font-black text-emerald-400 tracking-tight">
+                    {displayStats.converted}
+                  </span>
+                </div>
+              </div>
+              <div className="flex items-center justify-between text-[11px] sm:text-xs text-neutral-400 font-medium truncate mt-2 pt-2 border-t border-neutral-800/90">
+                <span className="truncate">{dateLabel ? `Converted on ${dateLabel}` : "Enrolled students"}</span>
+                <span className="shrink-0 text-emerald-400 font-bold group-hover:translate-x-1 transition-transform flex items-center gap-0.5">
+                  View <ArrowRight size={12} />
+                </span>
+              </div>
+            </div>
+
+            {/* 5. Lost Leads */}
+            <div 
+              onClick={() => navigate("/admin/dashboard/student-crm/lost-leads")}
+              role="button"
+              tabIndex={0}
+              title="Click to view dropped inquiries"
+              className="cursor-pointer select-none min-w-[145px] max-w-[170px] sm:min-w-0 sm:max-w-none snap-start shrink-0 sm:shrink bg-[#1f1f24] hover:bg-[#26262d] rounded-2xl sm:rounded-[26px] p-4 sm:p-6 border border-neutral-800 hover:border-rose-500/40 shadow-sm hover:shadow-md hover:-translate-y-1 active:scale-[0.98] transition-all duration-300 relative overflow-hidden group flex flex-col justify-between min-h-[135px] sm:min-h-[175px] text-white"
+            >
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-[11px] sm:text-xs font-semibold text-neutral-400 uppercase tracking-wider">Lost Leads</span>
+                <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-rose-500/15 text-rose-400 border border-rose-500/20 flex items-center justify-center shadow-2xs">
+                  <AlertCircle size={16} className="sm:w-[19px] sm:h-[19px]" />
+                </div>
+              </div>
+              <div className="my-auto">
+                <div className="flex items-baseline gap-2">
+                  <span className="text-2xl sm:text-3xl font-black text-rose-400 tracking-tight">
+                    {displayStats.lostLeads}
+                  </span>
+                </div>
+              </div>
+              <div className="flex items-center justify-between text-[11px] sm:text-xs text-neutral-400 font-medium truncate mt-2 pt-2 border-t border-neutral-800/90">
+                <span className="truncate">{dateLabel ? `Dropped on ${dateLabel}` : "Dropped inquiries"}</span>
+                <span className="shrink-0 text-rose-400 font-bold group-hover:translate-x-1 transition-transform flex items-center gap-0.5">
+                  View <ArrowRight size={12} />
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* Section Divider */}
+          <div className="border-t border-neutral-800/90" />
+
+          {/* Calling & Demo Telecalling Performance Cards (Horizontal Swipe on Mobile, 7 Grid on Desktop) */}
+          <div className="space-y-3 sm:space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 px-1 pb-1">
+              <div className="flex items-center gap-2 flex-wrap">
+                <div className="w-7 h-7 rounded-lg bg-orange-500/20 text-[#ee591e] border border-orange-500/30 flex items-center justify-center shadow-2xs">
+                  <PhoneCall size={15} />
+                </div>
+                <h3 className="text-xs sm:text-sm font-black uppercase tracking-wider text-white">
+                  Calling & Demo Response Performance
+                </h3>
+                {dateLabel && (
+                  <span className="text-[10px] font-black px-2.5 py-0.5 rounded-full bg-orange-500/20 text-orange-300 border border-orange-500/30 shadow-2xs flex items-center gap-1">
+                    <Calendar size={11} className="text-[#ee591e]" />
+                    {dateLabel}
+                  </span>
+                )}
+              </div>
+
+              {/* Date-wise Quick Filter Toolbar */}
+              <div className="flex items-center gap-1.5 flex-wrap">
+                <button
+                  type="button"
+                  onClick={() => {
                     setDateFilterMode("all");
                     setCustomDate("");
-                  }
-                }}
-                className={`text-[11px] font-semibold pl-2 pr-1.5 py-1 rounded-full border transition-all cursor-pointer focus:outline-none shadow-2xs ${
-                  dateFilterMode === "custom"
-                    ? "bg-orange-50 text-orange-950 border-orange-300 ring-2 ring-orange-200 font-bold"
-                    : "bg-neutral-50 text-neutral-700 border-neutral-200/80 hover:border-neutral-300"
+                  }}
+                  className={`px-2.5 py-1 rounded-full text-[11px] font-bold transition-all cursor-pointer shadow-2xs ${
+                    dateFilterMode === "all"
+                      ? "bg-white text-neutral-950 font-black shadow-xs"
+                      : "bg-neutral-800/90 text-neutral-300 hover:bg-neutral-700 hover:text-white border border-neutral-700/80"
+                  }`}
+                >
+                  All Time
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const todayStr = toLocalDateKey(new Date());
+                    setDateFilterMode("today");
+                    setCustomDate(todayStr);
+                  }}
+                  className={`px-2.5 py-1 rounded-full text-[11px] font-bold transition-all cursor-pointer shadow-2xs ${
+                    dateFilterMode === "today"
+                      ? "bg-[#ee591e] text-white font-black shadow-xs"
+                      : "bg-neutral-800/90 text-neutral-300 hover:bg-neutral-700 hover:text-white border border-neutral-700/80"
+                  }`}
+                >
+                  Today
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const y = new Date();
+                    y.setDate(y.getDate() - 1);
+                    setDateFilterMode("yesterday");
+                    setCustomDate(toLocalDateKey(y));
+                  }}
+                  className={`px-2.5 py-1 rounded-full text-[11px] font-bold transition-all cursor-pointer shadow-2xs ${
+                    dateFilterMode === "yesterday"
+                      ? "bg-amber-500 text-neutral-950 font-black shadow-xs"
+                      : "bg-neutral-800/90 text-neutral-300 hover:bg-neutral-700 hover:text-white border border-neutral-700/80"
+                  }`}
+                >
+                  Yesterday
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setDateFilterMode("7days");
+                    setCustomDate("");
+                  }}
+                  className={`px-2.5 py-1 rounded-full text-[11px] font-bold transition-all cursor-pointer shadow-2xs ${
+                    dateFilterMode === "7days"
+                      ? "bg-blue-600 text-white font-black shadow-xs"
+                      : "bg-neutral-800/90 text-neutral-300 hover:bg-neutral-700 hover:text-white border border-neutral-700/80"
+                  }`}
+                >
+                  Last 7 Days
+                </button>
+
+                {/* Specific Date Picker */}
+                <div className="relative inline-flex items-center">
+                  <input
+                    type="date"
+                    value={customDate}
+                    onChange={(e) => {
+                      if (e.target.value) {
+                        setDateFilterMode("custom");
+                        setCustomDate(e.target.value);
+                      } else {
+                        setDateFilterMode("all");
+                        setCustomDate("");
+                      }
+                    }}
+                    className={`text-[11px] font-semibold pl-2 pr-1.5 py-1 rounded-full border transition-all cursor-pointer focus:outline-none shadow-2xs [color-scheme:dark] ${
+                      dateFilterMode === "custom"
+                        ? "bg-orange-950/70 text-orange-200 border-orange-500 ring-2 ring-orange-500/30 font-bold"
+                        : "bg-neutral-800/90 text-neutral-200 border-neutral-700 hover:border-neutral-600"
+                    }`}
+                    title="Select a specific date to view calls made on that date"
+                  />
+                </div>
+
+                {dateFilterMode !== "all" && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setDateFilterMode("all");
+                      setCustomDate("");
+                    }}
+                    className="text-[10px] font-bold text-rose-300 hover:text-white bg-rose-500/20 hover:bg-rose-500/30 px-2 py-1 rounded-full border border-rose-500/40 transition-all cursor-pointer flex items-center gap-0.5 shadow-2xs"
+                    title="Reset date filter"
+                  >
+                    <X size={11} /> Clear Date
+                  </button>
+                )}
+
+                <button
+                  type="button"
+                  onClick={() => exportLeadsToPdf(filteredLeads, callResponseFilter !== "All" ? callResponseFilter : "Calling_Response")}
+                  className="px-2.5 py-1 rounded-full text-[11px] font-bold bg-white/10 hover:bg-white/20 text-white border border-white/15 transition-all cursor-pointer shadow-2xs flex items-center gap-1 shrink-0 ml-auto sm:ml-0"
+                  title={`Download PDF sheet of ${filteredLeads.length} leads matching current call & date selection`}
+                >
+                  <FileDown size={11} className="text-[#ee591e]" />
+                  <span>Download PDF ({filteredLeads.length})</span>
+                </button>
+              </div>
+            </div>
+
+            <div className="flex overflow-x-auto no-scrollbar gap-2.5 sm:gap-3.5 pb-1 -mx-2 px-2 sm:mx-0 sm:px-0 sm:grid sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 snap-x">
+              {/* 1. Total Calls */}
+              <div 
+                onClick={() => setCallResponseFilter("All")}
+                className={`cursor-pointer min-w-[135px] max-w-[155px] sm:min-w-0 sm:max-w-none snap-start shrink-0 sm:shrink bg-[#1f1f24] hover:bg-[#26262d] rounded-2xl sm:rounded-[24px] p-3.5 sm:p-5 border shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-300 relative overflow-hidden group flex flex-col justify-between min-h-[115px] sm:min-h-[145px] text-white ${
+                  callResponseFilter === "All" ? "border-[#ee591e] ring-2 ring-[#ee591e]/30 bg-[#262023]" : "border-neutral-800 hover:border-neutral-700"
                 }`}
-                title="Select a specific date to view calls made on that date"
-              />
-            </div>
-
-            {dateFilterMode !== "all" && (
-              <button
-                type="button"
-                onClick={() => {
-                  setDateFilterMode("all");
-                  setCustomDate("");
-                }}
-                className="text-[10px] font-bold text-rose-600 hover:text-rose-800 bg-rose-50 hover:bg-rose-100 px-2 py-1 rounded-full border border-rose-200 transition-all cursor-pointer flex items-center gap-0.5 shadow-2xs"
-                title="Reset date filter"
               >
-                <X size={11} /> Clear Date
-              </button>
-            )}
-
-            <button
-              type="button"
-              onClick={() => exportLeadsToPdf(filteredLeads, callResponseFilter !== "All" ? callResponseFilter : "Calling_Response")}
-              className="px-2.5 py-1 rounded-full text-[11px] font-bold bg-[#18181b] hover:bg-black text-white transition-all cursor-pointer shadow-2xs flex items-center gap-1 shrink-0 ml-auto sm:ml-0"
-              title={`Download PDF sheet of ${filteredLeads.length} leads matching current call & date selection`}
-            >
-              <FileDown size={11} className="text-[#ee591e]" />
-              <span>Download PDF ({filteredLeads.length})</span>
-            </button>
-          </div>
-        </div>
-
-        <div className="flex overflow-x-auto no-scrollbar gap-2.5 sm:gap-3.5 pb-1 -mx-2 px-2 sm:mx-0 sm:px-0 sm:grid sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 snap-x">
-          {/* 1. Total Calls */}
-          <div 
-            onClick={() => setCallResponseFilter("All")}
-            className={`cursor-pointer min-w-[135px] max-w-[155px] sm:min-w-0 sm:max-w-none snap-start shrink-0 sm:shrink bg-white rounded-2xl sm:rounded-[24px] p-3.5 sm:p-5 border shadow-xs hover:shadow-sm hover:-translate-y-1 transition-all duration-300 relative overflow-hidden group flex flex-col justify-between min-h-[115px] sm:min-h-[145px] ${
-              callResponseFilter === "All" ? "border-[#ee591e] ring-2 ring-orange-200" : "border-neutral-200/80 hover:border-neutral-300"
-            }`}
-          >
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-[10px] sm:text-[11px] font-semibold text-neutral-500 uppercase tracking-wider">Total Calls</span>
-              <div className="w-7 h-7 sm:w-9 sm:h-9 rounded-full bg-orange-50 text-[#ee591e] flex items-center justify-center shadow-2xs">
-                <PhoneCall size={15} className="sm:w-[17px] sm:h-[17px]" />
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-[10px] sm:text-[11px] font-semibold text-neutral-400 uppercase tracking-wider">Total Calls</span>
+                  <div className="w-7 h-7 sm:w-9 sm:h-9 rounded-full bg-orange-500/15 text-[#ee591e] border border-orange-500/20 flex items-center justify-center shadow-2xs">
+                    <PhoneCall size={15} className="sm:w-[17px] sm:h-[17px]" />
+                  </div>
+                </div>
+                <div className="my-auto">
+                  <span className="text-xl sm:text-2xl md:text-3xl font-black text-white tracking-tight">
+                    {callStats.totalCalls}
+                  </span>
+                </div>
+                <div className="text-[10px] sm:text-xs text-neutral-400 font-medium truncate">
+                  {dateLabel ? `Dials on ${dateLabel}` : "All dials made"}
+                </div>
               </div>
-            </div>
-            <div className="my-auto">
-              <span className="text-xl sm:text-2xl md:text-3xl font-black text-neutral-900 tracking-tight">
-                {callStats.totalCalls}
-              </span>
-            </div>
-            <div className="text-[10px] sm:text-xs text-neutral-400 font-medium truncate">
-              {dateLabel ? `Dials on ${dateLabel}` : "All dials made"}
-            </div>
-          </div>
 
-          {/* 2. Total Connected (Rize Forest Green matching WORLD in Logo) */}
-          <div 
-            onClick={() => setCallResponseFilter(callResponseFilter === "Connected" ? "All" : "Connected")}
-            className={`cursor-pointer min-w-[135px] max-w-[155px] sm:min-w-0 sm:max-w-none snap-start shrink-0 sm:shrink bg-white rounded-2xl sm:rounded-[24px] p-3.5 sm:p-5 border shadow-xs hover:shadow-sm hover:-translate-y-1 transition-all duration-300 relative overflow-hidden group flex flex-col justify-between min-h-[115px] sm:min-h-[145px] ${
-              callResponseFilter === "Connected" ? "border-[#2a7c37] ring-2 ring-emerald-200" : "border-neutral-200/80 hover:border-neutral-300"
-            }`}
-          >
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-[10px] sm:text-[11px] font-semibold text-neutral-500 uppercase tracking-wider">Connected</span>
-              <div className="w-7 h-7 sm:w-9 sm:h-9 rounded-full bg-emerald-50 text-[#2a7c37] flex items-center justify-center shadow-2xs">
-                <PhoneIncoming size={15} className="sm:w-[17px] sm:h-[17px]" />
+              {/* 2. Total Connected (Rize Forest Green matching WORLD in Logo) */}
+              <div 
+                onClick={() => setCallResponseFilter(callResponseFilter === "Connected" ? "All" : "Connected")}
+                className={`cursor-pointer min-w-[135px] max-w-[155px] sm:min-w-0 sm:max-w-none snap-start shrink-0 sm:shrink bg-[#1f1f24] hover:bg-[#26262d] rounded-2xl sm:rounded-[24px] p-3.5 sm:p-5 border shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-300 relative overflow-hidden group flex flex-col justify-between min-h-[115px] sm:min-h-[145px] text-white ${
+                  callResponseFilter === "Connected" ? "border-[#2a7c37] ring-2 ring-[#2a7c37]/40 bg-[#1c2920]" : "border-neutral-800 hover:border-neutral-700"
+                }`}
+              >
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-[10px] sm:text-[11px] font-semibold text-neutral-400 uppercase tracking-wider">Connected</span>
+                  <div className="w-7 h-7 sm:w-9 sm:h-9 rounded-full bg-emerald-500/15 text-emerald-400 border border-emerald-500/20 flex items-center justify-center shadow-2xs">
+                    <PhoneIncoming size={15} className="sm:w-[17px] sm:h-[17px]" />
+                  </div>
+                </div>
+                <div className="my-auto">
+                  <span className="text-xl sm:text-2xl md:text-3xl font-black text-[#34d399] tracking-tight">
+                    {callStats.connected}
+                  </span>
+                </div>
+                <div className="text-[10px] sm:text-xs text-neutral-400 font-medium truncate">
+                  {dateLabel ? `Connected on ${dateLabel}` : "Connected calls"}
+                </div>
               </div>
-            </div>
-            <div className="my-auto">
-              <span className="text-xl sm:text-2xl md:text-3xl font-black text-[#2a7c37] tracking-tight">
-                {callStats.connected}
-              </span>
-            </div>
-            <div className="text-[10px] sm:text-xs text-neutral-400 font-medium truncate">
-              {dateLabel ? `Connected on ${dateLabel}` : "Connected calls"}
-            </div>
-          </div>
 
-          {/* 3. Total Not Connected (Rize Yellow / Amber matching Logo) */}
-          <div 
-            onClick={() => setCallResponseFilter(callResponseFilter === "Not Connected" ? "All" : "Not Connected")}
-            className={`cursor-pointer min-w-[135px] max-w-[155px] sm:min-w-0 sm:max-w-none snap-start shrink-0 sm:shrink bg-white rounded-2xl sm:rounded-[24px] p-3.5 sm:p-5 border shadow-xs hover:shadow-sm hover:-translate-y-1 transition-all duration-300 relative overflow-hidden group flex flex-col justify-between min-h-[115px] sm:min-h-[145px] ${
-              callResponseFilter === "Not Connected" ? "border-amber-500 ring-2 ring-amber-200" : "border-neutral-200/80 hover:border-neutral-300"
-            }`}
-          >
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-[10px] sm:text-[11px] font-semibold text-neutral-500 uppercase tracking-wider">Not Connected</span>
-              <div className="w-7 h-7 sm:w-9 sm:h-9 rounded-full bg-amber-50 text-[#d97706] flex items-center justify-center shadow-2xs">
-                <PhoneOff size={15} className="sm:w-[17px] sm:h-[17px]" />
+              {/* 3. Total Not Connected (Rize Yellow / Amber matching Logo) */}
+              <div 
+                onClick={() => setCallResponseFilter(callResponseFilter === "Not Connected" ? "All" : "Not Connected")}
+                className={`cursor-pointer min-w-[135px] max-w-[155px] sm:min-w-0 sm:max-w-none snap-start shrink-0 sm:shrink bg-[#1f1f24] hover:bg-[#26262d] rounded-2xl sm:rounded-[24px] p-3.5 sm:p-5 border shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-300 relative overflow-hidden group flex flex-col justify-between min-h-[115px] sm:min-h-[145px] text-white ${
+                  callResponseFilter === "Not Connected" ? "border-amber-500 ring-2 ring-amber-500/30 bg-[#2b251c]" : "border-neutral-800 hover:border-neutral-700"
+                }`}
+              >
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-[10px] sm:text-[11px] font-semibold text-neutral-400 uppercase tracking-wider">Not Connected</span>
+                  <div className="w-7 h-7 sm:w-9 sm:h-9 rounded-full bg-amber-500/15 text-amber-400 border border-amber-500/20 flex items-center justify-center shadow-2xs">
+                    <PhoneOff size={15} className="sm:w-[17px] sm:h-[17px]" />
+                  </div>
+                </div>
+                <div className="my-auto">
+                  <span className="text-xl sm:text-2xl md:text-3xl font-black text-amber-400 tracking-tight">
+                    {callStats.notConnected}
+                  </span>
+                </div>
+                <div className="text-[10px] sm:text-xs text-neutral-400 font-medium truncate">
+                  {dateLabel ? `Unanswered on ${dateLabel}` : "Unanswered / busy"}
+                </div>
               </div>
-            </div>
-            <div className="my-auto">
-              <span className="text-xl sm:text-2xl md:text-3xl font-black text-[#d97706] tracking-tight">
-                {callStats.notConnected}
-              </span>
-            </div>
-            <div className="text-[10px] sm:text-xs text-neutral-400 font-medium truncate">
-              {dateLabel ? `Unanswered on ${dateLabel}` : "Unanswered / busy"}
-            </div>
-          </div>
 
-          {/* 4. Yes for Demo (Rize Blue matching Logo) */}
-          <div 
-            onClick={() => setCallResponseFilter(callResponseFilter === "Yes for Demo" ? "All" : "Yes for Demo")}
-            className={`cursor-pointer min-w-[135px] max-w-[155px] sm:min-w-0 sm:max-w-none snap-start shrink-0 sm:shrink bg-white rounded-2xl sm:rounded-[24px] p-3.5 sm:p-5 border shadow-xs hover:shadow-sm hover:-translate-y-1 transition-all duration-300 relative overflow-hidden group flex flex-col justify-between min-h-[115px] sm:min-h-[145px] ${
-              callResponseFilter === "Yes for Demo" ? "border-blue-500 ring-2 ring-blue-200" : "border-neutral-200/80 hover:border-neutral-300"
-            }`}
-          >
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-[10px] sm:text-[11px] font-semibold text-neutral-500 uppercase tracking-wider">Yes for Demo</span>
-              <div className="w-7 h-7 sm:w-9 sm:h-9 rounded-full bg-blue-50 text-[#0a66ff] flex items-center justify-center shadow-2xs">
-                <CalendarCheck size={15} className="sm:w-[17px] sm:h-[17px]" />
+              {/* 4. Yes for Demo (Rize Blue matching Logo) */}
+              <div 
+                onClick={() => setCallResponseFilter(callResponseFilter === "Yes for Demo" ? "All" : "Yes for Demo")}
+                className={`cursor-pointer min-w-[135px] max-w-[155px] sm:min-w-0 sm:max-w-none snap-start shrink-0 sm:shrink bg-[#1f1f24] hover:bg-[#26262d] rounded-2xl sm:rounded-[24px] p-3.5 sm:p-5 border shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-300 relative overflow-hidden group flex flex-col justify-between min-h-[115px] sm:min-h-[145px] text-white ${
+                  callResponseFilter === "Yes for Demo" ? "border-blue-500 ring-2 ring-blue-500/30 bg-[#1c232d]" : "border-neutral-800 hover:border-neutral-700"
+                }`}
+              >
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-[10px] sm:text-[11px] font-semibold text-neutral-400 uppercase tracking-wider">Yes for Demo</span>
+                  <div className="w-7 h-7 sm:w-9 sm:h-9 rounded-full bg-blue-500/15 text-blue-400 border border-blue-500/20 flex items-center justify-center shadow-2xs">
+                    <CalendarCheck size={15} className="sm:w-[17px] sm:h-[17px]" />
+                  </div>
+                </div>
+                <div className="my-auto">
+                  <span className="text-xl sm:text-2xl md:text-3xl font-black text-blue-400 tracking-tight">
+                    {callStats.yesForDemo}
+                  </span>
+                </div>
+                <div className="text-[10px] sm:text-xs text-neutral-400 font-medium truncate">
+                  {dateLabel ? `Scheduled on ${dateLabel}` : "Demo scheduled"}
+                </div>
               </div>
-            </div>
-            <div className="my-auto">
-              <span className="text-xl sm:text-2xl md:text-3xl font-black text-[#0a66ff] tracking-tight">
-                {callStats.yesForDemo}
-              </span>
-            </div>
-            <div className="text-[10px] sm:text-xs text-neutral-400 font-medium truncate">
-              {dateLabel ? `Scheduled on ${dateLabel}` : "Demo scheduled"}
-            </div>
-          </div>
 
-          {/* 5. Demo Completed (NEW DEDICATED CARD) */}
-          <div 
-            onClick={() => setCallResponseFilter(callResponseFilter === "Demo Completed" ? "All" : "Demo Completed")}
-            className={`cursor-pointer min-w-[135px] max-w-[155px] sm:min-w-0 sm:max-w-none snap-start shrink-0 sm:shrink bg-white rounded-2xl sm:rounded-[24px] p-3.5 sm:p-5 border shadow-xs hover:shadow-sm hover:-translate-y-1 transition-all duration-300 relative overflow-hidden group flex flex-col justify-between min-h-[115px] sm:min-h-[145px] ${
-              callResponseFilter === "Demo Completed" ? "border-teal-500 ring-2 ring-teal-200" : "border-neutral-200/80 hover:border-neutral-300"
-            }`}
-          >
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-[10px] sm:text-[11px] font-semibold text-neutral-500 uppercase tracking-wider">Demo Completed</span>
-              <div className="w-7 h-7 sm:w-9 sm:h-9 rounded-full bg-teal-50 text-teal-600 flex items-center justify-center shadow-2xs">
-                <CheckCircle2 size={15} className="sm:w-[17px] sm:h-[17px]" />
+              {/* 5. Demo Completed */}
+              <div 
+                onClick={() => setCallResponseFilter(callResponseFilter === "Demo Completed" ? "All" : "Demo Completed")}
+                className={`cursor-pointer min-w-[135px] max-w-[155px] sm:min-w-0 sm:max-w-none snap-start shrink-0 sm:shrink bg-[#1f1f24] hover:bg-[#26262d] rounded-2xl sm:rounded-[24px] p-3.5 sm:p-5 border shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-300 relative overflow-hidden group flex flex-col justify-between min-h-[115px] sm:min-h-[145px] text-white ${
+                  callResponseFilter === "Demo Completed" ? "border-teal-500 ring-2 ring-teal-500/30 bg-[#1c2a27]" : "border-neutral-800 hover:border-neutral-700"
+                }`}
+              >
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-[10px] sm:text-[11px] font-semibold text-neutral-400 uppercase tracking-wider">Demo Completed</span>
+                  <div className="w-7 h-7 sm:w-9 sm:h-9 rounded-full bg-teal-500/15 text-teal-400 border border-teal-500/20 flex items-center justify-center shadow-2xs">
+                    <CheckCircle2 size={15} className="sm:w-[17px] sm:h-[17px]" />
+                  </div>
+                </div>
+                <div className="my-auto">
+                  <span className="text-xl sm:text-2xl md:text-3xl font-black text-teal-400 tracking-tight">
+                    {callStats.demoCompleted}
+                  </span>
+                </div>
+                <div className="text-[10px] sm:text-xs text-neutral-400 font-medium truncate">
+                  {dateLabel ? `Completed on ${dateLabel}` : "Demo attended"}
+                </div>
               </div>
-            </div>
-            <div className="my-auto">
-              <span className="text-xl sm:text-2xl md:text-3xl font-black text-teal-600 tracking-tight">
-                {callStats.demoCompleted}
-              </span>
-            </div>
-            <div className="text-[10px] sm:text-xs text-neutral-400 font-medium truncate">
-              {dateLabel ? `Completed on ${dateLabel}` : "Demo attended"}
-            </div>
-          </div>
 
-          {/* 6. Told Later */}
-          <div 
-            onClick={() => setCallResponseFilter(callResponseFilter === "Told Later" ? "All" : "Told Later")}
-            className={`cursor-pointer min-w-[135px] max-w-[155px] sm:min-w-0 sm:max-w-none snap-start shrink-0 sm:shrink bg-white rounded-2xl sm:rounded-[24px] p-3.5 sm:p-5 border shadow-xs hover:shadow-sm hover:-translate-y-1 transition-all duration-300 relative overflow-hidden group flex flex-col justify-between min-h-[115px] sm:min-h-[145px] ${
-              callResponseFilter === "Told Later" ? "border-purple-500 ring-2 ring-purple-200" : "border-neutral-200/80 hover:border-neutral-300"
-            }`}
-          >
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-[10px] sm:text-[11px] font-semibold text-neutral-500 uppercase tracking-wider">Told Later</span>
-              <div className="w-7 h-7 sm:w-9 sm:h-9 rounded-full bg-purple-50 text-purple-600 flex items-center justify-center shadow-2xs">
-                <Clock size={15} className="sm:w-[17px] sm:h-[17px]" />
+              {/* 6. Told Later */}
+              <div 
+                onClick={() => setCallResponseFilter(callResponseFilter === "Told Later" ? "All" : "Told Later")}
+                className={`cursor-pointer min-w-[135px] max-w-[155px] sm:min-w-0 sm:max-w-none snap-start shrink-0 sm:shrink bg-[#1f1f24] hover:bg-[#26262d] rounded-2xl sm:rounded-[24px] p-3.5 sm:p-5 border shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-300 relative overflow-hidden group flex flex-col justify-between min-h-[115px] sm:min-h-[145px] text-white ${
+                  callResponseFilter === "Told Later" ? "border-purple-500 ring-2 ring-purple-500/30 bg-[#261d2d]" : "border-neutral-800 hover:border-neutral-700"
+                }`}
+              >
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-[10px] sm:text-[11px] font-semibold text-neutral-400 uppercase tracking-wider">Told Later</span>
+                  <div className="w-7 h-7 sm:w-9 sm:h-9 rounded-full bg-purple-500/15 text-purple-400 border border-purple-500/20 flex items-center justify-center shadow-2xs">
+                    <Clock size={15} className="sm:w-[17px] sm:h-[17px]" />
+                  </div>
+                </div>
+                <div className="my-auto">
+                  <span className="text-xl sm:text-2xl md:text-3xl font-black text-purple-400 tracking-tight">
+                    {callStats.toldLater}
+                  </span>
+                </div>
+                <div className="text-[10px] sm:text-xs text-neutral-400 font-medium truncate">
+                  {dateLabel ? `Callbacks on ${dateLabel}` : "Callback later"}
+                </div>
               </div>
-            </div>
-            <div className="my-auto">
-              <span className="text-xl sm:text-2xl md:text-3xl font-black text-purple-600 tracking-tight">
-                {callStats.toldLater}
-              </span>
-            </div>
-            <div className="text-[10px] sm:text-xs text-neutral-400 font-medium truncate">
-              {dateLabel ? `Callbacks on ${dateLabel}` : "Callback later"}
-            </div>
-          </div>
 
-          {/* 7. No (Not Interested / Dropped) */}
-          <div 
-            onClick={() => setCallResponseFilter(callResponseFilter === "No" ? "All" : "No")}
-            className={`cursor-pointer min-w-[135px] max-w-[155px] sm:min-w-0 sm:max-w-none snap-start shrink-0 sm:shrink bg-white rounded-2xl sm:rounded-[24px] p-3.5 sm:p-5 border shadow-xs hover:shadow-sm hover:-translate-y-1 transition-all duration-300 relative overflow-hidden group flex flex-col justify-between min-h-[115px] sm:min-h-[145px] ${
-              callResponseFilter === "No" ? "border-rose-500 ring-2 ring-rose-200" : "border-neutral-200/80 hover:border-neutral-300"
-            }`}
-          >
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-[10px] sm:text-[11px] font-semibold text-neutral-500 uppercase tracking-wider">No / Dropped</span>
-              <div className="w-7 h-7 sm:w-9 sm:h-9 rounded-full bg-rose-50 text-rose-600 flex items-center justify-center shadow-2xs">
-                <XCircle size={15} className="sm:w-[17px] sm:h-[17px]" />
+              {/* 7. No (Not Interested / Dropped) */}
+              <div 
+                onClick={() => setCallResponseFilter(callResponseFilter === "No" ? "All" : "No")}
+                className={`cursor-pointer min-w-[135px] max-w-[155px] sm:min-w-0 sm:max-w-none snap-start shrink-0 sm:shrink bg-[#1f1f24] hover:bg-[#26262d] rounded-2xl sm:rounded-[24px] p-3.5 sm:p-5 border shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-300 relative overflow-hidden group flex flex-col justify-between min-h-[115px] sm:min-h-[145px] text-white ${
+                  callResponseFilter === "No" ? "border-rose-500 ring-2 ring-rose-500/30 bg-[#2c1d23]" : "border-neutral-800 hover:border-neutral-700"
+                }`}
+              >
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-[10px] sm:text-[11px] font-semibold text-neutral-400 uppercase tracking-wider">No / Dropped</span>
+                  <div className="w-7 h-7 sm:w-9 sm:h-9 rounded-full bg-rose-500/15 text-rose-400 border border-rose-500/20 flex items-center justify-center shadow-2xs">
+                    <XCircle size={15} className="sm:w-[17px] sm:h-[17px]" />
+                  </div>
+                </div>
+                <div className="my-auto">
+                  <span className="text-xl sm:text-2xl md:text-3xl font-black text-rose-400 tracking-tight">
+                    {callStats.noLeads}
+                  </span>
+                </div>
+                <div className="text-[10px] sm:text-xs text-neutral-400 font-medium truncate">
+                  {dateLabel ? `Dropped on ${dateLabel}` : "Not interested"}
+                </div>
               </div>
-            </div>
-            <div className="my-auto">
-              <span className="text-xl sm:text-2xl md:text-3xl font-black text-rose-600 tracking-tight">
-                {callStats.noLeads}
-              </span>
-            </div>
-            <div className="text-[10px] sm:text-xs text-neutral-400 font-medium truncate">
-              {dateLabel ? `Dropped on ${dateLabel}` : "Not interested"}
             </div>
           </div>
         </div>
