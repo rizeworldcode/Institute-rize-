@@ -23,6 +23,9 @@ async function user_auth(req, res, next) {
       .select("-password -notificationToken")
       .exec();
     if (!user) return res.status(403).json({ msg: "User not found", success: false });
+    if (user.is_active === false) {
+      return res.status(403).json({ message: "Account has been deactivated. Please contact administrator.", success: false });
+    }
     req.user = user;
     next();
   } catch (error) {

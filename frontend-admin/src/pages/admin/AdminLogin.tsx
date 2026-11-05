@@ -111,9 +111,35 @@ export default function AdminLogin() {
         // Store the token and update auth state
         localStorage.setItem("adminAuthToken", data.token);
         localStorage.setItem("adminAuthTime", Date.now().toString());
-        if (email) localStorage.setItem("adminEmail", email.trim().toLowerCase());
+        if (data.email || email) {
+          localStorage.setItem("adminEmail", (data.email || email).trim().toLowerCase());
+        }
+        localStorage.setItem("adminRole", data.role || "staff");
+        localStorage.setItem("adminName", data.name || (data.role === "superadmin" ? "Super Admin" : "Staff User"));
+        localStorage.setItem("adminPermissions", JSON.stringify(data.permissions || []));
         setAttempts(0);
-        navigate("/admin/dashboard");
+
+        // Smart landing navigation: if staff, direct to first allowed tab
+        const perms: string[] = data.permissions || [];
+        if (data.role === "staff") {
+          if (perms.includes("dashboard")) {
+            navigate("/admin/dashboard/dashboard");
+          } else if (perms.includes("student-crm")) {
+            navigate("/admin/dashboard/student-crm");
+          } else if (perms.includes("inquiry")) {
+            navigate("/admin/dashboard/inquiry");
+          } else if (perms.includes("referred-by")) {
+            navigate("/admin/dashboard/referred-by");
+          } else if (perms.includes("deleted-referrers")) {
+            navigate("/admin/dashboard/deleted-referrers");
+          } else if (perms.includes("deleted-students")) {
+            navigate("/admin/dashboard/deleted-students");
+          } else {
+            navigate("/admin/dashboard");
+          }
+        } else {
+          navigate("/admin/dashboard");
+        }
       } else {
         const newAttempts = attempts + 1;
         setAttempts(newAttempts);

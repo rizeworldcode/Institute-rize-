@@ -6,6 +6,28 @@ const adminSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  name: {
+    type: String,
+    default: "",
+  },
+  role: {
+    type: String,
+    enum: ["superadmin", "staff"],
+    default: "staff",
+  },
+  permissions: {
+    type: [String],
+    default: [],
+  },
+  is_active: {
+    type: Boolean,
+    default: true,
+  },
+  created_by: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "admin",
+    default: null,
+  },
   password: {
     type: String,
   },

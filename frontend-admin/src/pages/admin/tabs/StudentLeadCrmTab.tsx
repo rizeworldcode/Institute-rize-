@@ -5,8 +5,10 @@ import {
   Trash2, Edit2, FileText, Calendar, User, 
   Clock, TrendingUp, CheckCircle2, AlertCircle, 
   Building, Target, ChevronDown, PhoneCall, PhoneIncoming, PhoneOff, CalendarCheck, XCircle,
-  X, MessageSquare, ArrowLeft, ArrowRight, Download
+  X, MessageSquare, ArrowLeft, ArrowRight, FileDown
 } from "lucide-react";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
 import { StudentLead, StudentLeadStats } from "../types";
 import { StudentLeadModal } from "../modals/StudentLeadModal";
 import { StudentLeadDetailsModal } from "../modals/StudentLeadDetailsModal";
@@ -986,61 +988,49 @@ export function StudentLeadCrmTab() {
     categorySearch,
   ]);
 
-  // Export currently filtered/selected leads to Excel CSV
-  const exportLeadsToExcel = (targetList: StudentLead[], titlePrefix: string = "Student_Leads") => {
+  // Export currently filtered/selected leads to PDF
+  // Showing ONLY: S.No., Student Name, Phone Number, Latest Call Response, School Name
+  const exportLeadsToPdf = (targetList: StudentLead[], titlePrefix: string = "Student_Leads") => {
     if (!targetList || targetList.length === 0) {
       alert("No student leads found matching current filter criteria to download.");
       return;
     }
 
-    const headers = [
-      "Lead ID",
-      "Registration Date",
-      "Student Name",
-      "Phone Number",
-      "WhatsApp Direct Link",
-      "Lead Status",
-      "Latest Call Response",
-      "Total Calls Made",
-      "Interested Course",
-      "Current Education",
-      "School / College Name",
-      "Lead Source",
-      "Workshop School Name",
-      "Workshop Date",
-      "Demo Class Status",
-      "Scheduled Demo Date & Time",
-      "Next Follow-up Date & Time",
-      "Follow-up Round",
-      "Follow-up Taken By / Counselor",
-      "Next Follow-up Assigned To",
-      "Interest Level",
-      "Problems Faced / Remarks",
-      "Latest Discussion Notes",
-      "Complete Follow-up Call History Timeline"
-    ];
-
-    const escapeCsv = (val: any): string => {
-      if (val === null || val === undefined) return '""';
-      const clean = String(val).replace(/"/g, '""');
-      return `"${clean}"`;
-    };
-
     const mode = activeCategory ? categoryDateFilterMode : dateFilterMode;
     const dateParam = activeCategory ? categoryCustomDate : customDate;
 
-    const rows = targetList.map((lead) => {
+    // Filter label text for header
+    let filterDescription = "All Leads";
+    if (!activeCategory) {
+      const parts: string[] = [];
+      if (callResponseFilter !== "All") parts.push(`Response: ${callResponseFilter}`);
+      if (statusFilter !== "All Statuses") parts.push(`Status: ${statusFilter}`);
+      if (sourceFilter !== "All Sources") parts.push(`Source: ${sourceFilter}`);
+      if (search.trim()) parts.push(`Search: "${search.trim()}"`);
+      filterDescription = parts.length > 0 ? parts.join(" | ") : "All Registered Inquiries";
+    } else {
+      const parts: string[] = [currentCategory?.title || "Category"];
+      if (subStatusFilter !== "All") parts.push(`Stage: ${subStatusFilter}`);
+      if (categoryCallFilter !== "All") parts.push(`Response: ${categoryCallFilter}`);
+      if (categorySourceFilter !== "All Sources") parts.push(`Source: ${categorySourceFilter}`);
+      if (categorySearch.trim()) parts.push(`Search: "${categorySearch.trim()}"`);
+      filterDescription = parts.join(" | ");
+    }
+
+    let dateDescription = "All Time";
+    const activeDateMode = activeCategory ? categoryDateFilterMode : dateFilterMode;
+    const activeDateParam = activeCategory ? categoryCustomDate : customDate;
+    if (activeDateMode === "today") dateDescription = "Today";
+    else if (activeDateMode === "yesterday") dateDescription = "Yesterday";
+    else if (activeDateMode === "7days") dateDescription = "Last 7 Days";
+    else if (activeDateMode === "custom" && activeDateParam) dateDescription = activeDateParam;
+
+    // Table Header - EXACT 5 COLUMNS as requested:
+    // S.No., Student Name, Phone Number, Latest Call Response, School Name
+    const tableHead = [["S.No.", "Student Name", "Phone Number", "Latest Call Response", "School Name"]];
+
+    const tableBody = targetList.map((lead, idx) => {
       const info = getLeadLatestCallInfo(lead, mode, dateParam);
-
-      const rawPhone = (lead.phone || "").trim();
-      const phoneCell = rawPhone ? `="${rawPhone.replace(/"/g, '""')}"` : '""';
-      const cleanPhoneDigits = rawPhone.replace(/\D/g, "").slice(-10);
-      const waUrl = cleanPhoneDigits ? `https://wa.me/91${cleanPhoneDigits}` : "";
-
-      const regDate = lead.created_at ? new Date(lead.created_at).toLocaleString("en-IN") : "";
-      const demoDate = lead.demo_date ? new Date(lead.demo_date).toLocaleString("en-IN") : "";
-      const nextFollowup = lead.next_followup_date ? new Date(lead.next_followup_date).toLocaleString("en-IN") : "";
-      const workshopDate = lead.workshop_date ? new Date(lead.workshop_date).toLocaleDateString("en-IN") : "";
 
       let callOutcome = "Connected";
       if (info?.isDemoCompleted) callOutcome = "Demo Completed";
@@ -1050,57 +1040,124 @@ export function StudentLeadCrmTab() {
       else if (info?.isNotConnected) callOutcome = "Not Connected";
       else if (info?.isConnected) callOutcome = "Connected";
 
-      const historyTimeline = Array.isArray(lead.followup_history) && lead.followup_history.length > 0
-        ? lead.followup_history
-            .map((h, i) => {
-              const dt = h.date ? new Date(h.date).toLocaleDateString("en-IN") : "";
-              const staff = h.taken_by || "Counselor";
-              const outcome = h.call_outcome || h.status || "";
-              const note = h.conversation ? `Notes: ${h.conversation.replace(/[\r\n]+/g, " ")}` : "";
-              const demo = h.demo_date ? `Demo: ${new Date(h.demo_date).toLocaleDateString("en-IN")}` : "";
-              return `[Call #${i + 1}] ${[dt, staff, outcome, note, demo].filter(Boolean).join(" - ")}`;
-            })
-            .join(" | ")
-        : (lead.conversation_notes ? `Notes: ${lead.conversation_notes.replace(/[\r\n]+/g, " ")}` : "No prior calls logged");
-
-      const latestNotes = (info?.latestNotes || lead.conversation_notes || "").replace(/[\r\n]+/g, " ").trim();
+      const school = lead.school_name || lead.workshop_school_name || "—";
+      const studentName = lead.student_name || "—";
+      const phone = lead.phone || "—";
 
       return [
-        escapeCsv(lead.lead_ID || ""),
-        escapeCsv(regDate),
-        escapeCsv(lead.student_name || ""),
-        phoneCell,
-        escapeCsv(waUrl),
-        escapeCsv(lead.status || "New Inquiry"),
-        escapeCsv(callOutcome),
-        escapeCsv(getLeadTotalCalls(lead)),
-        escapeCsv(lead.interested_course || "N/A"),
-        escapeCsv(lead.current_education || "N/A"),
-        escapeCsv(lead.school_name || "N/A"),
-        escapeCsv(lead.is_from_workshop ? "Workshop" : (lead.source_other || "Direct Walk-in")),
-        escapeCsv(lead.workshop_school_name || ""),
-        escapeCsv(workshopDate),
-        escapeCsv(lead.demo_class_taken ? "Demo Class Taken" : "No Demo Taken"),
-        escapeCsv(demoDate),
-        escapeCsv(nextFollowup),
-        escapeCsv(lead.followup_round || ""),
-        escapeCsv(lead.followup_taken_by || "Counselor"),
-        escapeCsv(lead.next_followup_by || ""),
-        escapeCsv(lead.interest_level || "Medium"),
-        escapeCsv((lead.remarks || lead.problems_faced || "").replace(/[\r\n]+/g, " ")),
-        escapeCsv(latestNotes),
-        escapeCsv(historyTimeline),
-      ].join(",");
+        (idx + 1).toString(),
+        studentName,
+        phone,
+        callOutcome,
+        school,
+      ];
     });
 
-    const csvContent = "\uFEFF" + headers.join(",") + "\n" + rows.join("\n");
+    const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
 
-    // Dynamic filename building according to current filters & date
+    // Document Brand Header
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(15);
+    doc.setTextColor(29, 78, 216); // Brand Primary Blue (#1d4ed8)
+    doc.text("RIZEWORLD INSTITUTE OF AI & DIGITAL MARKETING", 14, 15);
+
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(10.5);
+    doc.setTextColor(30, 41, 59); // Slate-800
+    doc.text(`Student Leads Report — ${titlePrefix.replace(/_/g, " ")}`, 14, 21.5);
+
+    // Metadata Row
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(8);
+    doc.setTextColor(100, 116, 139); // Slate-500
+    const metaLine = `Filter: ${filterDescription}  •  Date: ${dateDescription}  •  Total Records: ${targetList.length}`;
+    doc.text(metaLine, 14, 27);
+    const genLine = `Generated on: ${new Date().toLocaleString("en-IN", { dateStyle: "medium", timeStyle: "short" })}`;
+    doc.text(genLine, 14, 31.5);
+
+    // Top Divider Line
+    doc.setDrawColor(226, 232, 240); // Slate-200
+    doc.setLineWidth(0.4);
+    doc.line(14, 34, doc.internal.pageSize.getWidth() - 14, 34);
+
+    // AutoTable with exact 5 columns
+    autoTable(doc, {
+      startY: 37,
+      head: tableHead,
+      body: tableBody,
+      theme: "grid",
+      headStyles: {
+        fillColor: [29, 78, 216], // Brand Blue (#1d4ed8)
+        textColor: [255, 255, 255],
+        fontStyle: "bold",
+        fontSize: 8.5,
+        halign: "left",
+        cellPadding: 3,
+      },
+      bodyStyles: {
+        fontSize: 8,
+        textColor: [30, 41, 59],
+        cellPadding: 2.8,
+        lineColor: [226, 232, 240],
+        lineWidth: 0.1,
+      },
+      alternateRowStyles: {
+        fillColor: [248, 250, 252], // Slate-50 zebra
+      },
+      columnStyles: {
+        0: { cellWidth: 14, halign: "center", fontStyle: "bold", textColor: [100, 116, 139] },
+        1: { cellWidth: 46, fontStyle: "bold", textColor: [15, 23, 42] },
+        2: { cellWidth: 32 },
+        3: { cellWidth: 38, fontStyle: "bold" },
+        4: { cellWidth: "auto", textColor: [71, 85, 105] },
+      },
+      didParseCell: (data) => {
+        // Color-code Latest Call Response column (column index 3)
+        if (data.section === "body" && data.column.index === 3) {
+          const val = String(data.cell.raw || "");
+          if (val === "Connected") {
+            data.cell.styles.textColor = [22, 101, 52]; // green-800
+          } else if (val === "Demo Completed") {
+            data.cell.styles.textColor = [15, 118, 110]; // teal-700
+          } else if (val === "Yes for Demo") {
+            data.cell.styles.textColor = [67, 56, 202]; // indigo-700
+          } else if (val === "Told Later") {
+            data.cell.styles.textColor = [126, 34, 206]; // purple-700
+          } else if (val === "Not Connected") {
+            data.cell.styles.textColor = [180, 83, 9]; // amber-700
+          } else if (val === "No / Dropped") {
+            data.cell.styles.textColor = [190, 18, 60]; // rose-700
+          }
+        }
+      },
+      margin: { left: 14, right: 14, bottom: 15 },
+    });
+
+    // Page Numbering Footer
+    const totalPages = doc.getNumberOfPages();
+    for (let i = 1; i <= totalPages; i++) {
+      doc.setPage(i);
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(7.5);
+      doc.setTextColor(148, 163, 184); // Slate-400
+      doc.text(
+        "RizeWorld Institute of AI & Digital Marketing  •  Student CRM Official Report",
+        14,
+        doc.internal.pageSize.getHeight() - 7
+      );
+      doc.text(
+        `Page ${i} of ${totalPages}`,
+        doc.internal.pageSize.getWidth() - 14,
+        doc.internal.pageSize.getHeight() - 7,
+        { align: "right" }
+      );
+    }
+
+    // Dynamic PDF filename
     const nameParts = [titlePrefix.replace(/\s+/g, "_")];
     if (!activeCategory) {
       if (callResponseFilter !== "All") nameParts.push(callResponseFilter.replace(/\s+/g, "_"));
       if (statusFilter !== "All Statuses") nameParts.push(statusFilter.replace(/\s+/g, "_"));
-      if (sourceFilter !== "All Sources") nameParts.push(sourceFilter.replace(/\s+/g, "_"));
       if (dateFilterMode !== "all") {
         if (dateFilterMode === "today") nameParts.push("Today");
         else if (dateFilterMode === "yesterday") nameParts.push("Yesterday");
@@ -1124,17 +1181,10 @@ export function StudentLeadCrmTab() {
 
     const todayDateStr = new Date().toISOString().split("T")[0];
     nameParts.push(todayDateStr);
-    const filename = `${nameParts.join("_")}.csv`;
+    const filename = `RizeWorld_${nameParts.join("_")}.pdf`;
 
-    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
-    const downloadUrl = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = downloadUrl;
-    link.download = filename;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(downloadUrl);
+    // Download PDF directly
+    doc.save(filename);
   };
 
   // Shared renderer for the lead list: mobile cards (< md) and desktop table (>= md)
@@ -1626,12 +1676,12 @@ export function StudentLeadCrmTab() {
                 <span className="hidden sm:inline">Refresh</span>
               </button>
               <button
-                onClick={() => exportLeadsToExcel(categoryFilteredLeads, currentCategory.title)}
-                className="px-3.5 py-2 sm:px-4 sm:py-2.5 rounded-full bg-emerald-600 hover:bg-emerald-700 text-white text-xs sm:text-sm font-bold transition-all shadow-xs flex items-center justify-center gap-1.5 cursor-pointer shadow-emerald-600/20 hover:shadow"
-                title={`Download Excel sheet of ${categoryFilteredLeads.length} leads in ${currentCategory.title}`}
+                onClick={() => exportLeadsToPdf(categoryFilteredLeads, currentCategory.title)}
+                className="px-3.5 py-2 sm:px-4 sm:py-2.5 rounded-full bg-rose-600 hover:bg-rose-700 text-white text-xs sm:text-sm font-bold transition-all shadow-xs flex items-center justify-center gap-1.5 cursor-pointer shadow-rose-600/20 hover:shadow"
+                title={`Download PDF sheet of ${categoryFilteredLeads.length} leads in ${currentCategory.title}`}
               >
-                <Download size={15} />
-                <span>Download Excel ({categoryFilteredLeads.length})</span>
+                <FileDown size={15} />
+                <span>Download PDF ({categoryFilteredLeads.length})</span>
               </button>
               <button
                 onClick={() => {
@@ -1697,12 +1747,12 @@ export function StudentLeadCrmTab() {
               </div>
             <div className="flex items-center gap-2">
               <button
-                onClick={() => exportLeadsToExcel(categoryFilteredLeads, currentCategory.title)}
-                className="text-[11px] font-bold text-emerald-700 hover:text-emerald-800 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200/80 px-2.5 py-1 rounded-full transition-all cursor-pointer shadow-2xs flex items-center gap-1"
-                title={`Download Excel sheet of ${categoryFilteredLeads.length} leads in this category`}
+                onClick={() => exportLeadsToPdf(categoryFilteredLeads, currentCategory.title)}
+                className="text-[11px] font-bold text-rose-700 hover:text-rose-800 bg-rose-50 hover:bg-rose-100 border border-rose-200/80 px-2.5 py-1 rounded-full transition-all cursor-pointer shadow-2xs flex items-center gap-1"
+                title={`Download PDF sheet of ${categoryFilteredLeads.length} leads in this category`}
               >
-                <Download size={12} />
-                <span>Download Excel ({categoryFilteredLeads.length})</span>
+                <FileDown size={12} />
+                <span>Download PDF ({categoryFilteredLeads.length})</span>
               </button>
               {(categorySearch || categoryCallFilter !== "All" || categorySourceFilter !== "All Sources" || categoryDateFilterMode !== "all" || (isFollowUpCat && subStatusFilter !== "All")) && (
                 <button
@@ -1817,11 +1867,11 @@ export function StudentLeadCrmTab() {
                 <span className="font-bold text-neutral-900">{categoryBaseLeads.length}</span> {currentCategory.title}
               </span>
               <button
-                onClick={() => exportLeadsToExcel(categoryFilteredLeads, currentCategory.title)}
-                className="text-emerald-700 hover:text-emerald-800 font-bold flex items-center gap-1 text-[11px] hover:underline cursor-pointer"
+                onClick={() => exportLeadsToPdf(categoryFilteredLeads, currentCategory.title)}
+                className="text-rose-700 hover:text-rose-800 font-bold flex items-center gap-1 text-[11px] hover:underline cursor-pointer"
               >
-                <Download size={12} />
-                <span>Download Excel</span>
+                <FileDown size={12} />
+                <span>Download PDF</span>
               </button>
             </div>
             <button
@@ -1908,12 +1958,12 @@ export function StudentLeadCrmTab() {
 
           <button
             type="button"
-            onClick={() => exportLeadsToExcel(filteredLeads, "Student_Leads")}
-            className="flex-1 sm:flex-initial px-3.5 py-2 sm:px-4 sm:py-2.5 rounded-full bg-emerald-600 hover:bg-emerald-700 text-white text-xs sm:text-sm font-bold transition-all shadow-xs flex items-center justify-center gap-1.5 cursor-pointer shadow-emerald-600/20 hover:shadow"
-            title={`Download Excel sheet of ${filteredLeads.length} currently filtered leads`}
+            onClick={() => exportLeadsToPdf(filteredLeads, "Student_Leads")}
+            className="flex-1 sm:flex-initial px-3.5 py-2 sm:px-4 sm:py-2.5 rounded-full bg-rose-600 hover:bg-rose-700 text-white text-xs sm:text-sm font-bold transition-all shadow-xs flex items-center justify-center gap-1.5 cursor-pointer shadow-rose-600/20 hover:shadow"
+            title={`Download PDF sheet of ${filteredLeads.length} currently filtered leads`}
           >
-            <Download size={15} />
-            <span>Download Excel ({filteredLeads.length})</span>
+            <FileDown size={15} />
+            <span>Download PDF ({filteredLeads.length})</span>
           </button>
 
           <button
@@ -2199,12 +2249,12 @@ export function StudentLeadCrmTab() {
 
             <button
               type="button"
-              onClick={() => exportLeadsToExcel(filteredLeads, callResponseFilter !== "All" ? callResponseFilter : "Calling_Response")}
-              className="px-2.5 py-1 rounded-full text-[11px] font-bold bg-emerald-600 hover:bg-emerald-700 text-white transition-all cursor-pointer shadow-2xs flex items-center gap-1 shrink-0 ml-auto sm:ml-0"
-              title={`Download Excel sheet of ${filteredLeads.length} leads matching current call & date selection`}
+              onClick={() => exportLeadsToPdf(filteredLeads, callResponseFilter !== "All" ? callResponseFilter : "Calling_Response")}
+              className="px-2.5 py-1 rounded-full text-[11px] font-bold bg-rose-600 hover:bg-rose-700 text-white transition-all cursor-pointer shadow-2xs flex items-center gap-1 shrink-0 ml-auto sm:ml-0"
+              title={`Download PDF sheet of ${filteredLeads.length} leads matching current call & date selection`}
             >
-              <Download size={11} />
-              <span>Download Excel ({filteredLeads.length})</span>
+              <FileDown size={11} />
+              <span>Download PDF ({filteredLeads.length})</span>
             </button>
           </div>
         </div>
@@ -2392,12 +2442,12 @@ export function StudentLeadCrmTab() {
             <div className="flex items-center gap-2 flex-wrap">
               <button
                 type="button"
-                onClick={() => exportLeadsToExcel(filteredLeads, "Student_Leads")}
-                className="text-[11px] font-bold text-emerald-700 hover:text-emerald-800 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200/80 px-2.5 py-1 rounded-full transition-all cursor-pointer shadow-2xs flex items-center gap-1"
-                title={`Download Excel sheet of ${filteredLeads.length} leads matching current filters`}
+                onClick={() => exportLeadsToPdf(filteredLeads, "Student_Leads")}
+                className="text-[11px] font-bold text-rose-700 hover:text-rose-800 bg-rose-50 hover:bg-rose-100 border border-rose-200/80 px-2.5 py-1 rounded-full transition-all cursor-pointer shadow-2xs flex items-center gap-1"
+                title={`Download PDF sheet of ${filteredLeads.length} leads matching current filters`}
               >
-                <Download size={12} />
-                <span>Download Excel ({filteredLeads.length})</span>
+                <FileDown size={12} />
+                <span>Download PDF ({filteredLeads.length})</span>
               </button>
               {(callResponseFilter !== "All" || statusFilter !== "All Statuses" || sourceFilter !== "All Sources" || search || dateFilterMode !== "all") && (
                 <button
@@ -2556,11 +2606,11 @@ export function StudentLeadCrmTab() {
             </div>
             <button
               type="button"
-              onClick={() => exportLeadsToExcel(filteredLeads, "Student_Leads")}
-              className="text-[11px] font-bold text-emerald-700 hover:text-emerald-800 hover:underline flex items-center gap-1 cursor-pointer"
-              title="Download currently filtered leads as Excel"
+              onClick={() => exportLeadsToPdf(filteredLeads, "Student_Leads")}
+              className="text-[11px] font-bold text-rose-700 hover:text-rose-800 hover:underline flex items-center gap-1 cursor-pointer"
+              title="Download currently filtered leads as PDF"
             >
-              <Download size={12} /> Export to Excel ({filteredLeads.length})
+              <FileDown size={12} /> Export to PDF ({filteredLeads.length})
             </button>
           </div>
           <div className="flex items-center gap-4 text-[11px]">

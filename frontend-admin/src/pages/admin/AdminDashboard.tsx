@@ -5,7 +5,7 @@ import {
   AlertCircle, LayoutDashboard, MessagesSquare, MessageSquare, X, ArrowLeft,
   Award, Bell, UserCircle, Mail, IndianRupee, CheckCircle2, Activity, Trash2, UserX, UserMinus, FileText, Filter, Download, Target,
   Phone, Calendar, Clock, AlertTriangle, ChevronRight, UserCheck, RefreshCw,
-  MoreHorizontal, ChevronDown
+  MoreHorizontal, ChevronDown, Key
 } from "lucide-react";
 
 import { Student } from "./types";
@@ -18,7 +18,8 @@ import { DeletedReferrersTab } from "./tabs/DeletedReferrersTab";
 import { DeletedStudentsTab } from "./tabs/DeletedStudentsTab";
 import { StudentLeadCrmTab } from "./tabs/StudentLeadCrmTab";
 import { ReferrerModal } from "./modals/ReferrerModal";
-import { getApiUrl, API_BASE_URL } from "../../utils/api";
+import StaffManagementModal from "./modals/StaffManagementModal";
+import { getApiUrl, API_BASE_URL, apiRequest } from "../../utils/api";
 
 export default function AdminDashboard() {
   const navigate = useNavigate();
@@ -82,6 +83,40 @@ export default function AdminDashboard() {
   const [adminName, setAdminName] = useState<string>(() => {
     return localStorage.getItem("adminName") || "Super Admin";
   });
+  const [adminRole, setAdminRole] = useState<string>(() => {
+    return localStorage.getItem("adminRole") || "superadmin";
+  });
+  const [adminPermissions, setAdminPermissions] = useState<string[]>(() => {
+    try {
+      const stored = localStorage.getItem("adminPermissions");
+      return stored ? JSON.parse(stored) : [
+        "dashboard", "add-student", "student-crm", "inquiry", "referred-by", "deleted-referrers", "deleted-students"
+      ];
+    } catch {
+      return [
+        "dashboard", "add-student", "student-crm", "inquiry", "referred-by", "deleted-referrers", "deleted-students"
+      ];
+    }
+  });
+  const [isStaffModalOpen, setIsStaffModalOpen] = useState(false);
+
+  const isSuperAdmin = useMemo(() => {
+    return adminRole === "superadmin" || adminEmail.toLowerCase().includes("bhavik");
+  }, [adminRole, adminEmail]);
+
+  const hasAccess = (featureKey: string) => {
+    if (isSuperAdmin) return true;
+    return adminPermissions.includes(featureKey);
+  };
+
+  const firstAllowedTab = useMemo(() => {
+    if (isSuperAdmin) return "dashboard";
+    const order = ["dashboard", "student-crm", "inquiry", "referred-by", "deleted-referrers", "deleted-students"];
+    for (const key of order) {
+      if (adminPermissions.includes(key)) return key;
+    }
+    return null;
+  }, [isSuperAdmin, adminPermissions]);
 
   const adminInitials = useMemo(() => {
     if (!adminName) return "SA";
@@ -1316,6 +1351,41 @@ export default function AdminDashboard() {
     }
   }, [activeTab]);
 
+  // Auto-redirect if non-superadmin tries to access unauthorized tab
+  useEffect(() => {
+    if (!isSuperAdmin) {
+      const currentKey = activeTab === "student-leads" ? "student-crm" : activeTab;
+      if (!hasAccess(currentKey) && firstAllowedTab) {
+        navigate(`/admin/dashboard/${firstAllowedTab}`, { replace: true });
+      }
+    }
+  }, [activeTab, isSuperAdmin, firstAllowedTab, adminPermissions, navigate]);
+
+  // Sync staff profile and permissions from server on mount
+  useEffect(() => {
+    const syncProfile = async () => {
+      try {
+        const res = await apiRequest("/admin/me");
+        if (res.ok) {
+          const data = await res.json();
+          if (data.success && data.user) {
+            if (data.user.email) setAdminEmail(data.user.email);
+            if (data.user.name) setAdminName(data.user.name);
+            if (data.user.role) setAdminRole(data.user.role);
+            if (data.user.permissions) setAdminPermissions(data.user.permissions);
+            localStorage.setItem("adminEmail", data.user.email || "");
+            localStorage.setItem("adminName", data.user.name || "");
+            localStorage.setItem("adminRole", data.user.role || "staff");
+            localStorage.setItem("adminPermissions", JSON.stringify(data.user.permissions || []));
+          }
+        }
+      } catch {
+        // Fallback silently
+      }
+    };
+    syncProfile();
+  }, []);
+
   const fetchDashboardData = async () => {
     try {
       const token = localStorage.getItem("adminAuthToken");
@@ -1577,6 +1647,14 @@ export default function AdminDashboard() {
           setAdminName(data.adminName);
           localStorage.setItem("adminName", data.adminName);
         }
+        if (data.adminRole) {
+          setAdminRole(data.adminRole);
+          localStorage.setItem("adminRole", data.adminRole);
+        }
+        if (data.permissions) {
+          setAdminPermissions(data.permissions);
+          localStorage.setItem("adminPermissions", JSON.stringify(data.permissions));
+        }
         // Ensure graphData is always a continuous 8-month timeline on frontend
         let rawGraphData: any[] = data.graphData || [];
         const monthsShort = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
@@ -1775,70 +1853,94 @@ export default function AdminDashboard() {
                 </button>
               </div>
 
-              {/* Primary Action Button: + Add Student on Mobile */}
-              <div className="mb-4">
-                <button
-                  onClick={() => {
-                    setEditingStudent(null);
-                    setIsStudentModalOpen(true);
-                    setIsSidebarOpen(false);
-                  }}
-                  className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold text-sm shadow-md shadow-blue-500/20 hover:from-blue-700 hover:to-indigo-700 active:scale-[0.98] transition-all cursor-pointer"
-                >
-                  <Plus size={18} className="stroke-[2.5]" />
-                  <span>+ Add Student</span>
-                </button>
-              </div>
+              {/* Primary Action Button: + Add Student on Mobile (if permitted) */}
+              {hasAccess("add-student") && (
+                <div className="mb-4">
+                  <button
+                    onClick={() => {
+                      setEditingStudent(null);
+                      setIsStudentModalOpen(true);
+                      setIsSidebarOpen(false);
+                    }}
+                    className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold text-sm shadow-md shadow-blue-500/20 hover:from-blue-700 hover:to-indigo-700 active:scale-[0.98] transition-all cursor-pointer"
+                  >
+                    <Plus size={18} className="stroke-[2.5]" />
+                    <span>+ Add Student</span>
+                  </button>
+                </div>
+              )}
 
               <div className="space-y-1.5">
-                <button
-                  onClick={() => { navigate("/admin/dashboard/dashboard"); setIsSidebarOpen(false); }}
-                  className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all cursor-pointer ${
-                    activeTab === "dashboard" ? "bg-[#18181b] text-white shadow-xs" : "text-neutral-600 hover:bg-neutral-100"
-                  }`}
-                >
-                  <LayoutDashboard size={18} /> Dashboard
-                </button>
-                <button
-                  onClick={() => { navigate("/admin/dashboard/student-crm"); setIsSidebarOpen(false); }}
-                  className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all cursor-pointer ${
-                    activeTab === "student-crm" || activeTab === "student-leads" ? "bg-[#18181b] text-white shadow-xs" : "text-neutral-600 hover:bg-neutral-100"
-                  }`}
-                >
-                  <Target size={18} /> Student Leads CRM
-                </button>
-                <button
-                  onClick={() => { navigate("/admin/dashboard/inquiry"); setIsSidebarOpen(false); }}
-                  className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all cursor-pointer ${
-                    activeTab === "inquiry" ? "bg-[#18181b] text-white shadow-xs" : "text-neutral-600 hover:bg-neutral-100"
-                  }`}
-                >
-                  <MessagesSquare size={18} /> Inquiries
-                </button>
-                <button
-                  onClick={() => { navigate("/admin/dashboard/referred-by"); setIsSidebarOpen(false); }}
-                  className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all cursor-pointer ${
-                    activeTab === "referred-by" ? "bg-[#18181b] text-white shadow-xs" : "text-neutral-600 hover:bg-neutral-100"
-                  }`}
-                >
-                  <UserCircle size={18} /> Referred By
-                </button>
-                <button
-                  onClick={() => { navigate("/admin/dashboard/deleted-referrers"); setIsSidebarOpen(false); }}
-                  className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all cursor-pointer ${
-                    activeTab === "deleted-referrers" ? "bg-[#18181b] text-white shadow-xs" : "text-neutral-600 hover:bg-neutral-100"
-                  }`}
-                >
-                  <UserX size={18} /> Deleted Referrers
-                </button>
-                <button
-                  onClick={() => { navigate("/admin/dashboard/deleted-students"); setIsSidebarOpen(false); }}
-                  className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all cursor-pointer ${
-                    activeTab === "deleted-students" ? "bg-[#18181b] text-white shadow-xs" : "text-neutral-600 hover:bg-neutral-100"
-                  }`}
-                >
-                  <UserMinus size={18} /> Deleted Students
-                </button>
+                {hasAccess("dashboard") && (
+                  <button
+                    onClick={() => { navigate("/admin/dashboard/dashboard"); setIsSidebarOpen(false); }}
+                    className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all cursor-pointer ${
+                      activeTab === "dashboard" ? "bg-[#18181b] text-white shadow-xs" : "text-neutral-600 hover:bg-neutral-100"
+                    }`}
+                  >
+                    <LayoutDashboard size={18} /> Dashboard
+                  </button>
+                )}
+                {hasAccess("student-crm") && (
+                  <button
+                    onClick={() => { navigate("/admin/dashboard/student-crm"); setIsSidebarOpen(false); }}
+                    className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all cursor-pointer ${
+                      activeTab === "student-crm" || activeTab === "student-leads" ? "bg-[#18181b] text-white shadow-xs" : "text-neutral-600 hover:bg-neutral-100"
+                    }`}
+                  >
+                    <Target size={18} /> Student Leads CRM
+                  </button>
+                )}
+                {hasAccess("inquiry") && (
+                  <button
+                    onClick={() => { navigate("/admin/dashboard/inquiry"); setIsSidebarOpen(false); }}
+                    className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all cursor-pointer ${
+                      activeTab === "inquiry" ? "bg-[#18181b] text-white shadow-xs" : "text-neutral-600 hover:bg-neutral-100"
+                    }`}
+                  >
+                    <MessagesSquare size={18} /> Inquiries
+                  </button>
+                )}
+                {hasAccess("referred-by") && (
+                  <button
+                    onClick={() => { navigate("/admin/dashboard/referred-by"); setIsSidebarOpen(false); }}
+                    className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all cursor-pointer ${
+                      activeTab === "referred-by" ? "bg-[#18181b] text-white shadow-xs" : "text-neutral-600 hover:bg-neutral-100"
+                    }`}
+                  >
+                    <UserCircle size={18} /> Referred By
+                  </button>
+                )}
+                {hasAccess("deleted-referrers") && (
+                  <button
+                    onClick={() => { navigate("/admin/dashboard/deleted-referrers"); setIsSidebarOpen(false); }}
+                    className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all cursor-pointer ${
+                      activeTab === "deleted-referrers" ? "bg-[#18181b] text-white shadow-xs" : "text-neutral-600 hover:bg-neutral-100"
+                    }`}
+                  >
+                    <UserX size={18} /> Deleted Referrers
+                  </button>
+                )}
+                {hasAccess("deleted-students") && (
+                  <button
+                    onClick={() => { navigate("/admin/dashboard/deleted-students"); setIsSidebarOpen(false); }}
+                    className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all cursor-pointer ${
+                      activeTab === "deleted-students" ? "bg-[#18181b] text-white shadow-xs" : "text-neutral-600 hover:bg-neutral-100"
+                    }`}
+                  >
+                    <UserMinus size={18} /> Deleted Students
+                  </button>
+                )}
+
+                {/* Manage Staff Access Button in Drawer for Super Admin */}
+                {isSuperAdmin && (
+                  <button
+                    onClick={() => { setIsSidebarOpen(false); setIsStaffModalOpen(true); }}
+                    className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-bold text-blue-700 bg-blue-50 hover:bg-blue-100 transition-all cursor-pointer mt-2"
+                  >
+                    <Key size={18} className="text-blue-600" /> Manage Staff Access
+                  </button>
+                )}
               </div>
             </div>
 
@@ -2544,6 +2646,19 @@ export default function AdminDashboard() {
                   </>
                 )}
              </div>
+              {/* Manage Staff Access Button (Super Admin Only) */}
+              {isSuperAdmin && (
+                <button
+                  type="button"
+                  onClick={() => setIsStaffModalOpen(true)}
+                  className="hidden sm:inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-bold text-blue-700 bg-blue-50 hover:bg-blue-100/80 border border-blue-200 transition-all cursor-pointer shadow-2xs hover:shadow-xs shrink-0"
+                  title="Manage Staff Accounts & Feature Access"
+                >
+                  <Key size={13} className="stroke-[2.5]" />
+                  <span>Manage Staff</span>
+                </button>
+              )}
+
               {/* Logout Button */}
               <button
                 onClick={() => setIsLogoutModalOpen(true)}
@@ -2587,7 +2702,7 @@ export default function AdminDashboard() {
             </div>
           ) : (
             <>
-          {activeTab === "dashboard" && !expandedStat && (
+          {activeTab === "dashboard" && hasAccess("dashboard") && !expandedStat && (
             <div className="w-full space-y-6 animate-in fade-in duration-300">
               
               {/* KPI Stat Cards Row (3-3 Pairs: Top = Students, Earnings, Pending; Bottom = Clear, Issued, Unissued) */}
@@ -3286,7 +3401,7 @@ export default function AdminDashboard() {
             </div>
           )}
 
-          {activeTab === "dashboard" && expandedStat && (
+          {activeTab === "dashboard" && hasAccess("dashboard") && expandedStat && (
              <div className="max-w-[1520px] mx-auto animate-in fade-in duration-300 space-y-6">
                 <button onClick={() => navigate("/admin/dashboard/dashboard")} className="flex items-center gap-2 text-neutral-600 hover:text-neutral-900 font-bold transition-all cursor-pointer bg-white px-4 py-2 rounded-full border border-neutral-200/80 shadow-xs hover:border-neutral-300 text-xs">
                    <ArrowLeft size={16} /> Back to Dashboard
@@ -4514,10 +4629,10 @@ export default function AdminDashboard() {
           )}
 
           {/* INQUIRY PAGE */}
-          {activeTab === "inquiry" && <InquiryTab />}
+          {activeTab === "inquiry" && hasAccess("inquiry") && <InquiryTab />}
 
           {/* REFERRED BY PAGE */}
-          {activeTab === "referred-by" && (
+          {activeTab === "referred-by" && hasAccess("referred-by") && (
              <ReferredByTab
                 selectedReferrer={selectedReferrer}
                 setSelectedReferrer={setSelectedReferrer}
@@ -4534,7 +4649,7 @@ export default function AdminDashboard() {
           )}
 
           {/* DELETED REFERRERS PAGE */}
-          {activeTab === "deleted-referrers" && (
+          {activeTab === "deleted-referrers" && hasAccess("deleted-referrers") && (
              <DeletedReferrersTab 
                 deletedReferrers={deletedReferrers}
                 handleRestoreReferrer={handleRestoreReferrer}
@@ -4542,7 +4657,7 @@ export default function AdminDashboard() {
           )}
 
           {/* DELETED STUDENTS PAGE */}
-          {activeTab === "deleted-students" && (
+          {activeTab === "deleted-students" && hasAccess("deleted-students") && (
              <DeletedStudentsTab 
                 deletedStudents={deletedStudents}
                 handleRestoreStudent={handleRestoreStudent}
@@ -4550,8 +4665,34 @@ export default function AdminDashboard() {
           )}
 
           {/* STUDENT LEADS CRM PAGE */}
-          {(activeTab === "student-crm" || activeTab === "student-leads") && (
+          {(activeTab === "student-crm" || activeTab === "student-leads") && hasAccess("student-crm") && (
              <StudentLeadCrmTab />
+          )}
+
+          {/* ACCESS RESTRICTED NOTICE (IF CURRENT TAB NOT PERMITTED) */}
+          {((activeTab === "dashboard" && !hasAccess("dashboard")) ||
+            ((activeTab === "student-crm" || activeTab === "student-leads") && !hasAccess("student-crm")) ||
+            (activeTab === "inquiry" && !hasAccess("inquiry")) ||
+            (activeTab === "referred-by" && !hasAccess("referred-by")) ||
+            (activeTab === "deleted-referrers" && !hasAccess("deleted-referrers")) ||
+            (activeTab === "deleted-students" && !hasAccess("deleted-students"))) && (
+            <div className="py-20 px-6 text-center bg-white border border-neutral-200/80 rounded-3xl p-8 max-w-md mx-auto shadow-sm my-12 animate-in fade-in">
+              <div className="w-16 h-16 rounded-full bg-amber-50 text-amber-600 flex items-center justify-center mx-auto mb-4 border border-amber-200">
+                <Shield size={30} />
+              </div>
+              <h3 className="text-xl font-black text-neutral-900 mb-2">Access Restricted</h3>
+              <p className="text-xs text-neutral-500 mb-6 leading-relaxed">
+                You do not have permission to access this section. Please contact your administrator if you need access.
+              </p>
+              {firstAllowedTab && (
+                <button
+                  onClick={() => navigate(`/admin/dashboard/${firstAllowedTab}`)}
+                  className="px-6 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold transition-all shadow-md shadow-blue-500/20 cursor-pointer"
+                >
+                  Go to Permitted Tab
+                </button>
+              )}
+            </div>
           )}
             </>
           )}
@@ -4671,86 +4812,110 @@ export default function AdminDashboard() {
          </div>
       )}
 
+      {/* Staff Access Management Modal (Super Admin Only) */}
+      <StaffManagementModal
+        isOpen={isStaffModalOpen}
+        onClose={() => setIsStaffModalOpen(false)}
+      />
+
       {/* Floating Bottom Center Navigation Dock with Authentic Neumorphism Effect */}
       <nav 
         aria-label="Main Navigation Dock"
         className="hidden lg:block fixed bottom-8 sm:bottom-10 md:bottom-12 lg:bottom-14 left-1/2 -translate-x-1/2 z-40 max-w-[96vw] animate-in fade-in slide-in-from-bottom-4 duration-300 pointer-events-auto"
       >
         <div className="neumorphism-dock px-3 sm:px-4 py-2.5 sm:py-3 min-h-[72px] sm:min-h-[78px] md:min-h-[82px] flex items-center gap-2 sm:gap-2.5 overflow-x-auto no-scrollbar max-w-full">
-          <button
-            onClick={() => navigate("/admin/dashboard/dashboard")}
-            className={`px-6 sm:px-7 md:px-8 py-3.5 sm:py-4 rounded-full text-xs sm:text-sm md:text-[15px] whitespace-nowrap transition-all cursor-pointer ${
-              activeTab === "dashboard"
-                ? "neumorphism-dock-active font-black tracking-tight"
-                : "neumorphism-dock-inactive font-bold"
-            }`}
-          >
-            Dashboard
-          </button>
+          {hasAccess("dashboard") && (
+            <button
+              onClick={() => navigate("/admin/dashboard/dashboard")}
+              className={`px-6 sm:px-7 md:px-8 py-3.5 sm:py-4 rounded-full text-xs sm:text-sm md:text-[15px] whitespace-nowrap transition-all cursor-pointer ${
+                activeTab === "dashboard"
+                  ? "neumorphism-dock-active font-black tracking-tight"
+                  : "neumorphism-dock-inactive font-bold"
+              }`}
+            >
+              Dashboard
+            </button>
+          )}
 
           {/* Add Student Action in Bottom Dock (matches other dock buttons) */}
-          <button
-            onClick={() => {
-              setEditingStudent(null);
-              setIsStudentModalOpen(true);
-            }}
-            className="flex items-center gap-1.5 px-6 sm:px-7 md:px-8 py-3.5 sm:py-4 rounded-full text-xs sm:text-sm md:text-[15px] whitespace-nowrap transition-all cursor-pointer neumorphism-dock-inactive font-bold shrink-0"
-            title="Add New Student"
-          >
-            <Plus size={16} className="stroke-[2.5]" />
-            <span>Add Student</span>
-          </button>
+          {hasAccess("add-student") && (
+            <button
+              onClick={() => {
+                setEditingStudent(null);
+                setIsStudentModalOpen(true);
+              }}
+              className="flex items-center gap-1.5 px-6 sm:px-7 md:px-8 py-3.5 sm:py-4 rounded-full text-xs sm:text-sm md:text-[15px] whitespace-nowrap transition-all cursor-pointer neumorphism-dock-inactive font-bold shrink-0"
+              title="Add New Student"
+            >
+              <Plus size={16} className="stroke-[2.5]" />
+              <span>Add Student</span>
+            </button>
+          )}
 
-          <button
-            onClick={() => navigate("/admin/dashboard/student-crm")}
-            className={`px-6 sm:px-7 md:px-8 py-3.5 sm:py-4 rounded-full text-xs sm:text-sm md:text-[15px] whitespace-nowrap transition-all cursor-pointer ${
-              activeTab === "student-crm" || activeTab === "student-leads"
-                ? "neumorphism-dock-active font-black tracking-tight"
-                : "neumorphism-dock-inactive font-bold"
-            }`}
-          >
-            Student Leads CRM
-          </button>
-          <button
-            onClick={() => navigate("/admin/dashboard/inquiry")}
-            className={`px-6 sm:px-7 md:px-8 py-3.5 sm:py-4 rounded-full text-xs sm:text-sm md:text-[15px] whitespace-nowrap transition-all cursor-pointer ${
-              activeTab === "inquiry"
-                ? "neumorphism-dock-active font-black tracking-tight"
-                : "neumorphism-dock-inactive font-bold"
-            }`}
-          >
-            Inquiries
-          </button>
-          <button
-            onClick={() => navigate("/admin/dashboard/referred-by")}
-            className={`px-6 sm:px-7 md:px-8 py-3.5 sm:py-4 rounded-full text-xs sm:text-sm md:text-[15px] whitespace-nowrap transition-all cursor-pointer ${
-              activeTab === "referred-by"
-                ? "neumorphism-dock-active font-black tracking-tight"
-                : "neumorphism-dock-inactive font-semibold"
-            }`}
-          >
-            Referred By
-          </button>
-          <button
-            onClick={() => navigate("/admin/dashboard/deleted-referrers")}
-            className={`px-6 sm:px-7 md:px-8 py-3.5 sm:py-4 rounded-full text-xs sm:text-sm md:text-[15px] whitespace-nowrap transition-all cursor-pointer ${
-              activeTab === "deleted-referrers"
-                ? "neumorphism-dock-active font-black tracking-tight"
-                : "neumorphism-dock-inactive font-semibold"
-            }`}
-          >
-            Deleted Referrers
-          </button>
-          <button
-            onClick={() => navigate("/admin/dashboard/deleted-students")}
-            className={`px-6 sm:px-7 md:px-8 py-3.5 sm:py-4 rounded-full text-xs sm:text-sm md:text-[15px] whitespace-nowrap transition-all cursor-pointer ${
-              activeTab === "deleted-students"
-                ? "neumorphism-dock-active font-black tracking-tight"
-                : "neumorphism-dock-inactive font-semibold"
-            }`}
-          >
-            Deleted Students
-          </button>
+          {hasAccess("student-crm") && (
+            <button
+              onClick={() => navigate("/admin/dashboard/student-crm")}
+              className={`px-6 sm:px-7 md:px-8 py-3.5 sm:py-4 rounded-full text-xs sm:text-sm md:text-[15px] whitespace-nowrap transition-all cursor-pointer ${
+                activeTab === "student-crm" || activeTab === "student-leads"
+                  ? "neumorphism-dock-active font-black tracking-tight"
+                  : "neumorphism-dock-inactive font-bold"
+              }`}
+            >
+              Student Leads CRM
+            </button>
+          )}
+
+          {hasAccess("inquiry") && (
+            <button
+              onClick={() => navigate("/admin/dashboard/inquiry")}
+              className={`px-6 sm:px-7 md:px-8 py-3.5 sm:py-4 rounded-full text-xs sm:text-sm md:text-[15px] whitespace-nowrap transition-all cursor-pointer ${
+                activeTab === "inquiry"
+                  ? "neumorphism-dock-active font-black tracking-tight"
+                  : "neumorphism-dock-inactive font-bold"
+              }`}
+            >
+              Inquiries
+            </button>
+          )}
+
+          {hasAccess("referred-by") && (
+            <button
+              onClick={() => navigate("/admin/dashboard/referred-by")}
+              className={`px-6 sm:px-7 md:px-8 py-3.5 sm:py-4 rounded-full text-xs sm:text-sm md:text-[15px] whitespace-nowrap transition-all cursor-pointer ${
+                activeTab === "referred-by"
+                  ? "neumorphism-dock-active font-black tracking-tight"
+                  : "neumorphism-dock-inactive font-semibold"
+              }`}
+            >
+              Referred By
+            </button>
+          )}
+
+          {hasAccess("deleted-referrers") && (
+            <button
+              onClick={() => navigate("/admin/dashboard/deleted-referrers")}
+              className={`px-6 sm:px-7 md:px-8 py-3.5 sm:py-4 rounded-full text-xs sm:text-sm md:text-[15px] whitespace-nowrap transition-all cursor-pointer ${
+                activeTab === "deleted-referrers"
+                  ? "neumorphism-dock-active font-black tracking-tight"
+                  : "neumorphism-dock-inactive font-semibold"
+              }`}
+            >
+              Deleted Referrers
+            </button>
+          )}
+
+          {hasAccess("deleted-students") && (
+            <button
+              onClick={() => navigate("/admin/dashboard/deleted-students")}
+              className={`px-6 sm:px-7 md:px-8 py-3.5 sm:py-4 rounded-full text-xs sm:text-sm md:text-[15px] whitespace-nowrap transition-all cursor-pointer ${
+                activeTab === "deleted-students"
+                  ? "neumorphism-dock-active font-black tracking-tight"
+                  : "neumorphism-dock-inactive font-semibold"
+              }`}
+            >
+              Deleted Students
+            </button>
+          )}
         </div>
       </nav>
     </div>

@@ -382,8 +382,12 @@ exports.admin_dashboardGet = async (req, res) => {
             top_courses,
             graphData,
             referrel_amount: adminConfig ? adminConfig.referrel_amount : 0,
-            adminEmail: adminConfig?.email || process.env.ADMIN_EMAIL || 'admin@rizeworld.com',
-            adminName: 'Super Admin',
+            adminEmail: req?.user?.email || adminConfig?.email || process.env.ADMIN_EMAIL || 'admin@rizeworld.com',
+            adminName: req?.user?.name || (req?.user?.role === 'staff' ? (req?.user?.name || 'Staff User') : 'Super Admin'),
+            adminRole: req?.user?.role || (req?.user?.email?.toLowerCase() === 'bhavikbhai1922@gmail.com' ? 'superadmin' : 'staff'),
+            permissions: req?.user?.role === 'staff' ? (req?.user?.permissions || []) : [
+                "dashboard", "add-student", "student-crm", "inquiry", "referred-by", "deleted-referrers", "deleted-students"
+            ],
             studentsWithCertificates
         };
 
