@@ -619,7 +619,7 @@ export default function Home() {
                       {[
                         "Complete All-in-One Master Module",
                         "2 Months Free Agency Internship Included",
-                        "2 Certificates (RizeWorld & Digital Marketing)",
+                        "2 Certificates (RizeWorld Institute & Digital Marketing)",
                         "Lifetime community access",
                         "Portfolio building sessions",
                         "1-on-1 mentor calls",
