@@ -7,9 +7,6 @@ import {
   Video,
   X,
   ArrowRight,
-  Users,
-  Award,
-  Zap,
   ExternalLink,
 } from "lucide-react";
 import SEO from "../components/SEO";
@@ -134,28 +131,6 @@ export default function Workshop() {
             <p className="mt-6 text-base sm:text-lg text-neutral-400 max-w-2xl mx-auto leading-relaxed">
               Watch recordings of our exclusive live sessions, masterclasses, and agency-level case studies on AI tools, high-ROI marketing, and design.
             </p>
-          </Reveal>
-
-          {/* Quick Metrics Bar */}
-          <Reveal delay={0.3}>
-            <div className="mt-10 flex flex-wrap items-center justify-center gap-6 sm:gap-10 text-neutral-300 text-xs sm:text-sm font-medium">
-              <span className="flex items-center gap-2">
-                <Video size={16} className="text-blue-400" />
-                HD Video Recordings
-              </span>
-              <span className="flex items-center gap-2">
-                <Zap size={16} className="text-orange-400" />
-                100% Practical Case Studies
-              </span>
-              <span className="flex items-center gap-2">
-                <Users size={16} className="text-green-400" />
-                1,500+ Students Trained
-              </span>
-              <span className="flex items-center gap-2">
-                <Award size={16} className="text-purple-400" />
-                Certificate of Attendance
-              </span>
-            </div>
           </Reveal>
         </div>
       </section>
