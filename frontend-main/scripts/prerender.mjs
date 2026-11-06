@@ -136,6 +136,11 @@ console.log(`[Prerender] Statically generated ${blogCount} flat blog HTML files 
 // 3. Known static pages metadata for SSR static shells
 const staticPagesMeta = [
   {
+    route: '/workshop',
+    title: 'Digital Marketing & AI Workshops | Live Sessions - RizeWorld Institute',
+    desc: 'Watch practical workshops, masterclasses, and live industry sessions on AI, Digital Marketing, SEO, and Graphic Design by RizeWorld Institute.'
+  },
+  {
     route: '/courses',
     title: 'Best Digital Marketing Course in Alwar & Rajasthan | RizeWorld Institute',
     desc: 'Explore career-ready digital marketing courses in Alwar. 100% practical training in SEO, Social Media, Performance Marketing, Graphic Design, Web Development & AI tools.'

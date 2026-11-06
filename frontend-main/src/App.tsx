@@ -21,6 +21,7 @@ const PrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy"));
 const Terms = lazy(() => import("./pages/Terms"));
 const Certificate = lazy(() => import("./pages/Certificate"));
 const Trainers = lazy(() => import("./pages/Trainers"));
+const Workshop = lazy(() => import("./pages/Workshop"));
 const LocationHub = lazy(() => import("./pages/LocationHub"));
 const AlwarLocation = lazy(() => import("./pages/AlwarLocation"));
 const SEOPage = lazy(() => import("./pages/SEO"));
@@ -87,6 +88,7 @@ function MainLayout() {
           <Route path="/student_login" element={<Certificate />} />
           <Route path="/download-certificate" element={<DirectDownload />} />
           <Route path="/trainers" element={<Trainers />} />
+          <Route path="/workshop" element={<Workshop />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </Suspense>

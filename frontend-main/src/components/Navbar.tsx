@@ -36,6 +36,7 @@ export default function Navbar() {
             </button>
             <div className="absolute left-full top-1/2 -translate-y-1/2 ml-4 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 w-40 bg-white/95 backdrop-blur-xl rounded-2xl shadow-luxury border border-white/40 p-2 flex flex-col gap-1 z-50">
               <Link to="/about" className="px-4 py-2 text-sm font-semibold text-neutral-400 hover:text-rize-blue hover:bg-[#0f0f0f] rounded-xl transition-colors uppercase">About Us</Link>
+              <Link to="/workshop" className="px-4 py-2 text-sm font-semibold text-neutral-400 hover:text-rize-blue hover:bg-[#0f0f0f] rounded-xl transition-colors uppercase">Workshops</Link>
               <Link to="/blog" className="px-4 py-2 text-sm font-semibold text-neutral-400 hover:text-rize-blue hover:bg-[#0f0f0f] rounded-xl transition-colors uppercase">Blogs</Link>
               <Link to="/trainers" className="px-4 py-2 text-sm font-semibold text-neutral-400 hover:text-rize-blue hover:bg-[#0f0f0f] rounded-xl transition-colors uppercase">Trainers</Link>
               <Link to="/contact" className="px-4 py-2 text-sm font-semibold text-neutral-400 hover:text-rize-blue hover:bg-[#0f0f0f] rounded-xl transition-colors uppercase">Contact Us</Link>
@@ -87,7 +88,7 @@ export default function Navbar() {
           </Link>
 
           {/* Middle: Links */}
-          <div className="flex items-center gap-6 xl:gap-10 text-[14px] xl:text-[16px] font-normal text-neutral-900 tracking-wide uppercase" style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 400 }}>
+          <div className="flex items-center gap-4 xl:gap-7 text-[13px] xl:text-[15px] font-normal text-neutral-900 tracking-wide uppercase" style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 400 }}>
             <Link to="/location/alwar" className="hover:text-blue-600 transition-colors">
               Location Alwar
             </Link>
@@ -105,6 +106,7 @@ export default function Navbar() {
               </div>
             </div>
             <Link to="/master-course" className="hover:text-blue-600 transition-colors">Master Course</Link>
+            <Link to="/workshop" className="hover:text-blue-600 transition-colors">Workshop</Link>
             <Link to="/certificate" className="hover:text-blue-600 transition-colors">Certificate</Link>
           </div>
 
@@ -148,6 +150,7 @@ export default function Navbar() {
             <MobileLink to="/location/alwar" label="Location Alwar" onClick={() => setMobileOpen(false)} isActive={location.pathname === "/location/alwar"} />
             <MobileLink to="/courses" label="Courses" onClick={() => setMobileOpen(false)} isActive={location.pathname === "/courses"} />
             <MobileLink to="/master-course" label="Master Course" onClick={() => setMobileOpen(false)} isActive={location.pathname === "/master-course"} />
+            <MobileLink to="/workshop" label="Workshop" onClick={() => setMobileOpen(false)} isActive={location.pathname === "/workshop"} />
             <MobileLink to="/certificate" label="Certificate" onClick={() => setMobileOpen(false)} isActive={location.pathname === "/certificate"} />
             <MobileLink to="/about" label="About Us" onClick={() => setMobileOpen(false)} isActive={location.pathname === "/about"} />
             <MobileLink to="/hire-from-us" label="Hire From Us" onClick={() => setMobileOpen(false)} isActive={location.pathname === "/hire-from-us"} />
