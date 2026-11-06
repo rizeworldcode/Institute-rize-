@@ -12,6 +12,7 @@ import {
   Users,
   Award,
   Zap,
+  ExternalLink,
 } from "lucide-react";
 import SEO from "../components/SEO";
 import Reveal from "../components/Reveal";
@@ -26,93 +27,104 @@ export interface WorkshopVideo {
   duration: string;
   date: string;
   thumbnail: string;
-  videoUrl?: string; // YouTube embed URL or MP4 URL (e.g. https://www.youtube.com/embed/VIDEO_ID)
+  videoUrl?: string; // Local video file (/video/...) or YouTube embed URL
   featured?: boolean;
   attendees?: string;
   keyTakeaways: string[];
 }
 
-// Initial workshop data (will be populated with user's official videos)
+function isVideoFile(url: string): boolean {
+  if (!url) return false;
+  const clean = url.split("?")[0].toLowerCase();
+  return (
+    clean.endsWith(".mov") ||
+    clean.endsWith(".mp4") ||
+    clean.endsWith(".webm") ||
+    clean.endsWith(".ogg") ||
+    clean.startsWith("/video/")
+  );
+}
+
+// Official RizeWorld Workshop recordings & sessions
 const WORKSHOP_VIDEOS: WorkshopVideo[] = [
   {
-    id: "ws-1",
-    title: "AI Tools Masterclass: Automating Digital Marketing Workflows",
+    id: "ws-lords",
+    title: "Lords University × RizeWorld: AI & Digital Marketing Masterclass",
     description:
-      "A hands-on workshop demonstrating how to integrate ChatGPT, Midjourney, and AI automation to 10x your content and marketing output.",
+      "Exclusive university workshop conducted at Lords University covering AI tool integration, marketing automation, high-converting campaigns, and modern career paths for students.",
     category: "AI & Tools",
-    speaker: "Devesh Choudhary",
-    speakerRole: "Digital Marketing Specialist, RizeWorld",
-    duration: "1 hr 15 mins",
-    date: "Latest Workshop",
+    speaker: "Devesh Choudhary & Industry Mentors",
+    speakerRole: "Founder & Lead Trainer, RizeWorld Institute",
+    duration: "1 hr 20 mins",
+    date: "Lords University Campus",
     thumbnail:
-      "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=1200&q=80",
-    videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ", // Placeholder: replace with actual video URL
+      "https://images.unsplash.com/photo-1524178232363-1fb2b075b655?auto=format&fit=crop&w=1200&q=80",
+    videoUrl: "/video/lords-x-rize.mov",
     featured: true,
-    attendees: "250+ Attendees",
+    attendees: "350+ Students & Faculty",
     keyTakeaways: [
-      "AI Prompt Engineering for Marketing Campaigns",
-      "Automating SEO Content Generation with Fact-Checking",
-      "Building Custom AI Agents for Client Workflows",
+      "ChatGPT & AI Prompt Engineering for Marketing Campaigns",
+      "Automating Content, Copywriting & Visual Assets at Scale",
+      "Live Industry Case Studies & High-Income Career Roadmaps",
     ],
   },
   {
-    id: "ws-2",
-    title: "High-ROI Meta Ads & Performance Marketing Strategy",
+    id: "ws-campus",
+    title: "RizeWorld Institute: Hands-on Practical Marketing Workshop",
     description:
-      "Step-by-step breakdown of creating profitable Meta ad funnels, custom audience retargeting, and reducing CAC for local and national brands.",
+      "Intensive campus masterclass at RizeWorld Institute Alwar featuring live ad account audits, Google ranking workflows, and client acquisition systems.",
+    category: "Digital Marketing",
+    speaker: "Devesh Choudhary",
+    speakerRole: "Lead Performance Marketer & Trainer",
+    duration: "1 hr 35 mins",
+    date: "RizeWorld Alwar Campus",
+    thumbnail: "/images/rizeworld-institute-alwar-campus.webp",
+    videoUrl: "/video/rw-ins-workshop.mov",
+    attendees: "150+ Attendees",
+    keyTakeaways: [
+      "Setting Up Profitable Meta & Google Ad Funnels Live",
+      "Local Map Pack Domination & Core Technical SEO",
+      "High-Ticket Client Closing & Freelance Agency Blueprints",
+    ],
+  },
+  {
+    id: "ws-sophia",
+    title: "Sophia College × RizeWorld: Visual Storytelling & Design Clinic",
+    description:
+      "Special creative workshop hosted at Sophia College covering commercial graphic design, branding principles, video editing workflows, and portfolio creation.",
+    category: "Design & Video",
+    speaker: "Mohit Srivastava & Senior Faculty",
+    speakerRole: "Creative Director & Lead Faculty",
+    duration: "45 mins",
+    date: "Sophia College Campus",
+    thumbnail:
+      "https://images.unsplash.com/photo-1531482615713-2afd69097998?auto=format&fit=crop&w=1200&q=80",
+    videoUrl: "/video/sophia-workshop.mov",
+    attendees: "200+ Students",
+    keyTakeaways: [
+      "Color Psychology, Typography & Brand Identity Systems",
+      "Adobe Creative Cloud & Generative AI Design Hacks",
+      "Building a High-Impact Freelance Design Portfolio",
+    ],
+  },
+  {
+    id: "ws-performance",
+    title: "High-ROI Performance Marketing & Meta Ads Strategy Masterclass",
+    description:
+      "Deep dive into profitable Meta ad funnels, custom audience retargeting, conversion tracking APIs, and reducing customer acquisition cost (CAC).",
     category: "Performance Ads",
     speaker: "Devesh Choudhary",
-    speakerRole: "Lead Performance Marketer",
+    speakerRole: "Growth & Performance Specialist",
     duration: "55 mins",
-    date: "Live Session",
+    date: "Interactive Session",
     thumbnail:
       "https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=800&q=80",
-    videoUrl: "",
+    videoUrl: "/video/video 3.mp4",
     attendees: "180+ Attendees",
     keyTakeaways: [
       "CBO vs ABO Budget Optimization Breakdown",
-      "Creative Fatigue Prevention Strategies",
-      "Setting Up Conversion Tracking & Pixel APIs",
-    ],
-  },
-  {
-    id: "ws-3",
-    title: "Brand Visuals & Commercial Graphic Design with Adobe Suite",
-    description:
-      "Live design clinic covering high-converting social media creatives, brand guidelines, and visual storytelling for client projects.",
-    category: "Design & Video",
-    speaker: "Mohit Srivastava",
-    speakerRole: "Senior Graphic Designer, RizeWorld",
-    duration: "1 hr 10 mins",
-    date: "Interactive Session",
-    thumbnail:
-      "https://images.unsplash.com/photo-1572044162444-ad60f128bdea?auto=format&fit=crop&w=800&q=80",
-    videoUrl: "",
-    attendees: "200+ Attendees",
-    keyTakeaways: [
-      "Color Psychology & Typography Pairing",
-      "Faster Workflow Hacks in Photoshop & Illustrator",
-      "Creating Ready-to-Publish Agency Client Decks",
-    ],
-  },
-  {
-    id: "ws-4",
-    title: "Ranking #1 on Google: Modern Technical & Local SEO Masterclass",
-    description:
-      "Deep dive into Google algorithm updates, local map pack rankings, programmatic SEO, and building high-authority backlink foundations.",
-    category: "Digital Marketing",
-    speaker: "Devesh Choudhary",
-    speakerRole: "SEO & Growth Specialist",
-    duration: "1 hr 05 mins",
-    date: "Live Case Study",
-    thumbnail:
-      "https://images.unsplash.com/photo-1562577309-4932fdd64cd1?auto=format&fit=crop&w=800&q=80",
-    videoUrl: "",
-    attendees: "220+ Attendees",
-    keyTakeaways: [
-      "Technical Core Web Vitals Optimization",
-      "Local Google Business Profile Domination",
-      "Internal Linking Architecture That Ranks Fast",
+      "Creative Fatigue Prevention & Ad Copy Testing Frameworks",
+      "Advanced Retargeting & Lookalike Audience Scaling",
     ],
   },
 ];
@@ -419,11 +431,17 @@ export default function Workshop() {
                     </div>
                   </div>
 
-                  {/* Top Category Badge */}
-                  <div className="absolute top-3 left-3">
+                  {/* Top Badges */}
+                  <div className="absolute top-3 left-3 flex items-center gap-1.5">
                     <span className="px-3 py-1 rounded-full bg-black/60 backdrop-blur-md text-[11px] font-semibold text-neutral-200 border border-white/15">
                       {ws.category}
                     </span>
+                    {ws.videoUrl && (
+                      <span className="px-2 py-0.5 rounded-full bg-emerald-500/80 backdrop-blur-md text-[10px] font-bold text-white uppercase tracking-wider flex items-center gap-1 shadow-sm">
+                        <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
+                        Watch Now
+                      </span>
+                    )}
                   </div>
 
                   {/* Bottom Duration Badge */}
@@ -516,50 +534,88 @@ export default function Workshop() {
       {/* ================= VIDEO MODAL POPUP ================= */}
       {activeVideo && (
         <div
-          className="fixed inset-0 z-[9999] bg-black/85 backdrop-blur-md flex items-center justify-center p-4 sm:p-6"
+          className="fixed inset-0 z-[9999] bg-black/90 backdrop-blur-md flex items-center justify-center p-3 sm:p-6"
           onClick={() => setActiveVideo(null)}
           role="dialog"
           aria-modal="true"
         >
           <div
-            className="relative w-full max-w-4xl bg-neutral-900 border border-white/20 rounded-3xl overflow-hidden shadow-2xl"
+            className="relative w-full max-w-5xl bg-neutral-900 border border-white/20 rounded-2xl sm:rounded-3xl overflow-hidden shadow-2xl max-h-[92vh] flex flex-col"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Modal Header */}
-            <div className="flex items-center justify-between px-6 py-4 border-b border-white/10 bg-black/50">
-              <div className="flex items-center gap-2">
-                <span className="px-2.5 py-0.5 rounded-md bg-orange-500/20 text-orange-400 text-xs font-bold uppercase">
+            <div className="flex items-center justify-between px-4 sm:px-6 py-3 sm:py-4 border-b border-white/10 bg-black/60 shrink-0">
+              <div className="flex items-center gap-2 overflow-hidden pr-3">
+                <span className="px-2.5 py-0.5 rounded-md bg-orange-500/20 text-orange-400 text-[11px] sm:text-xs font-bold uppercase shrink-0">
                   {activeVideo.category}
                 </span>
-                <h3 className="text-sm sm:text-base font-bold text-white line-clamp-1">
+                <h3 className="text-sm sm:text-base font-bold text-white truncate">
                   {activeVideo.title}
                 </h3>
               </div>
 
-              <button
-                type="button"
-                onClick={() => setActiveVideo(null)}
-                className="p-1.5 rounded-full hover:bg-white/10 text-neutral-400 hover:text-white transition-colors cursor-pointer"
-                aria-label="Close video"
-              >
-                <X size={20} />
-              </button>
+              <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+                {activeVideo.videoUrl && (
+                  <a
+                    href={activeVideo.videoUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="p-1.5 sm:p-2 rounded-full hover:bg-white/10 text-neutral-400 hover:text-white transition-colors"
+                    title="Open Video in New Tab"
+                  >
+                    <ExternalLink size={18} />
+                  </a>
+                )}
+                <button
+                  type="button"
+                  onClick={() => setActiveVideo(null)}
+                  className="p-1.5 sm:p-2 rounded-full hover:bg-white/10 text-neutral-400 hover:text-white transition-colors cursor-pointer"
+                  aria-label="Close video"
+                >
+                  <X size={20} />
+                </button>
+              </div>
             </div>
 
             {/* Video Player Container */}
-            <div className="relative aspect-video bg-black flex items-center justify-center">
+            <div className="relative aspect-video bg-black flex items-center justify-center shrink-0">
               {activeVideo.videoUrl ? (
-                <iframe
-                  src={
-                    activeVideo.videoUrl.includes("autoplay")
-                      ? activeVideo.videoUrl
-                      : `${activeVideo.videoUrl}?autoplay=1`
-                  }
-                  title={activeVideo.title}
-                  className="w-full h-full"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                  allowFullScreen
-                />
+                isVideoFile(activeVideo.videoUrl) ? (
+                  <video
+                    key={activeVideo.videoUrl}
+                    controls
+                    autoPlay
+                    playsInline
+                    preload="auto"
+                    className="w-full h-full object-contain bg-black"
+                  >
+                    <source src={activeVideo.videoUrl} type="video/mp4" />
+                    <source src={activeVideo.videoUrl} type="video/quicktime" />
+                    <p className="text-sm text-neutral-300 p-6 text-center">
+                      Your browser does not support HTML5 video playback.{" "}
+                      <a
+                        href={activeVideo.videoUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-orange-400 underline font-semibold ml-1"
+                      >
+                        Click here to download or open video
+                      </a>
+                    </p>
+                  </video>
+                ) : (
+                  <iframe
+                    src={
+                      activeVideo.videoUrl.includes("autoplay")
+                        ? activeVideo.videoUrl
+                        : `${activeVideo.videoUrl}?autoplay=1`
+                    }
+                    title={activeVideo.title}
+                    className="w-full h-full"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                  />
+                )
               ) : (
                 <div className="text-center p-8 max-w-md">
                   <div className="w-16 h-16 rounded-full bg-orange-500/20 text-orange-400 flex items-center justify-center mx-auto mb-4 border border-orange-400/30">
@@ -584,7 +640,7 @@ export default function Workshop() {
             </div>
 
             {/* Modal Footer */}
-            <div className="p-6 bg-neutral-900 border-t border-white/10 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="p-4 sm:p-6 bg-neutral-900 border-t border-white/10 flex flex-col sm:flex-row sm:items-center justify-between gap-3 overflow-y-auto">
               <div>
                 <p className="text-xs text-neutral-400 font-medium">
                   Speaker: <span className="text-white font-semibold">{activeVideo.speaker}</span> ({activeVideo.speakerRole})
@@ -594,16 +650,16 @@ export default function Workshop() {
                 </p>
               </div>
 
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2 sm:gap-3 shrink-0">
                 <Link
                   to="/courses"
-                  className="px-4 py-2 rounded-full bg-white/10 hover:bg-white/20 text-xs font-semibold text-white transition-colors"
+                  className="px-3 sm:px-4 py-2 rounded-full bg-white/10 hover:bg-white/20 text-xs font-semibold text-white transition-colors"
                 >
-                  Explore Related Courses
+                  Explore Courses
                 </Link>
                 <Link
                   to="/contact"
-                  className="px-4 py-2 rounded-full bg-orange-500 hover:bg-orange-600 text-xs font-semibold text-white transition-colors"
+                  className="px-3 sm:px-4 py-2 rounded-full bg-orange-500 hover:bg-orange-600 text-xs font-semibold text-white transition-colors"
                 >
                   Join Next Workshop
                 </Link>
@@ -615,3 +671,4 @@ export default function Workshop() {
     </main>
   );
 }
+

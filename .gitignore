@@ -7,3 +7,5 @@ build/
 logs/
 backend/logs/
 frontend-main/dist.zip
+*.mov
+
