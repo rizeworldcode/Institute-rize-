@@ -41,24 +41,24 @@ function isVideoFile(url: string): boolean {
 const WORKSHOP_VIDEOS: WorkshopVideo[] = [
   {
     id: "ws-lords",
-    title: "Lords University × RizeWorld Workshop",
+    title: "Lords International School × RizeWorld Workshop",
     category: "AI & Tools",
-    date: "Lords University Campus",
+    date: "Lords International School Campus",
     videoUrl: "/video/lords-x-rize.mov",
     featured: true,
   },
   {
-    id: "ws-campus",
-    title: "RizeWorld Institute Campus Workshop",
+    id: "ws-dwps",
+    title: "DWPS Alwar × RizeWorld Workshop",
     category: "Digital Marketing",
-    date: "RizeWorld Alwar Campus",
+    date: "DWPS Alwar Campus",
     videoUrl: "/video/rw-ins-workshop.mov",
   },
   {
     id: "ws-sophia",
-    title: "Sophia College × RizeWorld Workshop",
+    title: "Sophia Public School Alwar × RizeWorld Workshop",
     category: "Design & Video",
-    date: "Sophia College Campus",
+    date: "Sophia Public School Campus",
     videoUrl: "/video/sophia-workshop.mov",
   },
 ];
