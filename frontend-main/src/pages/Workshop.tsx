@@ -228,23 +228,6 @@ export default function Workshop() {
                     {featuredWorkshop.title}
                   </h3>
                 </div>
-
-                <div className="pt-6 border-t border-white/10 flex flex-wrap items-center gap-4">
-                  <button
-                    type="button"
-                    onClick={() => setActiveVideo(featuredWorkshop)}
-                    className="flex-1 px-6 py-3.5 rounded-full bg-gradient-to-r from-orange-500 via-amber-500 to-orange-600 hover:brightness-110 text-white font-bold text-sm tracking-wide transition-all shadow-lg shadow-orange-500/20 flex items-center justify-center gap-2 cursor-pointer"
-                  >
-                    <Play size={16} className="fill-white" />
-                    Watch Full Recording
-                  </button>
-                  <Link
-                    to="/contact"
-                    className="px-5 py-3.5 rounded-full bg-white/10 hover:bg-white/20 text-neutral-200 hover:text-white font-semibold text-sm transition-colors border border-white/15"
-                  >
-                    Ask a Question
-                  </Link>
-                </div>
               </div>
             </div>
           </div>
