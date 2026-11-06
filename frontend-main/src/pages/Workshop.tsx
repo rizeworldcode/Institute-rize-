@@ -2,7 +2,6 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import {
   Play,
-  Clock,
   Calendar,
   Sparkles,
   Video,
@@ -21,13 +20,11 @@ export interface WorkshopVideo {
   id: string;
   title: string;
   description: string;
-  category: "AI & Tools" | "Digital Marketing" | "Performance Ads" | "Design & Video";
+  category: "AI & Tools" | "Digital Marketing" | "Design & Video";
   speaker: string;
   speakerRole: string;
-  duration: string;
   date: string;
-  thumbnail: string;
-  videoUrl?: string; // Local video file (/video/...) or YouTube embed URL
+  videoUrl: string; // Local video file (/video/...)
   featured?: boolean;
   attendees?: string;
   keyTakeaways: string[];
@@ -45,7 +42,7 @@ function isVideoFile(url: string): boolean {
   );
 }
 
-// Official RizeWorld Workshop recordings & sessions
+// Exactly 3 official RizeWorld Workshop recordings
 const WORKSHOP_VIDEOS: WorkshopVideo[] = [
   {
     id: "ws-lords",
@@ -55,10 +52,7 @@ const WORKSHOP_VIDEOS: WorkshopVideo[] = [
     category: "AI & Tools",
     speaker: "Devesh Choudhary & Industry Mentors",
     speakerRole: "Founder & Lead Trainer, RizeWorld Institute",
-    duration: "1 hr 20 mins",
     date: "Lords University Campus",
-    thumbnail:
-      "https://images.unsplash.com/photo-1524178232363-1fb2b075b655?auto=format&fit=crop&w=1200&q=80",
     videoUrl: "/video/lords-x-rize.mov",
     featured: true,
     attendees: "350+ Students & Faculty",
@@ -76,9 +70,7 @@ const WORKSHOP_VIDEOS: WorkshopVideo[] = [
     category: "Digital Marketing",
     speaker: "Devesh Choudhary",
     speakerRole: "Lead Performance Marketer & Trainer",
-    duration: "1 hr 35 mins",
     date: "RizeWorld Alwar Campus",
-    thumbnail: "/images/rizeworld-institute-alwar-campus.webp",
     videoUrl: "/video/rw-ins-workshop.mov",
     attendees: "150+ Attendees",
     keyTakeaways: [
@@ -95,10 +87,7 @@ const WORKSHOP_VIDEOS: WorkshopVideo[] = [
     category: "Design & Video",
     speaker: "Mohit Srivastava & Senior Faculty",
     speakerRole: "Creative Director & Lead Faculty",
-    duration: "45 mins",
     date: "Sophia College Campus",
-    thumbnail:
-      "https://images.unsplash.com/photo-1531482615713-2afd69097998?auto=format&fit=crop&w=1200&q=80",
     videoUrl: "/video/sophia-workshop.mov",
     attendees: "200+ Students",
     keyTakeaways: [
@@ -107,33 +96,12 @@ const WORKSHOP_VIDEOS: WorkshopVideo[] = [
       "Building a High-Impact Freelance Design Portfolio",
     ],
   },
-  {
-    id: "ws-performance",
-    title: "High-ROI Performance Marketing & Meta Ads Strategy Masterclass",
-    description:
-      "Deep dive into profitable Meta ad funnels, custom audience retargeting, conversion tracking APIs, and reducing customer acquisition cost (CAC).",
-    category: "Performance Ads",
-    speaker: "Devesh Choudhary",
-    speakerRole: "Growth & Performance Specialist",
-    duration: "55 mins",
-    date: "Interactive Session",
-    thumbnail:
-      "https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=800&q=80",
-    videoUrl: "/video/video 3.mp4",
-    attendees: "180+ Attendees",
-    keyTakeaways: [
-      "CBO vs ABO Budget Optimization Breakdown",
-      "Creative Fatigue Prevention & Ad Copy Testing Frameworks",
-      "Advanced Retargeting & Lookalike Audience Scaling",
-    ],
-  },
 ];
 
 const CATEGORIES = [
   "All",
   "AI & Tools",
   "Digital Marketing",
-  "Performance Ads",
   "Design & Video",
 ] as const;
 
@@ -261,27 +229,30 @@ export default function Workshop() {
 
           <div className="relative rounded-3xl overflow-hidden bg-gradient-to-br from-white/10 via-white/5 to-transparent border border-white/15 p-6 sm:p-10 shadow-2xl">
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
-              {/* Left Column: Video Preview Card */}
-              <div className="lg:col-span-7 relative group rounded-2xl overflow-hidden aspect-video bg-neutral-900 border border-white/10 shadow-xl cursor-pointer"
-                onClick={() => setActiveVideo(featuredWorkshop)}
-              >
-                <img
-                  src={featuredWorkshop.thumbnail}
-                  alt={featuredWorkshop.title}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 opacity-80 group-hover:opacity-90"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
-
-                {/* Big Glowing Play Button */}
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-gradient-to-r from-orange-500 to-amber-500 flex items-center justify-center text-white shadow-[0_0_30px_rgba(249,115,22,0.6)] group-hover:scale-110 group-hover:shadow-[0_0_45px_rgba(249,115,22,0.9)] transition-all duration-300">
-                    <Play size={28} className="fill-white ml-1 text-white" />
+              {/* Left Column: Direct Video Player (No Image) */}
+              <div className="lg:col-span-7 relative rounded-2xl overflow-hidden aspect-video bg-black border border-white/10 shadow-2xl">
+                {featuredWorkshop.videoUrl ? (
+                  <video
+                    key={featuredWorkshop.videoUrl}
+                    src={featuredWorkshop.videoUrl}
+                    controls
+                    playsInline
+                    preload="metadata"
+                    className="w-full h-full object-contain bg-black"
+                  >
+                    <source src={featuredWorkshop.videoUrl} type="video/mp4" />
+                    <source src={featuredWorkshop.videoUrl} type="video/quicktime" />
+                    Your browser does not support HTML5 video.
+                  </video>
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center bg-neutral-900">
+                    <Video size={48} className="text-neutral-600" />
                   </div>
-                </div>
+                )}
 
-                {/* Badges on Video Thumbnail */}
-                <div className="absolute top-4 left-4 flex items-center gap-2">
-                  <span className="px-3 py-1 rounded-full bg-orange-500 text-white text-xs font-bold uppercase tracking-wider shadow-md">
+                {/* Top Badges */}
+                <div className="absolute top-3 left-3 flex items-center gap-2 pointer-events-none">
+                  <span className="px-3 py-1 rounded-full bg-orange-500/90 text-white text-xs font-bold uppercase tracking-wider shadow-md">
                     Featured
                   </span>
                   <span className="px-3 py-1 rounded-full bg-black/60 backdrop-blur-md text-neutral-200 text-xs font-medium border border-white/20">
@@ -289,16 +260,14 @@ export default function Workshop() {
                   </span>
                 </div>
 
-                <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between text-xs text-neutral-300 font-medium">
-                  <span className="flex items-center gap-1.5 bg-black/60 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/10">
-                    <Clock size={13} className="text-orange-400" />
-                    {featuredWorkshop.duration}
-                  </span>
-                  <span className="flex items-center gap-1.5 bg-black/60 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/10">
-                    <Users size={13} className="text-green-400" />
-                    {featuredWorkshop.attendees}
-                  </span>
-                </div>
+                {featuredWorkshop.attendees && (
+                  <div className="absolute bottom-3 right-3 pointer-events-none">
+                    <span className="flex items-center gap-1.5 bg-black/70 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/10 text-xs text-neutral-200 font-medium">
+                      <Users size={13} className="text-green-400" />
+                      {featuredWorkshop.attendees}
+                    </span>
+                  </div>
+                )}
               </div>
 
               {/* Right Column: Workshop Details */}
@@ -412,43 +381,38 @@ export default function Workshop() {
               className="group rounded-3xl overflow-hidden bg-white/5 border border-white/10 hover:border-orange-400/40 transition-all duration-300 flex flex-col justify-between hover:shadow-2xl hover:shadow-orange-500/5 hover:-translate-y-1"
             >
               <div>
-                {/* 16:9 Thumbnail Container */}
+                {/* 16:9 Direct Video Container (No Image) */}
                 <div
-                  className="relative aspect-video overflow-hidden bg-neutral-900 cursor-pointer"
+                  className="relative aspect-video overflow-hidden bg-black cursor-pointer group/vid"
                   onClick={() => setActiveVideo(ws)}
                 >
-                  <img
-                    src={ws.thumbnail}
-                    alt={ws.title}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 opacity-80 group-hover:opacity-90"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+                  <video
+                    src={`${ws.videoUrl}#t=0.5`}
+                    preload="metadata"
+                    muted
+                    playsInline
+                    className="w-full h-full object-cover group-hover/vid:scale-105 transition-transform duration-500 pointer-events-none"
+                  >
+                    <source src={ws.videoUrl} type="video/mp4" />
+                    <source src={ws.videoUrl} type="video/quicktime" />
+                  </video>
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent pointer-events-none" />
 
                   {/* Play Button Overlay */}
-                  <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                     <div className="w-12 h-12 rounded-full bg-orange-500/90 group-hover:bg-orange-500 flex items-center justify-center text-white shadow-lg group-hover:scale-110 transition-transform">
                       <Play size={20} className="fill-white ml-0.5" />
                     </div>
                   </div>
 
                   {/* Top Badges */}
-                  <div className="absolute top-3 left-3 flex items-center gap-1.5">
+                  <div className="absolute top-3 left-3 flex items-center gap-1.5 pointer-events-none">
                     <span className="px-3 py-1 rounded-full bg-black/60 backdrop-blur-md text-[11px] font-semibold text-neutral-200 border border-white/15">
                       {ws.category}
                     </span>
-                    {ws.videoUrl && (
-                      <span className="px-2 py-0.5 rounded-full bg-emerald-500/80 backdrop-blur-md text-[10px] font-bold text-white uppercase tracking-wider flex items-center gap-1 shadow-sm">
-                        <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
-                        Watch Now
-                      </span>
-                    )}
-                  </div>
-
-                  {/* Bottom Duration Badge */}
-                  <div className="absolute bottom-3 right-3">
-                    <span className="px-2.5 py-1 rounded-full bg-black/70 backdrop-blur-md text-[11px] font-medium text-neutral-300 border border-white/10 flex items-center gap-1">
-                      <Clock size={11} className="text-orange-400" />
-                      {ws.duration}
+                    <span className="px-2 py-0.5 rounded-full bg-emerald-500/80 backdrop-blur-md text-[10px] font-bold text-white uppercase tracking-wider flex items-center gap-1 shadow-sm">
+                      <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
+                      Watch Video
                     </span>
                   </div>
                 </div>
@@ -645,9 +609,11 @@ export default function Workshop() {
                 <p className="text-xs text-neutral-400 font-medium">
                   Speaker: <span className="text-white font-semibold">{activeVideo.speaker}</span> ({activeVideo.speakerRole})
                 </p>
-                <p className="text-xs text-neutral-400 font-medium mt-0.5">
-                  Duration: <span className="text-orange-400 font-semibold">{activeVideo.duration}</span> • {activeVideo.attendees}
-                </p>
+                {activeVideo.attendees && (
+                  <p className="text-xs text-neutral-400 font-medium mt-0.5">
+                    <span className="text-orange-400 font-semibold">{activeVideo.attendees}</span>
+                  </p>
+                )}
               </div>
 
               <div className="flex items-center gap-2 sm:gap-3 shrink-0">
