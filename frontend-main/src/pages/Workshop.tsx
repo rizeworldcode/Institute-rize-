@@ -20,20 +20,20 @@ export interface WorkshopVideo {
 const WORKSHOP_VIDEOS: WorkshopVideo[] = [
   {
     id: "ws-lords",
-    title: "Lords International School × RizeWorld Workshop",
+    title: "Lords International School",
     date: "Lords International School Campus",
     videoUrl: "/video/lords-x-rize.mov",
     featured: true,
   },
   {
     id: "ws-dwps",
-    title: "DWPS Alwar × RizeWorld Workshop",
+    title: "DWPS Alwar",
     date: "DWPS Alwar Campus",
     videoUrl: "/video/rw-ins-workshop.mov",
   },
   {
     id: "ws-sophia",
-    title: "Sophia Public School Alwar × RizeWorld Workshop",
+    title: "Sophia Public School Alwar",
     date: "Sophia Public School Campus",
     videoUrl: "/video/sophia-workshop.mov",
   },
