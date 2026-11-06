@@ -19,7 +19,6 @@ import Reveal from "../components/Reveal";
 export interface WorkshopVideo {
   id: string;
   title: string;
-  category: "AI & Tools" | "Digital Marketing" | "Design & Video";
   date: string;
   videoUrl: string; // Local video file (/video/...)
   featured?: boolean;
@@ -42,7 +41,6 @@ const WORKSHOP_VIDEOS: WorkshopVideo[] = [
   {
     id: "ws-lords",
     title: "Lords International School × RizeWorld Workshop",
-    category: "AI & Tools",
     date: "Lords International School Campus",
     videoUrl: "/video/lords-x-rize.mov",
     featured: true,
@@ -50,14 +48,12 @@ const WORKSHOP_VIDEOS: WorkshopVideo[] = [
   {
     id: "ws-dwps",
     title: "DWPS Alwar × RizeWorld Workshop",
-    category: "Digital Marketing",
     date: "DWPS Alwar Campus",
     videoUrl: "/video/rw-ins-workshop.mov",
   },
   {
     id: "ws-sophia",
     title: "Sophia Public School Alwar × RizeWorld Workshop",
-    category: "Design & Video",
     date: "Sophia Public School Campus",
     videoUrl: "/video/sophia-workshop.mov",
   },
@@ -217,8 +213,6 @@ export default function Workshop() {
                   <div className="flex items-center gap-2 text-xs font-semibold text-neutral-400 mb-3">
                     <Calendar size={14} className="text-orange-400" />
                     <span>{featuredWorkshop.date}</span>
-                    <span>•</span>
-                    <span className="text-orange-400">{featuredWorkshop.category}</span>
                   </div>
 
                   <h3 className="text-2xl sm:text-3xl font-extrabold text-white leading-snug">
@@ -358,9 +352,6 @@ export default function Workshop() {
             {/* Modal Header */}
             <div className="flex items-center justify-between px-4 sm:px-6 py-3 sm:py-4 border-b border-white/10 bg-black/60 shrink-0">
               <div className="flex items-center gap-2 overflow-hidden pr-3">
-                <span className="px-2.5 py-0.5 rounded-md bg-orange-500/20 text-orange-400 text-[11px] sm:text-xs font-bold uppercase shrink-0">
-                  {activeVideo.category}
-                </span>
                 <h3 className="text-sm sm:text-base font-bold text-white truncate">
                   {activeVideo.title}
                 </h3>
