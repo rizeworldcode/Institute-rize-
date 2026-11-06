@@ -63,21 +63,8 @@ const WORKSHOP_VIDEOS: WorkshopVideo[] = [
   },
 ];
 
-const CATEGORIES = [
-  "All",
-  "AI & Tools",
-  "Digital Marketing",
-  "Design & Video",
-] as const;
-
 export default function Workshop() {
-  const [selectedCategory, setSelectedCategory] = useState<string>("All");
   const [activeVideo, setActiveVideo] = useState<WorkshopVideo | null>(null);
-
-  const filteredWorkshops =
-    selectedCategory === "All"
-      ? WORKSHOP_VIDEOS
-      : WORKSHOP_VIDEOS.filter((w) => w.category === selectedCategory);
 
   const featuredWorkshop =
     WORKSHOP_VIDEOS.find((w) => w.featured) || WORKSHOP_VIDEOS[0];
@@ -264,40 +251,20 @@ export default function Workshop() {
         </section>
       )}
 
-      {/* ================= ALL WORKSHOPS ARCHIVE WITH FILTER TABS ================= */}
+      {/* ================= ALL WORKSHOPS ARCHIVE ================= */}
       <section className="py-16 max-w-7xl mx-auto px-6">
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10">
-          <div>
-            <span className="text-xs font-bold tracking-widest text-orange-400 uppercase">
-              Video Library
-            </span>
-            <h2 className="text-3xl sm:text-4xl font-extrabold text-white mt-1">
-              Explore All Workshops
-            </h2>
-          </div>
-
-          {/* Category Filter Pills */}
-          <div className="flex flex-wrap items-center gap-2">
-            {CATEGORIES.map((cat) => (
-              <button
-                key={cat}
-                type="button"
-                onClick={() => setSelectedCategory(cat)}
-                className={`px-4 py-2 rounded-full text-xs sm:text-sm font-semibold transition-all cursor-pointer ${
-                  selectedCategory === cat
-                    ? "bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow-md shadow-orange-500/20"
-                    : "bg-white/5 hover:bg-white/10 text-neutral-400 hover:text-white border border-white/10"
-                }`}
-              >
-                {cat}
-              </button>
-            ))}
-          </div>
+        <div className="mb-10">
+          <span className="text-xs font-bold tracking-widest text-orange-400 uppercase">
+            Video Library
+          </span>
+          <h2 className="text-3xl sm:text-4xl font-extrabold text-white mt-1">
+            Explore All Workshops
+          </h2>
         </div>
 
         {/* Workshops Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {filteredWorkshops.map((ws) => (
+          {WORKSHOP_VIDEOS.map((ws) => (
             <div
               key={ws.id}
               className="group rounded-3xl overflow-hidden bg-white/5 border border-white/10 hover:border-orange-400/40 transition-all duration-300 flex flex-col justify-between hover:shadow-2xl hover:shadow-orange-500/5 hover:-translate-y-1"
