@@ -7,7 +7,6 @@ import {
   Video,
   X,
   ArrowRight,
-  GraduationCap,
   Users,
   Award,
   Zap,
@@ -295,45 +294,6 @@ export default function Workshop() {
               </div>
             </div>
           ))}
-        </div>
-      </section>
-
-      {/* ================= UPCOMING WORKSHOP INVITATION CARD ================= */}
-      <section className="py-20 max-w-7xl mx-auto px-6">
-        <div className="relative rounded-3xl overflow-hidden bg-gradient-to-r from-blue-900/40 via-orange-900/30 to-purple-900/40 border border-white/15 p-8 sm:p-14 text-center">
-          <div className="max-w-3xl mx-auto relative z-10">
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/10 border border-white/15 text-xs font-semibold text-orange-400 mb-6 uppercase tracking-wider">
-              <GraduationCap size={15} />
-              Attend Live & Interactive
-            </div>
-
-            <h2 className="font-display text-3xl sm:text-5xl font-extrabold text-white leading-tight">
-              Want to attend our next live interactive workshop?
-            </h2>
-
-            <p className="mt-5 text-sm sm:text-base text-neutral-300 leading-relaxed max-w-2xl mx-auto">
-              Join our weekend interactive workshops at RizeWorld Institute Alwar campus or attend online live. Ask questions directly to industry mentors and get hands-on experience.
-            </p>
-
-            <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
-              <Link
-                to="/contact"
-                className="px-8 py-4 rounded-full bg-gradient-to-r from-orange-500 to-amber-500 hover:brightness-110 text-white font-bold text-sm tracking-wider uppercase shadow-xl shadow-orange-500/25 transition-all flex items-center gap-2"
-              >
-                <span>Reserve Free Seat</span>
-                <ArrowRight size={16} />
-              </Link>
-
-              <a
-                href="https://wa.me/919636605051?text=Hi%2C%20I%20want%20to%20register%20for%20the%20upcoming%20RizeWorld%20Workshop"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="px-8 py-4 rounded-full bg-white/10 hover:bg-white/20 text-white font-bold text-sm tracking-wider uppercase border border-white/20 transition-all"
-              >
-                WhatsApp Us
-              </a>
-            </div>
-          </div>
         </div>
       </section>
 
