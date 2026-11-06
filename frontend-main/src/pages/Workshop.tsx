@@ -2,7 +2,6 @@ import { useState, useRef } from "react";
 import {
   Play,
   Calendar,
-  Sparkles,
   Video,
   ArrowRight,
 } from "lucide-react";
@@ -114,7 +113,7 @@ export default function Workshop() {
         <div className="max-w-7xl mx-auto px-6 relative z-10 text-center">
           <Reveal>
             <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-xs font-semibold text-orange-400 mb-6 tracking-wide uppercase">
-              <Sparkles size={14} className="text-orange-400" />
+              <Video size={14} className="text-orange-400" />
               Live Workshops & Masterclasses
             </div>
           </Reveal>
