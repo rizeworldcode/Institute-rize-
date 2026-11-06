@@ -202,13 +202,10 @@ export default function Workshop() {
                   </div>
                 )}
 
-                {/* Top Badges */}
-                <div className="absolute top-3 left-3 flex items-center gap-2 pointer-events-none">
+                {/* Top Badge */}
+                <div className="absolute top-3 left-3 pointer-events-none">
                   <span className="px-3 py-1 rounded-full bg-orange-500/90 text-white text-xs font-bold uppercase tracking-wider shadow-md">
                     Featured
-                  </span>
-                  <span className="px-3 py-1 rounded-full bg-black/60 backdrop-blur-md text-neutral-200 text-xs font-medium border border-white/20">
-                    {featuredWorkshop.category}
                   </span>
                 </div>
 
@@ -275,17 +272,6 @@ export default function Workshop() {
                     <div className="w-12 h-12 rounded-full bg-orange-500/90 group-hover:bg-orange-500 flex items-center justify-center text-white shadow-lg group-hover:scale-110 transition-transform">
                       <Play size={20} className="fill-white ml-0.5" />
                     </div>
-                  </div>
-
-                  {/* Top Badges */}
-                  <div className="absolute top-3 left-3 flex items-center gap-1.5 pointer-events-none">
-                    <span className="px-3 py-1 rounded-full bg-black/60 backdrop-blur-md text-[11px] font-semibold text-neutral-200 border border-white/15">
-                      {ws.category}
-                    </span>
-                    <span className="px-2 py-0.5 rounded-full bg-emerald-500/80 backdrop-blur-md text-[10px] font-bold text-white uppercase tracking-wider flex items-center gap-1 shadow-sm">
-                      <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
-                      Watch Video
-                    </span>
                   </div>
                 </div>
 
