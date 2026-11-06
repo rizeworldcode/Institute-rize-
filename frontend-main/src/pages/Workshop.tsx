@@ -19,15 +19,10 @@ import Reveal from "../components/Reveal";
 export interface WorkshopVideo {
   id: string;
   title: string;
-  description: string;
   category: "AI & Tools" | "Digital Marketing" | "Design & Video";
-  speaker: string;
-  speakerRole: string;
   date: string;
   videoUrl: string; // Local video file (/video/...)
   featured?: boolean;
-  attendees?: string;
-  keyTakeaways: string[];
 }
 
 function isVideoFile(url: string): boolean {
@@ -46,55 +41,25 @@ function isVideoFile(url: string): boolean {
 const WORKSHOP_VIDEOS: WorkshopVideo[] = [
   {
     id: "ws-lords",
-    title: "Lords University × RizeWorld: AI & Digital Marketing Masterclass",
-    description:
-      "Exclusive university workshop conducted at Lords University covering AI tool integration, marketing automation, high-converting campaigns, and modern career paths for students.",
+    title: "Lords University × RizeWorld Workshop",
     category: "AI & Tools",
-    speaker: "Devesh Choudhary & Industry Mentors",
-    speakerRole: "Founder & Lead Trainer, RizeWorld Institute",
     date: "Lords University Campus",
     videoUrl: "/video/lords-x-rize.mov",
     featured: true,
-    attendees: "350+ Students & Faculty",
-    keyTakeaways: [
-      "ChatGPT & AI Prompt Engineering for Marketing Campaigns",
-      "Automating Content, Copywriting & Visual Assets at Scale",
-      "Live Industry Case Studies & High-Income Career Roadmaps",
-    ],
   },
   {
     id: "ws-campus",
-    title: "RizeWorld Institute: Hands-on Practical Marketing Workshop",
-    description:
-      "Intensive campus masterclass at RizeWorld Institute Alwar featuring live ad account audits, Google ranking workflows, and client acquisition systems.",
+    title: "RizeWorld Institute Campus Workshop",
     category: "Digital Marketing",
-    speaker: "Devesh Choudhary",
-    speakerRole: "Lead Performance Marketer & Trainer",
     date: "RizeWorld Alwar Campus",
     videoUrl: "/video/rw-ins-workshop.mov",
-    attendees: "150+ Attendees",
-    keyTakeaways: [
-      "Setting Up Profitable Meta & Google Ad Funnels Live",
-      "Local Map Pack Domination & Core Technical SEO",
-      "High-Ticket Client Closing & Freelance Agency Blueprints",
-    ],
   },
   {
     id: "ws-sophia",
-    title: "Sophia College × RizeWorld: Visual Storytelling & Design Clinic",
-    description:
-      "Special creative workshop hosted at Sophia College covering commercial graphic design, branding principles, video editing workflows, and portfolio creation.",
+    title: "Sophia College × RizeWorld Workshop",
     category: "Design & Video",
-    speaker: "Mohit Srivastava & Senior Faculty",
-    speakerRole: "Creative Director & Lead Faculty",
     date: "Sophia College Campus",
     videoUrl: "/video/sophia-workshop.mov",
-    attendees: "200+ Students",
-    keyTakeaways: [
-      "Color Psychology, Typography & Brand Identity Systems",
-      "Adobe Creative Cloud & Generative AI Design Hacks",
-      "Building a High-Impact Freelance Design Portfolio",
-    ],
   },
 ];
 
@@ -260,18 +225,10 @@ export default function Workshop() {
                   </span>
                 </div>
 
-                {featuredWorkshop.attendees && (
-                  <div className="absolute bottom-3 right-3 pointer-events-none">
-                    <span className="flex items-center gap-1.5 bg-black/70 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/10 text-xs text-neutral-200 font-medium">
-                      <Users size={13} className="text-green-400" />
-                      {featuredWorkshop.attendees}
-                    </span>
-                  </div>
-                )}
               </div>
 
-              {/* Right Column: Workshop Details */}
-              <div className="lg:col-span-5 flex flex-col justify-between">
+              {/* Right Column: Workshop Details (Clean: No Speaker Box, No Long Content) */}
+              <div className="lg:col-span-5 flex flex-col justify-center gap-6">
                 <div>
                   <div className="flex items-center gap-2 text-xs font-semibold text-neutral-400 mb-3">
                     <Calendar size={14} className="text-orange-400" />
@@ -283,44 +240,9 @@ export default function Workshop() {
                   <h3 className="text-2xl sm:text-3xl font-extrabold text-white leading-snug">
                     {featuredWorkshop.title}
                   </h3>
-
-                  <p className="mt-4 text-sm sm:text-base text-neutral-300 leading-relaxed">
-                    {featuredWorkshop.description}
-                  </p>
-
-                  {/* Speaker Info */}
-                  <div className="mt-6 p-4 rounded-2xl bg-white/5 border border-white/10 flex items-center gap-3.5">
-                    <div className="w-11 h-11 rounded-full bg-orange-500/20 border border-orange-400/40 flex items-center justify-center text-orange-400 font-bold text-sm">
-                      {featuredWorkshop.speaker.slice(0, 2).toUpperCase()}
-                    </div>
-                    <div>
-                      <h4 className="text-sm font-bold text-white">
-                        {featuredWorkshop.speaker}
-                      </h4>
-                      <p className="text-xs text-neutral-400">
-                        {featuredWorkshop.speakerRole}
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Key Takeaways */}
-                  <div className="mt-6 space-y-2">
-                    <span className="text-xs font-bold uppercase tracking-wider text-neutral-400 block mb-2">
-                      Key Takeaways:
-                    </span>
-                    {featuredWorkshop.keyTakeaways.map((point, pIdx) => (
-                      <div
-                        key={pIdx}
-                        className="flex items-start gap-2 text-xs sm:text-sm text-neutral-300"
-                      >
-                        <span className="text-orange-400 font-bold mt-0.5">✓</span>
-                        <span>{point}</span>
-                      </div>
-                    ))}
-                  </div>
                 </div>
 
-                <div className="mt-8 pt-6 border-t border-white/10 flex flex-wrap items-center gap-4">
+                <div className="pt-6 border-t border-white/10 flex flex-wrap items-center gap-4">
                   <button
                     type="button"
                     onClick={() => setActiveVideo(featuredWorkshop)}
@@ -417,22 +339,16 @@ export default function Workshop() {
                   </div>
                 </div>
 
-                {/* Card Content */}
+                {/* Card Content (Clean: Only Title & Date, No Speaker, No Description) */}
                 <div className="p-6">
                   <div className="flex items-center gap-2 text-xs font-medium text-neutral-400 mb-2.5">
                     <Calendar size={13} className="text-orange-400" />
                     <span>{ws.date}</span>
-                    <span>•</span>
-                    <span className="text-neutral-300">{ws.speaker}</span>
                   </div>
 
-                  <h3 className="text-lg font-bold text-white group-hover:text-orange-300 transition-colors line-clamp-2 leading-snug">
+                  <h3 className="text-lg font-bold text-white group-hover:text-orange-300 transition-colors leading-snug">
                     {ws.title}
                   </h3>
-
-                  <p className="mt-2.5 text-xs sm:text-sm text-neutral-400 line-clamp-2 leading-relaxed">
-                    {ws.description}
-                  </p>
                 </div>
               </div>
 
@@ -446,10 +362,6 @@ export default function Workshop() {
                   <span>Watch Video</span>
                   <ArrowRight size={14} />
                 </button>
-
-                <span className="text-[11px] text-neutral-500 font-medium">
-                  {ws.attendees}
-                </span>
               </div>
             </div>
           ))}
@@ -606,14 +518,12 @@ export default function Workshop() {
             {/* Modal Footer */}
             <div className="p-4 sm:p-6 bg-neutral-900 border-t border-white/10 flex flex-col sm:flex-row sm:items-center justify-between gap-3 overflow-y-auto">
               <div>
-                <p className="text-xs text-neutral-400 font-medium">
-                  Speaker: <span className="text-white font-semibold">{activeVideo.speaker}</span> ({activeVideo.speakerRole})
+                <p className="text-sm font-bold text-white">
+                  {activeVideo.title}
                 </p>
-                {activeVideo.attendees && (
-                  <p className="text-xs text-neutral-400 font-medium mt-0.5">
-                    <span className="text-orange-400 font-semibold">{activeVideo.attendees}</span>
-                  </p>
-                )}
+                <p className="text-xs text-neutral-400 mt-0.5">
+                  {activeVideo.date}
+                </p>
               </div>
 
               <div className="flex items-center gap-2 sm:gap-3 shrink-0">
