@@ -201,13 +201,13 @@ _${form.message || 'No additional requirements specified.'}_
             </div>
           </Reveal>
 
-          {/* Framer-Style Candidate Cards Grid - Equal Size for All */}
+          {/* Framer-Style Candidate Cards - Exact Original Size */}
           <Reveal delay={0.15}>
-            <div className="pt-2 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 items-stretch">
+            <div className="pt-2 flex flex-wrap gap-8 items-center">
               {CANDIDATES.map((candidate) => (
                 <div
                   key={candidate.id}
-                  className="group relative w-full h-[470px] sm:h-[495px] rounded-[16px] overflow-hidden cursor-pointer bg-neutral-900 shadow-2xl transition-all duration-500 hover:shadow-[0_25px_60px_rgba(0,0,0,0.35)] flex flex-col justify-end p-3 select-none"
+                  className="group relative w-[320px] sm:w-[373px] h-[460px] sm:h-[497px] rounded-[16px] overflow-hidden cursor-pointer bg-neutral-900 shadow-2xl transition-all duration-500 hover:shadow-[0_25px_60px_rgba(0,0,0,0.35)] flex flex-col justify-end p-3 select-none"
                   onClick={() => handleSelectCandidate(candidate.name, candidate.role)}
                 >
                   {/* Subtle Background Glow */}
