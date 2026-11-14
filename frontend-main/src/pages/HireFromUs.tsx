@@ -22,11 +22,52 @@ const skillHighlights = [
   { title: "Tech Skills", skills: ["WordPress", "Webflow", "HTML/CSS", "Landing Pages", "E-commerce"] },
 ];
 
+export interface Candidate {
+  id: string;
+  name: string;
+  role: string;
+  image: string;
+  imageFit?: string;
+}
+
+export const CANDIDATES: Candidate[] = [
+  {
+    id: "punit",
+    name: "Punit Sharma",
+    role: "Graphic Designer",
+    image: "/student/punit.png",
+    imageFit: "object-contain object-bottom",
+  },
+  {
+    id: "pitanshi",
+    name: "Pitanshi",
+    role: "Digital Marketer",
+    image: "/student/pitanshi.webp",
+    imageFit: "object-cover object-center",
+  },
+  {
+    id: "sneha",
+    name: "Sneha",
+    role: "Performance Marketer",
+    image: "/student/sneha.webp",
+    imageFit: "object-cover object-center",
+  },
+  {
+    id: "lovely",
+    name: "Lovely",
+    role: "Social Media Specialist",
+    image: "/student/lovely.jpeg",
+    imageFit: "object-cover object-top",
+  },
+];
+
 export default function HireFromUs() {
   const [form, setForm] = useState({ name: "", company: "", email: "", phone: "", message: "" });
+  const [selectedCandidate, setSelectedCandidate] = useState<{ name: string; role: string } | null>(null);
   const [sent, setSent] = useState(false);
 
   const handleSelectCandidate = (candidateName: string, candidateRole: string) => {
+    setSelectedCandidate({ name: candidateName, role: candidateRole });
     setForm((prev) => ({
       ...prev,
       message: `I am interested in hiring ${candidateName} (${candidateRole}). Please share portfolio and availability.`,
@@ -90,6 +131,7 @@ _${form.message || 'No additional requirements specified.'}_
     setSent(true);
     setTimeout(() => setSent(false), 4000);
     setForm({ name: "", company: "", email: "", phone: "", message: "" });
+    setSelectedCandidate(null);
   };
 
   return (
@@ -159,46 +201,48 @@ _${form.message || 'No additional requirements specified.'}_
             </div>
           </Reveal>
 
-          {/* Framer-Style Candidate Card Directly Below Text */}
+          {/* Framer-Style Candidate Cards Grid - Equal Size for All */}
           <Reveal delay={0.15}>
-            <div className="pt-2 flex flex-wrap gap-8 items-center">
-              {/* Framer Team Card Hover Component */}
-              <div
-                className="group relative w-[320px] sm:w-[373px] h-[460px] sm:h-[497px] rounded-[16px] overflow-hidden cursor-pointer bg-neutral-900 shadow-2xl transition-all duration-500 hover:shadow-[0_25px_60px_rgba(0,0,0,0.35)] flex flex-col justify-end p-3 select-none"
-                onClick={() => handleSelectCandidate("Punit Sharma", "Graphic Designer")}
-              >
-                {/* Subtle Background Glow */}
-                <div className="absolute inset-0 bg-radial from-neutral-800/60 via-neutral-900 to-black pointer-events-none" />
+            <div className="pt-2 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 items-stretch">
+              {CANDIDATES.map((candidate) => (
+                <div
+                  key={candidate.id}
+                  className="group relative w-full h-[470px] sm:h-[495px] rounded-[16px] overflow-hidden cursor-pointer bg-neutral-900 shadow-2xl transition-all duration-500 hover:shadow-[0_25px_60px_rgba(0,0,0,0.35)] flex flex-col justify-end p-3 select-none"
+                  onClick={() => handleSelectCandidate(candidate.name, candidate.role)}
+                >
+                  {/* Subtle Background Glow */}
+                  <div className="absolute inset-0 bg-radial from-neutral-800/60 via-neutral-900 to-black pointer-events-none" />
 
-                {/* Member Photo */}
-                <img
-                  src="/student/punit.png"
-                  alt="Punit Sharma - Graphic Designer"
-                  className="absolute inset-0 w-full h-full object-contain object-bottom transition-transform duration-700 ease-out group-hover:scale-105"
-                />
+                  {/* Member Photo */}
+                  <img
+                    src={candidate.image}
+                    alt={`${candidate.name} - ${candidate.role}`}
+                    className={`absolute inset-0 w-full h-full ${candidate.imageFit || "object-cover object-center"} transition-transform duration-700 ease-out group-hover:scale-105`}
+                  />
 
-                {/* Masking Gradient (Framer exact gradient) */}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-transparent pointer-events-none group-hover:from-black/95 transition-all duration-500" />
+                  {/* Masking Gradient (Framer exact gradient) */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-transparent pointer-events-none group-hover:from-black/95 transition-all duration-500" />
 
-                {/* Information Overlay Box */}
-                <div className="relative z-10 w-full backdrop-blur-md bg-[rgba(52,59,53,0.35)] border border-white/20 rounded-[12px] p-4 sm:p-5 flex items-center justify-between gap-3 transition-all duration-500 group-hover:bg-[rgba(52,59,53,0.6)] group-hover:border-white/30">
-                  <div className="flex flex-col items-start min-w-0">
-                    {/* Role Pill */}
-                    <span className="inline-block px-3 py-1 rounded-full border border-white/40 text-[11px] sm:text-xs font-medium text-white tracking-wide uppercase mb-1.5 backdrop-blur-sm">
-                      Graphic Designer
-                    </span>
-                    {/* Name */}
-                    <h3 className="font-display text-xl sm:text-2xl font-bold text-white tracking-tight truncate">
-                      Punit Sharma
-                    </h3>
-                  </div>
+                  {/* Information Overlay Box */}
+                  <div className="relative z-10 w-full backdrop-blur-md bg-[rgba(52,59,53,0.35)] border border-white/20 rounded-[12px] p-4 sm:p-5 flex items-center justify-between gap-3 transition-all duration-500 group-hover:bg-[rgba(52,59,53,0.6)] group-hover:border-white/30">
+                    <div className="flex flex-col items-start min-w-0">
+                      {/* Role Pill */}
+                      <span className="inline-block px-3 py-1 rounded-full border border-white/40 text-[11px] sm:text-xs font-medium text-white tracking-wide uppercase mb-1.5 backdrop-blur-sm truncate max-w-full">
+                        {candidate.role}
+                      </span>
+                      {/* Name */}
+                      <h3 className="font-display text-xl sm:text-2xl font-bold text-white tracking-tight truncate w-full">
+                        {candidate.name}
+                      </h3>
+                    </div>
 
-                  {/* Framer Icon / Arrow */}
-                  <div className="w-10 h-10 rounded-full border border-white/30 bg-white/10 flex items-center justify-center text-white shrink-0 transition-transform duration-500 group-hover:rotate-45 group-hover:bg-white group-hover:text-black shadow-md">
-                    <ArrowUpRight size={20} />
+                    {/* Framer Icon / Arrow */}
+                    <div className="w-10 h-10 rounded-full border border-white/30 bg-white/10 flex items-center justify-center text-white shrink-0 transition-transform duration-500 group-hover:rotate-45 group-hover:bg-white group-hover:text-black shadow-md">
+                      <ArrowUpRight size={20} />
+                    </div>
                   </div>
                 </div>
-              </div>
+              ))}
             </div>
           </Reveal>
         </div>
@@ -344,12 +388,15 @@ _${form.message || 'No additional requirements specified.'}_
           <Reveal delay={0.2}>
             <form onSubmit={submit} className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-8 shadow-luxury">
               <h3 className="font-display text-2xl font-bold text-white mb-6">Send inquiry</h3>
-              {form.message.includes("Punit Sharma") && (
+              {selectedCandidate && (
                 <div className="mb-4 flex items-center justify-between px-4 py-2.5 rounded-xl bg-[#ff6b1a]/15 border border-[#ff6b1a]/30 text-xs text-orange-400">
-                  <span className="font-medium"> Selected Candidate: <strong>Punit Sharma (Graphic Designer)</strong></span>
+                  <span className="font-medium"> Selected Candidate: <strong>{selectedCandidate.name} ({selectedCandidate.role})</strong></span>
                   <button
                     type="button"
-                    onClick={() => setForm((prev) => ({ ...prev, message: "" }))}
+                    onClick={() => {
+                      setSelectedCandidate(null);
+                      setForm((prev) => ({ ...prev, message: "" }));
+                    }}
                     className="text-neutral-400 hover:text-white underline cursor-pointer text-[11px]"
                   >
                     Clear
