@@ -4,9 +4,6 @@ import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 import WhatsAppWidget from "./components/WhatsAppWidget";
 import CallWidget from "./components/CallWidget";
-import FestiveClickEffect from "./components/FestiveClickEffect";
-import DiwaliPopup from "./components/DiwaliPopup";
-import DiwaliLighting from "./components/DiwaliLighting";
 
 // Lazy load pages
 const Home = lazy(() => import("./pages/Home"));
@@ -59,9 +56,6 @@ const LoadingFallback = () => (
 function MainLayout() {
   return (
     <div className="min-h-screen bg-white overflow-x-hidden">
-      <FestiveClickEffect />
-      <DiwaliLighting />
-      <DiwaliPopup />
       <Navbar />
       <Suspense fallback={<LoadingFallback />}>
         <Routes>
