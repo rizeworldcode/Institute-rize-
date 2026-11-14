@@ -42,22 +42,22 @@ export const CANDIDATES: Candidate[] = [
     id: "pitanshi",
     name: "Pitanshi",
     role: "Digital Marketer",
-    image: "/student/pitanshi.webp",
-    imageFit: "object-cover object-center",
+    image: "/student/pitanshi.png",
+    imageFit: "object-contain object-bottom",
   },
   {
     id: "sneha",
     name: "Sneha",
     role: "Performance Marketer",
-    image: "/student/sneha.webp",
-    imageFit: "object-cover object-center",
+    image: "/student/sneha.png",
+    imageFit: "object-contain object-bottom",
   },
   {
     id: "lovely",
     name: "Lovely",
     role: "Social Media Specialist",
-    image: "/student/lovely.jpeg",
-    imageFit: "object-cover object-top",
+    image: "/student/lovely.png",
+    imageFit: "object-contain object-bottom",
   },
 ];
 
