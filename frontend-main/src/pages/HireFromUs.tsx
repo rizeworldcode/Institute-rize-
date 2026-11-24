@@ -62,7 +62,7 @@ export const CANDIDATES: Candidate[] = [
   {
     id: "niharika",
     name: "Niharika Yadav",
-    role: "Graphic Designer",
+    role: "SEO Specialist",
     image: "/student/niharika.png",
     imageFit: "object-contain object-bottom",
   },
