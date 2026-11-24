@@ -28,6 +28,7 @@ export interface Candidate {
   role: string;
   image: string;
   imageFit?: string;
+  imageClassName?: string;
 }
 
 export const CANDIDATES: Candidate[] = [
@@ -63,15 +64,16 @@ export const CANDIDATES: Candidate[] = [
     id: "niharika",
     name: "Niharika Yadav",
     role: "SEO",
-    image: "/student/niharika.png",
+    image: "/student/niharika.webp",
     imageFit: "object-contain object-bottom",
   },
   {
     id: "ishika",
     name: "Ishika Sachdeva",
     role: "SEO",
-    image: "/student/ishika.png",
+    image: "/student/ishika.webp",
     imageFit: "object-contain object-bottom",
+    imageClassName: "translate-y-4 sm:translate-y-6",
   },
 ];
 
@@ -231,7 +233,7 @@ _${form.message || 'No additional requirements specified.'}_
                   <img
                     src={candidate.image}
                     alt={`${candidate.name} - ${candidate.role}`}
-                    className={`absolute inset-0 w-full h-full ${candidate.imageFit || "object-cover object-center"} transition-transform duration-700 ease-out group-hover:scale-105`}
+                    className={`absolute inset-0 w-full h-full ${candidate.imageFit || "object-cover object-center"} ${candidate.imageClassName || ""} transition-transform duration-700 ease-out group-hover:scale-105`}
                   />
 
                   {/* Masking Gradient (Framer exact gradient) */}
