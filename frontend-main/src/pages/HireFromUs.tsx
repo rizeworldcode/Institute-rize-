@@ -59,6 +59,13 @@ export const CANDIDATES: Candidate[] = [
     image: "/student/lovely.png",
     imageFit: "object-contain object-bottom",
   },
+  {
+    id: "niharika",
+    name: "Niharika Yadav",
+    role: "Graphic Designer",
+    image: "/student/niharika.png",
+    imageFit: "object-contain object-bottom",
+  },
 ];
 
 export default function HireFromUs() {
