@@ -3789,7 +3789,6 @@ export const posts: BlogPost[] = [
       "RizeWorld Institute"
     ],
     content: `
-      <h2>Google Explains How to Track Search Traffic in Analytics</h2>
       <p>Have you ever checked your website traffic in Google Analytics and wondered where all those visitors are coming from? Sometimes Google Search Console shows clicks, but Google Analytics shows a different number of visitors. This can be confusing, especially when you are managing a website and trying to understand whether your <a href="/seo" class="blog-link">SEO work</a> is bringing real results.</p>
 
       <p>Google has published a comprehensive help page on its Search Central documentation explaining how website owners can identify traffic coming from Google Search. It explains which referrer values Google sends when someone clicks a search result and visits another website.</p>
