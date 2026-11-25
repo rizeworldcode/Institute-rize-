@@ -1,5 +1,5 @@
 import React, { useState, useRef } from "react";
-import { X, Printer } from "lucide-react";
+import { X, Printer, Globe, Phone, Mail } from "lucide-react";
 import { Student } from "../types";
 
 interface StudentInvoiceModalProps {
@@ -399,10 +399,10 @@ export function StudentInvoiceModal({ student, onClose, initialPaymentIndex }: S
                   <div class="company-title">RIZE WORLD INSTITUTE OF<br/>AI & DIGITAL MARKETING</div>
                   <div class="company-line"><strong>Address :</strong> <a href="https://maps.google.com/?q=C197,+near+Telco+Circle,+UIT+colony,+Shalimar+Nagar,+Alwar,+Rajasthan+301001" target="_blank" style="color: inherit; text-decoration: none;">C197, near Telco Circle, UIT colony,<br/>Shalimar Nagar, Alwar, Rajasthan 301001</a></div>
                   <div class="company-contact">
-                    <span>🌐 <a href="https://rizeworldinstitute.in/" target="_blank" style="color: inherit; text-decoration: none;">www.rizeworldinstitute.in</a></span>
-                    <span style="margin-left: 14px;">📞 <a href="tel:+918302277092" style="color: inherit; text-decoration: none;">+91 8302277092</a></span>
+                    <span><svg style="display:inline-block; vertical-align:-1.5px; width:12px; height:12px; margin-right:3px;" viewBox="0 0 24 24" fill="none" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg><a href="https://rizeworldinstitute.in/" target="_blank" style="color: inherit; text-decoration: none;">www.rizeworldinstitute.in</a></span>
+                    <span style="margin-left: 14px;"><svg style="display:inline-block; vertical-align:-1.5px; width:12px; height:12px; margin-right:3px;" viewBox="0 0 24 24" fill="none" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg><a href="tel:+918302277092" style="color: inherit; text-decoration: none;">+91 8302277092</a></span>
                   </div>
-                  <div class="company-line" style="margin-top: 2px;">✉️ hro@rizeworld.in</div>
+                  <div class="company-line" style="margin-top: 2px;"><svg style="display:inline-block; vertical-align:-1.5px; width:12px; height:12px; margin-right:3px;" viewBox="0 0 24 24" fill="none" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>hro@rizeworld.in</div>
                 </div>
               </div>
 
@@ -621,25 +621,28 @@ export function StudentInvoiceModal({ student, onClose, initialPaymentIndex }: S
                       Shalimar Nagar, Alwar, Rajasthan 301001
                     </a>
                   </div>
-                  <div className="mt-1 flex items-center justify-end gap-3 text-neutral-800">
+                  <div className="mt-1 flex items-center justify-end gap-3 text-black">
                     <a 
                       href="https://rizeworldinstitute.in/" 
                       target="_blank" 
                       rel="noreferrer"
-                      className="hover:underline flex items-center gap-1 text-black"
+                      className="hover:underline flex items-center gap-1.5 text-black"
                     >
-                      <span>🌐</span>
+                      <Globe size={12} className="text-black shrink-0" />
                       <span>www.rizeworldinstitute.in</span>
                     </a>
                     <a 
                       href="tel:+918302277092" 
-                      className="hover:underline flex items-center gap-1 text-black"
+                      className="hover:underline flex items-center gap-1.5 text-black"
                     >
-                      <span>📞</span>
+                      <Phone size={12} className="text-black shrink-0" />
                       <span>+91 8302277092</span>
                     </a>
                   </div>
-                  <div className="mt-0.5 text-neutral-800">✉️ hro@rizeworld.in</div>
+                  <div className="mt-0.5 flex items-center justify-end gap-1.5 text-black">
+                    <Mail size={12} className="text-black shrink-0" />
+                    <span>hro@rizeworld.in</span>
+                  </div>
                 </div>
               </div>
 
