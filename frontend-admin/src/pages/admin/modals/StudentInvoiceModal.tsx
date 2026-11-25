@@ -245,54 +245,59 @@ export function StudentInvoiceModal({ student, onClose, initialPaymentIndex }: S
               margin-bottom: 40px;
             }
             .logo-img {
-              height: 46px;
+              height: 48px;
               width: auto;
-              max-width: 150px;
+              max-width: 160px;
               object-fit: contain;
               object-position: left;
+              filter: grayscale(100%) contrast(140%);
+              -webkit-filter: grayscale(100%) contrast(140%);
             }
             .invoice-title {
-              font-size: 42px;
-              font-weight: 800;
-              color: #0f172a;
-              letter-spacing: -0.5px;
+              font-size: 40px;
+              font-weight: 900;
+              color: #000000;
+              letter-spacing: 1px;
+              text-transform: uppercase;
             }
             .invoice-date {
-              font-size: 16px;
+              font-size: 15px;
               font-weight: 600;
-              color: #1e293b;
+              color: #000000;
               text-align: right;
             }
             .billed-to-section {
-              margin-bottom: 42px;
+              margin-bottom: 38px;
               font-size: 15px;
               line-height: 1.5;
             }
             .billed-to-label {
-              color: #0f172a;
-              font-weight: 700;
+              color: #000000;
+              font-weight: 800;
               display: inline-block;
               width: 105px;
               vertical-align: top;
-              font-size: 16px;
+              font-size: 15px;
+              text-transform: uppercase;
+              letter-spacing: 0.5px;
             }
             .billed-to-content {
               display: inline-block;
               vertical-align: top;
             }
             .student-name {
-              font-size: 21px;
-              font-weight: 700;
-              color: #0f172a;
+              font-size: 20px;
+              font-weight: 800;
+              color: #000000;
               margin-bottom: 4px;
             }
             .student-phone {
-              color: #334155;
+              color: #333333;
               margin-bottom: 4px;
               font-size: 15px;
             }
             .student-address {
-              color: #334155;
+              color: #333333;
               font-size: 15px;
               max-width: 420px;
               word-break: break-word;
@@ -300,99 +305,106 @@ export function StudentInvoiceModal({ student, onClose, initialPaymentIndex }: S
             .invoice-table {
               width: 100%;
               border-collapse: collapse;
-              margin-bottom: 42px;
+              margin-bottom: 36px;
             }
             .invoice-table th {
-              font-size: 16px;
-              font-weight: 700;
-              color: #0f172a;
-              padding: 14px 10px;
-              border-bottom: 2.5px solid #0f172a;
+              font-size: 14px;
+              font-weight: 800;
+              color: #000000;
+              padding: 12px 10px;
+              border-top: 2px solid #000000;
+              border-bottom: 2px solid #000000;
               text-align: left;
+              text-transform: uppercase;
+              letter-spacing: 0.5px;
+              background-color: #f8fafc;
             }
             .invoice-table th.center { text-align: center; }
             .invoice-table th.right { text-align: right; }
             .invoice-table td {
-              font-size: 16px;
-              color: #1e293b;
-              padding: 22px 10px;
-              border-bottom: 2.5px solid #0f172a;
+              font-size: 15px;
+              color: #000000;
+              padding: 18px 10px;
+              border-bottom: 1px solid #cbd5e1;
             }
             .invoice-table td.center { text-align: center; }
-            .invoice-table td.right { text-align: right; font-weight: 700; font-size: 18px; }
+            .invoice-table td.right { text-align: right; font-weight: 700; font-size: 17px; }
             .course-name {
               font-weight: 700;
-              font-size: 18px;
-              color: #0f172a;
+              font-size: 17px;
+              color: #000000;
             }
             .course-joining {
-              font-size: 14px;
-              color: #64748b;
+              font-size: 13px;
+              color: #555555;
               margin-top: 5px;
               font-weight: 500;
             }
             .summary-container {
               display: flex;
               justify-content: flex-end;
-              margin-top: 36px;
+              margin-top: 30px;
               margin-bottom: auto;
             }
-            .summary-boxes {
-              width: 350px;
-              display: flex;
-              flex-direction: column;
-              gap: 14px;
+            .summary-table {
+              width: 340px;
+              border-collapse: collapse;
+              border: 1.5px solid #000000;
+              background: #ffffff;
             }
-            .summary-box-dark {
-              background-color: #0f172a !important;
-              color: #ffffff !important;
-              border-radius: 16px;
-              padding: 14px 22px;
-              display: flex;
-              justify-content: space-between;
-              align-items: center;
-              font-weight: 700;
-              font-size: 16px;
-              -webkit-print-color-adjust: exact !important;
-              print-color-adjust: exact !important;
+            .summary-table td {
+              padding: 10px 16px;
+              font-size: 15px;
+              border-bottom: 1px solid #e2e8f0;
             }
-            .summary-box-gray {
-              background-color: #f1f5f9 !important;
-              color: #0f172a !important;
-              border: 1.5px solid #cbd5e1 !important;
-              border-radius: 16px;
-              padding: 14px 22px;
-              display: flex;
-              justify-content: space-between;
-              align-items: center;
+            .summary-table .sum-label {
+              font-weight: 600;
+              color: #1e293b;
+              text-align: left;
+            }
+            .summary-table .sum-val {
               font-weight: 700;
+              color: #000000;
+              text-align: right;
               font-size: 16px;
-              -webkit-print-color-adjust: exact !important;
-              print-color-adjust: exact !important;
+            }
+            .summary-table tr.balance-row td {
+              border-top: 2px solid #000000;
+              border-bottom: none;
+              background-color: #f1f5f9;
+              font-weight: 800;
+              font-size: 16px;
+            }
+            .summary-table tr.balance-row .sum-val {
+              font-weight: 800;
+              font-size: 17px;
             }
             .footer {
               margin-top: auto;
               display: flex;
               justify-content: space-between;
               align-items: flex-end;
-              padding-top: 24px;
-              border-top: 1.5px solid #e2e8f0;
+              padding-top: 22px;
+              border-top: 2px solid #000000;
             }
             .payment-info-title {
-              color: #0f172a;
-              font-weight: 700;
-              font-size: 16px;
+              color: #000000;
+              font-weight: 800;
+              font-size: 15px;
+              text-transform: uppercase;
+              letter-spacing: 0.5px;
               margin-bottom: 6px;
             }
             .payment-info-institute {
               font-size: 14px;
               font-weight: 700;
-              color: #0f172a;
+              color: #000000;
               margin-bottom: 4px;
             }
             .payment-info-method {
               font-size: 14px;
               color: #334155;
+              line-height: 1.5;
             }
             .signatory-container {
               display: flex;
@@ -401,18 +413,26 @@ export function StudentInvoiceModal({ student, onClose, initialPaymentIndex }: S
               text-align: right;
             }
             .signature-img {
-              width: 160px;
+              width: 165px;
               height: auto;
-              max-height: 58px;
+              max-height: 60px;
               object-fit: contain;
               margin-bottom: 3px;
+              filter: grayscale(100%);
+            }
+            .signatory-line {
+              border-top: 1.5px solid #000000;
+              width: 175px;
+              margin-bottom: 4px;
             }
             .signatory-label {
-              color: #0f172a;
-              font-size: 13px;
-              font-weight: 700;
+              color: #000000;
+              font-size: 12px;
+              font-weight: 800;
               letter-spacing: 0.5px;
               text-transform: uppercase;
+              width: 175px;
+              text-align: center;
             }
           </style>
         </head>
@@ -451,28 +471,30 @@ export function StudentInvoiceModal({ student, onClose, initialPaymentIndex }: S
                     </td>
                     <td class="center">${duration}</td>
                     <td class="center">1</td>
-                    <td class="right">${totalFee}</td>
+                    <td class="right">₹${totalFee}</td>
                   </tr>
                 </tbody>
               </table>
 
               <div class="summary-container">
-                <div class="summary-boxes">
-                  <div class="summary-box-dark">
-                    <span>Total</span>
-                    <span>${totalFee}</span>
-                  </div>
-                  ${displayedPayments.map((p, idx) => `
-                    <div class="summary-box-dark">
-                      <span>${getInstallmentLabel(idx + 1)}</span>
-                      <span>${p.amount}</span>
-                    </div>
-                  `).join("")}
-                  <div class="summary-box-gray">
-                    <span>Balance Due</span>
-                    <span>${balanceDue}</span>
-                  </div>
-                </div>
+                <table class="summary-table">
+                  <tbody>
+                    <tr>
+                      <td class="sum-label">Total Course Fee</td>
+                      <td class="sum-val">₹${totalFee}</td>
+                    </tr>
+                    ${displayedPayments.map((p, idx) => `
+                      <tr>
+                        <td class="sum-label">${getInstallmentLabel(idx + 1)}</td>
+                        <td class="sum-val">₹${p.amount}</td>
+                      </tr>
+                    `).join("")}
+                    <tr class="balance-row">
+                      <td class="sum-label">Balance Due</td>
+                      <td class="sum-val">₹${balanceDue}</td>
+                    </tr>
+                  </tbody>
+                </table>
               </div>
             </div>
 
@@ -487,6 +509,7 @@ export function StudentInvoiceModal({ student, onClose, initialPaymentIndex }: S
               </div>
               <div class="signatory-container">
                 <img class="signature-img" src="/bhavik_signature.png" alt="Bhavik Joshi" />
+                <div class="signatory-line"></div>
                 <div class="signatory-label">Authorised Signatory</div>
               </div>
             </div>
@@ -564,7 +587,7 @@ export function StudentInvoiceModal({ student, onClose, initialPaymentIndex }: S
                   <img 
                     src="/logo/RIZE_LOGO_CROPPED.png" 
                     alt="Rizeworld Institute of AI & Digital Marketing" 
-                    className="h-9 sm:h-11 w-auto max-w-[140px] object-contain object-left"
+                    className="h-9 sm:h-11 w-auto max-w-[140px] object-contain object-left filter grayscale contrast-125"
                   />
                 </div>
                 <div className="w-1/3 text-center">
@@ -608,50 +631,45 @@ export function StudentInvoiceModal({ student, onClose, initialPaymentIndex }: S
                       </td>
                       <td className="py-5 px-2 text-center text-neutral-800 font-medium">{duration}</td>
                       <td className="py-5 px-2 text-center text-neutral-800 font-medium">1</td>
-                      <td className="py-5 px-2 text-right font-bold text-neutral-900 text-base sm:text-lg">{totalFee}</td>
+                      <td className="py-5 px-2 text-right font-bold text-neutral-900 text-base sm:text-lg">₹{totalFee}</td>
                     </tr>
                   </tbody>
                 </table>
               </div>
 
-              {/* Summary Pill Boxes (Aligned Right) */}
+              {/* Summary Table (Aligned Right) */}
               <div className="flex justify-end mt-8 sm:mt-12 mb-auto">
-                <div className="w-full max-w-[320px] sm:max-w-[350px] space-y-3 sm:space-y-3.5">
-                  {/* Total Box */}
-                  <div className="bg-neutral-900 text-white rounded-2xl px-6 py-3.5 sm:py-4 flex items-center justify-between font-bold text-sm sm:text-base shadow-xs">
-                    <span>Total</span>
-                    <span>{totalFee}</span>
+                <div className="w-full max-w-[320px] sm:max-w-[340px] border-[1.5px] border-black rounded-lg overflow-hidden bg-white shadow-2xs">
+                  <div className="flex justify-between items-center px-4 py-3 border-b border-neutral-200 text-sm sm:text-base">
+                    <span className="font-semibold text-neutral-800">Total Course Fee</span>
+                    <span className="font-bold text-black">₹{totalFee}</span>
                   </div>
-
-                  {/* All Paid Installment Boxes */}
                   {displayedPayments.map((p, idx) => (
                     <div 
                       key={idx} 
-                      className="bg-neutral-900 text-white rounded-2xl px-6 py-3.5 sm:py-4 flex items-center justify-between font-bold text-sm sm:text-base shadow-xs"
+                      className="flex justify-between items-center px-4 py-3 border-b border-neutral-200 text-sm sm:text-base"
                     >
-                      <span>{getInstallmentLabel(idx + 1)}</span>
-                      <span>{p.amount}</span>
+                      <span className="font-semibold text-neutral-800">{getInstallmentLabel(idx + 1)}</span>
+                      <span className="font-bold text-black">₹{p.amount}</span>
                     </div>
                   ))}
-
-                  {/* Balance Due Box */}
-                  <div className="bg-neutral-100 border border-neutral-300 text-neutral-900 rounded-2xl px-6 py-3.5 sm:py-4 flex items-center justify-between font-bold text-sm sm:text-base">
-                    <span>Balance Due</span>
-                    <span>{balanceDue}</span>
+                  <div className="flex justify-between items-center px-4 py-3.5 bg-neutral-100 border-t-2 border-black text-sm sm:text-base">
+                    <span className="font-extrabold text-black">Balance Due</span>
+                    <span className="font-extrabold text-black text-base sm:text-lg">₹{balanceDue}</span>
                   </div>
                 </div>
               </div>
             </div>
 
             {/* Footer: Payment Info (Left) & Authorised Signatory (Right) - Pinned to bottom */}
-            <div className="mt-auto pt-6 border-t border-neutral-200 flex items-end justify-between">
+            <div className="mt-auto pt-6 border-t-2 border-black flex items-end justify-between">
               {/* Payment Info */}
               <div>
-                <div className="text-neutral-900 font-bold text-sm sm:text-base mb-1.5">Payment Info</div>
-                <div className="text-neutral-900 text-xs sm:text-sm font-semibold">
+                <div className="text-black font-extrabold text-sm sm:text-base mb-1.5 uppercase tracking-wide">Payment Info</div>
+                <div className="text-black text-xs sm:text-sm font-bold">
                   Rizeworld Institute of AI & Digital Marketing
                 </div>
-                <div className="text-neutral-700 text-xs sm:text-sm mt-1">
+                <div className="text-neutral-700 text-xs sm:text-sm mt-1 leading-relaxed">
                   Payment: {paymentMethod}
                   {utrNumber && <span className="block text-xs text-neutral-500 mt-0.5">UTR: {utrNumber}</span>}
                 </div>
@@ -662,9 +680,10 @@ export function StudentInvoiceModal({ student, onClose, initialPaymentIndex }: S
                 <img 
                   src="/bhavik_signature.png" 
                   alt="Bhavik Joshi" 
-                  className="w-36 sm:w-44 h-auto max-h-14 sm:max-h-16 object-contain mb-1"
+                  className="w-36 sm:w-44 h-auto max-h-14 sm:max-h-16 object-contain mb-1.5 filter grayscale"
                 />
-                <div className="text-neutral-900 text-xs sm:text-sm font-bold tracking-wider uppercase">
+                <div className="border-t-[1.5px] border-black w-36 sm:w-44 mb-1.5" />
+                <div className="text-black text-xs sm:text-sm font-extrabold tracking-wider uppercase text-center w-36 sm:w-44">
                   Authorised Signatory
                 </div>
               </div>
