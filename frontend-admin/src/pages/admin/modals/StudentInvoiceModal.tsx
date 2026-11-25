@@ -126,16 +126,16 @@ export function StudentInvoiceModal({ student, onClose, initialPaymentIndex }: S
   // Joining Date format
   const rawStartDate = student.startDate || student.admissions?.[0]?.startDate;
   const joiningDateFormatted = rawStartDate 
-    ? new Date(rawStartDate).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })
-    : new Date().toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
+    ? new Date(rawStartDate).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" }).replace(/ /g, "-")
+    : new Date().toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" }).replace(/ /g, "-");
 
-  // Bill Date format
+  // Bill Date format (e.g. 23-Nov-2026)
   const paymentDate = currentPayment?.date ? new Date(currentPayment.date) : new Date();
   const billDateFormatted = paymentDate.toLocaleDateString("en-GB", {
-    day: "numeric",
-    month: "long",
+    day: "2-digit",
+    month: "short",
     year: "numeric"
-  });
+  }).replace(/ /g, "-");
 
   const paymentMethod = currentPayment?.paymentMethod || student.feeType || "Cash";
   const utrNumber = currentPayment?.utrNumber || student.utrNumber || "";
@@ -214,7 +214,8 @@ export function StudentInvoiceModal({ student, onClose, initialPaymentIndex }: S
               background-color: #ffffff;
               color: #000000;
               font-family: 'Montserrat', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-              font-size: 15px;
+              font-size: 14px;
+              line-height: 1.4;
             }
             .invoice-wrapper {
               width: 210mm;
@@ -222,7 +223,7 @@ export function StudentInvoiceModal({ student, onClose, initialPaymentIndex }: S
               height: 296mm;
               max-height: 296mm;
               margin: 0 auto;
-              padding: 22mm 22mm 20mm 22mm;
+              padding: 20mm 20mm 18mm 20mm;
               background: #ffffff;
               display: flex;
               flex-direction: column;
@@ -241,7 +242,7 @@ export function StudentInvoiceModal({ student, onClose, initialPaymentIndex }: S
               display: flex;
               align-items: center;
               justify-content: space-between;
-              margin-bottom: 40px;
+              margin-bottom: 36px;
             }
             .logo-img {
               height: 48px;
@@ -253,32 +254,32 @@ export function StudentInvoiceModal({ student, onClose, initialPaymentIndex }: S
               -webkit-filter: grayscale(100%) contrast(140%);
             }
             .invoice-title {
-              font-size: 40px;
+              font-size: 34px;
               font-weight: 900;
               color: #000000;
-              letter-spacing: 1px;
+              letter-spacing: 0.8px;
               text-transform: uppercase;
             }
             .invoice-date {
-              font-size: 15px;
-              font-weight: 600;
+              font-size: 14.5px;
+              font-weight: 700;
               color: #000000;
               text-align: right;
             }
             .billed-to-section {
-              margin-bottom: 38px;
-              font-size: 15px;
+              margin-bottom: 34px;
+              font-size: 14.5px;
               line-height: 1.5;
             }
             .billed-to-label {
               color: #000000;
-              font-weight: 800;
+              font-weight: 900;
               display: inline-block;
-              width: 105px;
+              width: 110px;
               vertical-align: top;
-              font-size: 15px;
+              font-size: 14.5px;
               text-transform: uppercase;
-              letter-spacing: 0.5px;
+              letter-spacing: 0.6px;
             }
             .billed-to-content {
               display: inline-block;
@@ -286,123 +287,133 @@ export function StudentInvoiceModal({ student, onClose, initialPaymentIndex }: S
             }
             .student-name {
               font-size: 20px;
-              font-weight: 800;
+              font-weight: 900;
               color: #000000;
               margin-bottom: 4px;
             }
             .student-phone {
-              color: #333333;
+              color: #222222;
               margin-bottom: 4px;
-              font-size: 15px;
+              font-size: 14.5px;
+              font-weight: 600;
             }
             .student-address {
-              color: #333333;
-              font-size: 15px;
-              max-width: 420px;
+              color: #222222;
+              font-size: 14px;
+              font-weight: 500;
+              max-width: 440px;
               word-break: break-word;
             }
             .invoice-table {
               width: 100%;
               border-collapse: collapse;
-              margin-bottom: 36px;
+              margin-bottom: 32px;
             }
             .invoice-table th {
-              font-size: 14px;
-              font-weight: 800;
+              font-size: 13.5px;
+              font-weight: 900;
               color: #000000;
-              padding: 12px 10px;
+              padding: 11px 10px;
               border-top: 2px solid #000000;
               border-bottom: 2px solid #000000;
               text-align: left;
               text-transform: uppercase;
-              letter-spacing: 0.5px;
-              background-color: #f8fafc;
+              letter-spacing: 0.6px;
+              background-color: #ffffff;
             }
             .invoice-table th.center { text-align: center; }
             .invoice-table th.right { text-align: right; }
             .invoice-table td {
-              font-size: 15px;
+              font-size: 14.5px;
               color: #000000;
-              padding: 18px 10px;
-              border-bottom: 1px solid #cbd5e1;
+              padding: 16px 10px;
+              border-bottom: 1px solid #cccccc;
             }
-            .invoice-table td.center { text-align: center; }
-            .invoice-table td.right { text-align: right; font-weight: 700; font-size: 17px; }
+            .invoice-table td.center { text-align: center; font-weight: 600; }
+            .invoice-table td.right { text-align: right; font-weight: 800; font-size: 16px; }
             .course-name {
-              font-weight: 700;
-              font-size: 17px;
+              font-weight: 800;
+              font-size: 16px;
               color: #000000;
             }
             .course-joining {
-              font-size: 13px;
-              color: #555555;
-              margin-top: 5px;
-              font-weight: 500;
+              font-size: 12.5px;
+              color: #444444;
+              margin-top: 4px;
+              font-weight: 600;
             }
             .summary-container {
               display: flex;
               justify-content: flex-end;
-              margin-top: 30px;
+              margin-top: 26px;
               margin-bottom: auto;
             }
             .summary-table {
-              width: 340px;
+              width: 350px;
               border-collapse: collapse;
               border: 1.5px solid #000000;
               background: #ffffff;
             }
             .summary-table td {
               padding: 10px 16px;
-              font-size: 15px;
+              font-size: 14px;
               border-bottom: 1px solid #e2e8f0;
             }
             .summary-table .sum-label {
-              font-weight: 600;
-              color: #1e293b;
-              text-align: left;
-            }
-            .summary-table .sum-val {
               font-weight: 700;
               color: #000000;
+              text-align: left;
+              text-transform: uppercase;
+              font-size: 13px;
+              letter-spacing: 0.4px;
+            }
+            .summary-table .sum-val {
+              font-weight: 800;
+              color: #000000;
               text-align: right;
-              font-size: 16px;
+              font-size: 15.5px;
             }
             .summary-table tr.balance-row td {
               border-top: 2px solid #000000;
               border-bottom: none;
-              background-color: #f1f5f9;
-              font-weight: 800;
-              font-size: 16px;
+              background-color: #f3f4f6;
+              font-weight: 900;
+            }
+            .summary-table tr.balance-row .sum-label {
+              font-weight: 900;
+              color: #000000;
+              font-size: 13.5px;
             }
             .summary-table tr.balance-row .sum-val {
-              font-weight: 800;
-              font-size: 17px;
+              font-weight: 900;
+              font-size: 16.5px;
             }
             .footer {
               margin-top: auto;
               display: flex;
               justify-content: space-between;
               align-items: flex-end;
-              padding-top: 22px;
+              padding-top: 20px;
               border-top: 2px solid #000000;
             }
             .payment-info-title {
               color: #000000;
-              font-weight: 800;
-              font-size: 15px;
+              font-weight: 900;
+              font-size: 14.5px;
               text-transform: uppercase;
-              letter-spacing: 0.5px;
+              letter-spacing: 0.6px;
               margin-bottom: 6px;
             }
             .payment-info-institute {
-              font-size: 14px;
-              font-weight: 700;
+              font-size: 13.5px;
+              font-weight: 800;
               color: #000000;
               margin-bottom: 4px;
             }
             .payment-info-method {
-              font-size: 14px;
-              color: #334155;
+              font-size: 13.5px;
+              color: #222222;
+              font-weight: 600;
               line-height: 1.5;
             }
             .signatory-container {
@@ -422,13 +433,13 @@ export function StudentInvoiceModal({ student, onClose, initialPaymentIndex }: S
             .signatory-line {
               border-top: 1.5px solid #000000;
               width: 175px;
-              margin-bottom: 4px;
+              margin-bottom: 5px;
             }
             .signatory-label {
               color: #000000;
-              font-size: 12px;
-              font-weight: 800;
-              letter-spacing: 0.5px;
+              font-size: 12.5px;
+              font-weight: 900;
+              letter-spacing: 0.6px;
               text-transform: uppercase;
               width: 175px;
               text-align: center;
@@ -440,7 +451,7 @@ export function StudentInvoiceModal({ student, onClose, initialPaymentIndex }: S
             <div class="content-body">
               <div class="header">
                 <img class="logo-img" src="/logo/RIZE_LOGO_CROPPED.png" alt="Rizeworld" />
-                <div class="invoice-title">Invoice</div>
+                <div class="invoice-title">Tax Invoice</div>
                 <div class="invoice-date">${billDateFormatted}</div>
               </div>
 
@@ -466,11 +477,11 @@ export function StudentInvoiceModal({ student, onClose, initialPaymentIndex }: S
                   <tr>
                     <td>
                       <div class="course-name">${courseName}</div>
-                      <div class="course-joining">Joining Date: ${joiningDateFormatted}</div>
+                      <div class="course-joining">( Joining Date: ${joiningDateFormatted} )</div>
                     </td>
                     <td class="center">${duration}</td>
                     <td class="center">1</td>
-                    <td class="right">₹${totalFee}</td>
+                    <td class="right">₹${Number(totalFee).toLocaleString("en-IN")} /-</td>
                   </tr>
                 </tbody>
               </table>
@@ -480,17 +491,17 @@ export function StudentInvoiceModal({ student, onClose, initialPaymentIndex }: S
                   <tbody>
                     <tr>
                       <td class="sum-label">Total Course Fee</td>
-                      <td class="sum-val">₹${totalFee}</td>
+                      <td class="sum-val">₹${Number(totalFee).toLocaleString("en-IN")} /-</td>
                     </tr>
                     ${displayedPayments.map((p, idx) => `
                       <tr>
                         <td class="sum-label">${getInstallmentLabel(idx + 1)}</td>
-                        <td class="sum-val">₹${p.amount}</td>
+                        <td class="sum-val">₹${Number(p.amount).toLocaleString("en-IN")} /-</td>
                       </tr>
                     `).join("")}
                     <tr class="balance-row">
                       <td class="sum-label">Balance Due</td>
-                      <td class="sum-val">₹${balanceDue}</td>
+                      <td class="sum-val">₹${Number(balanceDue).toLocaleString("en-IN")} /-</td>
                     </tr>
                   </tbody>
                 </table>
@@ -503,7 +514,7 @@ export function StudentInvoiceModal({ student, onClose, initialPaymentIndex }: S
                 <div class="payment-info-institute">Rizeworld Institute of AI & Digital Marketing</div>
                 <div class="payment-info-method">
                   Payment: ${paymentMethod}
-                  ${utrNumber ? `<br/><span style="font-size:12px; color:#64748b;">UTR: ${utrNumber}</span>` : ""}
+                  ${utrNumber ? `<br/><span style="font-size:12px; color:#444444; font-weight: 600;">UTR: ${utrNumber}</span>` : ""}
                 </div>
               </div>
               <div class="signatory-container">
@@ -546,7 +557,7 @@ export function StudentInvoiceModal({ student, onClose, initialPaymentIndex }: S
                 >
                   {paymentsList.map((p, idx) => (
                     <option key={idx} value={idx}>
-                      {idx + 1}{idx === 0 ? "st" : idx === 1 ? "nd" : idx === 2 ? "rd" : "th"} Installment (₹{p.amount})
+                      {idx + 1}{idx === 0 ? "st" : idx === 1 ? "nd" : idx === 2 ? "rd" : "th"} Installment (₹{p.amount.toLocaleString("en-IN")})
                     </option>
                   ))}
                 </select>
@@ -572,7 +583,7 @@ export function StudentInvoiceModal({ student, onClose, initialPaymentIndex }: S
           </div>
         </div>
 
-        {/* Invoice Preview Container (Full A4 Page Layout) */}
+        {/* Invoice Preview Container (Full A4 Page Layout with Montserrat font) */}
         <div className="p-4 sm:p-8 overflow-y-auto max-h-[85vh] bg-neutral-200/60 flex justify-center">
           <div 
             ref={invoicePrintRef}
@@ -591,22 +602,24 @@ export function StudentInvoiceModal({ student, onClose, initialPaymentIndex }: S
                   />
                 </div>
                 <div className="w-1/3 text-center">
-                  <h1 className="text-3xl sm:text-4xl font-black text-black tracking-tight uppercase">Invoice</h1>
+                  <h1 className="text-2xl sm:text-3xl font-black text-black tracking-wider uppercase">
+                    Tax Invoice
+                  </h1>
                 </div>
                 <div className="w-1/3 text-right">
-                  <p className="text-sm sm:text-base font-semibold text-black">{billDateFormatted}</p>
+                  <p className="text-sm sm:text-base font-bold text-black">{billDateFormatted}</p>
                 </div>
               </div>
 
               {/* Billed To Section */}
               <div className="flex items-start gap-4 mb-10 text-sm sm:text-base">
-                <div className="text-black font-extrabold min-w-[85px] pt-0.5 uppercase tracking-wide">
+                <div className="text-black font-black min-w-[95px] pt-0.5 uppercase tracking-wide text-xs sm:text-sm">
                   Billed to:
                 </div>
                 <div>
-                  <div className="font-extrabold text-black text-lg sm:text-xl">{student.name}</div>
-                  <div className="text-neutral-800 mt-1 font-medium">{student.phone || "N/A"}</div>
-                  <div className="text-neutral-800 mt-1 max-w-sm whitespace-pre-line leading-relaxed">
+                  <div className="font-black text-black text-lg sm:text-xl">{student.name}</div>
+                  <div className="text-neutral-800 mt-1 font-semibold">{student.phone || "N/A"}</div>
+                  <div className="text-neutral-700 mt-1 max-w-sm whitespace-pre-line leading-relaxed font-medium">
                     {student.address || "Alwar, Rajasthan"}
                   </div>
                 </div>
@@ -617,21 +630,25 @@ export function StudentInvoiceModal({ student, onClose, initialPaymentIndex }: S
                 <table className="w-full text-left text-sm sm:text-base border-collapse">
                   <thead>
                     <tr className="border-t-2 border-b-2 border-black">
-                      <th className="py-3 px-2 font-black text-black uppercase tracking-wider w-[46%]">Description</th>
-                      <th className="py-3 px-2 font-black text-black uppercase tracking-wider text-center w-[22%]">Duration</th>
-                      <th className="py-3 px-2 font-black text-black uppercase tracking-wider text-center w-[12%]">QTY</th>
-                      <th className="py-3 px-2 font-black text-black uppercase tracking-wider text-right w-[20%]">Total</th>
+                      <th className="py-3 px-2 font-black text-black uppercase tracking-wider w-[46%] text-xs sm:text-sm">Description</th>
+                      <th className="py-3 px-2 font-black text-black uppercase tracking-wider text-center w-[22%] text-xs sm:text-sm">Duration</th>
+                      <th className="py-3 px-2 font-black text-black uppercase tracking-wider text-center w-[12%] text-xs sm:text-sm">QTY</th>
+                      <th className="py-3 px-2 font-black text-black uppercase tracking-wider text-right w-[20%] text-xs sm:text-sm">Total</th>
                     </tr>
                   </thead>
                   <tbody>
                     <tr className="border-b border-neutral-300">
                       <td className="py-5 px-2">
-                        <div className="font-bold text-black text-base sm:text-lg">{courseName}</div>
-                        <div className="text-xs sm:text-sm text-neutral-600 mt-1 font-medium">Joining Date: {joiningDateFormatted}</div>
+                        <div className="font-extrabold text-black text-base sm:text-lg">{courseName}</div>
+                        <div className="text-xs sm:text-sm text-neutral-600 mt-1 font-semibold">
+                          ( Joining Date: {joiningDateFormatted} )
+                        </div>
                       </td>
-                      <td className="py-5 px-2 text-center text-neutral-800 font-medium">{duration}</td>
-                      <td className="py-5 px-2 text-center text-neutral-800 font-medium">1</td>
-                      <td className="py-5 px-2 text-right font-extrabold text-black text-base sm:text-lg">₹{totalFee}</td>
+                      <td className="py-5 px-2 text-center text-neutral-900 font-semibold">{duration}</td>
+                      <td className="py-5 px-2 text-center text-neutral-900 font-semibold">1</td>
+                      <td className="py-5 px-2 text-right font-black text-black text-base sm:text-lg">
+                        ₹{Number(totalFee).toLocaleString("en-IN")} /-
+                      </td>
                     </tr>
                   </tbody>
                 </table>
@@ -639,23 +656,23 @@ export function StudentInvoiceModal({ student, onClose, initialPaymentIndex }: S
 
               {/* Summary Table (Aligned Right) */}
               <div className="flex justify-end mt-8 sm:mt-12 mb-auto">
-                <div className="w-full max-w-[320px] sm:max-w-[340px] border-[1.5px] border-black rounded-lg overflow-hidden bg-white shadow-2xs">
-                  <div className="flex justify-between items-center px-4 py-3 border-b border-neutral-200 text-sm sm:text-base">
-                    <span className="font-semibold text-neutral-800">Total Course Fee</span>
-                    <span className="font-bold text-black">₹{totalFee}</span>
+                <div className="w-full max-w-[320px] sm:max-w-[350px] border-[1.5px] border-black rounded-lg overflow-hidden bg-white shadow-2xs">
+                  <div className="flex justify-between items-center px-4 py-3 border-b border-neutral-200 text-xs sm:text-sm">
+                    <span className="font-bold text-black uppercase tracking-wide">Total Course Fee</span>
+                    <span className="font-black text-black text-sm sm:text-base">₹{Number(totalFee).toLocaleString("en-IN")} /-</span>
                   </div>
                   {displayedPayments.map((p, idx) => (
                     <div 
                       key={idx} 
-                      className="flex justify-between items-center px-4 py-3 border-b border-neutral-200 text-sm sm:text-base"
+                      className="flex justify-between items-center px-4 py-3 border-b border-neutral-200 text-xs sm:text-sm"
                     >
-                      <span className="font-semibold text-neutral-800">{getInstallmentLabel(idx + 1)}</span>
-                      <span className="font-bold text-black">₹{p.amount}</span>
+                      <span className="font-bold text-black uppercase tracking-wide">{getInstallmentLabel(idx + 1)}</span>
+                      <span className="font-black text-black text-sm sm:text-base">₹{Number(p.amount).toLocaleString("en-IN")} /-</span>
                     </div>
                   ))}
-                  <div className="flex justify-between items-center px-4 py-3.5 bg-neutral-100 border-t-2 border-black text-sm sm:text-base">
-                    <span className="font-extrabold text-black">Balance Due</span>
-                    <span className="font-extrabold text-black text-base sm:text-lg">₹{balanceDue}</span>
+                  <div className="flex justify-between items-center px-4 py-3.5 bg-neutral-100 border-t-2 border-black text-xs sm:text-sm">
+                    <span className="font-black text-black uppercase tracking-wide">Balance Due</span>
+                    <span className="font-black text-black text-sm sm:text-base">₹{Number(balanceDue).toLocaleString("en-IN")} /-</span>
                   </div>
                 </div>
               </div>
@@ -665,13 +682,13 @@ export function StudentInvoiceModal({ student, onClose, initialPaymentIndex }: S
             <div className="mt-auto pt-6 border-t-2 border-black flex items-end justify-between">
               {/* Payment Info */}
               <div>
-                <div className="text-black font-extrabold text-sm sm:text-base mb-1.5 uppercase tracking-wide">Payment Info</div>
+                <div className="text-black font-black text-sm sm:text-base mb-1.5 uppercase tracking-wide">Payment Info</div>
                 <div className="text-black text-xs sm:text-sm font-bold">
                   Rizeworld Institute of AI & Digital Marketing
                 </div>
-                <div className="text-neutral-700 text-xs sm:text-sm mt-1 leading-relaxed">
+                <div className="text-neutral-800 text-xs sm:text-sm mt-1 font-medium leading-relaxed">
                   Payment: {paymentMethod}
-                  {utrNumber && <span className="block text-xs text-neutral-500 mt-0.5">UTR: {utrNumber}</span>}
+                  {utrNumber && <span className="block text-xs text-neutral-600 font-semibold mt-0.5">UTR: {utrNumber}</span>}
                 </div>
               </div>
 
@@ -683,7 +700,7 @@ export function StudentInvoiceModal({ student, onClose, initialPaymentIndex }: S
                   className="w-36 sm:w-44 h-auto max-h-14 sm:max-h-16 object-contain mb-1.5 filter grayscale"
                 />
                 <div className="border-t-[1.5px] border-black w-36 sm:w-44 mb-1.5" />
-                <div className="text-black text-xs sm:text-sm font-extrabold tracking-wider uppercase text-center w-36 sm:w-44">
+                <div className="text-black text-xs sm:text-sm font-black tracking-wider uppercase text-center w-36 sm:w-44">
                   Authorised Signatory
                 </div>
               </div>
