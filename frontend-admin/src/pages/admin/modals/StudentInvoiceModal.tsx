@@ -517,7 +517,6 @@ export function StudentInvoiceModal({ student, onClose, initialPaymentIndex }: S
                 <div class="signatory-img-wrap">
                   <img class="signature-img" src="/bhavik_signature.png" alt="Bhavik Joshi" />
                 </div>
-                <div class="signatory-name">Bhavik Joshi</div>
                 <div class="signatory-role">CEO</div>
               </div>
 
@@ -789,9 +788,6 @@ export function StudentInvoiceModal({ student, onClose, initialPaymentIndex }: S
                     alt="Bhavik Joshi" 
                     className="w-32 sm:w-40 h-auto max-h-12 sm:max-h-14 object-contain filter grayscale"
                   />
-                </div>
-                <div className="font-extrabold text-xs sm:text-sm text-black">
-                  Bhavik Joshi
                 </div>
                 <div className="font-bold text-[11px] uppercase text-black mt-0.5">
                   CEO
