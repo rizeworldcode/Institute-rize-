@@ -437,12 +437,12 @@ export function StudentInvoiceModal({ student, onClose, initialPaymentIndex }: S
               <table class="grid-table bill-grid-table">
                 <tbody>
                   <tr>
-                    <td class="cell-label" style="width: 24%;">Client Name</td>
+                    <td class="cell-label" style="width: 24%;">Student Name</td>
                     <td class="cell-value" style="width: 76%; font-weight: 700;">${student.name}</td>
                   </tr>
                   <tr>
-                    <td class="cell-label">Company Name</td>
-                    <td class="cell-value">Rizeworld Student</td>
+                    <td class="cell-label">Institute Name</td>
+                    <td class="cell-value" style="font-weight: 600;">RIZE WORLD INSTITUTE OF AI & DIGITAL MARKETING</td>
                   </tr>
                   <tr>
                     <td class="cell-label">Address</td>
@@ -679,12 +679,14 @@ export function StudentInvoiceModal({ student, onClose, initialPaymentIndex }: S
               <table className="w-full border-collapse border border-black text-xs sm:text-sm mb-4">
                 <tbody>
                   <tr>
-                    <td className="border border-black px-2.5 sm:px-3 py-1.5 sm:py-2 font-bold w-[24%]">Client Name</td>
+                    <td className="border border-black px-2.5 sm:px-3 py-1.5 sm:py-2 font-bold w-[24%]">Student Name</td>
                     <td className="border border-black px-2.5 sm:px-3 py-1.5 sm:py-2 font-bold w-[76%]">{student.name}</td>
                   </tr>
                   <tr>
-                    <td className="border border-black px-2.5 sm:px-3 py-1.5 sm:py-2 font-bold">Company Name</td>
-                    <td className="border border-black px-2.5 sm:px-3 py-1.5 sm:py-2 font-medium">Rizeworld Student</td>
+                    <td className="border border-black px-2.5 sm:px-3 py-1.5 sm:py-2 font-bold">Institute Name</td>
+                    <td className="border border-black px-2.5 sm:px-3 py-1.5 sm:py-2 font-semibold">
+                      RIZE WORLD INSTITUTE OF AI & DIGITAL MARKETING
+                    </td>
                   </tr>
                   <tr>
                     <td className="border border-black px-2.5 sm:px-3 py-1.5 sm:py-2 font-bold">Address</td>
