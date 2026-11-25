@@ -3776,7 +3776,7 @@ export const posts: BlogPost[] = [
     category: "SEO",
     readTime: "7 min read",
     date: "November 25, 2026",
-    featured: true,
+    featured: false,
     img: "/hero/Google Explains How to Track Search Traffic.webp",
     gridImg: "/hero/Google Explains How to Track Search Traffic.webp",
     keywords: [
