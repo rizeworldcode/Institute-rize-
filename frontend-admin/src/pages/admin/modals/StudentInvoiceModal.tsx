@@ -397,7 +397,6 @@ export function StudentInvoiceModal({ student, onClose, initialPaymentIndex }: S
                 <img class="logo-img" src="/logo/RIZE_LOGO_CROPPED.png" alt="Rizeworld" />
                 <div class="company-header-info">
                   <div class="company-title">RIZE WORLD INSTITUTE OF<br/>AI & DIGITAL MARKETING</div>
-                  <div class="company-line"><strong>GSTIN :</strong> 08AAOCR8626A1Z7</div>
                   <div class="company-line"><strong>Address :</strong> <a href="https://maps.google.com/?q=C197,+near+Telco+Circle,+UIT+colony,+Shalimar+Nagar,+Alwar,+Rajasthan+301001" target="_blank" style="color: inherit; text-decoration: none;">C197, near Telco Circle, UIT colony,<br/>Shalimar Nagar, Alwar, Rajasthan 301001</a></div>
                   <div class="company-contact">
                     <span>🌐 <a href="https://rizeworldinstitute.in/" target="_blank" style="color: inherit; text-decoration: none;">www.rizeworldinstitute.in</a></span>
@@ -523,14 +522,10 @@ export function StudentInvoiceModal({ student, onClose, initialPaymentIndex }: S
               </div>
 
               <div class="footer-bank">
-                <div><strong>Account Name:</strong> Rizeworld Digital Marketing Private Limited</div>
-                <div><strong>Bank Name:</strong> IDFC First</div>
-                <div><strong>Account Number:</strong> 589 4959 3218</div>
-                <div><strong>IFSC Code:</strong> IDFB 0042 986</div>
-                <div class="payment-method-box">
-                  <strong>Payment Mode:</strong> ${paymentMethod}
-                  ${utrNumber ? `<br/><strong>UTR Number:</strong> ${utrNumber}` : ""}
-                </div>
+                <div style="font-weight: 800; font-size: 13px; text-transform: uppercase; margin-bottom: 4px;">Payment Info</div>
+                <div><strong>Payment Mode:</strong> ${paymentMethod}</div>
+                ${utrNumber ? `<div style="margin-top: 2px;"><strong>UTR Number:</strong> ${utrNumber}</div>` : ""}
+                <div style="margin-top: 2px;"><strong>Payment Date:</strong> ${billDateFormatted}</div>
               </div>
             </div>
           </div>
@@ -615,7 +610,6 @@ export function StudentInvoiceModal({ student, onClose, initialPaymentIndex }: S
                   <div className="font-black text-xs sm:text-sm uppercase tracking-wide">
                     RIZE WORLD INSTITUTE OF<br />AI & DIGITAL MARKETING
                   </div>
-                  <div className="mt-0.5"><strong className="font-bold">GSTIN :</strong> 08AAOCR8626A1Z7</div>
                   <div className="mt-0.5">
                     <strong className="font-bold">Address :</strong>{" "}
                     <a 
@@ -802,16 +796,14 @@ export function StudentInvoiceModal({ student, onClose, initialPaymentIndex }: S
                 </div>
               </div>
 
-              {/* Right: Bank Details */}
+              {/* Right: Payment Details */}
               <div className="w-[52%] border-l-2 border-black pl-4 sm:pl-6 text-[11px] sm:text-xs leading-relaxed text-black">
-                <div><strong className="font-bold">Account Name:</strong> Rizeworld Digital Marketing Private Limited</div>
-                <div><strong className="font-bold">Bank Name:</strong> IDFC First</div>
-                <div><strong className="font-bold">Account Number:</strong> 589 4959 3218</div>
-                <div><strong className="font-bold">IFSC Code:</strong> IDFB 0042 986</div>
-                <div className="mt-1.5 pt-1.5 border-t border-dashed border-neutral-400 text-[11px] sm:text-xs">
-                  <strong className="font-bold">Payment Mode:</strong> {paymentMethod}
-                  {utrNumber && <div className="mt-0.5"><strong className="font-bold">UTR Number:</strong> {utrNumber}</div>}
+                <div className="font-black text-xs sm:text-sm uppercase tracking-wide mb-1 text-black">
+                  Payment Info
                 </div>
+                <div><strong className="font-bold">Payment Mode:</strong> {paymentMethod}</div>
+                {utrNumber && <div className="mt-0.5"><strong className="font-bold">UTR Number:</strong> {utrNumber}</div>}
+                <div className="mt-0.5"><strong className="font-bold">Payment Date:</strong> {billDateFormatted}</div>
               </div>
             </div>
 
