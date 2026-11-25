@@ -96,7 +96,6 @@ export function StudentInvoiceModal({ student, onClose, initialPaymentIndex }: S
     if (typeof initialPaymentIndex === "number" && initialPaymentIndex >= 0 && initialPaymentIndex < paymentsList.length) {
       return initialPaymentIndex;
     }
-    // Default to the latest payment if available, otherwise 0
     return paymentsList.length > 0 ? paymentsList.length - 1 : 0;
   });
 
@@ -127,16 +126,19 @@ export function StudentInvoiceModal({ student, onClose, initialPaymentIndex }: S
   // Joining Date format
   const rawStartDate = student.startDate || student.admissions?.[0]?.startDate;
   const joiningDateFormatted = rawStartDate 
-    ? new Date(rawStartDate).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })
-    : new Date().toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
+    ? new Date(rawStartDate).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" }).replace(/ /g, "-")
+    : new Date().toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" }).replace(/ /g, "-");
 
-  // Bill Date format (from payment date or today)
+  // Bill Date format (e.g. 23-Nov-2026)
   const paymentDate = currentPayment?.date ? new Date(currentPayment.date) : new Date();
   const billDateFormatted = paymentDate.toLocaleDateString("en-GB", {
-    day: "numeric",
-    month: "long",
+    day: "2-digit",
+    month: "short",
     year: "numeric"
-  });
+  }).replace(/ /g, "-");
+
+  // Invoice Number
+  const invoiceNo = (student as any).invoiceNo || (student.id ? `RW-${student.id.replace(/\D/g, '').slice(-3) || student.id.slice(-4).toUpperCase()}` : "111");
 
   const paymentMethod = currentPayment?.paymentMethod || student.feeType || "Online";
   const utrNumber = currentPayment?.utrNumber || student.utrNumber || "";
@@ -184,7 +186,7 @@ export function StudentInvoiceModal({ student, onClose, initialPaymentIndex }: S
           <title>&nbsp;</title>
           <link rel="preconnect" href="https://fonts.googleapis.com">
           <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-          <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+          <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
           <style>
             @page {
               size: A4 portrait;
@@ -213,9 +215,10 @@ export function StudentInvoiceModal({ student, onClose, initialPaymentIndex }: S
               margin: 0;
               padding: 0;
               background-color: #ffffff;
-              color: #1e293b;
-              font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-              font-size: 15px;
+              color: #000000;
+              font-family: 'Montserrat', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+              font-size: 13px;
+              line-height: 1.4;
             }
             .invoice-wrapper {
               width: 210mm;
@@ -223,7 +226,7 @@ export function StudentInvoiceModal({ student, onClose, initialPaymentIndex }: S
               height: 296mm;
               max-height: 296mm;
               margin: 0 auto;
-              padding: 22mm 22mm 20mm 22mm;
+              padding: 16mm 18mm 14mm 18mm;
               background: #ffffff;
               display: flex;
               flex-direction: column;
@@ -236,281 +239,298 @@ export function StudentInvoiceModal({ student, onClose, initialPaymentIndex }: S
             .content-body {
               display: flex;
               flex-direction: column;
-              flex: 1;
             }
             .header {
               display: flex;
-              align-items: center;
+              align-items: flex-start;
               justify-content: space-between;
-              margin-bottom: 40px;
             }
             .logo-img {
-              height: 48px;
+              height: 64px;
               width: auto;
-              max-width: 160px;
+              max-width: 190px;
               object-fit: contain;
               object-position: left;
               filter: grayscale(100%) contrast(140%);
               -webkit-filter: grayscale(100%) contrast(140%);
             }
-            .invoice-title {
-              font-size: 40px;
-              font-weight: 900;
-              color: #000000;
-              letter-spacing: 1px;
-              text-transform: uppercase;
-            }
-            .invoice-date {
-              font-size: 15px;
-              font-weight: 600;
-              color: #000000;
+            .company-header-info {
               text-align: right;
-            }
-            .billed-to-section {
-              margin-bottom: 38px;
-              font-size: 15px;
-              line-height: 1.5;
-            }
-            .billed-to-label {
+              font-size: 11.5px;
+              line-height: 1.4;
               color: #000000;
-              font-weight: 800;
-              display: inline-block;
-              width: 105px;
-              vertical-align: top;
-              font-size: 15px;
+            }
+            .company-title {
+              font-weight: 900;
+              font-size: 13.5px;
+              letter-spacing: 0.3px;
+              margin-bottom: 3px;
               text-transform: uppercase;
-              letter-spacing: 0.5px;
             }
-            .billed-to-content {
-              display: inline-block;
-              vertical-align: top;
+            .company-line {
+              margin-top: 1px;
             }
-            .student-name {
+            .company-contact {
+              margin-top: 2px;
+            }
+            .header-divider {
+              border-bottom: 2px solid #000000;
+              margin: 14px 0 16px 0;
+            }
+            .section-heading-large {
               font-size: 20px;
-              font-weight: 800;
-              color: #000000;
-              margin-bottom: 4px;
+              font-weight: 900;
+              letter-spacing: 0.5px;
+              text-transform: uppercase;
+              margin-bottom: 12px;
             }
-            .student-phone {
-              color: #333333;
-              margin-bottom: 4px;
-              font-size: 15px;
+            .section-heading-medium {
+              font-size: 16px;
+              font-weight: 900;
+              letter-spacing: 0.4px;
+              text-transform: uppercase;
+              margin-top: 14px;
+              margin-bottom: 8px;
             }
-            .student-address {
-              color: #333333;
-              font-size: 15px;
-              max-width: 420px;
-              word-break: break-word;
-            }
-            .invoice-table {
+            .grid-table {
               width: 100%;
               border-collapse: collapse;
-              margin-bottom: 36px;
+              border: 1px solid #000000;
+              font-size: 12.5px;
             }
-            .invoice-table th {
-              font-size: 14px;
+            .grid-table th {
+              border: 1px solid #000000;
+              padding: 7px 8px;
               font-weight: 800;
-              color: #000000;
-              padding: 12px 10px;
-              border-top: 2px solid #000000;
-              border-bottom: 2px solid #000000;
-              text-align: left;
+              background-color: #ffffff;
+              font-size: 12.5px;
               text-transform: uppercase;
-              letter-spacing: 0.5px;
-              background-color: #f8fafc;
+              letter-spacing: 0.3px;
             }
-            .invoice-table th.center { text-align: center; }
-            .invoice-table th.right { text-align: right; }
-            .invoice-table td {
-              font-size: 15px;
-              color: #000000;
-              padding: 18px 10px;
-              border-bottom: 1px solid #cbd5e1;
+            .grid-table td {
+              border: 1px solid #000000;
+              padding: 7px 10px;
+              vertical-align: middle;
             }
-            .invoice-table td.center { text-align: center; }
-            .invoice-table td.right { text-align: right; font-weight: 700; font-size: 17px; }
-            .course-name {
-              font-weight: 700;
-              font-size: 17px;
-              color: #000000;
-            }
-            .course-joining {
-              font-size: 13px;
-              color: #555555;
-              margin-top: 5px;
-              font-weight: 500;
-            }
-            .summary-container {
-              display: flex;
-              justify-content: flex-end;
-              margin-top: 30px;
-              margin-bottom: auto;
-            }
-            .summary-table {
-              width: 340px;
-              border-collapse: collapse;
-              border: 1.5px solid #000000;
-              background: #ffffff;
-            }
-            .summary-table td {
-              padding: 10px 16px;
-              font-size: 15px;
-              border-bottom: 1px solid #e2e8f0;
-            }
-            .summary-table .sum-label {
-              font-weight: 600;
-              color: #1e293b;
-              text-align: left;
-            }
-            .summary-table .sum-val {
+            .cell-label {
               font-weight: 700;
               color: #000000;
-              text-align: right;
-              font-size: 16px;
             }
-            .summary-table tr.balance-row td {
-              border-top: 2px solid #000000;
-              border-bottom: none;
-              background-color: #f1f5f9;
-              font-weight: 800;
-              font-size: 16px;
+            .cell-value {
+              color: #000000;
             }
-            .summary-table tr.balance-row .sum-val {
-              font-weight: 800;
-              font-size: 17px;
+            .meta-grid-table {
+              margin-bottom: 4px;
             }
-            .footer {
-              margin-top: auto;
+            .bill-grid-table {
+              margin-bottom: 14px;
+            }
+            .service-grid-table {
+              margin-bottom: 12px;
+            }
+            .declaration-text {
+              font-size: 12px;
+              margin: 10px 0 16px 0;
+              line-height: 1.45;
+            }
+            .footer-layout {
               display: flex;
               justify-content: space-between;
-              align-items: flex-end;
-              padding-top: 22px;
-              border-top: 2px solid #000000;
+              align-items: flex-start;
+              margin-top: auto;
+              padding-top: 10px;
             }
-            .payment-info-title {
-              color: #000000;
+            .footer-signatory {
+              width: 44%;
+            }
+            .signatory-company {
               font-weight: 800;
-              font-size: 15px;
+              font-size: 13px;
+              line-height: 1.35;
               text-transform: uppercase;
-              letter-spacing: 0.5px;
-              margin-bottom: 6px;
             }
-            .payment-info-institute {
-              font-size: 14px;
-              font-weight: 700;
-              color: #000000;
-              margin-bottom: 4px;
+            .signatory-title {
+              font-size: 12px;
+              font-weight: 600;
+              margin-top: 6px;
             }
-            .payment-info-method {
-              font-size: 14px;
-              color: #334155;
-              line-height: 1.5;
-            }
-            .signatory-container {
-              display: flex;
-              flex-direction: column;
-              align-items: flex-end;
-              text-align: right;
+            .signatory-img-wrap {
+              margin: 6px 0 2px 0;
             }
             .signature-img {
-              width: 165px;
-              height: auto;
-              max-height: 60px;
+              height: 52px;
+              width: auto;
+              max-width: 160px;
               object-fit: contain;
-              margin-bottom: 3px;
               filter: grayscale(100%);
             }
-            .signatory-line {
-              border-top: 1.5px solid #000000;
-              width: 175px;
-              margin-bottom: 4px;
-            }
-            .signatory-label {
-              color: #000000;
-              font-size: 12px;
+            .signatory-name {
               font-weight: 800;
-              letter-spacing: 0.5px;
+              font-size: 13.5px;
+            }
+            .signatory-role {
+              font-weight: 700;
+              font-size: 11.5px;
               text-transform: uppercase;
-              width: 175px;
-              text-align: center;
+              margin-top: 1px;
+            }
+            .footer-bank {
+              width: 52%;
+              border-left: 2px solid #000000;
+              padding-left: 20px;
+              font-size: 12px;
+              line-height: 1.6;
+            }
+            .payment-method-box {
+              margin-top: 6px;
+              padding-top: 6px;
+              border-top: 1px dashed #777777;
+              font-size: 12px;
             }
           </style>
         </head>
         <body>
           <div class="invoice-wrapper">
             <div class="content-body">
+              <!-- Top Header: Logo (Left) + Company Info (Right) -->
               <div class="header">
                 <img class="logo-img" src="/logo/RIZE_LOGO_CROPPED.png" alt="Rizeworld" />
-                <div class="invoice-title">Invoice</div>
-                <div class="invoice-date">${billDateFormatted}</div>
-              </div>
-
-              <div class="billed-to-section">
-                <span class="billed-to-label">Billed to:</span>
-                <div class="billed-to-content">
-                  <div class="student-name">${student.name}</div>
-                  <div class="student-phone">${student.phone || "N/A"}</div>
-                  <div class="student-address">${student.address ? student.address.replace(/\\n/g, '<br/>') : "Alwar, Rajasthan"}</div>
+                <div class="company-header-info">
+                  <div class="company-title">RIZE WORLD INSTITUTE OF<br/>AI & DIGITAL MARKETING</div>
+                  <div class="company-line"><strong>GSTIN :</strong> 08AAOCR8626A1Z7</div>
+                  <div class="company-line"><strong>Address :</strong> C197, near Telco Circle, UIT colony,<br/>Shalimar Nagar, Alwar, Rajasthan 301001</div>
+                  <div class="company-contact">
+                    <span>🌐 www.rizeworld.in</span>
+                    <span style="margin-left: 14px;">📞 +91-9024615510</span>
+                  </div>
+                  <div class="company-line" style="margin-top: 2px;">✉️ hro@rizeworld.in</div>
                 </div>
               </div>
 
-              <table class="invoice-table">
-                <thead>
-                  <tr>
-                    <th style="width: 48%;">Description</th>
-                    <th class="center" style="width: 22%;">Duration</th>
-                    <th class="center" style="width: 12%;">QTY</th>
-                    <th class="right" style="width: 18%;">Total</th>
-                  </tr>
-                </thead>
+              <!-- Solid Black Divider Line -->
+              <div class="header-divider"></div>
+
+              <!-- TAX INVOICE Heading -->
+              <div class="section-heading-large">TAX INVOICE</div>
+
+              <!-- Meta Table (2x2 Grid) -->
+              <table class="grid-table meta-grid-table">
                 <tbody>
                   <tr>
-                    <td>
-                      <div class="course-name">${courseName}</div>
-                      <div class="course-joining">Joining Date: ${joiningDateFormatted}</div>
-                    </td>
-                    <td class="center">${duration}</td>
-                    <td class="center">1</td>
-                    <td class="right">₹${totalFee}</td>
+                    <td class="cell-label" style="width: 20%;">Invoice No</td>
+                    <td class="cell-value" style="width: 30%; font-weight: 600;">${invoiceNo}</td>
+                    <td class="cell-label" style="width: 22%;">Invoice Date</td>
+                    <td class="cell-value" style="width: 28%; font-weight: 600;">${billDateFormatted}</td>
+                  </tr>
+                  <tr>
+                    <td class="cell-label">GSTIN</td>
+                    <td class="cell-value">${(student as any).gstin || ""}</td>
+                    <td class="cell-label">PAN</td>
+                    <td class="cell-value">${(student as any).pan || ""}</td>
                   </tr>
                 </tbody>
               </table>
 
-              <div class="summary-container">
-                <table class="summary-table">
-                  <tbody>
+              <!-- BILL TO Heading -->
+              <div class="section-heading-medium">BILL TO</div>
+
+              <!-- BILL TO Table -->
+              <table class="grid-table bill-grid-table">
+                <tbody>
+                  <tr>
+                    <td class="cell-label" style="width: 24%;">Client Name</td>
+                    <td class="cell-value" style="width: 76%; font-weight: 700;">${student.name}</td>
+                  </tr>
+                  <tr>
+                    <td class="cell-label">Company Name</td>
+                    <td class="cell-value">Rizeworld Student</td>
+                  </tr>
+                  <tr>
+                    <td class="cell-label">Address</td>
+                    <td class="cell-value">${student.address ? student.address.replace(/\\n/g, '<br/>') : "Nagli Cir, Alwar, Rajasthan 301001"}</td>
+                  </tr>
+                  <tr>
+                    <td class="cell-label">Contact / Phone</td>
+                    <td class="cell-value">${student.phone || "N/A"}</td>
+                  </tr>
+                </tbody>
+              </table>
+
+              <!-- Services / Fee Description Table -->
+              <table class="grid-table service-grid-table">
+                <thead>
+                  <tr>
+                    <th style="width: 8%; text-align: center;">S.No</th>
+                    <th style="width: 52%; text-align: center;">Service Description</th>
+                    <th style="width: 18%; text-align: center;">Duration</th>
+                    <th style="width: 22%; text-align: center;">Amount</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td style="text-align: center; font-weight: 600;">1</td>
+                    <td>
+                      <div style="font-weight: 700;">${courseName}</div>
+                      <div style="font-size: 11.5px; color: #333; margin-top: 2px;">( Joining Date: ${joiningDateFormatted} )</div>
+                    </td>
+                    <td style="text-align: center; font-weight: 500;">${duration}</td>
+                    <td style="text-align: right; font-weight: 700;">${Number(totalFee).toLocaleString("en-IN")} /-</td>
+                  </tr>
+                  ${displayedPayments.map((p, idx) => `
                     <tr>
-                      <td class="sum-label">Total Course Fee</td>
-                      <td class="sum-val">₹${totalFee}</td>
+                      <td style="text-align: center; font-weight: 600;">${idx + 2}</td>
+                      <td>
+                        <span style="font-weight: 600;">${getInstallmentLabel(idx + 1)}</span>
+                        <span style="font-size: 11.5px; margin-left: 6px; color: #333;">( Mode: ${p.paymentMethod}${p.utrNumber ? ` - UTR: ${p.utrNumber}` : ""} - ${new Date(p.date).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" }).replace(/ /g, "-")} )</span>
+                      </td>
+                      <td style="text-align: center; font-weight: 500;">Paid</td>
+                      <td style="text-align: right; font-weight: 700;">${Number(p.amount).toLocaleString("en-IN")} /-</td>
                     </tr>
-                    ${displayedPayments.map((p, idx) => `
-                      <tr>
-                        <td class="sum-label">${getInstallmentLabel(idx + 1)}</td>
-                        <td class="sum-val">₹${p.amount}</td>
-                      </tr>
-                    `).join("")}
-                    <tr class="balance-row">
-                      <td class="sum-label">Balance Due</td>
-                      <td class="sum-val">₹${balanceDue}</td>
-                    </tr>
-                  </tbody>
-                </table>
+                  `).join("")}
+                  <tr>
+                    <td style="height: 18px;"></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                  </tr>
+                  <tr>
+                    <td colspan="3" style="text-align: right; font-weight: 800; padding-right: 14px; text-transform: uppercase;">TOTAL PAID</td>
+                    <td style="text-align: right; font-weight: 800;">${Number(cumulativePaid).toLocaleString("en-IN")} /-</td>
+                  </tr>
+                  <tr>
+                    <td colspan="3" style="text-align: right; font-weight: 800; padding-right: 14px; text-transform: uppercase;">BALANCE DUE</td>
+                    <td style="text-align: right; font-weight: 800; font-size: 13.5px;">${Number(balanceDue).toLocaleString("en-IN")} /-</td>
+                  </tr>
+                </tbody>
+              </table>
+
+              <!-- Declaration Text -->
+              <div class="declaration-text">
+                <strong>Declaration:</strong> We declare that this invoice shows the true and correct value of services provided.
               </div>
             </div>
 
-            <div class="footer">
-              <div>
-                <div class="payment-info-title">Payment Info</div>
-                <div class="payment-info-institute">Rizeworld Institute of AI & Digital Marketing</div>
-                <div class="payment-info-method">
-                  Payment: ${paymentMethod}
-                  ${utrNumber ? `<br/><span style="font-size:12px; color:#64748b;">UTR: ${utrNumber}</span>` : ""}
+            <!-- Footer: Signatory (Left) & Bank/Payment Info (Right) -->
+            <div class="footer-layout">
+              <div class="footer-signatory">
+                <div class="signatory-company">For Rizeworld Institute of<br/>AI & Digital Marketing</div>
+                <div class="signatory-title">Authorized Signatory</div>
+                <div class="signatory-img-wrap">
+                  <img class="signature-img" src="/bhavik_signature.png" alt="Bhavik Joshi" />
                 </div>
+                <div class="signatory-name">Bhavik Joshi</div>
+                <div class="signatory-role">CEO</div>
               </div>
-              <div class="signatory-container">
-                <img class="signature-img" src="/bhavik_signature.png" alt="Bhavik Joshi" />
-                <div class="signatory-line"></div>
-                <div class="signatory-label">Authorised Signatory</div>
+
+              <div class="footer-bank">
+                <div><strong>Account Name:</strong> Rizeworld Digital Marketing Private Limited</div>
+                <div><strong>Bank Name:</strong> IDFC First</div>
+                <div><strong>Account Number:</strong> 589 4959 3218</div>
+                <div><strong>IFSC Code:</strong> IDFB 0042 986</div>
+                <div class="payment-method-box">
+                  <strong>Payment Mode:</strong> ${paymentMethod}
+                  ${utrNumber ? `<br/><strong>UTR Number:</strong> ${utrNumber}` : ""}
+                </div>
               </div>
             </div>
           </div>
@@ -547,7 +567,7 @@ export function StudentInvoiceModal({ student, onClose, initialPaymentIndex }: S
                 >
                   {paymentsList.map((p, idx) => (
                     <option key={idx} value={idx}>
-                      {idx + 1}{idx === 0 ? "st" : idx === 1 ? "nd" : idx === 2 ? "rd" : "th"} Installment (₹{p.amount})
+                      {idx + 1}{idx === 0 ? "st" : idx === 1 ? "nd" : idx === 2 ? "rd" : "th"} Installment (₹{p.amount.toLocaleString("en-IN")})
                     </option>
                   ))}
                 </select>
@@ -573,118 +593,202 @@ export function StudentInvoiceModal({ student, onClose, initialPaymentIndex }: S
           </div>
         </div>
 
-        {/* Invoice Preview Container (Full A4 Page Layout) */}
+        {/* Invoice Preview Container (Full A4 Page Layout matching user template) */}
         <div className="p-4 sm:p-8 overflow-y-auto max-h-[85vh] bg-neutral-200/60 flex justify-center">
           <div 
             ref={invoicePrintRef}
-            className="w-full max-w-[760px] min-h-[960px] sm:min-h-[1020px] bg-white rounded-2xl p-8 sm:p-14 shadow-xl border border-neutral-200/80 text-neutral-900 flex flex-col justify-between"
+            style={{ fontFamily: "'Montserrat', sans-serif" }}
+            className="w-full max-w-[760px] min-h-[960px] sm:min-h-[1020px] bg-white rounded-2xl p-6 sm:p-12 shadow-xl border border-neutral-200 text-black flex flex-col justify-between"
           >
             {/* Upper Content Area */}
             <div className="flex-1 flex flex-col">
-              {/* Header: Logo, Title, Date */}
-              <div className="flex items-center justify-between gap-4 mb-10">
+              {/* Header: Logo (Left) + Company Info (Right) */}
+              <div className="flex items-start justify-between gap-4">
                 <div className="w-1/3 flex justify-start">
                   <img 
                     src="/logo/RIZE_LOGO_CROPPED.png" 
                     alt="Rizeworld Institute of AI & Digital Marketing" 
-                    className="h-9 sm:h-11 w-auto max-w-[140px] object-contain object-left filter grayscale contrast-125"
+                    className="h-12 sm:h-16 w-auto max-w-[170px] object-contain object-left filter grayscale contrast-125"
                   />
                 </div>
-                <div className="w-1/3 text-center">
-                  <h1 className="text-3xl sm:text-4xl font-extrabold text-neutral-900 tracking-tight">Invoice</h1>
-                </div>
-                <div className="w-1/3 text-right">
-                  <p className="text-sm sm:text-base font-semibold text-neutral-800">{billDateFormatted}</p>
-                </div>
-              </div>
-
-              {/* Billed To Section */}
-              <div className="flex items-start gap-4 mb-10 text-sm sm:text-base">
-                <div className="text-neutral-900 font-bold min-w-[85px] pt-0.5">
-                  Billed to:
-                </div>
-                <div>
-                  <div className="font-bold text-neutral-900 text-lg sm:text-xl">{student.name}</div>
-                  <div className="text-neutral-700 mt-1 font-medium">{student.phone || "N/A"}</div>
-                  <div className="text-neutral-700 mt-1 max-w-sm whitespace-pre-line leading-relaxed">
-                    {student.address || "Alwar, Rajasthan"}
+                <div className="w-2/3 text-right text-[11px] sm:text-xs leading-relaxed text-black">
+                  <div className="font-black text-xs sm:text-sm uppercase tracking-wide">
+                    RIZE WORLD INSTITUTE OF<br />AI & DIGITAL MARKETING
                   </div>
+                  <div className="mt-0.5"><strong className="font-bold">GSTIN :</strong> 08AAOCR8626A1Z7</div>
+                  <div className="mt-0.5">
+                    <strong className="font-bold">Address :</strong> C197, near Telco Circle, UIT colony,<br />
+                    Shalimar Nagar, Alwar, Rajasthan 301001
+                  </div>
+                  <div className="mt-1 flex items-center justify-end gap-3 text-neutral-800">
+                    <span>🌐 www.rizeworld.in</span>
+                    <span>📞 +91-9024615510</span>
+                  </div>
+                  <div className="mt-0.5 text-neutral-800">✉️ hro@rizeworld.in</div>
                 </div>
               </div>
 
-              {/* Course Table */}
-              <div className="mb-10 overflow-x-auto">
-                <table className="w-full text-left text-sm sm:text-base border-collapse">
+              {/* Solid Black Divider Line */}
+              <div className="border-b-2 border-black my-3.5 sm:my-4" />
+
+              {/* TAX INVOICE Heading */}
+              <div className="text-lg sm:text-xl font-black uppercase tracking-wider text-black mb-3">
+                TAX INVOICE
+              </div>
+
+              {/* Meta Table (2x2 Grid) */}
+              <table className="w-full border-collapse border border-black text-xs sm:text-sm mb-3">
+                <tbody>
+                  <tr>
+                    <td className="border border-black px-2.5 sm:px-3 py-1.5 sm:py-2 font-bold w-[20%]">Invoice No</td>
+                    <td className="border border-black px-2.5 sm:px-3 py-1.5 sm:py-2 font-semibold w-[30%]">{invoiceNo}</td>
+                    <td className="border border-black px-2.5 sm:px-3 py-1.5 sm:py-2 font-bold w-[22%]">Invoice Date</td>
+                    <td className="border border-black px-2.5 sm:px-3 py-1.5 sm:py-2 font-semibold w-[28%]">{billDateFormatted}</td>
+                  </tr>
+                  <tr>
+                    <td className="border border-black px-2.5 sm:px-3 py-1.5 sm:py-2 font-bold">GSTIN</td>
+                    <td className="border border-black px-2.5 sm:px-3 py-1.5 sm:py-2">{(student as any).gstin || ""}</td>
+                    <td className="border border-black px-2.5 sm:px-3 py-1.5 sm:py-2 font-bold">PAN</td>
+                    <td className="border border-black px-2.5 sm:px-3 py-1.5 sm:py-2">{(student as any).pan || ""}</td>
+                  </tr>
+                </tbody>
+              </table>
+
+              {/* BILL TO Heading */}
+              <div className="text-sm sm:text-base font-black uppercase tracking-wider text-black mt-2 mb-2">
+                BILL TO
+              </div>
+
+              {/* BILL TO Table */}
+              <table className="w-full border-collapse border border-black text-xs sm:text-sm mb-4">
+                <tbody>
+                  <tr>
+                    <td className="border border-black px-2.5 sm:px-3 py-1.5 sm:py-2 font-bold w-[24%]">Client Name</td>
+                    <td className="border border-black px-2.5 sm:px-3 py-1.5 sm:py-2 font-bold w-[76%]">{student.name}</td>
+                  </tr>
+                  <tr>
+                    <td className="border border-black px-2.5 sm:px-3 py-1.5 sm:py-2 font-bold">Company Name</td>
+                    <td className="border border-black px-2.5 sm:px-3 py-1.5 sm:py-2 font-medium">Rizeworld Student</td>
+                  </tr>
+                  <tr>
+                    <td className="border border-black px-2.5 sm:px-3 py-1.5 sm:py-2 font-bold">Address</td>
+                    <td className="border border-black px-2.5 sm:px-3 py-1.5 sm:py-2 font-medium">
+                      {student.address || "Nagli Cir, Alwar, Rajasthan 301001"}
+                    </td>
+                  </tr>
+                  <tr>
+                    <td className="border border-black px-2.5 sm:px-3 py-1.5 sm:py-2 font-bold">Contact / Phone</td>
+                    <td className="border border-black px-2.5 sm:px-3 py-1.5 sm:py-2 font-medium">{student.phone || "N/A"}</td>
+                  </tr>
+                </tbody>
+              </table>
+
+              {/* Service Description Table */}
+              <div className="overflow-x-auto mb-3">
+                <table className="w-full border-collapse border border-black text-xs sm:text-sm">
                   <thead>
-                    <tr className="border-b-2 border-neutral-900">
-                      <th className="py-3.5 px-2 font-bold text-neutral-900 w-[46%]">Description</th>
-                      <th className="py-3.5 px-2 font-bold text-neutral-900 text-center w-[22%]">Duration</th>
-                      <th className="py-3.5 px-2 font-bold text-neutral-900 text-center w-[12%]">QTY</th>
-                      <th className="py-3.5 px-2 font-bold text-neutral-900 text-right w-[20%]">Total</th>
+                    <tr className="bg-white">
+                      <th className="border border-black px-2 py-2 font-extrabold text-center w-[8%]">S.No</th>
+                      <th className="border border-black px-2 py-2 font-extrabold text-center w-[52%]">Service Description</th>
+                      <th className="border border-black px-2 py-2 font-extrabold text-center w-[18%]">Duration</th>
+                      <th className="border border-black px-2 py-2 font-extrabold text-center w-[22%]">Amount</th>
                     </tr>
                   </thead>
                   <tbody>
-                    <tr className="border-b-2 border-neutral-900">
-                      <td className="py-5 px-2">
-                        <div className="font-bold text-neutral-900 text-base sm:text-lg">{courseName}</div>
-                        <div className="text-xs sm:text-sm text-neutral-500 mt-1 font-medium">Joining Date: {joiningDateFormatted}</div>
+                    <tr>
+                      <td className="border border-black px-2 py-2 text-center font-bold">1</td>
+                      <td className="border border-black px-2.5 py-2">
+                        <div className="font-bold text-black">{courseName}</div>
+                        <div className="text-[11px] sm:text-xs text-neutral-600 mt-0.5 font-medium">
+                          ( Joining Date: {joiningDateFormatted} )
+                        </div>
                       </td>
-                      <td className="py-5 px-2 text-center text-neutral-800 font-medium">{duration}</td>
-                      <td className="py-5 px-2 text-center text-neutral-800 font-medium">1</td>
-                      <td className="py-5 px-2 text-right font-bold text-neutral-900 text-base sm:text-lg">₹{totalFee}</td>
+                      <td className="border border-black px-2 py-2 text-center font-medium">{duration}</td>
+                      <td className="border border-black px-2.5 py-2 text-right font-bold text-black">
+                        {Number(totalFee).toLocaleString("en-IN")} /-
+                      </td>
+                    </tr>
+                    {displayedPayments.map((p, idx) => (
+                      <tr key={idx}>
+                        <td className="border border-black px-2 py-1.5 text-center font-bold">{idx + 2}</td>
+                        <td className="border border-black px-2.5 py-1.5">
+                          <span className="font-bold text-black">{getInstallmentLabel(idx + 1)}</span>
+                          <span className="text-[11px] sm:text-xs text-neutral-600 ml-1.5 font-medium">
+                            ( Mode: {p.paymentMethod}{p.utrNumber ? ` - UTR: ${p.utrNumber}` : ""} - {new Date(p.date).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" }).replace(/ /g, "-")} )
+                          </span>
+                        </td>
+                        <td className="border border-black px-2 py-1.5 text-center font-medium">Paid</td>
+                        <td className="border border-black px-2.5 py-1.5 text-right font-bold text-black">
+                          {Number(p.amount).toLocaleString("en-IN")} /-
+                        </td>
+                      </tr>
+                    ))}
+                    <tr>
+                      <td className="border border-black h-5"></td>
+                      <td className="border border-black"></td>
+                      <td className="border border-black"></td>
+                      <td className="border border-black"></td>
+                    </tr>
+                    <tr>
+                      <td colSpan={3} className="border border-black px-3 py-2 text-right font-black uppercase text-xs sm:text-sm">
+                        TOTAL PAID
+                      </td>
+                      <td className="border border-black px-2.5 py-2 text-right font-black text-black text-xs sm:text-sm">
+                        {Number(cumulativePaid).toLocaleString("en-IN")} /-
+                      </td>
+                    </tr>
+                    <tr>
+                      <td colSpan={3} className="border border-black px-3 py-2 text-right font-black uppercase text-xs sm:text-sm">
+                        BALANCE DUE
+                      </td>
+                      <td className="border border-black px-2.5 py-2 text-right font-black text-black text-xs sm:text-sm">
+                        {Number(balanceDue).toLocaleString("en-IN")} /-
+                      </td>
                     </tr>
                   </tbody>
                 </table>
               </div>
 
-              {/* Summary Table (Aligned Right) */}
-              <div className="flex justify-end mt-8 sm:mt-12 mb-auto">
-                <div className="w-full max-w-[320px] sm:max-w-[340px] border-[1.5px] border-black rounded-lg overflow-hidden bg-white shadow-2xs">
-                  <div className="flex justify-between items-center px-4 py-3 border-b border-neutral-200 text-sm sm:text-base">
-                    <span className="font-semibold text-neutral-800">Total Course Fee</span>
-                    <span className="font-bold text-black">₹{totalFee}</span>
-                  </div>
-                  {displayedPayments.map((p, idx) => (
-                    <div 
-                      key={idx} 
-                      className="flex justify-between items-center px-4 py-3 border-b border-neutral-200 text-sm sm:text-base"
-                    >
-                      <span className="font-semibold text-neutral-800">{getInstallmentLabel(idx + 1)}</span>
-                      <span className="font-bold text-black">₹{p.amount}</span>
-                    </div>
-                  ))}
-                  <div className="flex justify-between items-center px-4 py-3.5 bg-neutral-100 border-t-2 border-black text-sm sm:text-base">
-                    <span className="font-extrabold text-black">Balance Due</span>
-                    <span className="font-extrabold text-black text-base sm:text-lg">₹{balanceDue}</span>
-                  </div>
-                </div>
+              {/* Declaration Text */}
+              <div className="text-[11px] sm:text-xs text-black my-2.5 leading-relaxed">
+                <strong className="font-bold">Declaration:</strong> We declare that this invoice shows the true and correct value of services provided.
               </div>
             </div>
 
-            {/* Footer: Payment Info (Left) & Authorised Signatory (Right) - Pinned to bottom */}
-            <div className="mt-auto pt-6 border-t-2 border-black flex items-end justify-between">
-              {/* Payment Info */}
-              <div>
-                <div className="text-black font-extrabold text-sm sm:text-base mb-1.5 uppercase tracking-wide">Payment Info</div>
-                <div className="text-black text-xs sm:text-sm font-bold">
-                  Rizeworld Institute of AI & Digital Marketing
+            {/* Footer: Signatory (Left) & Bank/Payment Info (Right) */}
+            <div className="mt-auto pt-3 flex items-start justify-between">
+              {/* Left: Signatory */}
+              <div className="w-[45%]">
+                <div className="font-black text-xs sm:text-sm uppercase leading-tight text-black">
+                  For Rizeworld Institute of<br />AI & Digital Marketing
                 </div>
-                <div className="text-neutral-700 text-xs sm:text-sm mt-1 leading-relaxed">
-                  Payment: {paymentMethod}
-                  {utrNumber && <span className="block text-xs text-neutral-500 mt-0.5">UTR: {utrNumber}</span>}
+                <div className="text-xs font-semibold text-black mt-1.5">
+                  Authorized Signatory
+                </div>
+                <div className="my-1.5">
+                  <img 
+                    src="/bhavik_signature.png" 
+                    alt="Bhavik Joshi" 
+                    className="w-32 sm:w-40 h-auto max-h-12 sm:max-h-14 object-contain filter grayscale"
+                  />
+                </div>
+                <div className="font-extrabold text-xs sm:text-sm text-black">
+                  Bhavik Joshi
+                </div>
+                <div className="font-bold text-[11px] uppercase text-black mt-0.5">
+                  CEO
                 </div>
               </div>
 
-              {/* Authorised Signatory */}
-              <div className="flex flex-col items-end text-right">
-                <img 
-                  src="/bhavik_signature.png" 
-                  alt="Bhavik Joshi" 
-                  className="w-36 sm:w-44 h-auto max-h-14 sm:max-h-16 object-contain mb-1.5 filter grayscale"
-                />
-                <div className="border-t-[1.5px] border-black w-36 sm:w-44 mb-1.5" />
-                <div className="text-black text-xs sm:text-sm font-extrabold tracking-wider uppercase text-center w-36 sm:w-44">
-                  Authorised Signatory
+              {/* Right: Bank Details */}
+              <div className="w-[52%] border-l-2 border-black pl-4 sm:pl-6 text-[11px] sm:text-xs leading-relaxed text-black">
+                <div><strong className="font-bold">Account Name:</strong> Rizeworld Digital Marketing Private Limited</div>
+                <div><strong className="font-bold">Bank Name:</strong> IDFC First</div>
+                <div><strong className="font-bold">Account Number:</strong> 589 4959 3218</div>
+                <div><strong className="font-bold">IFSC Code:</strong> IDFB 0042 986</div>
+                <div className="mt-1.5 pt-1.5 border-t border-dashed border-neutral-400 text-[11px] sm:text-xs">
+                  <strong className="font-bold">Payment Mode:</strong> {paymentMethod}
+                  {utrNumber && <div className="mt-0.5"><strong className="font-bold">UTR Number:</strong> {utrNumber}</div>}
                 </div>
               </div>
             </div>
