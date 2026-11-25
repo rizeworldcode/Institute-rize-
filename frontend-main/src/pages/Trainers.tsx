@@ -36,6 +36,16 @@ const STATIC_MENTORS = [
     tags: ["SEO", "META ADS", "SMM"],
     objectPosition: "center 20%",
   },
+  {
+    name: "Vikas Jangid",
+    role: "FULL STACK DEVELOPER",
+    specialty: "MERN Stack, Backend Development & REST APIs",
+    experience: "Building Modern, Scalable & Dynamic Web Applications",
+    bio: "A passionate developer specializing in MERN Stack development, backend engineering, and scalable web applications. From responsive frontend interfaces to robust backend architectures, he builds complete digital solutions using modern technologies.",
+    img: "/images/T 3.jpeg",
+    tags: ["MERN STACK", "BACKEND", "REST APIS"],
+    objectPosition: "center 20%",
+  },
 ];
 
 export default function Trainers() {
@@ -132,11 +142,11 @@ export default function Trainers() {
             </div>
           </Reveal>
 
-          <div className="grid md:grid-cols-2 gap-8">
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
             {STATIC_MENTORS.map((mentor, index) => (
               <Reveal key={index} delay={index * 0.15} className="h-full">
-                <div className="h-full bg-[#121215]/80 backdrop-blur-xl border border-white/5 rounded-3xl p-6 md:p-8 flex flex-col sm:flex-row gap-6 hover:border-orange-500/30 transition-all duration-500 hover:shadow-[0_20px_40px_rgba(0,0,0,0.3)] hover:-translate-y-1 group">
-                  <div className="w-full sm:w-40 h-56 sm:h-40 shrink-0 rounded-2xl overflow-hidden relative shadow-md">
+                <div className="h-full bg-[#121215]/80 backdrop-blur-xl border border-white/5 rounded-3xl p-6 md:p-8 flex flex-col gap-6 hover:border-orange-500/30 transition-all duration-500 hover:shadow-[0_20px_40px_rgba(0,0,0,0.3)] hover:-translate-y-1 group">
+                  <div className="w-full h-64 sm:h-60 shrink-0 rounded-2xl overflow-hidden relative shadow-md">
                     <img 
                       src={mentor.img} 
                       alt={mentor.name} 
@@ -148,7 +158,7 @@ export default function Trainers() {
                   
                   <div className="flex-1 flex flex-col justify-between space-y-4">
                     <div className="flex flex-col flex-1">
-                      <div className="sm:min-h-[120px] flex flex-col justify-start">
+                      <div className="min-h-[110px] flex flex-col justify-start">
                         <div className="flex flex-wrap gap-1.5 mb-2">
                           {mentor.tags.map((t, idx) => (
                             <span key={idx} className="px-2 py-0.5 rounded-md bg-white/5 text-[10px] font-bold text-neutral-300 border border-white/5 uppercase">
