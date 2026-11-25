@@ -184,7 +184,7 @@ export function StudentInvoiceModal({ student, onClose, initialPaymentIndex }: S
           <title>&nbsp;</title>
           <link rel="preconnect" href="https://fonts.googleapis.com">
           <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-          <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Dancing+Script:wght@600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+          <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
           <style>
             @page {
               size: A4 portrait;
@@ -254,7 +254,7 @@ export function StudentInvoiceModal({ student, onClose, initialPaymentIndex }: S
             .invoice-title {
               font-size: 42px;
               font-weight: 800;
-              color: #FF5A36;
+              color: #0f172a;
               letter-spacing: -0.5px;
             }
             .invoice-date {
@@ -269,7 +269,7 @@ export function StudentInvoiceModal({ student, onClose, initialPaymentIndex }: S
               line-height: 1.5;
             }
             .billed-to-label {
-              color: #FF5A36;
+              color: #0f172a;
               font-weight: 700;
               display: inline-block;
               width: 105px;
@@ -343,8 +343,8 @@ export function StudentInvoiceModal({ student, onClose, initialPaymentIndex }: S
               flex-direction: column;
               gap: 14px;
             }
-            .summary-box-coral {
-              background-color: #FF5A36 !important;
+            .summary-box-dark {
+              background-color: #0f172a !important;
               color: #ffffff !important;
               border-radius: 16px;
               padding: 14px 22px;
@@ -357,8 +357,9 @@ export function StudentInvoiceModal({ student, onClose, initialPaymentIndex }: S
               print-color-adjust: exact !important;
             }
             .summary-box-gray {
-              background-color: #E2E8F0 !important;
+              background-color: #f1f5f9 !important;
               color: #0f172a !important;
+              border: 1.5px solid #cbd5e1 !important;
               border-radius: 16px;
               padding: 14px 22px;
               display: flex;
@@ -378,7 +379,7 @@ export function StudentInvoiceModal({ student, onClose, initialPaymentIndex }: S
               border-top: 1.5px solid #e2e8f0;
             }
             .payment-info-title {
-              color: #FF5A36;
+              color: #0f172a;
               font-weight: 700;
               font-size: 16px;
               margin-bottom: 6px;
@@ -394,21 +395,24 @@ export function StudentInvoiceModal({ student, onClose, initialPaymentIndex }: S
               color: #334155;
             }
             .signatory-container {
+              display: flex;
+              flex-direction: column;
+              align-items: flex-end;
               text-align: right;
             }
-            .signature-text {
-              font-family: 'Dancing Script', 'Caveat', cursive;
-              font-size: 38px;
-              font-weight: 700;
-              color: #2563EB;
-              margin-bottom: 2px;
-              line-height: 1.1;
+            .signature-img {
+              width: 160px;
+              height: auto;
+              max-height: 58px;
+              object-fit: contain;
+              margin-bottom: 3px;
             }
             .signatory-label {
-              color: #FF5A36;
+              color: #0f172a;
               font-size: 13px;
               font-weight: 700;
               letter-spacing: 0.5px;
+              text-transform: uppercase;
             }
           </style>
         </head>
@@ -454,12 +458,12 @@ export function StudentInvoiceModal({ student, onClose, initialPaymentIndex }: S
 
               <div class="summary-container">
                 <div class="summary-boxes">
-                  <div class="summary-box-coral">
+                  <div class="summary-box-dark">
                     <span>Total</span>
                     <span>${totalFee}</span>
                   </div>
                   ${displayedPayments.map((p, idx) => `
-                    <div class="summary-box-coral">
+                    <div class="summary-box-dark">
                       <span>${getInstallmentLabel(idx + 1)}</span>
                       <span>${p.amount}</span>
                     </div>
@@ -482,7 +486,7 @@ export function StudentInvoiceModal({ student, onClose, initialPaymentIndex }: S
                 </div>
               </div>
               <div class="signatory-container">
-                <div class="signature-text">Bhavik Joshi</div>
+                <img class="signature-img" src="/bhavik_signature.png" alt="Bhavik Joshi" />
                 <div class="signatory-label">Authorised Signatory</div>
               </div>
             </div>
@@ -531,7 +535,7 @@ export function StudentInvoiceModal({ student, onClose, initialPaymentIndex }: S
           <div className="flex items-center gap-2">
             <button
               onClick={handlePrint}
-              className="flex items-center gap-1.5 px-4 py-2 bg-[#FF5A36] hover:bg-[#e04825] text-white font-semibold rounded-xl text-xs shadow-sm transition-all cursor-pointer hover:shadow"
+              className="flex items-center gap-1.5 px-4 py-2 bg-neutral-900 hover:bg-neutral-800 text-white font-semibold rounded-xl text-xs shadow-sm transition-all cursor-pointer hover:shadow"
               title="Print or Save as PDF"
             >
               <Printer size={15} />
@@ -564,7 +568,7 @@ export function StudentInvoiceModal({ student, onClose, initialPaymentIndex }: S
                   />
                 </div>
                 <div className="w-1/3 text-center">
-                  <h1 className="text-3xl sm:text-4xl font-extrabold text-[#FF5A36] tracking-tight">Invoice</h1>
+                  <h1 className="text-3xl sm:text-4xl font-extrabold text-neutral-900 tracking-tight">Invoice</h1>
                 </div>
                 <div className="w-1/3 text-right">
                   <p className="text-sm sm:text-base font-semibold text-neutral-800">{billDateFormatted}</p>
@@ -573,7 +577,7 @@ export function StudentInvoiceModal({ student, onClose, initialPaymentIndex }: S
 
               {/* Billed To Section */}
               <div className="flex items-start gap-4 mb-10 text-sm sm:text-base">
-                <div className="text-[#FF5A36] font-bold min-w-[85px] pt-0.5">
+                <div className="text-neutral-900 font-bold min-w-[85px] pt-0.5">
                   Billed to:
                 </div>
                 <div>
@@ -614,7 +618,7 @@ export function StudentInvoiceModal({ student, onClose, initialPaymentIndex }: S
               <div className="flex justify-end mt-8 sm:mt-12 mb-auto">
                 <div className="w-full max-w-[320px] sm:max-w-[350px] space-y-3 sm:space-y-3.5">
                   {/* Total Box */}
-                  <div className="bg-[#FF5A36] text-white rounded-2xl px-6 py-3.5 sm:py-4 flex items-center justify-between font-bold text-sm sm:text-base shadow-xs">
+                  <div className="bg-neutral-900 text-white rounded-2xl px-6 py-3.5 sm:py-4 flex items-center justify-between font-bold text-sm sm:text-base shadow-xs">
                     <span>Total</span>
                     <span>{totalFee}</span>
                   </div>
@@ -623,7 +627,7 @@ export function StudentInvoiceModal({ student, onClose, initialPaymentIndex }: S
                   {displayedPayments.map((p, idx) => (
                     <div 
                       key={idx} 
-                      className="bg-[#FF5A36] text-white rounded-2xl px-6 py-3.5 sm:py-4 flex items-center justify-between font-bold text-sm sm:text-base shadow-xs"
+                      className="bg-neutral-900 text-white rounded-2xl px-6 py-3.5 sm:py-4 flex items-center justify-between font-bold text-sm sm:text-base shadow-xs"
                     >
                       <span>{getInstallmentLabel(idx + 1)}</span>
                       <span>{p.amount}</span>
@@ -631,7 +635,7 @@ export function StudentInvoiceModal({ student, onClose, initialPaymentIndex }: S
                   ))}
 
                   {/* Balance Due Box */}
-                  <div className="bg-[#E2E8F0] text-neutral-900 rounded-2xl px-6 py-3.5 sm:py-4 flex items-center justify-between font-bold text-sm sm:text-base">
+                  <div className="bg-neutral-100 border border-neutral-300 text-neutral-900 rounded-2xl px-6 py-3.5 sm:py-4 flex items-center justify-between font-bold text-sm sm:text-base">
                     <span>Balance Due</span>
                     <span>{balanceDue}</span>
                   </div>
@@ -643,7 +647,7 @@ export function StudentInvoiceModal({ student, onClose, initialPaymentIndex }: S
             <div className="mt-auto pt-6 border-t border-neutral-200 flex items-end justify-between">
               {/* Payment Info */}
               <div>
-                <div className="text-[#FF5A36] font-bold text-sm sm:text-base mb-1.5">Payment Info</div>
+                <div className="text-neutral-900 font-bold text-sm sm:text-base mb-1.5">Payment Info</div>
                 <div className="text-neutral-900 text-xs sm:text-sm font-semibold">
                   Rizeworld Institute of AI & Digital Marketing
                 </div>
@@ -654,14 +658,13 @@ export function StudentInvoiceModal({ student, onClose, initialPaymentIndex }: S
               </div>
 
               {/* Authorised Signatory */}
-              <div className="text-right">
-                <div 
-                  style={{ fontFamily: "'Dancing Script', 'Caveat', cursive" }}
-                  className="text-3xl sm:text-4xl text-[#2563EB] font-bold tracking-wide -mb-1"
-                >
-                  Bhavik Joshi
-                </div>
-                <div className="text-[#FF5A36] text-xs sm:text-sm font-bold tracking-wider uppercase mt-1">
+              <div className="flex flex-col items-end text-right">
+                <img 
+                  src="/bhavik_signature.png" 
+                  alt="Bhavik Joshi" 
+                  className="w-36 sm:w-44 h-auto max-h-14 sm:max-h-16 object-contain mb-1"
+                />
+                <div className="text-neutral-900 text-xs sm:text-sm font-bold tracking-wider uppercase">
                   Authorised Signatory
                 </div>
               </div>
