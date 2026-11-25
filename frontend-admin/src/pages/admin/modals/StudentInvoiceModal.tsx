@@ -398,10 +398,10 @@ export function StudentInvoiceModal({ student, onClose, initialPaymentIndex }: S
                 <div class="company-header-info">
                   <div class="company-title">RIZE WORLD INSTITUTE OF<br/>AI & DIGITAL MARKETING</div>
                   <div class="company-line"><strong>GSTIN :</strong> 08AAOCR8626A1Z7</div>
-                  <div class="company-line"><strong>Address :</strong> C197, near Telco Circle, UIT colony,<br/>Shalimar Nagar, Alwar, Rajasthan 301001</div>
+                  <div class="company-line"><strong>Address :</strong> <a href="https://maps.google.com/?q=C197,+near+Telco+Circle,+UIT+colony,+Shalimar+Nagar,+Alwar,+Rajasthan+301001" target="_blank" style="color: inherit; text-decoration: none;">C197, near Telco Circle, UIT colony,<br/>Shalimar Nagar, Alwar, Rajasthan 301001</a></div>
                   <div class="company-contact">
-                    <span>🌐 www.rizeworld.in</span>
-                    <span style="margin-left: 14px;">📞 +91-9024615510</span>
+                    <span>🌐 <a href="https://rizeworldinstitute.in/" target="_blank" style="color: inherit; text-decoration: none;">www.rizeworldinstitute.in</a></span>
+                    <span style="margin-left: 14px;">📞 <a href="tel:+918302277092" style="color: inherit; text-decoration: none;">+91 8302277092</a></span>
                   </div>
                   <div class="company-line" style="margin-top: 2px;">✉️ hro@rizeworld.in</div>
                 </div>
@@ -617,12 +617,34 @@ export function StudentInvoiceModal({ student, onClose, initialPaymentIndex }: S
                   </div>
                   <div className="mt-0.5"><strong className="font-bold">GSTIN :</strong> 08AAOCR8626A1Z7</div>
                   <div className="mt-0.5">
-                    <strong className="font-bold">Address :</strong> C197, near Telco Circle, UIT colony,<br />
-                    Shalimar Nagar, Alwar, Rajasthan 301001
+                    <strong className="font-bold">Address :</strong>{" "}
+                    <a 
+                      href="https://maps.google.com/?q=C197,+near+Telco+Circle,+UIT+colony,+Shalimar+Nagar,+Alwar,+Rajasthan+301001" 
+                      target="_blank" 
+                      rel="noreferrer"
+                      className="hover:underline text-black"
+                    >
+                      C197, near Telco Circle, UIT colony,<br />
+                      Shalimar Nagar, Alwar, Rajasthan 301001
+                    </a>
                   </div>
                   <div className="mt-1 flex items-center justify-end gap-3 text-neutral-800">
-                    <span>🌐 www.rizeworld.in</span>
-                    <span>📞 +91-9024615510</span>
+                    <a 
+                      href="https://rizeworldinstitute.in/" 
+                      target="_blank" 
+                      rel="noreferrer"
+                      className="hover:underline flex items-center gap-1 text-black"
+                    >
+                      <span>🌐</span>
+                      <span>www.rizeworldinstitute.in</span>
+                    </a>
+                    <a 
+                      href="tel:+918302277092" 
+                      className="hover:underline flex items-center gap-1 text-black"
+                    >
+                      <span>📞</span>
+                      <span>+91 8302277092</span>
+                    </a>
                   </div>
                   <div className="mt-0.5 text-neutral-800">✉️ hro@rizeworld.in</div>
                 </div>
