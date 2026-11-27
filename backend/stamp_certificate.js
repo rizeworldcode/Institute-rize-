@@ -32,8 +32,8 @@ async function stampCertificate(options = {}) {
   // Target URL: If a studentId is given, attach it dynamically, else default
   const studentId = options.studentId;
   const targetUrl = studentId 
-    ? `https://institute-rize.onrender.com/download-certificate?id=${encodeURIComponent(studentId)}`
-    : 'https://institute-rize.onrender.com/download-certificate';
+    ? `https://institute-rize-ryuk.onrender.com/download-certificate?id=${encodeURIComponent(studentId)}`
+    : 'https://institute-rize-ryuk.onrender.com/download-certificate';
 
   // Generate QR Code with standard 'M' error correction, clean margin and true black
   const qrSize = 224;

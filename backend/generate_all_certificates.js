@@ -204,7 +204,7 @@ async function run() {
       console.log(`   -> Generating certificate for COMPLETED course: ${courseObj.title} (${courseObj.duration})...`);
 
       // Dynamic QR code with id and course query
-      const targetUrl = `https://institute-rize.onrender.com/download-certificate?id=${encodeURIComponent(studentId)}&course=${encodeURIComponent(courseObj.title)}`;
+      const targetUrl = `https://institute-rize-ryuk.onrender.com/download-certificate?id=${encodeURIComponent(studentId)}&course=${encodeURIComponent(courseObj.title)}`;
       const qrDataUrl = await QRCode.toDataURL(targetUrl, {
         errorCorrectionLevel: 'M',
         margin: 2,
